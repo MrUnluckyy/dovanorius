@@ -1,7 +1,7 @@
 import React from "react";
 
 const themes = ["light", "dark", "cupcake", "bumblebee", "retro", "coffee"];
-// retro --default, halloween --prefersdark, cupcake, retro, coffee, light, dark;
+
 export default function ThemeSelector() {
   return (
     <div className="dropdown">
