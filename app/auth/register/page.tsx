@@ -1,6 +1,3 @@
-import { SimpleHero } from "@/components/hero/SimpleHero";
-import { Navigation } from "@/components/navigation/Navigation";
-
 export default function Register() {
   return (
     <main>

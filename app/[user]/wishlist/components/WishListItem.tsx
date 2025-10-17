@@ -1,7 +1,6 @@
 import React from "react";
 
 type Item = {
-  id: number;
   image: string;
   title: string;
   price: number;
@@ -14,9 +13,9 @@ type Props = {
 };
 
 export function WishListItem({ item }: Props) {
-  const { id, image, title, price, description, url } = item;
+  const { image, title, price, description, url } = item;
   return (
-    <tr key={id}>
+    <tr>
       <th>
         <div className="avatar">
           <div className="mask mask-squircle h-12 w-12">

@@ -52,7 +52,7 @@ export function WishList() {
         </thead>
         <tbody>
           {mockWishlistItems.map((item) => (
-            <WishListItem item={item} />
+            <WishListItem key={item.id} item={item} />
           ))}
         </tbody>
       </table>
