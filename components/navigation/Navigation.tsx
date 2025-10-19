@@ -1,8 +1,10 @@
-import React from "react";
-import ThemeSelector from "../ThemeSelector";
+"use client";
 import Link from "next/link";
+import { SignOutButton } from "@/app/(auth)/components/SignOutButton";
+import { User } from "@supabase/supabase-js";
+import ThemeSelector from "../ThemeSelector";
 
-export function Navigation() {
+export function Navigation({ user }: { user: User | null }) {
   return (
     <div className="navbar bg-base-100 shadow-sm">
       <div className="max-w-[1440px] w-full mx-auto">
@@ -13,8 +15,18 @@ export function Navigation() {
         </div>
 
         <div className="navbar-end">
-          <a className="btn">Login</a>
-          <a className="btn">Register</a>
+          {user ? (
+            <SignOutButton />
+          ) : (
+            <div className="space-x-1">
+              <Link href="login" className="btn">
+                Login
+              </Link>
+              <Link href="register" className="btn">
+                Register
+              </Link>
+            </div>
+          )}
           <ThemeSelector />
         </div>
       </div>

@@ -1,14 +1,9 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: retro --default, halloween --prefersdark, cupcake, retro, coffee,
-    light, dark, bumbelbee;
+  themes: retro, halloween, cupcake, retro, coffee, light, dark, bumblebee;
 }
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-main {
-  max-width: 1440px;
 }

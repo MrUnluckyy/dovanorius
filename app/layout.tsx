@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Providers } from "@/components/providers/Providers";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -23,18 +24,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        <footer>
-          <div className="footer footer-center p-4 bg-base-300 text-base-content rounded">
-            <div>
-              <p>Copyright © 2025 - All right reserved by Dovanorius</p>
-            </div>
-          </div>
-        </footer>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

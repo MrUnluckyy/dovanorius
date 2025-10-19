@@ -1,17 +1,26 @@
+import { User } from "@supabase/supabase-js";
+import Link from "next/link";
 import React from "react";
 
-export function SimpleHero() {
+export function SimpleHero({ user }: { user: User | null }) {
   return (
     <div className="hero bg-base-200 min-h-screen">
       <div className="hero-content text-center">
         <div className="max-w-md">
-          <h1 className="text-5xl font-bold">Hello there</h1>
+          <h1 className="text-5xl font-bold">Hello there 👋</h1>
           <p className="py-6">
-            Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
-            excepturi exercitationem quasi. In deleniti eaque aut repudiandae et
-            a id nisi.
+            Welcome to Dovanoriu, your personal wish list manager. Start adding
+            your wishes and share them with friends and family!
           </p>
-          <button className="btn btn-primary">Get Started</button>
+          {user?.id ? (
+            <Link href={`/boards`} className="btn btn-primary">
+              Add a Wish!
+            </Link>
+          ) : (
+            <Link href={`/boards`} className="btn btn-primary">
+              See Wishlists
+            </Link>
+          )}
         </div>
       </div>
     </div>

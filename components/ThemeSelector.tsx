@@ -1,8 +1,16 @@
-import React from "react";
+"use client";
+import { useTheme } from "next-themes";
+import React, { useEffect, useState } from "react";
 
 const themes = ["light", "dark", "cupcake", "bumblebee", "retro", "coffee"];
 
 export default function ThemeSelector() {
+  const { setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return null; // avoid hydration mismatch
+
   return (
     <div className="dropdown">
       <div tabIndex={0} role="button" className="btn m-1">
@@ -26,9 +34,10 @@ export default function ThemeSelector() {
             <input
               type="radio"
               name="theme-dropdown"
-              className="theme-controller w-full btn btn-sm btn-block btn-ghost justify-start"
+              className="theme-controller w-full btn btn-sm btn-block btn-ghost justify-start capitalize"
               aria-label={theme}
               value={theme}
+              onChange={(e) => setTheme(e.target.value)}
             />
           </li>
         ))}
