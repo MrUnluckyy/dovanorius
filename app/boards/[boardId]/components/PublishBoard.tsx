@@ -1,4 +1,3 @@
-// Example button/form inside your board row (owner only UI)
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
@@ -7,9 +6,11 @@ import { v4 as uuidv4 } from "uuid";
 export function PublishBoard({
   boardId,
   boardName,
+  boardPublished,
 }: {
   boardId: string;
   boardName: string;
+  boardPublished: boolean;
 }) {
   const supabase = createClient();
   const qc = useQueryClient();
@@ -23,15 +24,15 @@ export function PublishBoard({
     e.preventDefault();
     const { error } = await supabase
       .from("boards")
-      .update({ slug, is_public: true })
+      .update({ slug, is_public: !boardPublished })
       .eq("id", boardId);
-    if (!error) qc.invalidateQueries(); // refresh lists
+    if (!error) qc.invalidateQueries({ queryKey: ["boards", boardId] });
   }
 
   return (
-    <form onSubmit={onPublish} className="flex gap-2">
-      <button className="btn btn-active" type="submit">
-        Make public
+    <form onSubmit={onPublish} className="flex gap-2 w-full">
+      <button className="btn w-full" type="submit">
+        {boardPublished ? "Make Private" : "Publish"}
       </button>
     </form>
   );

@@ -28,22 +28,23 @@ export function BoardsList({ user }: { user: User }) {
   return (
     <div className="flex flex-col gap-4">
       <CreateWishlist user={user} />
-      <div className="flex gap-4">
+      <div className="flex flex-col md:flex-row gap-4">
         {boards.map((board) => (
-          <div
+          <Link
             key={board.id}
-            className="card w-96 bg-base-300 card-sm shadow-sm"
+            href={`/boards/${board.id}`}
+            className="cursor-pointer flex-1 max-w-md"
           >
-            <div className="card-body">
-              <h2 className="card-title">{board.name}</h2>
-              <p className="h-14">{board.description}</p>
-              <div className="justify-end card-actions">
-                <Link href={`/boards/${board.id}`} className="btn btn-primary">
-                  Go
-                </Link>
+            <div key={board.id} className="card bg-base-300 card-sm shadow-sm ">
+              <div className="card-body">
+                <h2 className="card-title">{board.name}</h2>
+                <p className="h-14">{board.description}</p>
+                <div className="justify-end card-actions">
+                  <button className="btn btn-accent">View</button>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

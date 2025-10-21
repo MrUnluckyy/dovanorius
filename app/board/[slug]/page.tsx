@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
-import Link from "next/link";
-import ReserveButton from "../components/ReserveButton";
+import { Navigation } from "@/components/navigation/Navigation";
+import { BoardBar } from "@/app/boards/[boardId]/components/BoardBar";
 
 export default async function PublicBoardPage({
   params,
@@ -15,7 +15,7 @@ export default async function PublicBoardPage({
   // Fetch board by slug when is_public = true
   const { data: board, error: bErr } = await supabase
     .from("boards")
-    .select("id, name, is_public")
+    .select("id, name, is_public, created_at, slug, description")
     .eq("slug", params.slug)
     .eq("is_public", true)
     .single();
@@ -41,37 +41,33 @@ export default async function PublicBoardPage({
     .order("created_at", { ascending: false });
 
   return (
-    <main className="max-w-2xl mx-auto p-6 space-y-6">
-      <header className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">{board.name}</h1>
-        <Link href="/" className="text-sm underline">
-          Back
-        </Link>
-      </header>
+    <main>
+      <Navigation user={user} />
+      <div className="max-w-[1440px] mx-auto min-h-screen px-4">
+        <div className="py-8 mb-10">
+          <BoardBar board={board} inPublicView />
+        </div>
 
-      <ul className="divide-y border rounded">
-        {(items ?? []).map((it) => (
-          <li key={it.id} className="p-3">
-            <a
-              href={it.url ?? "#"}
-              target={it.url ? "_blank" : undefined}
-              className="font-medium underline decoration-dotted"
-            >
-              {it.title}
-            </a>
-            {it.notes && (
-              <p className="text-sm text-gray-600 mt-1">{it.notes}</p>
-            )}
-            <p className="text-xs text-gray-500 mt-1">
-              {it.priority} · {new Date(it.created_at).toLocaleDateString()}
-            </p>
-            <ReserveButton itemId={it.id} />
-          </li>
-        ))}
-        {(items ?? []).length === 0 && (
-          <li className="p-3 text-sm text-gray-500">No available items</li>
-        )}
-      </ul>
+        <div className="flex">
+          {(items ?? []).map((item) => (
+            <div key={item.id} className="card bg-base-100 shadow-sm max-w-md">
+              <figure className="max-h-52">
+                <img
+                  src="https://images.unsplash.com/photo-1640025867572-f6b3a8410c81?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1364"
+                  alt="Gift illustration"
+                />
+              </figure>
+              <div className="card-body">
+                <h2 className="card-title">{item.title}</h2>
+                <p>{item.notes}</p>
+                <div className="card-actions justify-end">
+                  <button className="btn btn-primary">Reserve</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </main>
   );
 }

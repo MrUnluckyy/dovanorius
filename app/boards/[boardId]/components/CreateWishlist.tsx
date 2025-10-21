@@ -43,7 +43,7 @@ export function CreateWishlist({ user }: { user: User | null }) {
   };
 
   return (
-    <div>
+    <div className="w-full justify-end">
       <button className="btn" onClick={openModal}>
         + Create New Board
       </button>
@@ -57,6 +57,7 @@ export function CreateWishlist({ user }: { user: User | null }) {
                 type="text"
                 className="input w-full"
                 placeholder="Boards name"
+                required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -70,7 +71,11 @@ export function CreateWishlist({ user }: { user: User | null }) {
               />
             </fieldset>
             <div className="modal-action">
-              <button className="btn btn-error" onClick={closeModal}>
+              <button
+                type="button"
+                className="btn btn-error"
+                onClick={closeModal}
+              >
                 Cancel
               </button>
               <button className="btn" type="submit">

@@ -3,6 +3,7 @@ import useProfile, { Profile } from "@/hooks/useProfile";
 import { useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import AvatarUploader from "./AvatarUpload";
+import ThemeSelector from "@/components/ThemeSelector";
 
 export function ProfileEditForm() {
   const { profile, isLoading, editProfile } = useProfile();
@@ -18,7 +19,7 @@ export function ProfileEditForm() {
 
   useEffect(() => {
     if (profile) {
-      reset(profile); // or reset({ display_name: profile.display_name })
+      reset(profile);
     }
   }, [profile, reset]);
 
@@ -32,6 +33,7 @@ export function ProfileEditForm() {
       <div>
         <AvatarUploader profile={profile} />
       </div>
+      <ThemeSelector />
       <div>
         <form onSubmit={handleSubmit(onSubmit)}>
           <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">

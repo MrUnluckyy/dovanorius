@@ -17,7 +17,7 @@ export default async function BoardPage({
     error,
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  if (!user || error) redirect("/login");
 
   const board = await getBoard(boardId);
 
@@ -28,7 +28,7 @@ export default async function BoardPage({
   return (
     <main>
       <Navigation user={user} />
-      <div className="max-w-[1400px] mx-auto min-h-screen">
+      <div className="max-w-[1400px] mx-auto min-h-screen px-4">
         <div className="py-8 mb-10">
           <BoardBar board={board} />
         </div>

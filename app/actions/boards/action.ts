@@ -40,7 +40,7 @@ export async function getBoard(boardId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("boards")
-    .select("id, name, description, created_at")
+    .select("id, name, slug, description, created_at, is_public")
     .eq("id", boardId)
     .single();
 

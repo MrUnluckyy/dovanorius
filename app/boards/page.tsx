@@ -11,15 +11,15 @@ export default async function BoardsPage() {
     error,
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  if (!user || error) redirect("/login");
 
   return (
     <main>
       <Navigation user={user} />
 
-      <div className="max-w-[1400px] mx-auto min-h-screen">
-        <div className="py-8 mb-10">
-          <UserBar userId={user.id} />
+      <div className="max-w-[1440px] mx-auto min-h-screen px-4">
+        <div className="py-8 mb-4 md:mb-10">
+          <UserBar />
         </div>
         <BoardsList user={user} />
       </div>

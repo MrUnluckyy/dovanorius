@@ -1,6 +1,5 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { WishListItem } from "./WishListItem";
 import { AddItemModal } from "./AddItemModal";
 import { createClient } from "@/utils/supabase/client";
 
@@ -39,27 +38,30 @@ export function WishList({ boardId }: { boardId: string }) {
   if (error) return <p className="text-red-600">Failed to load items</p>;
 
   return (
-    <div className="overflow-x-auto">
-      <div className="w-full flex justify-end">
+    <div className="">
+      <div className="w-full flex justify-end mb-4">
         <AddItemModal boardId={boardId} />
       </div>
 
-      <table className="table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Title</th>
-            <th>Price</th>
-            <th>Url</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item) => (
-            <WishListItem key={item.id} boardId={boardId} item={item} />
-          ))}
-        </tbody>
-      </table>
+      <div className="flex">
+        {(items ?? []).map((item) => (
+          <div key={item.id} className="card bg-base-200 shadow-sm max-w-md">
+            <figure className="max-h-52">
+              <img
+                src="https://images.unsplash.com/photo-1640025867572-f6b3a8410c81?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1364"
+                alt="Gift illustration"
+              />
+            </figure>
+            <div className="card-body">
+              <h2 className="card-title">{item.title}</h2>
+              <p>{item.notes}</p>
+              <div className="card-actions justify-end">
+                <button className="btn btn-primary">Reserve</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
