@@ -7,26 +7,29 @@ export function PublishBoard({
   boardId,
   boardName,
   boardPublished,
+  boardSlug,
 }: {
   boardId: string;
   boardName: string;
   boardPublished: boolean;
+  boardSlug?: string | null;
 }) {
   const supabase = createClient();
   const qc = useQueryClient();
 
   async function onPublish(e: React.FormEvent) {
-    const slug =
-      boardName.toLocaleLowerCase().replace(/\s+/g, "-") +
-      "-" +
-      uuidv4().slice(0, 8);
+    const slug = boardSlug
+      ? boardSlug
+      : boardName.toLocaleLowerCase().replace(/\s+/g, "-") +
+        "-" +
+        uuidv4().slice(0, 8);
 
     e.preventDefault();
     const { error } = await supabase
       .from("boards")
       .update({ slug, is_public: !boardPublished })
       .eq("id", boardId);
-    if (!error) qc.invalidateQueries({ queryKey: ["boards", boardId] });
+    if (!error) qc.invalidateQueries({ queryKey: ["board", boardId] });
   }
 
   return (

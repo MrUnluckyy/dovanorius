@@ -2,6 +2,7 @@
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import { useState } from "react";
+import { FaRegCheckCircle } from "react-icons/fa";
 
 export function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -31,6 +32,20 @@ export function RegisterForm() {
       setLoading(false);
       setCompleted(true);
     }
+  }
+
+  if (completed) {
+    return (
+      <div className="spacing-y-8">
+        <h2 className="text-2xl font-semibold text-center">All done! 👋 </h2>
+        <p className="text-center">
+          Registration complete! Please check your email to verify your account.
+        </p>
+        <Link href="/login" className="btn">
+          Done
+        </Link>
+      </div>
+    );
   }
 
   return (
@@ -69,7 +84,7 @@ export function RegisterForm() {
           </button>
 
           {completed && (
-            <p className="text-green-600 mt-2">
+            <p className="text-success mt-2">
               Registration complete! Please check your email to verify your
               account.
             </p>

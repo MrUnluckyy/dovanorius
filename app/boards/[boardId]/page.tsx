@@ -30,7 +30,7 @@ export default async function BoardPage({
       <Navigation user={user} />
       <div className="max-w-[1400px] mx-auto min-h-screen px-4">
         <div className="py-8 mb-10">
-          <BoardBar board={board} />
+          <BoardBar user={user} board={board} />
         </div>
         <WishList boardId={board.id} />
       </div>

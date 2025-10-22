@@ -33,7 +33,7 @@ export function BoardsList({ user }: { user: User }) {
           <Link
             key={board.id}
             href={`/boards/${board.id}`}
-            className="cursor-pointer flex-1 max-w-md"
+            className="cursor-pointer max-w-md"
           >
             <div key={board.id} className="card bg-base-300 card-sm shadow-sm ">
               <div className="card-body">

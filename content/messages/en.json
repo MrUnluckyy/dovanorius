@@ -1,0 +1,45 @@
+{
+  "Auth": {
+    "login": {
+      "title": "Welcome Back!",
+      "email": "Email Address",
+      "password": "Password",
+      "buttonText": "Login",
+      "forgotPassword": "Forgot your password?",
+      "noAccount": "Don't have an account? Register"
+    },
+    "register": {
+      "title": "Create an Account",
+      "email": "Email Address",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "buttonText": "Register",
+      "haveAccount": "Already have an account? Login"
+    }
+  },
+
+  "HomePage": {
+    "title": "Hey there! 👋",
+    "description": "Welcome to Dovanoriu, your personal wish list manager. Start adding your wishes and share them with friends and family!",
+    "buttonText": "Add a Wish"
+  },
+  "Navbar": {
+    "login": "Login",
+    "register": "Register",
+    "profile": "Profile",
+    "signOut": "Sign Out"
+  },
+
+  "Actions": {
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "States": {
+    "loading": "Loading...",
+    "error": "An error occurred. Please try again.",
+    "noData": "No data available"
+  }
+}

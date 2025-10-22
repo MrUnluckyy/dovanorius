@@ -1,8 +1,10 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
+import { useTranslations } from "next-intl";
 
 export function SignOutButton() {
+  const t = useTranslations("Navbar");
   const supabase = createClient();
   return (
     <button
@@ -11,7 +13,7 @@ export function SignOutButton() {
         await supabase.auth.signOut();
       }}
     >
-      Sign out
+      {t("signOut")}
     </button>
   );
 }

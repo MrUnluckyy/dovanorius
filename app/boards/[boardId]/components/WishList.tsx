@@ -43,7 +43,7 @@ export function WishList({ boardId }: { boardId: string }) {
         <AddItemModal boardId={boardId} />
       </div>
 
-      <div className="flex">
+      <div className="flex flex-col gap-4 md:flex-row">
         {(items ?? []).map((item) => (
           <div key={item.id} className="card bg-base-200 shadow-sm max-w-md">
             <figure className="max-h-52">

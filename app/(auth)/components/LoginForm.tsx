@@ -25,6 +25,7 @@ export function LoginForm() {
 
       if (data.user) {
         window.location.href = `/boards`;
+        return;
       }
     } catch (error) {
       console.log("Error signing up:", error);

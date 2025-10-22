@@ -1,0 +1,43 @@
+{
+  "Auth": {
+    "login": {
+      "title": "Sveiki sugrįžę!",
+      "email": "El. pašto adresas",
+      "password": "Slaptažodis",
+      "buttonText": "Prisijungti",
+      "forgotPassword": "Pamiršai slaptažodi?",
+      "noAccount": "Neturi paskyros? Registruotis"
+    },
+    "register": {
+      "title": "Susikurk paskyrą",
+      "email": "El. pašto adresas",
+      "password": "Slaptažodis",
+      "confirmPassword": "Patvirtink slaptažodį",
+      "buttonText": "Registruotis",
+      "haveAccount": "Jau turi paskyrą? Prisijungti"
+    }
+  },
+  "HomePage": {
+    "title": "Labas! 👋",
+    "description": "Sveiki atvykę į Dovanoriu, jūsų asmeninį norų sąrašų tvarkyklę. Pradėkite pridėti savo norus ir dalinkitės jais su draugais bei šeima!",
+    "buttonText": "Pridėti norą"
+  },
+  "Navbar": {
+    "login": "Prisijungti",
+    "register": "Registruotis",
+    "profile": "Profilis",
+    "signOut": "Atsijungti"
+  },
+  "Actions": {
+    "add": "Pridėti",
+    "edit": "Redaguoti",
+    "delete": "Ištrinti",
+    "save": "Išsaugoti",
+    "cancel": "Atšaukti"
+  },
+  "States": {
+    "loading": "Įkeliama...",
+    "error": "Įvyko klaida. Bandykite dar kartą.",
+    "noData": "Nėra duomenų"
+  }
+}
