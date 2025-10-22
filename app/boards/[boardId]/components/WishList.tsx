@@ -43,14 +43,11 @@ export function WishList({ boardId }: { boardId: string }) {
         <AddItemModal boardId={boardId} />
       </div>
 
-      <div className="flex flex-col gap-4 md:flex-row">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {(items ?? []).map((item) => (
           <div key={item.id} className="card bg-base-200 shadow-sm max-w-md">
             <figure className="max-h-52">
-              <img
-                src="https://images.unsplash.com/photo-1640025867572-f6b3a8410c81?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1364"
-                alt="Gift illustration"
-              />
+              <img src="/assets/placeholder.jpg" alt="Gift illustration" />
             </figure>
             <div className="card-body">
               <h2 className="card-title">{item.title}</h2>

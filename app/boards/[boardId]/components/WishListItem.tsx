@@ -15,7 +15,7 @@ export function WishListItem({ item, boardId }: Props) {
         <div className="avatar">
           <div className="mask mask-squircle h-12 w-12">
             <img
-              src="https://img.daisyui.com/images/profile/demo/5@94.webp"
+              src="/assets/placeholder.jpg"
               alt="Avatar Tailwind CSS Component"
             />
           </div>
