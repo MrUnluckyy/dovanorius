@@ -11,7 +11,7 @@ export default async function Home() {
   return (
     <>
       <Navigation user={user} />
-      <main>
+      <main className="pb-20">
         <SimpleHero user={user} />
       </main>
     </>

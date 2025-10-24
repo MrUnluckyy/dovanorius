@@ -10,7 +10,7 @@ export default async function Users() {
   return (
     <>
       <Navigation user={user} />
-      <main>
+      <main className="pb-20">
         <h2>Here we are going to make a search for users page</h2>
       </main>
     </>

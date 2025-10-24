@@ -27,7 +27,7 @@ export default async function BoardPage({
   }
 
   return (
-    <main>
+    <main className="pb-20">
       <Navigation user={user} />
       <div className="max-w-[1440px] mx-auto min-h-screen px-4">
         <Breadcrumbs />
