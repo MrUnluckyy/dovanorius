@@ -2,8 +2,9 @@ import { createClient } from "@/utils/supabase/server";
 import { Navigation } from "@/components/navigation/Navigation";
 import { BoardBar } from "@/app/boards/[boardId]/components/BoardBar";
 import Breadcrumbs from "@/components/navigation/Breadcrumbs";
+import { WishList } from "@/app/boards/[boardId]/components/WishList";
 
-export default async function PublicBoardPage({
+export default async function PublicUserBoardPage({
   params,
 }: {
   params: { slug: string };
@@ -49,8 +50,9 @@ export default async function PublicBoardPage({
         <div className="py-8 mb-10">
           <BoardBar board={board} inPublicView />
         </div>
+        <WishList boardId={board.id} user={user} isPublic />
 
-        <div className="flex">
+        {/* <div className="flex">
           {(items ?? []).map((item) => (
             <div key={item.id} className="card bg-base-100 shadow-sm max-w-md">
               <figure className="max-h-52">
@@ -68,7 +70,7 @@ export default async function PublicBoardPage({
               </div>
             </div>
           ))}
-        </div>
+        </div> */}
       </div>
     </main>
   );

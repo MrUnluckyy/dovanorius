@@ -12,7 +12,8 @@ export type Profile = {
   created_at: string;
 };
 
-const useProfile = () => {
+// if publicUserId is provided, fetch that user's profile; otherwise, fetch the current user's profile
+const useProfile = (publicUserId?: string) => {
   const supabase = createClient();
   const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
@@ -28,14 +29,18 @@ const useProfile = () => {
 
       setUser(currentUser.user);
     };
-    fetchUser();
+    if (!publicUserId) {
+      fetchUser();
+    }
   }, []);
+
+  const userId = publicUserId || user?.id;
 
   const fetchProfile = async () => {
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
-      .eq("id", user?.id)
+      .eq("id", userId)
       .single();
 
     if (error) {
@@ -44,7 +49,11 @@ const useProfile = () => {
     return data as Profile;
   };
 
+  // Edit is possible only with fetched user id
   const editProfile = async (updatedProfile: Partial<Profile>) => {
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
     const { data, error } = await supabase
       .from("profiles")
       .update(updatedProfile)

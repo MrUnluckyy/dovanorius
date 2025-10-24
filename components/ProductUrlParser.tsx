@@ -1,40 +1,60 @@
 "use client";
-import { useState } from "react";
 
-export default function ProductUrlParser() {
-  const [url, setUrl] = useState("");
-  const [loading, setLoading] = useState(false);
+type Props = {
+  onParse: () => void;
+  loading: boolean;
+  value: string;
+  onChange: (value: string) => void;
+};
 
-  const handleFetch = async () => {
-    if (!url) return;
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/parser?url=${encodeURIComponent(url)}`);
-      const data = await res.json();
-      console.log("Parsed product metadata:", data); // <--- LOGS EVERYTHING
-    } catch (err) {
-      console.error("Error parsing product:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export default function ProductUrlParser({
+  onParse,
+  loading,
+  onChange,
+  value,
+}: Props) {
   return (
-    <div className="p-4 space-y-2">
-      <input
-        type="text"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="Paste product URL..."
-        className="border rounded p-2 w-full"
-      />
-      <button
-        onClick={handleFetch}
-        disabled={loading}
-        className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
-      >
-        {loading ? "Fetching..." : "Parse Product"}
-      </button>
+    <div>
+      <label className="label">Url</label>
+      <div className="join w-full">
+        <div className="w-full">
+          <label className="input validator join-item w-full">
+            <svg
+              className="h-[1em] opacity-50"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+            >
+              <g
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                strokeWidth="2.5"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </g>
+            </svg>
+            <input
+              type="url"
+              placeholder="https://"
+              value={value}
+              pattern="^(https?://)?([a-zA-Z0-9]([a-zA-Z0-9\-].*[a-zA-Z0-9])?\.)+[a-zA-Z].*$"
+              title="Must be valid URL"
+              className="w-full"
+              onChange={(e) => onChange(e.target.value)}
+            />
+          </label>
+          <div className="validator-hint hidden">Enter valid email address</div>
+        </div>
+        <button
+          type="button"
+          className="btn btn-neutral join-item"
+          onClick={onParse}
+        >
+          {loading ? "Parsing..." : "Parse"}
+        </button>
+      </div>
     </div>
   );
 }

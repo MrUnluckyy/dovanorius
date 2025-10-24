@@ -2,7 +2,6 @@
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import { useState } from "react";
-import { FaRegCheckCircle } from "react-icons/fa";
 
 export function RegisterForm() {
   const [email, setEmail] = useState("");

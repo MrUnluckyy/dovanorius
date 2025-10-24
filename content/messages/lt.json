@@ -28,6 +28,12 @@
     "profile": "Profilis",
     "signOut": "Atsijungti"
   },
+
+  "Boards": {
+    "public": "Viešas",
+    "private": "Privatus"
+  },
+
   "Actions": {
     "add": "Pridėti",
     "edit": "Redaguoti",

@@ -1,16 +1,19 @@
 import { Navigation } from "@/components/navigation/Navigation";
-import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { ProfileEditForm } from "./components/ProfileEditForm";
 import Breadcrumbs from "@/components/navigation/Breadcrumbs";
+import { ProfileBar } from "@/app/users/components/ProfileBar";
+import { PublicBoardsList } from "../components/PublicBoardsList";
 
-export default async function BoardsPage() {
+export default async function UserPage({
+  params,
+}: {
+  params: Promise<{ userId: string }>;
+}) {
+  const { userId } = await params;
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
 
   return (
     <main>
@@ -18,9 +21,10 @@ export default async function BoardsPage() {
 
       <div className="max-w-[1440px] mx-auto min-h-screen px-4">
         <Breadcrumbs />
-        <div className="flex justify-center mt-10">
-          <ProfileEditForm />
+        <div className="py-8 mb-4 md:mb-10">
+          <ProfileBar />
         </div>
+        <PublicBoardsList userId={userId} />
       </div>
     </main>
   );

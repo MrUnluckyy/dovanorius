@@ -30,6 +30,11 @@
     "signOut": "Sign Out"
   },
 
+  "Boards": {
+    "public": "Public",
+    "private": "Private"
+  },
+
   "Actions": {
     "add": "Add",
     "edit": "Edit",

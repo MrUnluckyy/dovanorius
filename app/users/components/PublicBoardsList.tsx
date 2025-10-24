@@ -1,16 +1,13 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
-import { User } from "@supabase/supabase-js";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
-import { CreateWishlist } from "../[boardId]/components/CreateWishlist";
 import { useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
 
-export function BoardsList({ user }: { user: User }) {
+export function PublicBoardsList({ userId }: { userId: string }) {
   const supabase = createClient();
-  const userId = user.id;
   const t = useTranslations("Boards");
 
   const { data: boards = [], isLoading } = useQuery({
@@ -20,6 +17,7 @@ export function BoardsList({ user }: { user: User }) {
         .from("boards_with_stats")
         .select("*")
         .eq("owner_id", userId)
+        .eq("is_public", true)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -30,12 +28,11 @@ export function BoardsList({ user }: { user: User }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <CreateWishlist user={user} />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {boards.map((board) => (
           <Link
             key={board.id}
-            href={`/boards/${board.id}`}
+            href={`/users/${userId}/${board.slug}`}
             className="cursor-pointer"
           >
             <div key={board.id} className="card bg-base-300 card-sm shadow-sm">

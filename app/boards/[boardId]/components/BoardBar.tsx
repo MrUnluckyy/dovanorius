@@ -16,10 +16,9 @@ type Board = {
 type Props = {
   board: Board;
   inPublicView?: boolean;
-  user?: { id: string };
 };
 
-export function BoardBar({ board, user, inPublicView }: Props) {
+export function BoardBar({ board, inPublicView }: Props) {
   const [copied, setCopied] = useState(false);
   const supabase = createClient();
 

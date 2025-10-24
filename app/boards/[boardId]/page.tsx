@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { WishList } from "./components/WishList";
 import { BoardBar } from "./components/BoardBar";
 import { getBoard } from "@/app/actions/boards/action";
+import Breadcrumbs from "@/components/navigation/Breadcrumbs";
 
 export default async function BoardPage({
   params,
@@ -28,9 +29,10 @@ export default async function BoardPage({
   return (
     <main>
       <Navigation user={user} />
-      <div className="max-w-[1400px] mx-auto min-h-screen px-4">
+      <div className="max-w-[1440px] mx-auto min-h-screen px-4">
+        <Breadcrumbs />
         <div className="py-8 mb-10">
-          <BoardBar user={user} board={board} />
+          <BoardBar board={board} />
         </div>
         <WishList boardId={board.id} />
       </div>

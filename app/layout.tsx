@@ -3,7 +3,6 @@ import { Providers } from "@/components/providers/Providers";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
-import { getRequestConfig } from "next-intl/server";
 import { cookies } from "next/headers";
 
 const geistSans = Geist({
@@ -29,7 +28,6 @@ export default async function RootLayout({
   const store = await cookies();
   const locale = store.get("locale")?.value || "lt";
 
-  // const {locale, messages} = await getRequestConfig();
   return (
     <html lang={locale} suppressHydrationWarning>
       <body

@@ -2,11 +2,9 @@
 import useProfile from "@/hooks/useProfile";
 import { isWithinInterval, subWeeks } from "date-fns";
 import { UserAvatar } from "@/app/profile/components/UserAvatar";
-import { useProductImageUpload } from "@/hooks/useImageUpload";
 
-export function UserBar() {
+export function ProfileBar() {
   const { isLoading, profile } = useProfile();
-  const { uploadProductImage, uploading } = useProductImageUpload();
 
   if (isLoading) return <div>Loading...</div>;
 
