@@ -47,7 +47,7 @@ export default async function PublicBoardPage({
       <div className="max-w-[1440px] mx-auto min-h-screen px-4">
         <Breadcrumbs />
         <div className="py-8 mb-10">
-          <BoardBar board={board} inPublicView />
+          <BoardBar userId={user?.id} board={board} inPublicView />
         </div>
 
         <div className="flex">

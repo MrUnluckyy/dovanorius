@@ -16,15 +16,16 @@ type Board = {
 type Props = {
   board: Board;
   inPublicView?: boolean;
+  userId?: string | null;
 };
 
-export function BoardBar({ board, inPublicView }: Props) {
+export function BoardBar({ board, inPublicView, userId }: Props) {
   const [copied, setCopied] = useState(false);
   const supabase = createClient();
 
   const handleCopy = async () => {
     if (!board.is_public) return;
-    const url = `${window.location.origin}/board/${board.slug}`;
+    const url = `${window.location.origin}/users/${userId}/${board.slug}`;
 
     try {
       await navigator.clipboard.writeText(url);
