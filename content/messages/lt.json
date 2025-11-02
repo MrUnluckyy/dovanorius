@@ -1,4 +1,7 @@
 {
+  "Meta": {
+    "description": "Svajok kartu su Dovanoriu, kurk norų lentas ir dalinkis jomis su draugais bei šeima 🎁"
+  },
   "Auth": {
     "login": {
       "title": "Sveiki sugrįžę!",

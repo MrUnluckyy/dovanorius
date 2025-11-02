@@ -13,8 +13,46 @@ const rubik = Rubik({
 const ballo = Baloo_2({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
 export const metadata: Metadata = {
-  title: "Dovanorius",
-  description: "Wishlist website for friends and family",
+  title: "Dovanoriu",
+  description:
+    "Svajok kartu su Dovanoriu, kurk norų lentas ir dalinkis jomis su draugais bei šeima 🎁",
+  manifest: "/favicons/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicons/favicon.ico" },
+    ],
+    apple: "/favicons/apple-touch-icon.png",
+  },
+  themeColor: "#31473A",
+  other: {
+    "msapplication-TileColor": "#31473A",
+  },
+  openGraph: {
+    title: "Dovanoriu",
+    description:
+      "Svajok kartu su Dovanoriu, kurk norų lentas ir dalinkis jomis su draugais bei šeima 🎁",
+    url: "https://dovanoriu.lt",
+    siteName: "Dovanoriu",
+    images: [
+      {
+        url: "/assets/dovanorius.png",
+        width: 1200,
+        height: 630,
+        alt: "Dovanorius illustration",
+      },
+    ],
+    locale: "lt",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Dovanoriu",
+    description:
+      "Svajok kartu su Dovanoriu, kurk norų lentas ir dalinkis jomis su draugais bei šeima 🎁",
+    images: ["/assets/dovanorius.png"],
+  },
 };
 
 export default async function RootLayout({

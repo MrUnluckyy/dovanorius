@@ -1,4 +1,7 @@
 {
+  "Meta": {
+    "description": "Don't stress about gift ideas! Create wish boards, share with friends, and make every occasion special. Dovanorius - your ultimate wish board app."
+  },
   "Auth": {
     "login": {
       "title": "Welcome Back!",
@@ -17,7 +20,6 @@
       "haveAccount": "Already have an account? Login"
     }
   },
-
   "HomePage": {
     "title": "Make gifting easy and fun.",
     "description": "Create wish boards, share with friends, and make every occasion special.",

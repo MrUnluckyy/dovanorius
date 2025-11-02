@@ -43,7 +43,6 @@ export function AddItemModal({ boardId }: { boardId: string }) {
       );
       const data = await res.json();
 
-      console.log("Parsed data", data);
       if (data?.title) {
         setForm((prev) => ({ ...prev, title: data.title }));
       }
@@ -52,6 +51,9 @@ export function AddItemModal({ boardId }: { boardId: string }) {
       }
       if (data?.images && data.images.length > 0) {
         setForm((prev) => ({ ...prev, image_url: data.images?.[0] }));
+      }
+      if (data?.price) {
+        setForm((prev) => ({ ...prev, price: data.price }));
       }
     } catch (err) {
       console.error("Error parsing product:", err);
@@ -124,6 +126,7 @@ export function AddItemModal({ boardId }: { boardId: string }) {
                 url: form.url,
                 notes: form.notes,
                 image_url: form.image_url,
+                price: form.price,
               });
             }}
           >

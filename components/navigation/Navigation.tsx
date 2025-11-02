@@ -9,9 +9,9 @@ export function Navigation({ user }: { user: User | null }) {
   const t = useTranslations("Navbar");
   return (
     <div className="navbar bg-base-100 shadow-sm">
-      <div className="max-w-[1440px] w-full mx-auto">
+      <div className="max-w-[1440px] w-full mx-auto px-4">
         <div className="navbar-start">
-          <Link href="/" className="btn btn-ghost text-xl">
+          <Link href="/" className="text-xl font-bold">
             :D noriu
           </Link>
         </div>
