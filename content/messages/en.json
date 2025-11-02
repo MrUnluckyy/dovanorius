@@ -37,7 +37,8 @@
     "login": "Login",
     "register": "Register",
     "profile": "Profile",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "boards": "Wish Boards"
   },
 
   "Boards": {

@@ -1,8 +1,8 @@
 import { createClient } from "@/utils/supabase/server";
-import { Navigation } from "@/components/navigation/Navigation";
 import { BoardBar } from "@/app/boards/[boardId]/components/BoardBar";
 import Breadcrumbs from "@/components/navigation/Breadcrumbs";
 import { WishList } from "@/app/boards/[boardId]/components/WishList";
+import { NavigationV2 } from "@/components/navigation/NavigationV2";
 
 export default async function PublicUserBoardPage({
   params,
@@ -44,7 +44,8 @@ export default async function PublicUserBoardPage({
 
   return (
     <main className="pb-20">
-      <Navigation user={user} />
+      <NavigationV2 user={user} />
+      {/* <Navigation user={user} /> */}
       <div className="max-w-[1440px] mx-auto min-h-screen px-4">
         <Breadcrumbs />
         <div className="py-8 mb-10">

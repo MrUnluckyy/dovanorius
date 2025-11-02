@@ -27,19 +27,18 @@ export function WishListItem({ item, boardId, inPublicBoard, user }: Props) {
       queryClient.invalidateQueries({ queryKey: ["items", boardId] }),
   });
 
-  console.log(item);
   return (
     <div key={item.id} className="card bg-base-200 shadow-sm max-w-md">
       <figure className="w-full">
         {item.image_url ? (
-          <img src={item.image_url} alt={item.title} />
+          <img src={item.image_url} alt={title} />
         ) : (
           <img src="/assets/placeholder.jpg" alt="Gift illustration" />
         )}
       </figure>
       <div className="card-body">
         {price && <p className="text-xl font-bold ">&euro; {price}</p>}
-        <h2 className="card-title">{item.title}</h2>
+        <h2 className="card-title">{title}</h2>
         <p>{notes}</p>
 
         <div className="card-actions flex-col w-full">

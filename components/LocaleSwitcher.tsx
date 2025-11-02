@@ -11,6 +11,11 @@ export function LocaleSwitcher() {
   const active = useLocale();
   const [isPending, startTransition] = useTransition();
 
+  const getLocaleLabel = (locale: string) => {
+    if (locale === "en") return "🇬🇧";
+    return "🇱🇹";
+  };
+
   return (
     <form
       action={(formData) => {
@@ -28,11 +33,11 @@ export function LocaleSwitcher() {
         disabled={isPending}
         aria-label="Change language"
         onChange={(e) => e.target.form?.requestSubmit()}
-        className="select"
+        className="select select-ghost text-lg"
       >
         {LOCALES.map((l) => (
           <option key={l} value={l}>
-            {l.toUpperCase()}
+            {getLocaleLabel(l)}
           </option>
         ))}
       </select>

@@ -1,10 +1,10 @@
-import { Navigation } from "@/components/navigation/Navigation";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { WishList } from "./components/WishList";
 import { BoardBar } from "./components/BoardBar";
 import { getBoard } from "@/app/actions/boards/action";
 import Breadcrumbs from "@/components/navigation/Breadcrumbs";
+import { NavigationV2 } from "@/components/navigation/NavigationV2";
 
 export default async function BoardPage({
   params,
@@ -28,7 +28,7 @@ export default async function BoardPage({
 
   return (
     <main className="pb-20">
-      <Navigation user={user} />
+      <NavigationV2 user={user} />
       <div className="max-w-[1440px] mx-auto min-h-screen px-4">
         <Breadcrumbs />
         <div className="py-8 mb-10">

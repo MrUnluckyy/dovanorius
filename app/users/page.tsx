@@ -1,4 +1,4 @@
-import { Navigation } from "@/components/navigation/Navigation";
+import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function Users() {
@@ -9,7 +9,7 @@ export default async function Users() {
 
   return (
     <>
-      <Navigation user={user} />
+      <NavigationV2 user={user} />
       <main className="pb-20">
         <h2>Here we are going to make a search for users page</h2>
       </main>

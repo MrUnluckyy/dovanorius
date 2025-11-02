@@ -1,5 +1,5 @@
 import { ImageHero } from "@/components/hero/ImageHero";
-import { Navigation } from "@/components/navigation/Navigation";
+import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function Home() {
@@ -10,7 +10,7 @@ export default async function Home() {
 
   return (
     <>
-      <Navigation user={user} />
+      <NavigationV2 user={user} />
       <main className="pb-20 overflow-hidden">
         <ImageHero />
       </main>

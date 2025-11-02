@@ -38,7 +38,8 @@
     "login": "Prisijungti",
     "register": "Registruotis",
     "profile": "Profilis",
-    "signOut": "Atsijungti"
+    "signOut": "Atsijungti",
+    "boards": "Norų lentos"
   },
 
   "Boards": {

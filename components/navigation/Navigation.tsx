@@ -22,6 +22,9 @@ export function Navigation({ user }: { user: User | null }) {
               <Link href="/profile" className="btn">
                 {t("profile")}
               </Link>
+              <Link href="/boards" className="btn">
+                {t("boards")}
+              </Link>
             </>
           ) : (
             <>
