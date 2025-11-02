@@ -19,9 +19,17 @@
   },
 
   "HomePage": {
-    "title": "Hey there! 👋",
-    "description": "Welcome to Dovanoriu, your personal wish list manager. Start adding your wishes and share them with friends and family!",
-    "buttonText": "Add a Wish"
+    "title": "Make gifting easy and fun.",
+    "description": "Create wish boards, share with friends, and make every occasion special.",
+    "buttonText": "Build Dreams",
+    "board1title": "🏋 My Sports Board",
+    "board1description": "New running shoes for the season, resistance bands upgrade, and that sleek fitness watch I've been eyeing.",
+    "board2title": "🌍 Activities Board",
+    "board2description": "Kayaking trip gear, hiking backpack, and tickets for the next cycling marathon.",
+    "board3title": "🎨 Hobbies Board",
+    "board3description": "A new lens for my camera, sketchbook for ideas, and a pottery class I've been meaning to try.",
+    "ctaCreate": "Create",
+    "ctaTryOut": "Try Out!"
   },
   "Navbar": {
     "login": "Login",
@@ -32,7 +40,17 @@
 
   "Boards": {
     "public": "Public",
-    "private": "Private"
+    "private": "Private",
+    "delete": "Delete",
+    "share": "Share",
+    "copied": "Copied to clipboard",
+    "makePrivate": "Make Private",
+    "publish": "Publish",
+    "noItems": "List is empty. 😭",
+
+    "ctaCreateBoard": "Create New Board",
+    "ctaView": "View",
+    "ctaAddItem": "Add"
   },
 
   "Actions": {

@@ -3,7 +3,9 @@ import ProductUrlParser from "@/components/ProductUrlParser";
 import { useProductImageUpload } from "@/hooks/useImageUpload";
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React, { useState, useRef } from "react";
+import { useTranslations } from "next-intl";
+import { useState, useRef } from "react";
+import { LuListPlus } from "react-icons/lu";
 
 export function AddItemModal({ boardId }: { boardId: string }) {
   const [form, setForm] = useState({
@@ -11,11 +13,13 @@ export function AddItemModal({ boardId }: { boardId: string }) {
     url: "",
     notes: "",
     image_url: "",
+    price: "",
   });
   const [parsing, setParsing] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
   const { uploadProductImage } = useProductImageUpload();
+  const t = useTranslations("Boards");
 
   const modalRef = useRef<HTMLDialogElement>(null);
   const supabase = createClient();
@@ -62,6 +66,7 @@ export function AddItemModal({ boardId }: { boardId: string }) {
       url?: string;
       notes?: string;
       image_url?: string;
+      price?: string;
     }) => {
       const {
         data: { user },
@@ -76,6 +81,7 @@ export function AddItemModal({ boardId }: { boardId: string }) {
           image_url: payload.image_url || null,
           notes: payload.notes || null,
           created_by: user?.id || null,
+          price: payload?.price ? parseInt(payload?.price) : null,
           status: "wanted",
           priority: "medium",
         })
@@ -96,7 +102,7 @@ export function AddItemModal({ boardId }: { boardId: string }) {
     onSuccess: (data) => {
       console.log("Item added", data);
       queryClient.invalidateQueries({ queryKey: ["items", boardId] });
-      setForm({ title: "", url: "", notes: "", image_url: "" });
+      setForm({ title: "", url: "", notes: "", image_url: "", price: "" });
       closeModal();
     },
   });
@@ -104,7 +110,8 @@ export function AddItemModal({ boardId }: { boardId: string }) {
   return (
     <>
       <button className="btn" onClick={openModal}>
-        + Add Item
+        <LuListPlus />
+        {t("ctaAddItem")}
       </button>
       <dialog ref={modalRef} open={isOpen} className="modal">
         <div className="modal-box">
@@ -136,6 +143,15 @@ export function AddItemModal({ boardId }: { boardId: string }) {
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 required
+              />
+
+              <label className="label">Price (eur)</label>
+              <input
+                type="number"
+                className="input w-full"
+                placeholder="Price"
+                value={form.price}
+                onChange={(e) => setForm({ ...form, price: e.target.value })}
               />
 
               <label className="label">Notes</label>

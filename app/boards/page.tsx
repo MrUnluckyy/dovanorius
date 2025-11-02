@@ -23,6 +23,7 @@ export default async function BoardsPage() {
         <div className="py-8 mb-4 md:mb-10">
           <UserBar />
         </div>
+
         <BoardsList user={user} />
       </div>
     </main>

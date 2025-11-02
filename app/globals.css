@@ -6,4 +6,6 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-poppins: var(--font-poppins);
+  --bg-base-custom: var(--color-base-100);
 }

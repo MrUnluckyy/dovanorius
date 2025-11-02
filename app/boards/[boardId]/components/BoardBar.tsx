@@ -1,8 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import { PublishBoard } from "./PublishBoard";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { UserLoadingSkeleton } from "@/components/loaders/UserLoadingSkeleton";
 
 type Board = {
   id: string;
@@ -22,6 +25,9 @@ type Props = {
 export function BoardBar({ board, inPublicView, userId }: Props) {
   const [copied, setCopied] = useState(false);
   const supabase = createClient();
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const t = useTranslations("Boards");
 
   const handleCopy = async () => {
     if (!board.is_public) return;
@@ -49,7 +55,21 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
     },
   });
 
-  if (isLoading) return <p>Loading...</p>;
+  const deleteBoard = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("boards")
+        .delete()
+        .eq("id", board.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      router.push("/boards");
+    },
+  });
+
+  if (isLoading) return <UserLoadingSkeleton />;
 
   return (
     <div className="flex flex-col gap-4">
@@ -64,7 +84,7 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
             <h2 className="text-4xl font-semibold mb-2">
               {boardClient?.name}
               <span className="badge badge-info ml-2">
-                {boardClient?.is_public ? "Public" : "Personal"}
+                {boardClient?.is_public ? t("public") : t("private")}
               </span>
             </h2>
             <p className="text-sm">{boardClient?.description}</p>
@@ -84,7 +104,13 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
             onClick={handleCopy}
             disabled={!boardClient?.is_public}
           >
-            {copied ? "Board copied" : "Share Board"}
+            {copied ? t("copied") : t("share")}
+          </button>
+          <button
+            className="btn btn-error"
+            onClick={() => deleteBoard.mutate()}
+          >
+            {t("delete")}
           </button>
         </div>
       )}

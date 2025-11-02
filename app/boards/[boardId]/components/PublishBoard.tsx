@@ -2,6 +2,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { v4 as uuidv4 } from "uuid";
+import { useTranslations } from "next-intl";
 
 export function PublishBoard({
   boardId,
@@ -16,6 +17,7 @@ export function PublishBoard({
 }) {
   const supabase = createClient();
   const qc = useQueryClient();
+  const t = useTranslations("Boards");
 
   async function onPublish(e: React.FormEvent) {
     const slug = boardSlug
@@ -35,7 +37,7 @@ export function PublishBoard({
   return (
     <form onSubmit={onPublish} className="flex gap-2 w-full">
       <button className="btn w-full" type="submit">
-        {boardPublished ? "Make Private" : "Publish"}
+        {boardPublished ? t("makePrivate") : t("publish")}
       </button>
     </form>
   );

@@ -2,13 +2,10 @@
 import useProfile from "@/hooks/useProfile";
 import { isWithinInterval, subWeeks } from "date-fns";
 import { UserAvatar } from "@/app/profile/components/UserAvatar";
-import { useProductImageUpload } from "@/hooks/useImageUpload";
+import { UserLoadingSkeleton } from "@/components/loaders/UserLoadingSkeleton";
 
 export function UserBar() {
   const { isLoading, profile } = useProfile();
-  const { uploadProductImage, uploading } = useProductImageUpload();
-
-  if (isLoading) return <div>Loading...</div>;
 
   const isNewUser =
     profile?.created_at &&
@@ -17,11 +14,13 @@ export function UserBar() {
       end: new Date(),
     });
 
+  if (isLoading || !profile) return <UserLoadingSkeleton />;
+
   return (
     <div className="flex gap-4 justify-between">
       <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-12">
         <div className="avatar">
-          <div className="w-30 rounded-full">
+          <div className="w-40 rounded-full">
             <UserAvatar size="40" avatarUrl={profile?.avatar_url} />
           </div>
         </div>

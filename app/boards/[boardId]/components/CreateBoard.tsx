@@ -2,12 +2,15 @@
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { FormEvent, useRef, useState } from "react";
+import { LuClipboardPlus } from "react-icons/lu";
 
-export function CreateWishlist({ user }: { user: User | null }) {
+export function CreateBoard({ user }: { user: User | null }) {
   const supabase = createClient();
   const modalRef = useRef<HTMLDialogElement>(null);
   const queryClient = useQueryClient();
+  const t = useTranslations("Boards");
 
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
@@ -45,7 +48,8 @@ export function CreateWishlist({ user }: { user: User | null }) {
   return (
     <div className="w-full justify-end">
       <button className="btn" onClick={openModal}>
-        + Create New Board
+        <LuClipboardPlus />
+        {t("ctaCreateBoard")}
       </button>
       <dialog ref={modalRef} open={isOpen} className="modal">
         <div className="modal-box">

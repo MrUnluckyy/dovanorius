@@ -18,10 +18,19 @@
     }
   },
   "HomePage": {
-    "title": "Labas! 👋",
-    "description": "Sveiki atvykę į Dovanoriu, jūsų asmeninį norų sąrašų tvarkyklę. Pradėkite pridėti savo norus ir dalinkitės jais su draugais bei šeima!",
-    "buttonText": "Pridėti norą"
+    "title": "Dovanų teikimas - lengva ir smagu!",
+    "description": "Kurk norų lentas, dalinkis su draugais ir paversk kiekvieną progą ypatinga.",
+    "buttonText": "Kurti Svajones",
+    "board1title": "🏋 Sporto lentyna",
+    "board1description": "Nauji bėgimo bateliai šiam sezonui, atnaujintos pasipriešinimo gumos ir sportinis laikrodis, kurio seniai noriu.",
+    "board2title": "🌍 Užsiėmimai",
+    "board2description": "Įranga plaukimui baidarėmis, žygio kuprinė ir bilietai į kitą dviračių maratoną.",
+    "board3title": "🎨 Hobiams",
+    "board3description": "Naujas objektyvas fotoaparatui, eskizų knyga idėjoms ir keramikos pamoka, kurią vis noriu išbandyti.",
+    "ctaCreate": "Sukurti",
+    "ctaTryOut": "Išbandyk!"
   },
+
   "Navbar": {
     "login": "Prisijungti",
     "register": "Registruotis",
@@ -31,7 +40,17 @@
 
   "Boards": {
     "public": "Viešas",
-    "private": "Privatus"
+    "private": "Privatus",
+    "delete": "Ištrinti lentą",
+    "share": "Dalintis lenta",
+    "copied": "Nukopijuota į iškarpinę",
+    "makePrivate": "Padaryti privačia",
+    "publish": "Viešinti",
+    "noItems": "Sąrašas tuščias. 😭",
+
+    "ctaView": "Atidaryti",
+    "ctaCreateBoard": "Sukurti naują lentą",
+    "ctaAddItem": "Pridėti"
   },
 
   "Actions": {

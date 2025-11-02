@@ -4,9 +4,10 @@ import { User } from "@supabase/supabase-js";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
-import { CreateWishlist } from "../[boardId]/components/CreateWishlist";
+import { CreateBoard } from "../[boardId]/components/CreateBoard";
 import { useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
+import { BoardsLoadingSkeleton } from "@/components/loaders/BoardsLoadingSkeleton";
 
 export function BoardsList({ user }: { user: User }) {
   const supabase = createClient();
@@ -26,11 +27,11 @@ export function BoardsList({ user }: { user: User }) {
     },
   });
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <BoardsLoadingSkeleton />;
 
   return (
     <div className="flex flex-col gap-4">
-      <CreateWishlist user={user} />
+      <CreateBoard user={user} />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {boards.map((board) => (
           <Link
@@ -60,7 +61,7 @@ export function BoardsList({ user }: { user: User }) {
                       )}`}
                 </p>
                 <div className="justify-end card-actions">
-                  <button className="btn btn-accent">View</button>
+                  <button className="btn btn-accent">{t("ctaView")}</button>
                 </div>
               </div>
             </div>
