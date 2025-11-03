@@ -50,10 +50,23 @@
     "makePrivate": "Make Private",
     "publish": "Publish",
     "noItems": "List is empty. 😭",
+    "notProvided": "Not Provided",
+    "reserved": "Reserved",
+    "myReservation": "My Reservation",
+
+    "price": "Price",
+    "shop": "Shop",
+
+    "successReserve": "🎉 Success!",
+    "successReserveDesc": "You have successfully reserved this item.",
+    "errorReserve": "😵 Oppps!",
+    "errorReserveDesc": "Something went wrong while reserving this item. Please try again later.",
 
     "ctaCreateBoard": "Create New Board",
     "ctaView": "View",
-    "ctaAddItem": "Add"
+    "ctaAddItem": "Add",
+    "ctaReserve": "Reserve",
+    "ctaClose": "Close"
   },
 
   "Actions": {

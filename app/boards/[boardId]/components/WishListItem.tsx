@@ -4,7 +4,9 @@ import { Item } from "./WishList";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { LuExternalLink } from "react-icons/lu";
+import { ViewItemModal } from "./ViewItemModal";
+import PriceCategoryBadge from "./PriceCategoryBadge";
+import { useTranslations } from "next-intl";
 
 type Props = {
   item: Item;
@@ -13,67 +15,97 @@ type Props = {
   user?: User | null;
 };
 
-export function WishListItem({ item, boardId, inPublicBoard, user }: Props) {
-  const { title, url, notes, price } = item;
-  const supabase = createClient();
-  const queryClient = useQueryClient();
-
-  const deleteItem = useMutation({
-    mutationFn: async (itemId: string) => {
-      const { error } = await supabase.from("items").delete().eq("id", itemId);
-      if (error) throw error;
-    },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["items", boardId] }),
-  });
+export function WishListItem({ item, inPublicBoard, user }: Props) {
+  const { title, price, status, reserved_by } = item;
+  const t = useTranslations("Boards");
 
   return (
-    <div key={item.id} className="card bg-base-200 shadow-sm max-w-md">
-      <figure className="w-full">
-        {item.image_url ? (
-          <img src={item.image_url} alt={title} />
+    <div className="card bg-base-200 shadow-sm">
+      <figure className="px-10 pt-10">
+        <div
+          className="aspect-square w-32 overflow-hidden rounded-md relative"
+          aria-hidden={!item?.image_url} // image is decorative if there's no real image
+        >
+          <img
+            src={item?.image_url || "/assets/placeholder.jpg"}
+            alt={title ?? "Gift image"} // meaningful alt
+            className="h-full w-full object-cover object-center"
+            loading="lazy"
+            decoding="async"
+            onError={(e) => {
+              e.currentTarget.src = "/assets/placeholder.jpg";
+            }}
+          />
+        </div>
+
+        {inPublicBoard && status === "reserved" && reserved_by ? (
+          <div className="badge badge-sm badge-warning absolute top-2 left-2">
+            {reserved_by === user?.id ? t("myReservation") : t("reserved")}
+          </div>
         ) : (
-          <img src="/assets/placeholder.jpg" alt="Gift illustration" />
+          <PriceCategoryBadge price={price} />
         )}
       </figure>
-      <div className="card-body">
-        {price && <p className="text-xl font-bold ">&euro; {price}</p>}
-        <h2 className="card-title">{title}</h2>
-        <p>{notes}</p>
-
-        <div className="card-actions flex-col w-full">
-          {inPublicBoard && user && (
-            <button className="btn btn-primary w-full">Reserve</button>
-          )}
-
-          {url && (
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-primary w-full"
-            >
-              View Item <LuExternalLink />
-            </a>
-          )}
-          {!inPublicBoard && (
-            <>
-              <button
-                className="btn btn-primary w-full"
-                onClick={() => deleteItem.mutate(item.id)}
-              >
-                Edit
-              </button>
-              <button
-                className="btn btn-error w-full"
-                onClick={() => deleteItem.mutate(item.id)}
-              >
-                Delete
-              </button>
-            </>
-          )}
+      <div className="card-body items-center text-center p-4 justify-between">
+        <h2 className="card-title text-md text-sm line-clamp-2">{title}</h2>
+        <div className="card-actions">
+          <ViewItemModal
+            item={item}
+            inPublicBoard={inPublicBoard}
+            user={user}
+          />
         </div>
       </div>
     </div>
   );
+
+  // return (
+  //   <div key={item.id} className="card bg-base-200 shadow-sm max-w-md">
+  //     <figure className="w-full">
+  //       {item.image_url ? (
+  //         <img src={item.image_url} alt={title} />
+  //       ) : (
+  //         <img src="/assets/placeholder.jpg" alt="Gift illustration" />
+  //       )}
+  //     </figure>
+  //     <div className="card-body">
+  //       {price && <p className="text-xl font-bold ">&euro; {price}</p>}
+  //       <h2 className="card-title">{title}</h2>
+  //       <p>{notes}</p>
+
+  //       <div className="card-actions flex-col w-full">
+  //         {inPublicBoard && user && (
+  //           <button className="btn btn-primary w-full">Reserve</button>
+  //         )}
+
+  //         {url && (
+  //           <a
+  //             href={url}
+  //             target="_blank"
+  //             rel="noopener noreferrer"
+  //             className="btn btn-primary w-full"
+  //           >
+  //             View Item <LuExternalLink />
+  //           </a>
+  //         )}
+  //         {!inPublicBoard && (
+  //           <>
+  //             <button
+  //               className="btn btn-primary w-full"
+  //               onClick={() => deleteItem.mutate(item.id)}
+  //             >
+  //               Edit
+  //             </button>
+  //             <button
+  //               className="btn btn-error w-full"
+  //               onClick={() => deleteItem.mutate(item.id)}
+  //             >
+  //               Delete
+  //             </button>
+  //           </>
+  //         )}
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 }

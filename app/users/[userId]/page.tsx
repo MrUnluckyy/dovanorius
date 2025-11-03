@@ -21,7 +21,7 @@ export default async function UserPage({
       <div className="max-w-[1440px] mx-auto min-h-screen px-4">
         <Breadcrumbs />
         <div className="py-8 mb-4 md:mb-10">
-          <ProfileBar />
+          <ProfileBar userId={userId} />
         </div>
         <PublicBoardsList userId={userId} />
       </div>

@@ -1,5 +1,5 @@
 "use client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { AddItemModal } from "./AddItemModal";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -9,12 +9,14 @@ import { WishListItem } from "./WishListItem";
 
 export type Item = {
   id: string;
+  board_id: string;
   title: string;
   notes: string | null;
   url: string | null;
   price: number | null;
   image_url: string | null;
   status: "wanted" | "reserved" | "purchased";
+  reserved_by: string | null;
   priority: "low" | "medium" | "high";
   created_at: string;
 };
@@ -29,7 +31,6 @@ export function WishList({
   user?: User | null;
 }) {
   const supabase = createClient();
-  const queryClient = useQueryClient();
   const t = useTranslations("Boards");
 
   const {
@@ -42,7 +43,7 @@ export function WishList({
       const { data, error } = await supabase
         .from("items")
         .select(
-          "id, title, notes, price, image_url, url, status, priority, created_at"
+          "id, board_id, title, notes, price, image_url, url, status, reserved_by ,priority, created_at"
         )
         .eq("board_id", boardId)
         .order("created_at", { ascending: false });

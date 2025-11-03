@@ -3,8 +3,9 @@ import useProfile from "@/hooks/useProfile";
 import { isWithinInterval, subWeeks } from "date-fns";
 import { UserAvatar } from "@/app/profile/components/UserAvatar";
 
-export function ProfileBar() {
-  const { isLoading, profile } = useProfile();
+export function ProfileBar({ userId }: { userId?: string }) {
+  const { isLoading, profile } = useProfile(userId);
+  console.log("profile", userId);
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -19,7 +20,7 @@ export function ProfileBar() {
     <div className="flex gap-4 justify-between">
       <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-12">
         <div className="avatar">
-          <div className="w-30 rounded-full">
+          <div className="rounded-full">
             <UserAvatar size="40" avatarUrl={profile?.avatar_url} />
           </div>
         </div>

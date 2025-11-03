@@ -35,6 +35,7 @@ const useProfile = (publicUserId?: string) => {
   }, []);
 
   const userId = publicUserId || user?.id;
+  console.log("publicUserId", userId);
 
   const fetchProfile = async () => {
     const { data, error } = await supabase
@@ -77,7 +78,6 @@ const useProfile = (publicUserId?: string) => {
   } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: fetchProfile,
-    enabled: !!user,
   });
   return { profile, isLoading, error, editProfile };
 };

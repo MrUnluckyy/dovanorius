@@ -51,10 +51,23 @@
     "makePrivate": "Padaryti privačia",
     "publish": "Viešinti",
     "noItems": "Sąrašas tuščias. 😭",
+    "notProvided": "Nenurodyta",
+    "reserved": "Rezervuota",
+    "myReservation": "Mano rezervacija",
+
+    "price": "Kaina",
+    "shop": "Parduotuvė",
+
+    "successReserve": "🎉 Pavyko!",
+    "successReserveDesc": "Sėkmingai rezervavote šį daiktą!",
+    "errorReserve": "😵 Upsss!",
+    "errorReserveDesc": "Įvyko klaida rezervuojant šį daiktą. Bandykite dar kartą vėliau.",
 
     "ctaView": "Atidaryti",
     "ctaCreateBoard": "Sukurti naują lentą",
-    "ctaAddItem": "Pridėti"
+    "ctaAddItem": "Pridėti",
+    "ctaReserve": "Rezervuoti",
+    "ctaClose": "Uždaryti"
   },
 
   "Actions": {
