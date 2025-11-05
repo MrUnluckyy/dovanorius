@@ -3,6 +3,9 @@
 import { createClient } from "@/utils/supabase/client";
 import { useState } from "react";
 import { UserAvatar } from "./UserAvatar";
+import { LuPen } from "react-icons/lu";
+import { useTranslations } from "next-intl";
+import { useToast } from "@/components/providers/ToastProvider";
 
 export default function AvatarUploader({
   profile,
@@ -12,6 +15,9 @@ export default function AvatarUploader({
   const supabase = createClient();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const t = useTranslations("Profile");
+
+  const { toastError } = useToast();
 
   const getPreviewUrl = () => {
     if (file) {
@@ -42,8 +48,6 @@ export default function AvatarUploader({
 
       // Create a stable path: avatars/<userId>/avatar.<ext>
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-
-      console.log("ext", ext);
       const path = `${user.id}/avatar.${ext}`;
 
       // Optional: remove previous avatar to keep only one file
@@ -70,7 +74,7 @@ export default function AvatarUploader({
         .eq("id", user.id);
       if (profErr) throw profErr;
     } catch (err) {
-      alert(err ?? "Upload failed");
+      toastError(t("errorUploadingAvatar"));
     } finally {
       setUploading(false);
     }
@@ -78,17 +82,20 @@ export default function AvatarUploader({
 
   if (!profile) return <p>Loading...</p>;
   return (
-    <div className="flex items-center gap-4 mb-8">
-      <label htmlFor="avatarUpload">
+    <div className="flex flex-col items-center gap-4 mb-8 relative">
+      <label htmlFor="avatarUpload" className="relative">
         {file ? (
           <div className="avatar">
-            <div className="w-24 rounded-full">
+            <div className="w-30 rounded-full">
               <img src={getPreviewUrl()} alt="User avatar preview" />
             </div>
           </div>
         ) : (
-          <UserAvatar avatarUrl={profile?.avatar_url} />
+          <UserAvatar size="30" avatarUrl={profile?.avatar_url} />
         )}
+        <div className="absolute top-1 right-1 h-8 w-8 rounded-full bg-base-200 flex justify-center items-center">
+          <LuPen />
+        </div>
       </label>
 
       <form onSubmit={onFileChange}>
@@ -98,9 +105,14 @@ export default function AvatarUploader({
           className="hidden"
           onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
         />
+
         {file && (
-          <button className="btn" type="submit" disabled={uploading}>
-            Save
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={uploading}
+          >
+            {t("ctaSave")}
           </button>
         )}
       </form>

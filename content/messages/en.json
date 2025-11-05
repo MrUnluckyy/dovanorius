@@ -69,6 +69,22 @@
     "ctaClose": "Close"
   },
 
+  "Profile": {
+    "displayName": "Display Name",
+    "description": "About Me",
+    "email": "Email Address",
+    "pickTheme": "Pick Theme",
+    "stats": "Profile Stats",
+    "boards": "{count, plural, one {# Board} other {# Boards}}",
+    "items": "{count, plural, one {# Wish} other {# Wishes}}",
+    "editProfile": "Edit Profile",
+    "errorUploadingAvatar": "Error uploading avatar. Please try again.",
+    "ctaEdit": "Edit Profile",
+    "ctaSave": "Save",
+    "ctaClose": "Close",
+    "toastProfileUpdated": "Profile updated successfully!"
+  },
+
   "Actions": {
     "add": "Add",
     "edit": "Edit",

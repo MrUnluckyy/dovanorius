@@ -1,47 +1,35 @@
 "use client";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import React, { useEffect, useState } from "react";
 
-const themes = ["light", "dark", "cupcake", "bumblebee", "retro", "coffee"];
+const themes = ["winter", "bumblebee", "retro", "coffee"];
 
 export default function ThemeSelector() {
-  const { setTheme } = useTheme();
+  const { setTheme, theme: selectedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  console.log("selectedTheme", selectedTheme);
+  const t = useTranslations("Profile");
   useEffect(() => setMounted(true), []);
 
   if (!mounted) return null; // avoid hydration mismatch
 
   return (
-    <div className="dropdown">
-      <div tabIndex={0} role="button" className="btn m-1">
-        Theme
-        <svg
-          width="12px"
-          height="12px"
-          className="inline-block h-2 w-2 fill-current opacity-60"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 2048 2048"
-        >
-          <path d="M1799 349l242 241-1017 1017L7 590l242-241 775 775 775-775z"></path>
-        </svg>
-      </div>
-      <ul
-        tabIndex={-1}
-        className="dropdown-content bg-base-300 rounded-box z-1 w-52 p-2 shadow-2xl"
-      >
+    <div>
+      <p className="mb-2 text-2xl font-semibold">{t("pickTheme")}</p>
+      <div className="join join-horizontal">
         {themes.map((theme) => (
-          <li key={theme}>
-            <input
-              type="radio"
-              name="theme-dropdown"
-              className="theme-controller w-full btn btn-sm btn-block btn-ghost justify-start capitalize"
-              aria-label={theme}
-              value={theme}
-              onChange={(e) => setTheme(e.target.value)}
-            />
-          </li>
+          <input
+            key={theme}
+            type="radio"
+            name="theme-buttons"
+            className="btn theme-controller join-item"
+            aria-label={theme}
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+          />
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

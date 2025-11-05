@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: retro, halloween, cupcake, retro, coffee, light, dark, bumblebee;
+  themes: retro, halloween, cupcake, retro, coffee, light, dark, bumblebee,
+    pastel, winter;
 }
 
 @theme inline {

@@ -4,6 +4,8 @@ import { useTranslations } from "next-intl";
 import { User } from "@supabase/supabase-js";
 import { Logo } from "../Logo";
 import { LuUser, LuClipboardList, LuX, LuMenu } from "react-icons/lu";
+import { SignOutButton } from "@/app/(auth)/components/SignOutButton";
+import Image from "next/image";
 
 export function NavigationV2({ user }: { user?: User | null }) {
   const t = useTranslations("Navbar");
@@ -26,7 +28,18 @@ export function NavigationV2({ user }: { user?: User | null }) {
             </div>
 
             <div className="mx-2 flex-1 px-2 font-bold justify-between flex lg:block">
-              <Logo />
+              <Link
+                href="/"
+                className="text-xl font-bold flex gap-2 items-center"
+              >
+                <Image
+                  src="/assets/logo.png"
+                  alt="Logo"
+                  width={40}
+                  height={40}
+                />
+                Dovanorius
+              </Link>
               <div className="lg:hidden">
                 <LocaleSwitcher />
               </div>
@@ -42,6 +55,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                     <LuUser />
                     {t("profile")}
                   </Link>
+                  <SignOutButton className="btn btn-ghost" />
                 </>
               ) : (
                 <>
@@ -82,6 +96,8 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   <LuUser />
                   {t("profile")}
                 </Link>
+                <div className="divider" />
+                <SignOutButton className="btn btn-ghost text-2xl" />
               </>
             ) : (
               <>

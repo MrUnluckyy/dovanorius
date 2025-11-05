@@ -1,12 +1,20 @@
 "use client";
 import useProfile, { Profile } from "@/hooks/useProfile";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import AvatarUploader from "./AvatarUpload";
-import ThemeSelector from "@/components/ThemeSelector";
+import { useTranslations } from "next-intl";
+import { useToast } from "@/components/providers/ToastProvider";
 
-export function ProfileEditForm() {
+export function ProfileEditForm({
+  onCloseModal,
+}: {
+  onCloseModal: () => void;
+}) {
   const { profile, isLoading, editProfile } = useProfile();
+  const [uploading, setUploading] = useState(false);
+  const { toastError, toastSuccess } = useToast();
+  const t = useTranslations("Profile");
 
   const { register, handleSubmit, reset } = useForm<Profile>({
     defaultValues: {
@@ -15,7 +23,17 @@ export function ProfileEditForm() {
     },
   });
 
-  const onSubmit: SubmitHandler<Profile> = (data) => editProfile(data);
+  const onSubmit: SubmitHandler<Profile> = async (data) => {
+    setUploading(true);
+    try {
+      await editProfile(data);
+      toastSuccess(t("toastProfileUpdated"));
+    } catch (error) {
+    } finally {
+      setUploading(false);
+      onCloseModal();
+    }
+  };
 
   useEffect(() => {
     if (profile) {
@@ -28,18 +46,15 @@ export function ProfileEditForm() {
   return (
     <div className="flex flex-col items-center">
       <div className="mb-8">
-        <h2 className="text-2xl">Edit Profile</h2>
+        <h2 className="text-2xl">{t("editProfile")}</h2>
       </div>
       <div>
         <AvatarUploader profile={profile} />
       </div>
-      <ThemeSelector />
       <div>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-            <legend className="fieldset-legend">Edit User</legend>
-
-            <label className="label">Display Name</label>
+          <fieldset className="fieldset w-xs p-4">
+            <label className="label">{t("displayName")}</label>
             <input
               type="text"
               className="input"
@@ -47,14 +62,25 @@ export function ProfileEditForm() {
               {...register("display_name")}
             />
 
-            <label className="label">About</label>
+            <label className="label">{t("description")}</label>
             <textarea
               className="textarea"
               placeholder="Short info about you"
               {...register("about")}
             />
-            <button type="submit" className="btn">
-              {isLoading ? "Saving..." : "Save"}
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={uploading}
+            >
+              {t("ctaSave")}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={uploading}
+            >
+              {t("ctaClose")}
             </button>
           </fieldset>
         </form>

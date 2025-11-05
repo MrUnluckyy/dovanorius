@@ -70,6 +70,21 @@
     "ctaClose": "Uždaryti"
   },
 
+  "Profile": {
+    "displayName": "Slapyvardis",
+    "description": "Apie mane",
+    "email": "El. pašto adresas",
+    "pickTheme": "Pasirink temą",
+    "stats": "Vartotojo statistika",
+    "boards": "{count, plural, one {# Lenta} other {# Lentos}}",
+    "items": "{count, plural, one {# Noras} other {# Norai}}",
+    "editProfile": "Redaguoti profilį",
+    "errorUploadingAvatar": "Klaida įkeliant avatarą. Bandykite dar kartą.",
+    "ctaEdit": "Redaguoti profilį",
+    "ctaSave": "Išsaugoti",
+    "ctaClose": "Uždaryti",
+    "toastProfileUpdated": "Profilis sėkmingai atnaujintas!"
+  },
   "Actions": {
     "add": "Pridėti",
     "edit": "Redaguoti",
