@@ -1,21 +1,16 @@
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers/Providers";
-import { Geist, Geist_Mono, Poppins, Rubik, Baloo_2 } from "next/font/google";
+import { Baloo_2 } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";
 
-const rubik = Rubik({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-});
-
 const ballo = Baloo_2({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
 export const metadata: Metadata = {
-  title: "Dovanoriu",
+  title: "NoriuTo",
   description:
-    "Svajok kartu su Dovanoriu, kurk norų lentas ir dalinkis jomis su draugais bei šeima 🎁",
+    "Svajok kartu su NoriuTo, kurk norų lentas ir dalinkis jomis su draugais bei šeima 🎁",
   manifest: "/favicons/site.webmanifest",
   icons: {
     icon: [
@@ -33,8 +28,8 @@ export const metadata: Metadata = {
     title: "Dovanoriu",
     description:
       "Svajok kartu su Dovanoriu, kurk norų lentas ir dalinkis jomis su draugais bei šeima 🎁",
-    url: "https://dovanoriu.lt",
-    siteName: "Dovanoriu",
+    url: "https://www.noriuto.lt",
+    siteName: "NoriuTo",
     images: [
       {
         url: "/assets/dovanorius.png",
@@ -50,7 +45,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Dovanoriu",
     description:
-      "Svajok kartu su Dovanoriu, kurk norų lentas ir dalinkis jomis su draugais bei šeima 🎁",
+      "Svajok kartu su NoriuTo, kurk norų lentas ir dalinkis jomis su draugais bei šeima 🎁",
     images: ["/assets/dovanorius.png"],
   },
 };

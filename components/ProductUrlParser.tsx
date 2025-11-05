@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 type Props = {
   onParse: () => void;
   loading: boolean;
@@ -13,6 +15,7 @@ export default function ProductUrlParser({
   onChange,
   value,
 }: Props) {
+  const t = useTranslations("Boards");
   return (
     <div>
       <label className="label">Url</label>
@@ -45,14 +48,18 @@ export default function ProductUrlParser({
               onChange={(e) => onChange(e.target.value)}
             />
           </label>
-          <div className="validator-hint hidden">Enter valid email address</div>
+          <div className="validator-hint hidden">{t("urlValidError")}</div>
         </div>
         <button
           type="button"
           className="btn btn-neutral join-item"
+          disabled={loading}
           onClick={onParse}
         >
-          {loading ? "Parsing..." : "Parse"}
+          {loading && (
+            <span className="loading loading-spinner loading-sm"></span>
+          )}
+          {t("getMetadata")}
         </button>
       </div>
     </div>

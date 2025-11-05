@@ -38,7 +38,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   width={40}
                   height={40}
                 />
-                Dovanorius
+                NoriuTo
               </Link>
               <div className="lg:hidden">
                 <LocaleSwitcher />

@@ -1,6 +1,6 @@
 {
   "Meta": {
-    "description": "Don't stress about gift ideas! Create wish boards, share with friends, and make every occasion special. Dovanorius - your ultimate wish board app."
+    "description": "Don't stress about gift ideas! Create wish boards, share with friends, and make every occasion special. NoriuTo - your ultimate wish board app."
   },
   "Auth": {
     "loginTitle": "👋 Hey there!",
@@ -45,6 +45,9 @@
 
     "price": "Price",
     "shop": "Shop",
+    "title": "Title",
+    "notes": "Notes",
+    "image": "Image",
 
     "successReserve": "🎉 Success!",
     "successReserveDesc": "You have successfully reserved this item.",
@@ -55,6 +58,13 @@
     "successUnreserveDesc": "You have successfully un-reserved this item.!",
     "errorUnreserve": "😵 Opsss!",
     "errorUnreserveDesc": "Something went wrong while un-reserving this item. Please try again later.",
+
+    "urlValidError": "Please enter a valid URL.",
+    "maxImageSizeLabel": "Maximum image size is 2MB.",
+
+    "getMetadata": "Get Metadata",
+
+    "addWish": "Add a wish! 🎁",
 
     "ctaCreateBoard": "Create New Board",
     "ctaView": "View",

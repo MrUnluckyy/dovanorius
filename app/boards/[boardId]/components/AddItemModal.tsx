@@ -130,7 +130,7 @@ export function AddItemModal({ boardId }: { boardId: string }) {
               });
             }}
           >
-            <h3 className="font-bold text-lg">Add Item!</h3>
+            <h3 className="font-bold text-lg">{t("addWish")}</h3>
             <fieldset className="fieldset w-full">
               <ProductUrlParser
                 onParse={handleParse}
@@ -138,29 +138,29 @@ export function AddItemModal({ boardId }: { boardId: string }) {
                 loading={parsing}
                 value={form.url}
               />
-              <label className="label">Title</label>
+              <label className="label">{t("title")}</label>
               <input
                 type="text"
                 className="input w-full"
-                placeholder="Title *"
+                placeholder={t("title")}
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 required
               />
 
-              <label className="label">Price (eur)</label>
+              <label className="label">{t("price")}</label>
               <input
                 type="number"
                 className="input w-full"
-                placeholder="Price"
+                placeholder={t("price")}
                 value={form.price}
                 onChange={(e) => setForm({ ...form, price: e.target.value })}
               />
 
-              <label className="label">Notes</label>
+              <label className="label">{t("notes")}</label>
               <textarea
                 className="textarea w-full"
-                placeholder="Notes (optional)"
+                placeholder={t("notes")}
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
               />
@@ -171,7 +171,7 @@ export function AddItemModal({ boardId }: { boardId: string }) {
                 ) : null}
               </div>
 
-              <label className="label">Image</label>
+              <label className="label">{t("image")}</label>
               <input
                 type="file"
                 className="file-input w-full"
@@ -181,14 +181,14 @@ export function AddItemModal({ boardId }: { boardId: string }) {
                   )
                 }
               />
-              <label className="label">Max size 2MB</label>
+              <label className="label">{t("maxImageSizeLabel")}</label>
             </fieldset>
             <div className="modal-action">
               <button className="btn btn-error" onClick={closeModal}>
-                Close
+                {t("ctaClose")}
               </button>
               <button className="btn" type="submit">
-                Submit
+                {t("ctaSubmit")}
               </button>
             </div>
           </form>
