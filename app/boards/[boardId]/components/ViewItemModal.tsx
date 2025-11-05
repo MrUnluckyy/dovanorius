@@ -22,6 +22,7 @@ export function ViewItemModal({
   const { title, notes, price, url, id } = item;
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [showConfirmView, setShowConfirmView] = useState(false);
   const t = useTranslations("Boards");
 
   const modalRef = useRef<HTMLDialogElement>(null);
@@ -79,6 +80,28 @@ export function ViewItemModal({
     closeModal();
   };
 
+  const handleUnReserve = async () => {
+    const { error } = await supabase
+      .from("items")
+      .update({ status: "wanted", reserved_by: null })
+      .eq("id", id)
+      .select();
+    if (error) {
+      toastError({
+        title: t("errorUnreserve"),
+        description: t("errorUnreserveDesc"),
+      });
+      console.error("Error reserving item:", error);
+      return;
+    }
+    toastSuccess({
+      title: t("successUnreserve"),
+      description: t("successUnreserveDesc"),
+    });
+    queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
+    closeModal();
+  };
+
   const disablePublicEditing =
     inPublicBoard &&
     item.status === "reserved" &&
@@ -131,17 +154,27 @@ export function ViewItemModal({
                 </div>
               </div>
               <div className="modal-action">
-                {inPublicBoard && (
+                {inPublicBoard && item.status === "wanted" && (
                   <button
-                    disabled={
-                      inPublicBoard &&
-                      item.status === "reserved" &&
-                      item.reserved_by === user?.id
-                    }
+                    disabled={inPublicBoard && item.reserved_by === user?.id}
                     className="btn btn-primary"
                     onClick={handleReserve}
                   >
                     {t("ctaReserve")}
+                  </button>
+                )}
+
+                {inPublicBoard && item.status === "reserved" && (
+                  <button
+                    disabled={
+                      inPublicBoard &&
+                      item.status === "reserved" &&
+                      item.reserved_by !== user?.id
+                    }
+                    className="btn btn-primary"
+                    onClick={handleUnReserve}
+                  >
+                    {t("ctaUnreserve")}
                   </button>
                 )}
 
@@ -152,13 +185,13 @@ export function ViewItemModal({
                       disabled
                       onClick={() => setIsEditing(true)}
                     >
-                      Edit
+                      {t("ctaEdit")}
                     </button>
                     <button
                       className="btn btn-error"
                       onClick={() => deleteItem.mutate(item.id)}
                     >
-                      Delete
+                      {t("ctaDelete")}
                     </button>
                   </>
                 )}

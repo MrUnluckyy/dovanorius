@@ -3,22 +3,11 @@
     "description": "Don't stress about gift ideas! Create wish boards, share with friends, and make every occasion special. Dovanorius - your ultimate wish board app."
   },
   "Auth": {
-    "login": {
-      "title": "Welcome Back!",
-      "email": "Email Address",
-      "password": "Password",
-      "buttonText": "Login",
-      "forgotPassword": "Forgot your password?",
-      "noAccount": "Don't have an account? Register"
-    },
-    "register": {
-      "title": "Create an Account",
-      "email": "Email Address",
-      "password": "Password",
-      "confirmPassword": "Confirm Password",
-      "buttonText": "Register",
-      "haveAccount": "Already have an account? Login"
-    }
+    "loginTitle": "👋 Hey there!",
+    "signInWithGoogle": "Sign in with Google",
+    "registerWithGoogle": "Register with Google",
+    "or": "or",
+    "login": "Login"
   },
   "HomePage": {
     "title": "Make gifting easy and fun.",
@@ -62,11 +51,18 @@
     "errorReserve": "😵 Oppps!",
     "errorReserveDesc": "Something went wrong while reserving this item. Please try again later.",
 
+    "successUnreserve": "🎉 Success!",
+    "successUnreserveDesc": "You have successfully un-reserved this item.!",
+    "errorUnreserve": "😵 Opsss!",
+    "errorUnreserveDesc": "Something went wrong while un-reserving this item. Please try again later.",
+
     "ctaCreateBoard": "Create New Board",
     "ctaView": "View",
     "ctaAddItem": "Add",
     "ctaReserve": "Reserve",
-    "ctaClose": "Close"
+    "ctaClose": "Close",
+    "ctaDelete": "Delete",
+    "ctaEdit": "Edit"
   },
 
   "Profile": {

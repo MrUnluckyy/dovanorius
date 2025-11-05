@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { LoginForm } from "../components/LoginForm";
 import { redirect } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default async function Login() {
   const client = await createClient();

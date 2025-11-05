@@ -102,7 +102,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       <div
         role="status"
         aria-live="polite"
-        className={`alert ${variantClasses(toast.variant)} shadow`}
+        className={`alert ${variantClasses(toast.variant)} shadow z-50`}
       >
         <div className="flex flex-col gap-1">
           {toast.title && <span className="font-semibold">{toast.title}</span>}

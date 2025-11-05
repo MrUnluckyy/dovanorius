@@ -1,13 +1,19 @@
 "use client";
+import { useToast } from "@/components/providers/ToastProvider";
 import { createClient } from "@/utils/supabase/client";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
+import { FaGoogle } from "react-icons/fa6";
 
 export function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const t = useTranslations("Auth");
+
+  const { toastError } = useToast();
 
   const supabase = createClient();
   async function onSubmit(e: React.FormEvent) {
@@ -26,6 +32,7 @@ export function RegisterForm() {
         throw Error(error.message);
       }
     } catch (error) {
+      toastError("Error signing up");
       console.log("Error signing up:", error);
     } finally {
       setLoading(false);
@@ -50,6 +57,22 @@ export function RegisterForm() {
   return (
     <>
       <h2 className="text-2xl font-semibold">Hey There! 👋 </h2>
+      <button
+        className="btn btn-accent"
+        type="button"
+        onClick={() =>
+          supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+              redirectTo: `${process.env.NEXT_PUBLIC_WEB_URL}/api/auth/callback`,
+            },
+          })
+        }
+      >
+        <FaGoogle />
+        {t("registerWithGoogle")}
+      </button>
+      <div className="divider">{t("or")}</div>
       <form onSubmit={onSubmit} className="space-y-3">
         <fieldset className="fieldset">
           <label className="label">Email</label>
@@ -78,7 +101,7 @@ export function RegisterForm() {
             Already with us? Log in here.
           </Link>
 
-          <button className="btn btn-neutral mt-4">
+          <button type="submit" className="btn btn-neutral mt-4">
             {loading ? "Signing up..." : "Register"}
           </button>
 
