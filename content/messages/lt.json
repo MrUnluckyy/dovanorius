@@ -87,6 +87,7 @@
     "items": "{count, plural, one {# Noras} other {# Norai}}",
     "editProfile": "Redaguoti profilį",
     "errorUploadingAvatar": "Klaida įkeliant avatarą. Bandykite dar kartą.",
+    "makeProfilePublic": "Profilis yra viešas",
     "ctaEdit": "Redaguoti profilį",
     "ctaSave": "Išsaugoti",
     "ctaClose": "Uždaryti",

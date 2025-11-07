@@ -85,6 +85,7 @@
     "items": "{count, plural, one {# Wish} other {# Wishes}}",
     "editProfile": "Edit Profile",
     "errorUploadingAvatar": "Error uploading avatar. Please try again.",
+    "makeProfilePublic": "Profile is Public",
     "ctaEdit": "Edit Profile",
     "ctaSave": "Save",
     "ctaClose": "Close",

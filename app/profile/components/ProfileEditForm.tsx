@@ -16,10 +16,11 @@ export function ProfileEditForm({
   const { toastError, toastSuccess } = useToast();
   const t = useTranslations("Profile");
 
-  const { register, handleSubmit, reset } = useForm<Profile>({
+  const { register, handleSubmit, reset, formState } = useForm<Profile>({
     defaultValues: {
       display_name: profile?.display_name || "NOT SET",
       about: profile?.about || "",
+      public: profile?.public || false,
     },
   });
 
@@ -40,6 +41,7 @@ export function ProfileEditForm({
       reset(profile);
     }
   }, [profile, reset]);
+  console.log("profile in edit form", formState);
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -54,6 +56,44 @@ export function ProfileEditForm({
       <div>
         <form onSubmit={handleSubmit(onSubmit)}>
           <fieldset className="fieldset w-xs p-4">
+            <div className="flex justify-between mb-4">
+              <label className="text-lg">{t("makeProfilePublic")}</label>
+              <label className="toggle text-base-content">
+                <input
+                  id="makePublic"
+                  type="checkbox"
+                  {...register("public")}
+                />
+                <svg
+                  aria-label="disabled"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+                <svg
+                  aria-label="enabled"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <g
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                    strokeWidth="4"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </g>
+                </svg>
+              </label>
+            </div>
             <label className="label">{t("displayName")}</label>
             <input
               type="text"
