@@ -10,7 +10,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider
       attribute="data-theme" // <- puts data-theme on <html>
-      defaultTheme="bumblebee" // or "system"
+      defaultTheme="retro" // or "system"
       enableSystem
       storageKey="theme" // localStorage key
     >
