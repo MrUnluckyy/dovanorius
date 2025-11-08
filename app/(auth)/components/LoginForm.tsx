@@ -9,6 +9,7 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const supabase = createClient();
   const t = useTranslations("Auth");
 
@@ -23,6 +24,11 @@ export function LoginForm() {
       });
 
       if (error) {
+        setLoginError(
+          error.code === "invalid_credentials"
+            ? t("invalidCredentials")
+            : error.message
+        );
         throw Error(error.message);
       }
 
@@ -77,14 +83,19 @@ export function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          {loginError && (
+            <p className="text-sm text-error mt-2">{loginError}</p>
+          )}
           <div className="flex flex-col gap-2">
-            <a className="link link-hover">Forgot password?</a>
+            <Link href="forgot-password" className="link link-hover">
+              Forgot password?
+            </Link>
             <Link href="/register" className="link link-hover">
               Do not have an account?
             </Link>
           </div>
 
-          <button className="btn btn-neutral mt-4">
+          <button type="submit" className="btn btn-neutral mt-4">
             {loading ? "Logging in..." : "Log in"}
           </button>
         </fieldset>

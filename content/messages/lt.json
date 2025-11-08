@@ -7,7 +7,9 @@
     "signInWithGoogle": "Prisijungti su Google",
     "registerWithGoogle": "Registruotis su Google",
     "or": "arba",
-    "login": "Prisijungti"
+    "login": "Prisijungti",
+    "invalidCredentials": "Neteisingas el. paštas arba slaptažodis.",
+    "forgotPasswordTitle": "Pamiršote slaptažodį?"
   },
   "HomePage": {
     "title": "Dovanų teikimas - lengva ir smagu!",
@@ -74,7 +76,8 @@
     "ctaUnreserve": "Atšaukti rezervaciją",
     "ctaClose": "Uždaryti",
     "ctaDelete": "Ištrinti",
-    "ctaEdit": "Redaguoti"
+    "ctaEdit": "Redaguoti",
+    "ctaSubmit": "Pateikti"
   },
 
   "Profile": {

@@ -7,7 +7,9 @@
     "signInWithGoogle": "Sign in with Google",
     "registerWithGoogle": "Register with Google",
     "or": "or",
-    "login": "Login"
+    "login": "Login",
+    "invalidCredentials": "Invalid email or password.",
+    "forgotPasswordTitle": "Forgot your password?"
   },
   "HomePage": {
     "title": "Make gifting easy and fun.",
@@ -72,7 +74,8 @@
     "ctaReserve": "Reserve",
     "ctaClose": "Close",
     "ctaDelete": "Delete",
-    "ctaEdit": "Edit"
+    "ctaEdit": "Edit",
+    "ctaSubmit": "Submit"
   },
 
   "Profile": {
