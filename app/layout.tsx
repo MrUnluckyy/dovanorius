@@ -1,11 +1,28 @@
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers/Providers";
-import { Baloo_2 } from "next/font/google";
+import { Baloo_2, Inter, Over_the_Rainbow } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";
 
-const ballo = Baloo_2({ subsets: ["latin"], weight: ["400", "600", "700"] });
+const headings = Baloo_2({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-heading",
+  display: "swap",
+});
+const special = Over_the_Rainbow({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-special",
+  display: "swap",
+});
+const body = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-body",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "NoriuTo",
@@ -60,7 +77,9 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${ballo.className} antialiased`}>
+      <body
+        className={`${headings.variable} ${body.variable} ${special.variable} antialiased `}
+      >
         <NextIntlClientProvider>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>

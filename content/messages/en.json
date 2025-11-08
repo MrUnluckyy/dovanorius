@@ -7,7 +7,10 @@
     "signInWithGoogle": "Sign in with Google",
     "registerWithGoogle": "Register with Google",
     "or": "or",
-    "login": "Login"
+    "login": "Login",
+    "invalidCredentials": "Invalid email or password.",
+    "forgotPasswordTitle": "Forgot your password?",
+    "newPasswordTitle": "Set a new password"
   },
   "HomePage": {
     "title": "Make gifting easy and fun.",
@@ -72,7 +75,8 @@
     "ctaReserve": "Reserve",
     "ctaClose": "Close",
     "ctaDelete": "Delete",
-    "ctaEdit": "Edit"
+    "ctaEdit": "Edit",
+    "ctaSubmit": "Submit"
   },
 
   "Profile": {
@@ -86,6 +90,7 @@
     "editProfile": "Edit Profile",
     "errorUploadingAvatar": "Error uploading avatar. Please try again.",
     "makeProfilePublic": "Profile is Public",
+    "saving": "Saving...",
     "ctaEdit": "Edit Profile",
     "ctaSave": "Save",
     "ctaClose": "Close",

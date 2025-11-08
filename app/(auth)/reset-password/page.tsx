@@ -2,8 +2,10 @@ import { createClient } from "@/utils/supabase/server";
 import { LoginForm } from "../components/LoginForm";
 import { redirect } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { ForgotPasswordForm } from "../components/ForgotPasswordForm";
+import SetNewPassword from "../components/SetNewPassword";
 
-export default async function Login() {
+export default async function ForgotPassword() {
   const client = await createClient();
   const {
     data: { user },
@@ -18,15 +20,11 @@ export default async function Login() {
       <div className="hero bg-base-200 min-h-screen">
         <div className="hero-content flex-col lg:flex-row-reverse">
           <div className="text-center lg:text-left">
-            <h1 className="text-5xl font-bold">Login</h1>
-            <p className="py-6 max-w-prose">
-              Gifting is not about the thing you give — it is about the thought
-              that says, <i>I see you</i>, <i>I know you</i>, and <i>I care</i>.
-            </p>
+            <h1 className="text-5xl font-bold">Pamiršai slaptažodį?</h1>
           </div>
           <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
             <div className="card-body">
-              <LoginForm />
+              <SetNewPassword />
             </div>
           </div>
         </div>

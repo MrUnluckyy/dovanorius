@@ -1,6 +1,5 @@
 import { User } from "@supabase/supabase-js";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
@@ -9,9 +8,22 @@ export function ImageHero({ user }: { user?: User | null }) {
 
   return (
     <div className="max-w-[1440px] mx-auto py-12 px-4 relative flex flex-col gap-12">
-      <div className="text-center px-8 pt-30 pb-30 bg-primary rounded-2xl">
-        <h2 className="font-bold text-3xl md:text-5xl">{t("title")}</h2>
-        <Link href="boards" className="btn btn-accent btn-md md:btn-lg mt-8">
+      <div className="px-8 pt-30 pb-30 text-center md:text-start">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 480 480"
+          className="absolute fill-base-200 top-0 -right-20  -z-10"
+        >
+          <path d="M0 0h230c138 0 250 112 250 250v230H250C112 480 0 368 0 230V0Z"></path>
+        </svg>
+        <h2 className="font-bold font-special text-4xl md:text-5xl mb-4">
+          {t("title")}
+        </h2>
+        <p className="font-special text-xl md:text-2xl">{t("description")}</p>
+        <Link
+          href="boards"
+          className="btn btn-primary font-heading btn-md md:btn-lg mt-8"
+        >
           {t("ctaTryOut")}
         </Link>
       </div>
