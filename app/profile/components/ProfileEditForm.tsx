@@ -27,7 +27,11 @@ export function ProfileEditForm({
   const onSubmit: SubmitHandler<Profile> = async (data) => {
     setUploading(true);
     try {
-      await editProfile(data);
+      await editProfile({
+        display_name: data.display_name,
+        about: data.about,
+        public: data.public,
+      });
       toastSuccess(t("toastProfileUpdated"));
     } catch (error) {
     } finally {
@@ -111,7 +115,7 @@ export function ProfileEditForm({
             <button
               type="submit"
               className="btn btn-primary"
-              disabled={uploading}
+              disabled={uploading || !formState.isDirty}
             >
               {t("ctaSave")}
             </button>
@@ -119,6 +123,7 @@ export function ProfileEditForm({
               type="button"
               className="btn btn-secondary"
               disabled={uploading}
+              onClick={onCloseModal}
             >
               {t("ctaClose")}
             </button>

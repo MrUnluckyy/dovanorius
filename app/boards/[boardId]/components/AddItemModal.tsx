@@ -94,10 +94,16 @@ export function AddItemModal({ boardId }: { boardId: string }) {
       if (uploadedImageFile) {
         const imageUrl = await uploadProductImage(uploadedImageFile, data?.id);
         if (imageUrl) {
-          await supabase
+          const { error } = await supabase
             .from("items")
             .update({ image_url: imageUrl })
-            .eq("id", data.id);
+            .eq("id", data.id)
+            .select()
+            .single();
+
+          if (error) {
+            console.error("Error updating item with image URL:", error);
+          }
         }
       }
     },

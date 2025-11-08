@@ -59,47 +59,73 @@ export function ViewItemModal({
   };
 
   const handleReserve = async () => {
-    const { error } = await supabase
-      .from("items")
-      .update({ status: "reserved", reserved_by: user?.id || null })
-      .eq("id", id)
-      .select();
+    // const { error } = await supabase
+    //   .from("items")
+    //   .update({ status: "reserved", reserved_by: user?.id || null })
+    //   .eq("id", id)
+    //   .select();
+    // if (error) {
+    //   toastError({
+    //     title: t("errorReserve"),
+    //     description: t("errorReserveDesc"),
+    //   });
+    //   console.error("Error reserving item:", error);
+    //   return;
+    // }
+    const { data, error } = await supabase.rpc("unreserve_item", {
+      p_item_id: id,
+    });
+
+    if (data) {
+      toastSuccess({
+        title: t("successReserve"),
+        description: t("successReserveDesc"),
+      });
+      queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
+      closeModal();
+    }
+
     if (error) {
       toastError({
         title: t("errorReserve"),
         description: t("errorReserveDesc"),
       });
       console.error("Error reserving item:", error);
-      return;
     }
-    toastSuccess({
-      title: t("successReserve"),
-      description: t("successReserveDesc"),
-    });
-    queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
-    closeModal();
   };
 
   const handleUnReserve = async () => {
-    const { error } = await supabase
-      .from("items")
-      .update({ status: "wanted", reserved_by: null })
-      .eq("id", id)
-      .select();
+    // const { error } = await supabase
+    //   .from("items")
+    //   .update({ status: "wanted", reserved_by: null })
+    //   .eq("id", id)
+    //   .select();
+    // if (error) {
+    //   toastError({
+    //     title: t("errorUnreserve"),
+    //     description: t("errorUnreserveDesc"),
+    //   });
+    //   console.error("Error reserving item:", error);
+    //   return;
+    // }
+    const { data, error } = await supabase.rpc("unreserve_item", {
+      p_item_id: id,
+    });
+    if (data) {
+      toastSuccess({
+        title: t("successUnreserve"),
+        description: t("successUnreserveDesc"),
+      });
+      queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
+      closeModal();
+    }
     if (error) {
       toastError({
         title: t("errorUnreserve"),
         description: t("errorUnreserveDesc"),
       });
-      console.error("Error reserving item:", error);
-      return;
+      console.error("Error unreserving item:", error);
     }
-    toastSuccess({
-      title: t("successUnreserve"),
-      description: t("successUnreserveDesc"),
-    });
-    queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
-    closeModal();
   };
 
   const disablePublicEditing =

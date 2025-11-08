@@ -9,11 +9,12 @@
     "or": "arba",
     "login": "Prisijungti",
     "invalidCredentials": "Neteisingas el. paštas arba slaptažodis.",
-    "forgotPasswordTitle": "Pamiršote slaptažodį?"
+    "forgotPasswordTitle": "Pamiršote slaptažodį?",
+    "newPasswordTitle": "Nustatyti naują slaptažodį"
   },
   "HomePage": {
-    "title": "Dovanų teikimas - lengva ir smagu!",
-    "description": "Kurk norų lentas, dalinkis su draugais ir paversk kiekvieną progą ypatinga.",
+    "title": "Pamiršk netikusias dovanas!",
+    "description": "Susikurk savo norų lentą ir gauk būtent tai, ko trokšti. Lengva. Naudinga. Smagu.",
     "buttonText": "Kurti Svajones",
     "board1title": "🏋 Sporto lentyna",
     "board1description": "Nauji bėgimo bateliai šiam sezonui, atnaujintos pasipriešinimo gumos ir sportinis laikrodis, kurio seniai noriu.",
@@ -91,6 +92,7 @@
     "editProfile": "Redaguoti profilį",
     "errorUploadingAvatar": "Klaida įkeliant avatarą. Bandykite dar kartą.",
     "makeProfilePublic": "Profilis yra viešas",
+    "saving": "Įrašoma...",
     "ctaEdit": "Redaguoti profilį",
     "ctaSave": "Išsaugoti",
     "ctaClose": "Uždaryti",

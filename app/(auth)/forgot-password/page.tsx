@@ -11,7 +11,7 @@ export default async function ForgotPassword() {
   } = await client.auth.getUser();
 
   if (user) {
-    redirect("/" + user.id + "/wishlist");
+    redirect("boards");
   }
 
   return (
