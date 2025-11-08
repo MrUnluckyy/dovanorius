@@ -44,8 +44,21 @@ export function ViewItemModal({
       const { error } = await supabase.from("items").delete().eq("id", itemId);
       if (error) throw error;
     },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["items", item.board_id] }),
+    onSuccess: () => {
+      toastSuccess({
+        title: t("successDelete"),
+        description: t("successDeleteDesc"),
+      });
+      closeModal();
+      queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
+    },
+    onError: (error) => {
+      toastError({
+        title: t("errorDelete"),
+        description: t("errorDeleteDesc"),
+      });
+      console.error("Error deleting item:", error);
+    },
   });
 
   const getDomain = (urlString: string | null) => {
