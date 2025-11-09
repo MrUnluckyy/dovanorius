@@ -83,7 +83,7 @@ export function useFollow(viewerId?: string, targetId?: string) {
   const {
     data: following = [],
     isLoading: followingLoading,
-    refetch,
+    refetch: refetchFollowing,
   } = useQuery({
     queryKey: key,
     enabled: !!viewerId,
@@ -118,5 +118,6 @@ export function useFollow(viewerId?: string, targetId?: string) {
     followersLoading,
     followingLoading,
     refetchFollowers,
+    refetchFollowing,
   };
 }
