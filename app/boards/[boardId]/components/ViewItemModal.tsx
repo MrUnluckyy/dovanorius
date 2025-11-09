@@ -78,7 +78,7 @@ export function ViewItemModal({
     //   console.error("Error reserving item:", error);
     //   return;
     // }
-    const { data, error } = await supabase.rpc("unreserve_item", {
+    const { data, error } = await supabase.rpc("reserve_item", {
       p_item_id: id,
     });
 
