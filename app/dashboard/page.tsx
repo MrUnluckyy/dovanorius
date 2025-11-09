@@ -5,6 +5,7 @@ import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import { UserBar } from "../boards/components/UserBar";
 import { BoardsList } from "../boards/components/BoardsList";
 import { ReservedItems } from "./components/ReservedItems";
+import { FollowingList } from "./components/FollowingList";
 
 export default async function BoardsPage() {
   const supabase = await createClient();
@@ -26,6 +27,7 @@ export default async function BoardsPage() {
 
         <BoardsList user={user} />
         <ReservedItems user={user} />
+        <FollowingList userId={user.id} />
       </div>
     </main>
   );
