@@ -2,10 +2,17 @@
 import useProfile from "@/hooks/useProfile";
 import { isWithinInterval, subWeeks } from "date-fns";
 import { UserAvatar } from "@/app/profile/components/UserAvatar";
+import { useFollow } from "@/hooks/useFollow";
 
-export function ProfileBar({ userId }: { userId?: string }) {
+export function ProfileBar({
+  authUserId,
+  userId,
+}: {
+  authUserId?: string;
+  userId?: string;
+}) {
   const { isLoading, profile } = useProfile(userId);
-  console.log("profile", userId);
+  const { isFollowing, follow, unfollow } = useFollow(authUserId, userId);
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -16,20 +23,22 @@ export function ProfileBar({ userId }: { userId?: string }) {
       end: new Date(),
     });
 
+  const isOwnProfile = authUserId === userId;
+
   return (
-    <div className="flex gap-4 justify-between">
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-12">
+    <div className="flex justify-center items-center gap-4">
+      <div className="flex flex-col items-center gap-6 ">
         <div className="avatar">
           <div className="rounded-full">
             <UserAvatar size="40" avatarUrl={profile?.avatar_url} />
           </div>
         </div>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col md:flex-row justify-between w-full gap-6">
           <div>
             <h2 className="text-4xl font-semibold mb-2">
               {profile?.display_name || "Anonimus User"}
               {isNewUser && (
-                <span className="badge badge-accent ml-2">New</span>
+                <span className="badge badge-accent ml-2">Naujas</span>
               )}
             </h2>
             <p className="text-sm">
@@ -38,6 +47,14 @@ export function ProfileBar({ userId }: { userId?: string }) {
             </p>
           </div>
         </div>
+        {authUserId && !isOwnProfile && (
+          <button
+            className="btn btn-primary"
+            onClick={isFollowing ? unfollow : follow}
+          >
+            {isFollowing ? "Unfollow" : "Follow"}
+          </button>
+        )}
       </div>
     </div>
   );
