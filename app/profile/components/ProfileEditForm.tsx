@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import AvatarUploader from "./AvatarUpload";
 import { useTranslations } from "next-intl";
-import { useToast } from "@/components/providers/ToastProvider";
+import { toast } from "react-hot-toast";
 
 export function ProfileEditForm({
   onCloseModal,
@@ -13,7 +13,6 @@ export function ProfileEditForm({
 }) {
   const { profile, isLoading, editProfile } = useProfile();
   const [uploading, setUploading] = useState(false);
-  const { toastError, toastSuccess } = useToast();
   const t = useTranslations("Profile");
 
   const { register, handleSubmit, reset, formState } = useForm<Profile>({
@@ -32,7 +31,7 @@ export function ProfileEditForm({
         about: data.about,
         public: data.public,
       });
-      toastSuccess(t("toastProfileUpdated"));
+      toast.success(t("toastProfileUpdated"));
     } catch (error) {
     } finally {
       setUploading(false);

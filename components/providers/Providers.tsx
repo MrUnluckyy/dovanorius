@@ -3,7 +3,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { ReactNode, useState } from "react";
-import { ToastProvider } from "./ToastProvider";
 
 export function Providers({ children }: { children: ReactNode }) {
   const [client] = useState(() => new QueryClient());
@@ -14,9 +13,7 @@ export function Providers({ children }: { children: ReactNode }) {
       enableSystem
       storageKey="theme" // localStorage key
     >
-      <ToastProvider>
-        <QueryClientProvider client={client}>{children}</QueryClientProvider>
-      </ToastProvider>
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
     </ThemeProvider>
   );
 }

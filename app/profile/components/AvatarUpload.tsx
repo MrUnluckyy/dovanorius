@@ -5,8 +5,8 @@ import { useState } from "react";
 import { UserAvatar } from "./UserAvatar";
 import { LuPen } from "react-icons/lu";
 import { useTranslations } from "next-intl";
-import { useToast } from "@/components/providers/ToastProvider";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 export default function AvatarUploader({
   profile,
@@ -17,7 +17,6 @@ export default function AvatarUploader({
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const t = useTranslations("Profile");
-  const { toastError } = useToast();
   const router = useRouter();
 
   const getPreviewUrl = () => (file ? URL.createObjectURL(file) : undefined);
@@ -27,8 +26,9 @@ export default function AvatarUploader({
     if (!file) return;
 
     if (!file.type.startsWith("image/"))
-      return toastError("Please choose an image.");
-    if (file.size > 2 * 1024 * 1024) return toastError("Max size 2 MB.");
+      return toast.error("Pasirinkite paveikslėlį.");
+    if (file.size > 4 * 1024 * 1024)
+      return toast.error("Maximalus failo dydis 4 MB.");
 
     setUploading(true);
     try {
@@ -68,7 +68,7 @@ export default function AvatarUploader({
       router.refresh();
     } catch (err) {
       console.error(err);
-      toastError(t("errorUploadingAvatar"));
+      toast.error(t("errorUploadingAvatar"));
     } finally {
       setUploading(false);
     }

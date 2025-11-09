@@ -1,9 +1,9 @@
 "use client";
-import { useToast } from "@/components/providers/ToastProvider";
 import { createClient } from "@/utils/supabase/client";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { FaGoogle } from "react-icons/fa6";
 
 export function RegisterForm() {
@@ -12,8 +12,6 @@ export function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [completed, setCompleted] = useState(false);
   const t = useTranslations("Auth");
-
-  const { toastError } = useToast();
 
   const supabase = createClient();
   async function onSubmit(e: React.FormEvent) {
@@ -32,7 +30,7 @@ export function RegisterForm() {
         throw Error(error.message);
       }
     } catch (error) {
-      toastError("Error signing up");
+      toast.error("Opps, klaida registruojantis.");
       console.log("Error signing up:", error);
     } finally {
       setLoading(false);

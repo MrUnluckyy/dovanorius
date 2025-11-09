@@ -4,6 +4,7 @@ import { Baloo_2, Inter, Over_the_Rainbow } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";
+import { Toaster } from "react-hot-toast";
 
 const headings = Baloo_2({
   subsets: ["latin"],
@@ -78,10 +79,11 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${headings.variable} ${body.variable} ${special.variable} antialiased `}
+        className={`${headings.variable} ${body.variable} ${special.variable} antialiased relative`}
       >
         <NextIntlClientProvider>
           <Providers>{children}</Providers>
+          <Toaster />
         </NextIntlClientProvider>
       </body>
     </html>

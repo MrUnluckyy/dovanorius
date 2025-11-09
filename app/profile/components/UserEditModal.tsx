@@ -11,7 +11,7 @@ export function UserEditModal() {
 
   const openModal = () => {
     setIsOpen(true);
-    modalRef.current?.showModal();
+    modalRef.current?.show();
   };
   const closeModal = () => {
     setIsOpen(false);

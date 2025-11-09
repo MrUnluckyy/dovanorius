@@ -7,8 +7,8 @@ import { useState, useRef } from "react";
 import { LuExternalLink } from "react-icons/lu";
 import { Item } from "./WishList";
 import { User } from "@supabase/supabase-js";
-import { useToast } from "@/components/providers/ToastProvider";
 import { ItemForm } from "./ItemForm";
+import toast from "react-hot-toast";
 
 export function ViewItemModal({
   item,
@@ -28,7 +28,6 @@ export function ViewItemModal({
   const modalRef = useRef<HTMLDialogElement>(null);
   const supabase = createClient();
   const queryClient = useQueryClient();
-  const { toastSuccess, toastError } = useToast();
 
   const openModal = () => {
     setIsOpen(true);
@@ -45,18 +44,12 @@ export function ViewItemModal({
       if (error) throw error;
     },
     onSuccess: () => {
-      toastSuccess({
-        title: t("successDelete"),
-        description: t("successDeleteDesc"),
-      });
+      toast.success(t("successDelete"));
       closeModal();
       queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
     },
     onError: (error) => {
-      toastError({
-        title: t("errorDelete"),
-        description: t("errorDeleteDesc"),
-      });
+      toast.error(t("errorDelete"));
       console.error("Error deleting item:", error);
     },
   });
@@ -90,19 +83,13 @@ export function ViewItemModal({
     });
 
     if (data) {
-      toastSuccess({
-        title: t("successReserve"),
-        description: t("successReserveDesc"),
-      });
+      toast.success(t("successReserve"));
       queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
       closeModal();
     }
 
     if (error) {
-      toastError({
-        title: t("errorReserve"),
-        description: t("errorReserveDesc"),
-      });
+      toast.success(t("errorReserve"));
       console.error("Error reserving item:", error);
     }
   };
@@ -125,18 +112,12 @@ export function ViewItemModal({
       p_item_id: id,
     });
     if (data) {
-      toastSuccess({
-        title: t("successUnreserve"),
-        description: t("successUnreserveDesc"),
-      });
+      toast.success(t("successUnreserve"));
       queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
       closeModal();
     }
     if (error) {
-      toastError({
-        title: t("errorUnreserve"),
-        description: t("errorUnreserveDesc"),
-      });
+      toast.error(t("errorUnreserve"));
       console.error("Error unreserving item:", error);
     }
   };
