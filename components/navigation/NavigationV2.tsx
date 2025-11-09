@@ -3,7 +3,7 @@ import { LocaleSwitcher } from "../LocaleSwitcher";
 import { useTranslations } from "next-intl";
 import { User } from "@supabase/supabase-js";
 import { Logo } from "../Logo";
-import { LuUser, LuClipboardList, LuX, LuMenu } from "react-icons/lu";
+import { LuUser, LuClipboardList, LuX, LuMenu, LuHouse } from "react-icons/lu";
 import { SignOutButton } from "@/app/(auth)/components/SignOutButton";
 import Image from "next/image";
 
@@ -47,6 +47,10 @@ export function NavigationV2({ user }: { user?: User | null }) {
             <div className="hidden flex-none lg:flex gap-2">
               {user ? (
                 <>
+                  <Link href="/dashboard" className="btn btn-ghost">
+                    <LuHouse />
+                    {t("dashboard")}
+                  </Link>
                   <Link href="/boards" className="btn btn-ghost">
                     <LuClipboardList />
                     {t("boards")}
@@ -88,6 +92,10 @@ export function NavigationV2({ user }: { user?: User | null }) {
           <div className="flex flex-col gap-4 items-start text-2xl">
             {user ? (
               <>
+                <Link href="/dashboard" className="btn btn-ghost text-2xl">
+                  <LuHouse />
+                  {t("dashboard")}
+                </Link>
                 <Link href="/boards" className="btn btn-ghost text-2xl">
                   <LuClipboardList />
                   {t("boards")}
