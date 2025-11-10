@@ -54,6 +54,8 @@
     "myReservation": "My Reservation",
     "follow": "Follow",
     "unfollow": "Unfollow",
+    "lastUpdated": "Last updated",
+    "noItemsYet": "No items yet. 😢",
 
     "price": "Price",
     "shop": "Shop",
@@ -70,6 +72,9 @@
     "successUnreserveDesc": "You have successfully un-reserved this item.!",
     "errorUnreserve": "😵 Opsss!",
     "errorUnreserveDesc": "Something went wrong while un-reserving this item. Please try again later.",
+
+    "boardsCount": "{count, plural, one {# Board} other {# Boards}}",
+    "itemsCount": "{count, plural, one {# Wish} other {# Wishes}}",
 
     "urlValidError": "Please enter a valid URL.",
     "maxImageSizeLabel": "Maximum image size is 2MB.",

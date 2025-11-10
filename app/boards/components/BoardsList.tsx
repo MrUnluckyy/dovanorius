@@ -5,14 +5,16 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
 import { CreateBoard } from "../[boardId]/components/CreateBoard";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
 import { BoardsLoadingSkeleton } from "@/components/loaders/BoardsLoadingSkeleton";
 
 export function BoardsList({ user }: { user: User }) {
   const supabase = createClient();
   const userId = user.id;
-  const t = useTranslations("Boards");
+  const t = useTranslations<"Boards">("Boards");
+  const format = useFormatter();
+  const now = new Date();
 
   const { data: boards = [], isLoading } = useQuery({
     queryKey: ["boards", userId],
@@ -49,15 +51,17 @@ export function BoardsList({ user }: { user: User }) {
                     </span>
                   )}
                 </h2>
-                <p className="text-semibold">{`${board.item_count} wishes`}</p>
+
+                <p className="text-semibold">
+                  {t("itemsCount", { count: board.item_count })}
+                </p>
+
                 <p className="text-semibold">
                   {!board.last_item_added_at
-                    ? "No items added yet"
-                    : `Last updated ${formatDistanceToNow(
-                        new Date(board.last_item_added_at),
-                        {
-                          addSuffix: true,
-                        }
+                    ? t("noItemsYet")
+                    : `${t("lastUpdated")} ${format.relativeTime(
+                        board.last_item_added_at,
+                        now
                       )}`}
                 </p>
                 <div className="justify-end card-actions">

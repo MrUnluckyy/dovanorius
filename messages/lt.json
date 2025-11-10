@@ -55,6 +55,8 @@
     "myReservation": "Mano rezervacija",
     "follow": "Sekti",
     "unfollow": "Nebesekti",
+    "lastUpdated": "Atnaujinta",
+    "noItemsYet": "Norų dar nėra. 😢",
 
     "price": "Kaina",
     "shop": "Parduotuvė",
@@ -71,6 +73,9 @@
     "successUnreserveDesc": "Sėkmingai atšaukėte rezervaciją!",
     "errorUnreserve": "😵 Upsss!",
     "errorUnreserveDesc": "Įvyko klaida atšaukiant rezervaciją. Bandykite dar kartą vėliau.",
+
+    "boardsCount": "{count, plural, one {# Lenta} other {# Lentos}}",
+    "itemsCount": "{count, plural, one {# Noras} other {# Norai}}",
 
     "urlValidError": "Prašome įvesti galiojantį URL.",
     "maxImageSizeLabel": "Maximalus paveikslėlio dydis - 2MB.",
