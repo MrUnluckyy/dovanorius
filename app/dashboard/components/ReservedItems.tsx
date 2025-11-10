@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import React from "react";
 import { ReservedItemsList } from "./ReservedItemsList";
+import { BoardsLoadingSkeleton } from "@/components/loaders/BoardsLoadingSkeleton";
 
 export function ReservedItems({ user }: { user: User }) {
   const supabase = createClient();
@@ -35,7 +36,11 @@ export function ReservedItems({ user }: { user: User }) {
   return (
     <div className="my-8">
       <h2 className="font-heading text-2xl font-bold">Išsaugoti pirkiniai</h2>
-      <ReservedItemsList items={items} />
+      {isLoading ? (
+        <BoardsLoadingSkeleton />
+      ) : (
+        <ReservedItemsList items={items} />
+      )}
     </div>
   );
 }

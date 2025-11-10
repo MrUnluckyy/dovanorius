@@ -22,9 +22,10 @@ export default async function BoardPage({
 
   const board = await getBoard(boardId);
 
-  if (!board || board.owner_id !== user.id) {
-    redirect("/boards");
-  }
+  // MAKE MORE ADVANCED ACCESS CHECKS LATER
+  // if (!board || board.owner_id !== user.id) {
+  //   redirect("/boards");
+  // }
 
   return (
     <main className="pb-20">
