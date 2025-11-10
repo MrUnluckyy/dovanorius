@@ -44,7 +44,6 @@ export function ProfileEditForm({
       reset(profile);
     }
   }, [profile, reset]);
-  console.log("profile in edit form", formState);
 
   if (isLoading) return <div>Loading...</div>;
 

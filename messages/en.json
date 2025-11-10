@@ -57,6 +57,12 @@
     "lastUpdated": "Last updated",
     "noItemsYet": "No items yet. 😢",
 
+    "createBoardTitle": "Create a New Wish Board",
+    "boardTitle": "Board Title",
+    "boardTitlePlaceholder": "e.g., Birthday Wishes, Holiday Gifts",
+    "boardDescription": "Board Description",
+    "boardDescriptionPlaceholder": "Describe the purpose of this wish board.",
+
     "price": "Price",
     "shop": "Shop",
     "title": "Title",
@@ -90,7 +96,9 @@
     "ctaClose": "Close",
     "ctaDelete": "Delete",
     "ctaEdit": "Edit",
-    "ctaSubmit": "Submit"
+    "ctaSubmit": "Submit",
+    "ctaCancel": "Cancel",
+    "ctaSave": "Save"
   },
 
   "Profile": {

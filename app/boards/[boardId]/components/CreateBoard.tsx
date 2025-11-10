@@ -4,17 +4,29 @@ import { User } from "@supabase/supabase-js";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { FormEvent, useRef, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { LuClipboardPlus } from "react-icons/lu";
 
+type FormData = {
+  name: string;
+  description: string;
+};
+
 export function CreateBoard({ user }: { user: User | null }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   const supabase = createClient();
   const modalRef = useRef<HTMLDialogElement>(null);
   const queryClient = useQueryClient();
   const t = useTranslations("Boards");
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const { register, handleSubmit, reset, formState } = useForm({
+    defaultValues: {
+      name: "",
+      description: "",
+    },
+  });
 
   const openModal = () => {
     setIsOpen(true);
@@ -26,23 +38,27 @@ export function CreateBoard({ user }: { user: User | null }) {
   };
 
   const createBoard = useMutation({
-    mutationFn: async (name: string) => {
+    mutationFn: async ({ name, description }: FormData) => {
       const { error } = await supabase
         .from("boards")
         .insert({ owner_id: user?.id, name, description });
       if (error) throw error;
     },
     onSuccess: () => {
-      const userId = user?.id || "";
-      queryClient.invalidateQueries({ queryKey: ["boards", userId] });
-      setName("");
+      toast.success(t("toastBoardCreated"));
+      queryClient.invalidateQueries({ queryKey: ["boards", user?.id] });
+      reset();
     },
   });
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    createBoard.mutate(name);
-    closeModal();
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    try {
+      createBoard.mutate(data);
+    } catch (error) {
+      toast.error(t("toastBoardCreateError"));
+    } finally {
+      closeModal();
+    }
   };
 
   return (
@@ -53,37 +69,35 @@ export function CreateBoard({ user }: { user: User | null }) {
       </button>
       <dialog ref={modalRef} open={isOpen} className="modal">
         <div className="modal-box">
-          <h3 className="font-bold text-lg">Add Item!</h3>
-          <form onSubmit={handleSubmit}>
-            <fieldset className="fieldset w-full ">
-              <label className="label">Name</label>
+          <h3 className="font-bold text-lg">{t("createBoardTitle")}</h3>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <fieldset className="fieldset w-full">
+              <label className="label">{t("boardTitle")}</label>
               <input
                 type="text"
                 className="input w-full"
-                placeholder="Boards name"
+                placeholder={t("boardTitlePlaceholder") || ""}
                 required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                {...register("name")}
               />
 
-              <label className="label">Description</label>
+              <label className="label">{t("boardDescription")}</label>
               <textarea
                 className="textarea w-full"
-                placeholder="Boards description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t("boardDescriptionPlaceholder") || ""}
+                {...register("description")}
               />
             </fieldset>
             <div className="modal-action">
               <button
                 type="button"
-                className="btn btn-error"
+                className="btn btn-ghost"
                 onClick={closeModal}
               >
-                Cancel
+                {t("ctaCancel")}
               </button>
-              <button className="btn" type="submit">
-                Save
+              <button className="btn btn-primary" type="submit">
+                {t("ctaSave")}
               </button>
             </div>
           </form>

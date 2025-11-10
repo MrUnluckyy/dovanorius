@@ -95,14 +95,14 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
             boardSlug={boardClient?.slug}
           />
           <button
-            className={`btn ${copied ? "btn-success" : ""}`}
+            className={`whitespace-nowrap btn ${copied ? "btn-success" : ""}`}
             onClick={handleCopy}
             disabled={!boardClient?.is_public}
           >
             {copied ? t("copied") : t("share")}
           </button>
           <button
-            className="btn btn-error"
+            className="btn btn-error whitespace-nowrap"
             onClick={() => deleteBoard.mutate()}
           >
             {t("delete")}

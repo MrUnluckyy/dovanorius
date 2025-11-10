@@ -58,6 +58,12 @@
     "lastUpdated": "Atnaujinta",
     "noItemsYet": "Norų dar nėra. 😢",
 
+    "createBoardTitle": "Sukurti naują norų lentą",
+    "boardTitle": "Lentos pavadinimas",
+    "boardTitlePlaceholder": "Pvz., Kalėdų norai, Gimtadienio dovanos ir kt.",
+    "boardDescription": "Lentos aprašymas",
+    "boardDescriptionPlaceholder": "Papildoma informacija apie jūsų norų lentą (neprivaloma)",
+
     "price": "Kaina",
     "shop": "Parduotuvė",
     "title": "Pavadinimas",
@@ -92,7 +98,9 @@
     "ctaClose": "Uždaryti",
     "ctaDelete": "Ištrinti",
     "ctaEdit": "Redaguoti",
-    "ctaSubmit": "Pateikti"
+    "ctaSubmit": "Pateikti",
+    "ctaCancel": "Atšaukti",
+    "ctaSave": "Išsaugoti"
   },
 
   "Profile": {
