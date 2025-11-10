@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: retro, black, lofi, forest, cmyk;
+  themes: retro, black, lofi, forest, cmyk, silk, business, sunset;
 }
 /* 
 @theme inline {

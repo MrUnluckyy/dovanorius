@@ -3,7 +3,15 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import React, { useEffect, useState } from "react";
 
-const themes = ["retro", "black", "forest", "cmyk"];
+const themes = [
+  "silk",
+  "retro",
+  "black",
+  "forest",
+  "cmyk",
+  "business",
+  "sunset",
+];
 
 export default function ThemeSelector() {
   const { setTheme, theme: selectedTheme } = useTheme();
