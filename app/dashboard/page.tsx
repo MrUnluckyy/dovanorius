@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
-import { UserBar } from "../boards/components/UserBar";
 import { BoardsList } from "../boards/components/BoardsList";
 import { ReservedItems } from "./components/ReservedItems";
 import { FollowingList } from "./components/FollowingList";
+import { DashboardUser } from "./components/DashboardUser";
 
 export default async function BoardsPage() {
   const supabase = await createClient();
@@ -20,7 +20,7 @@ export default async function BoardsPage() {
       <NavigationV2 user={user} />
       <div className="max-w-[1440px] mx-auto min-h-screen px-4">
         <div className="py-8 mb-4 md:mb-10">
-          <UserBar />
+          <DashboardUser />
         </div>
 
         <BoardsList user={user} />

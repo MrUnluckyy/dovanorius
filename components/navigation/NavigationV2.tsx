@@ -3,7 +3,7 @@ import { LocaleSwitcher } from "../LocaleSwitcher";
 import { useTranslations } from "next-intl";
 import { User } from "@supabase/supabase-js";
 import { Logo } from "../Logo";
-import { LuUser, LuClipboardList, LuX, LuMenu, LuHouse } from "react-icons/lu";
+import { LuX, LuMenu, LuHouse } from "react-icons/lu";
 import { SignOutButton } from "@/app/(auth)/components/SignOutButton";
 import Image from "next/image";
 
@@ -51,10 +51,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                     <LuHouse />
                     {t("dashboard")}
                   </Link>
-                  <Link href="/profile" className="btn btn-ghost">
-                    <LuUser />
-                    {t("profile")}
-                  </Link>
+
                   <SignOutButton className="btn btn-ghost" />
                 </>
               ) : (
@@ -92,10 +89,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   <LuHouse />
                   {t("dashboard")}
                 </Link>
-                <Link href="/profile" className="btn btn-ghost text-2xl">
-                  <LuUser />
-                  {t("profile")}
-                </Link>
+
                 <div className="divider" />
                 <SignOutButton className="btn btn-ghost text-2xl" />
               </>

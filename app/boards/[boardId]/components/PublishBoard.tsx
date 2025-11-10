@@ -22,7 +22,11 @@ export function PublishBoard({
   async function onPublish(e: React.FormEvent) {
     const slug = boardSlug
       ? boardSlug
-      : boardName.toLocaleLowerCase().replace(/\s+/g, "-") +
+      : boardName
+          .toLowerCase()
+          .replace(/[^\p{L}\p{N}\s-]/gu, "") // remove emojis & symbols
+          .trim()
+          .replace(/\s+/g, "-") +
         "-" +
         uuidv4().slice(0, 8);
 

@@ -4,7 +4,6 @@ import { User } from "@supabase/supabase-js";
 import { useTranslations } from "next-intl";
 import { Item } from "@/app/boards/[boardId]/components/WishList";
 import PriceCategoryBadge from "@/app/boards/[boardId]/components/PriceCategoryBadge";
-import { ViewItemModal } from "@/app/boards/[boardId]/components/ViewItemModal";
 import { ViewReservedItem } from "./ViewReservedItem";
 
 type Props = {

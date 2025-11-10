@@ -5,6 +5,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import AvatarUploader from "./AvatarUpload";
 import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
+import ThemeSelector from "@/components/ThemeSelector";
 
 export function ProfileEditForm({
   onCloseModal,
@@ -55,6 +56,7 @@ export function ProfileEditForm({
       <div>
         <AvatarUploader profile={profile} />
       </div>
+      <ThemeSelector />
       <div>
         <form onSubmit={handleSubmit(onSubmit)}>
           <fieldset className="fieldset w-xs p-4">

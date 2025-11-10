@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState, useRef } from "react";
-import { LuListPlus, LuPlus } from "react-icons/lu";
+import { LuPlus } from "react-icons/lu";
 
 export function AddItemModal({ boardId }: { boardId: string }) {
   const [form, setForm] = useState({

@@ -65,7 +65,7 @@ export function WishList({
       )}
       {items.length === 0 ? (
         <div className="flex flex-col justify-center items-center">
-          <p className="text-center text-info-content">{t("noItems")}</p>
+          <p className="text-center">{t("noItems")}</p>
         </div>
       ) : null}
 
