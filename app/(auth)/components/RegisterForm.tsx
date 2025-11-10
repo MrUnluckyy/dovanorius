@@ -67,8 +67,10 @@ export function RegisterForm() {
 
       toast.success("Registration successful! Check your email to verify.");
       setCompleted(true);
-    } catch (err: any) {
-      setError("root", { message: err?.message ?? "Unknown error" });
+    } catch (err) {
+      setError("root", {
+        message: "An unexpected error occurred. Please try again.",
+      });
       toast.error("Opps, klaida registruojantis.");
     }
   };
