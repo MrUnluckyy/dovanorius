@@ -21,7 +21,7 @@ export function ReservedItems({ user }: { user: User }) {
       const { data, error } = await supabase
         .from("items")
         .select(
-          "id, board_id, title, notes, price, image_url, url, status, reserved_by, reserved_at, priority, created_at, created_by(display_name, avatar_url)"
+          "id, board_id, title, notes, price, image_url, url, status, reserved_by, reserved_at, priority, created_at, created_by(id, display_name, avatar_url)"
         )
         .eq("reserved_by", user.id)
         .order("reserved_at", { ascending: false });

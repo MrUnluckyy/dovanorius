@@ -8,6 +8,7 @@ import { LuExternalLink } from "react-icons/lu";
 import { User } from "@supabase/supabase-js";
 import toast from "react-hot-toast";
 import { Item } from "@/app/boards/[boardId]/components/WishList";
+import Link from "next/link";
 
 export function ViewReservedItem({
   item,
@@ -108,6 +109,24 @@ export function ViewReservedItem({
             <h3 className="font-bold text-lg">{title}</h3>
             <p className="py-4">{notes}</p>
             <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center w-full">
+                <p className="text-start">Adresatas</p>
+                <div className="flex gap-2 items-center">
+                  {item.created_by?.avatar_url && (
+                    <div className="avatar">
+                      <div className="w-6 rounded-full">
+                        <img src={item.created_by.avatar_url} />
+                      </div>
+                    </div>
+                  )}
+                  <Link
+                    href={`/users/${item.created_by?.id}`}
+                    className="text-end link"
+                  >
+                    {item.created_by?.display_name}
+                  </Link>
+                </div>
+              </div>
               <div className="flex justify-between items-center w-full">
                 <p className="text-start">{t("price")}</p>
                 <p className="text-end">&euro;{price ?? "-"}</p>

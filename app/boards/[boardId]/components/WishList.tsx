@@ -19,6 +19,11 @@ export type Item = {
   reserved_by: string | null;
   priority: "low" | "medium" | "high";
   created_at: string;
+  created_by?: {
+    id: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  };
 };
 
 export function WishList({
