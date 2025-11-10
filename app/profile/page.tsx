@@ -8,7 +8,7 @@ import { ProfileData } from "./components/ProfileData";
 import ThemeSelector from "@/components/ThemeSelector";
 import { ProfileStats } from "./components/ProfileStats";
 
-export default async function BoardsPage() {
+export default async function ProfilePage() {
   const supabase = await createClient();
   const {
     data: { user },

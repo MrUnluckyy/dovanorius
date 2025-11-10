@@ -8,26 +8,30 @@ import { CreateBoard } from "../[boardId]/components/CreateBoard";
 import { useFormatter, useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
 import { BoardsLoadingSkeleton } from "@/components/loaders/BoardsLoadingSkeleton";
+import { useBoardMembersMap } from "@/hooks/useMemberMap";
+import { AvatarGroup } from "./AvatarGroup";
+import { LuUsers } from "react-icons/lu";
 
 export function BoardsList({ user }: { user: User }) {
   const supabase = createClient();
-  const userId = user.id;
   const t = useTranslations<"Boards">("Boards");
   const format = useFormatter();
   const now = new Date();
 
   const { data: boards = [], isLoading } = useQuery({
-    queryKey: ["boards", userId],
+    queryKey: ["boards"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("boards_with_stats")
+        .from("my_boards_with_stats")
         .select("*")
-        .eq("owner_id", userId)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
+
+  const ids = boards.map((b) => b.id);
+  const { membersByBoard } = useBoardMembersMap(ids);
 
   if (isLoading) return <BoardsLoadingSkeleton />;
 
@@ -45,6 +49,7 @@ export function BoardsList({ user }: { user: User }) {
               <div className="card-body">
                 <h2 className="card-title text-2xl">
                   {board.name}
+                  {membersByBoard[board.id]?.length > 1 && <LuUsers />}
                   {!board.is_public && (
                     <span className="badge badge-info badge-sm ml-2">
                       {t("private")}
@@ -64,7 +69,12 @@ export function BoardsList({ user }: { user: User }) {
                         now
                       )}`}
                 </p>
-                <div className="justify-end card-actions">
+                <div className="justify-between card-actions">
+                  <div>
+                    {membersByBoard[board.id]?.length > 1 && (
+                      <AvatarGroup members={membersByBoard[board.id] || []} />
+                    )}
+                  </div>
                   <button className="btn btn-accent">{t("ctaView")}</button>
                 </div>
               </div>

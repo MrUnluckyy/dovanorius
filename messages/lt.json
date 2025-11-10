@@ -89,6 +89,7 @@
     "getMetadata": "Gauti Metaduomenis",
 
     "addWish": "Pridėk norą 🎁",
+    "addMember": "Pridėti narį",
 
     "ctaView": "Atidaryti",
     "ctaCreateBoard": "Sukurti naują lentą",
@@ -100,7 +101,8 @@
     "ctaEdit": "Redaguoti",
     "ctaSubmit": "Pateikti",
     "ctaCancel": "Atšaukti",
-    "ctaSave": "Išsaugoti"
+    "ctaSave": "Išsaugoti",
+    "ctaAdd": "Pridėti"
   },
 
   "Profile": {

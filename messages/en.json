@@ -88,6 +88,7 @@
     "getMetadata": "Get Metadata",
 
     "addWish": "Add a wish! 🎁",
+    "addMember": "Add Member",
 
     "ctaCreateBoard": "Create New Board",
     "ctaView": "View",
@@ -98,7 +99,8 @@
     "ctaEdit": "Edit",
     "ctaSubmit": "Submit",
     "ctaCancel": "Cancel",
-    "ctaSave": "Save"
+    "ctaSave": "Save",
+    "ctaAdd": "Add"
   },
 
   "Profile": {

@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState, useRef } from "react";
-import { LuListPlus } from "react-icons/lu";
+import { LuListPlus, LuPlus } from "react-icons/lu";
 
 export function AddItemModal({ boardId }: { boardId: string }) {
   const [form, setForm] = useState({
@@ -117,8 +117,8 @@ export function AddItemModal({ boardId }: { boardId: string }) {
 
   return (
     <>
-      <button className="btn" onClick={openModal}>
-        <LuListPlus />
+      <button className="btn btn-accent" onClick={openModal}>
+        <LuPlus />
         {t("ctaAddItem")}
       </button>
       <dialog ref={modalRef} open={isOpen} className="modal">

@@ -6,6 +6,9 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { UserLoadingSkeleton } from "@/components/loaders/UserLoadingSkeleton";
+import { AddMemberModal } from "./AddMemberModal";
+import { useBoardMembersMap } from "@/hooks/useMemberMap";
+import { AvatarGroup } from "../../components/AvatarGroup";
 
 type Board = {
   id: string;
@@ -69,6 +72,8 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
     },
   });
 
+  const { membersByBoard } = useBoardMembersMap([board.id]);
+
   if (isLoading) return <UserLoadingSkeleton />;
 
   return (
@@ -83,6 +88,11 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
               </span>
             </h2>
             <p className="text-sm">{boardClient?.description}</p>
+          </div>
+          <div>
+            {membersByBoard[board.id]?.length > 0 && (
+              <AvatarGroup members={membersByBoard[board.id] || []} />
+            )}
           </div>
         </div>
       </div>
@@ -101,8 +111,9 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
           >
             {copied ? t("copied") : t("share")}
           </button>
+          {userId && <AddMemberModal userId={userId} boardId={board.id} />}
           <button
-            className="btn btn-error whitespace-nowrap"
+            className="btn btn-ghost whitespace-nowrap"
             onClick={() => deleteBoard.mutate()}
           >
             {t("delete")}
