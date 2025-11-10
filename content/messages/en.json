@@ -39,6 +39,7 @@
     "private": "Private",
     "delete": "Delete",
     "share": "Share",
+    "shareUser": "Share User",
     "copied": "Copied to clipboard",
     "makePrivate": "Make Private",
     "publish": "Publish",
@@ -46,6 +47,8 @@
     "notProvided": "Not Provided",
     "reserved": "Reserved",
     "myReservation": "My Reservation",
+    "follow": "Follow",
+    "unfollow": "Unfollow",
 
     "price": "Price",
     "shop": "Shop",

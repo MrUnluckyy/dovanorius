@@ -9,7 +9,7 @@ import { LuClipboard, LuGift, LuUsers } from "react-icons/lu";
 export function ProfileStats({ userId }: { userId: string }) {
   const supabase = createClient();
   const t = useTranslations("Profile");
-  const { followers } = useFollow(userId);
+  const { followers } = useFollow(undefined, userId);
 
   const { data: boards = [], isLoading } = useQuery({
     queryKey: ["boards", userId],

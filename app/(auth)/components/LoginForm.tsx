@@ -33,7 +33,7 @@ export function LoginForm() {
       }
 
       if (data.user) {
-        window.location.href = `/boards`;
+        window.location.href = `/dashboard`;
         return;
       }
     } catch (error) {

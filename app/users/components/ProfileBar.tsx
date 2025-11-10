@@ -3,6 +3,9 @@ import useProfile from "@/hooks/useProfile";
 import { isWithinInterval, subWeeks } from "date-fns";
 import { UserAvatar } from "@/app/profile/components/UserAvatar";
 import { useFollow } from "@/hooks/useFollow";
+import { LuShare, LuUserMinus, LuUserPlus } from "react-icons/lu";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 export function ProfileBar({
   authUserId,
@@ -13,6 +16,21 @@ export function ProfileBar({
 }) {
   const { isLoading, profile } = useProfile(userId);
   const { isFollowing, follow, unfollow } = useFollow(authUserId, userId);
+  const [copied, setCopied] = useState(false);
+  const t = useTranslations("Boards");
+
+  const handleCopy = async () => {
+    if (!profile?.id) return;
+    const url = `${window.location.origin}/users/${profile.id}`;
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // reset after 2 seconds
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -47,14 +65,24 @@ export function ProfileBar({
             </p>
           </div>
         </div>
-        {authUserId && !isOwnProfile && (
+        <div className="flex gap-4">
+          {authUserId && !isOwnProfile && (
+            <button
+              className="btn btn-primary"
+              onClick={isFollowing ? unfollow : follow}
+            >
+              {isFollowing ? <LuUserMinus /> : <LuUserPlus />}
+              {isFollowing ? t("unfollow") : t("follow")}
+            </button>
+          )}
           <button
-            className="btn btn-primary"
-            onClick={isFollowing ? unfollow : follow}
+            className={`btn ${copied ? "btn-success" : ""}`}
+            onClick={handleCopy}
           >
-            {isFollowing ? "Unfollow" : "Follow"}
+            <LuShare />
+            {copied ? t("copied") : t("shareUser")}
           </button>
-        )}
+        </div>
       </div>
     </div>
   );

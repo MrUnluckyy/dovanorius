@@ -40,6 +40,7 @@
     "private": "Privatus",
     "delete": "Ištrinti lentą",
     "share": "Dalintis lenta",
+    "shareUser": "Dalintis Profiliu",
     "copied": "Nukopijuota į iškarpinę",
     "makePrivate": "Padaryti privačia",
     "publish": "Viešinti",
@@ -47,6 +48,8 @@
     "notProvided": "Nenurodyta",
     "reserved": "Rezervuota",
     "myReservation": "Mano rezervacija",
+    "follow": "Sekti",
+    "unfollow": "Nebesekti",
 
     "price": "Kaina",
     "shop": "Parduotuvė",
