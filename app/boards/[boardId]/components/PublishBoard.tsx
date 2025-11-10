@@ -35,8 +35,8 @@ export function PublishBoard({
   }
 
   return (
-    <form onSubmit={onPublish} className="flex gap-2 w-full">
-      <button className="btn w-full" type="submit">
+    <form onSubmit={onPublish} className="w-full">
+      <button className="btn w-full whitespace-nowrap" type="submit">
         {boardPublished ? t("makePrivate") : t("publish")}
       </button>
     </form>

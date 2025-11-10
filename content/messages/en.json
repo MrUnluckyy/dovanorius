@@ -31,7 +31,12 @@
     "profile": "Profile",
     "signOut": "Sign Out",
     "boards": "Wish Boards",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "wishBoards": "Wish Boards",
+    "board": "Wish Board",
+    "users": "Users",
+    "user": "User",
+    "userBoards": "Vser's Boards"
   },
 
   "Boards": {

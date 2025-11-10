@@ -59,7 +59,7 @@ export function WishList({
   return (
     <div className="">
       {!isPublic && (
-        <div className="w-full flex justify-end mb-4">
+        <div className="mb-4">
           <AddItemModal boardId={boardId} />
         </div>
       )}

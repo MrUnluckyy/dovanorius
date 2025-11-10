@@ -72,13 +72,8 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
   if (isLoading) return <UserLoadingSkeleton />;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col items-center gap-6 md:flex-row md:items-start md:gap-12">
-        <div className="avatar avatar-placeholder">
-          <div className="bg-accent text-neutral-content w-24 rounded-full">
-            <span className="text-3xl">🎁</span>
-          </div>
-        </div>
+    <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col items-center gap-6 md:flex-row md:items-start md:gap-12 w-full">
         <div className="flex flex-col gap-6">
           <div>
             <h2 className="text-4xl font-semibold mb-2">
@@ -92,7 +87,7 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
         </div>
       </div>
       {inPublicView ? null : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 ">
           <PublishBoard
             boardId={boardClient?.id || ""}
             boardName={boardClient?.name || ""}

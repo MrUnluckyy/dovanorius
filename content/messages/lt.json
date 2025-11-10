@@ -32,7 +32,12 @@
     "profile": "Profilis",
     "signOut": "Atsijungti",
     "boards": "Norų lentos",
-    "dashboard": "Pagrindinis"
+    "dashboard": "Pagrindinis",
+    "wishBoards": "Norų lentos",
+    "board": "Norų lenta",
+    "users": "Vartotojai",
+    "user": "Vartotojas",
+    "userBoards": "Vartotojo lentos"
   },
 
   "Boards": {
