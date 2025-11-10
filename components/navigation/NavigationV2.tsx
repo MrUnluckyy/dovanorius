@@ -51,10 +51,6 @@ export function NavigationV2({ user }: { user?: User | null }) {
                     <LuHouse />
                     {t("dashboard")}
                   </Link>
-                  <Link href="/boards" className="btn btn-ghost">
-                    <LuClipboardList />
-                    {t("boards")}
-                  </Link>
                   <Link href="/profile" className="btn btn-ghost">
                     <LuUser />
                     {t("profile")}
@@ -95,10 +91,6 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 <Link href="/dashboard" className="btn btn-ghost text-2xl">
                   <LuHouse />
                   {t("dashboard")}
-                </Link>
-                <Link href="/boards" className="btn btn-ghost text-2xl">
-                  <LuClipboardList />
-                  {t("boards")}
                 </Link>
                 <Link href="/profile" className="btn btn-ghost text-2xl">
                   <LuUser />

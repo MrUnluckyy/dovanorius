@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
@@ -14,7 +15,8 @@ export function Logo({ size = "md" }: Props) {
   return (
     <div>
       <Link href="/" className={`btn btn-ghost ${getSize()}`}>
-        :D noriu
+        <Image src="/assets/logo.png" alt="Logo" width={40} height={40} />
+        NoriuTo
       </Link>
     </div>
   );
