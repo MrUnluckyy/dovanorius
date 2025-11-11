@@ -1,4 +1,3 @@
-// no "use client"
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
@@ -15,10 +14,12 @@ export default async function MyRecipientPage({
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+
   const { slug } = await params;
+
   return (
     <main>
-      <NavigationV2 user={null} />
+      <NavigationV2 user={user} />
       <MyRecipientClient slug={slug} />
     </main>
   );

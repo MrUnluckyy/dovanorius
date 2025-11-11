@@ -138,7 +138,7 @@ export function ViewItemModal({
         {t("ctaView")}
       </button>
       <dialog ref={modalRef} open={isOpen} className="modal">
-        <div className="modal-box">
+        <div className="modal-box pb-16 md:pb-4">
           {isEditing ? (
             <ItemForm item={item} onCloseModal={closeModal} />
           ) : (

@@ -1,4 +1,3 @@
-// no "use client"
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import LobbyClient from "./_components/LobbyClient";
 import { createClient } from "@/utils/supabase/server";
@@ -18,7 +17,7 @@ export default async function SsLobyPage({
   const { slug } = await params;
   return (
     <main>
-      <NavigationV2 user={null} />
+      <NavigationV2 user={user} />
       <LobbyClient slug={slug} />
     </main>
   );
