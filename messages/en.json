@@ -92,6 +92,9 @@
     "addWish": "Add a wish! 🎁",
     "addMember": "Add Member",
 
+    "toastBoardCreated": "🎉 Board {board} created successfully!",
+    "toastBoardCreateError": "😵 Oops! Something went wrong while creating the board. Please try again later.",
+
     "ctaCreateBoard": "Create New Board",
     "ctaView": "View",
     "ctaAddItem": "Add",

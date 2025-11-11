@@ -33,7 +33,7 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
   const t = useTranslations("Boards");
 
   const handleCopy = async () => {
-    if (!board.is_public) return;
+    if (!boardClient?.is_public) return;
     const url = `${window.location.origin}/users/${userId}/${board.slug}`;
 
     try {
@@ -74,6 +74,8 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
 
   const { membersByBoard } = useBoardMembersMap([board.id]);
 
+  console.log("Public?", boardClient?.is_public);
+
   if (isLoading) return <UserLoadingSkeleton />;
 
   return (
@@ -90,7 +92,7 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
             <p className="text-sm">{boardClient?.description}</p>
           </div>
           <div>
-            {membersByBoard[board.id]?.length > 0 && (
+            {membersByBoard[board.id]?.length > 1 && (
               <AvatarGroup members={membersByBoard[board.id] || []} />
             )}
           </div>

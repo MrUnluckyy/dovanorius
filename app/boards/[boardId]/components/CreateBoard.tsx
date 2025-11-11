@@ -21,7 +21,7 @@ export function CreateBoard({ user }: { user: User | null }) {
   const queryClient = useQueryClient();
   const t = useTranslations("Boards");
 
-  const { register, handleSubmit, reset, formState } = useForm({
+  const { register, handleSubmit, reset, getValues } = useForm({
     defaultValues: {
       name: "",
       description: "",
@@ -45,8 +45,8 @@ export function CreateBoard({ user }: { user: User | null }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success(t("toastBoardCreated"));
-      queryClient.invalidateQueries({ queryKey: ["boards", user?.id] });
+      toast.success(t("toastBoardCreated", { board: getValues("name") }));
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
       reset();
     },
   });

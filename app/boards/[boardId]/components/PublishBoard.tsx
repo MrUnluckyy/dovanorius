@@ -35,7 +35,7 @@ export function PublishBoard({
       .from("boards")
       .update({ slug, is_public: !boardPublished })
       .eq("id", boardId);
-    if (!error) qc.invalidateQueries({ queryKey: ["board", boardId] });
+    if (!error) qc.invalidateQueries({ queryKey: ["board"] });
   }
 
   return (
