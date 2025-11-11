@@ -36,6 +36,7 @@ export function ViewItemModal({
   const closeModal = () => {
     setIsOpen(false);
     modalRef.current?.close();
+    setIsEditing(false);
   };
 
   const deleteItem = useMutation({
@@ -139,7 +140,7 @@ export function ViewItemModal({
       <dialog ref={modalRef} open={isOpen} className="modal">
         <div className="modal-box">
           {isEditing ? (
-            <ItemForm />
+            <ItemForm item={item} onCloseModal={closeModal} />
           ) : (
             <>
               <figure className="w-full mb-6">
@@ -174,6 +175,10 @@ export function ViewItemModal({
                 </div>
               </div>
               <div className="modal-action">
+                <form method="dialog">
+                  {/* if there is a button in form, it will close the modal */}
+                  <button className="btn btn-ghost">{t("ctaClose")}</button>
+                </form>
                 {inPublicBoard && item.status === "wanted" && (
                   <button
                     disabled={inPublicBoard && item.reserved_by === user?.id}
@@ -201,27 +206,19 @@ export function ViewItemModal({
                 {!inPublicBoard && (
                   <>
                     <button
-                      className="btn btn-primary"
-                      disabled
-                      onClick={() => setIsEditing(true)}
-                    >
-                      {t("ctaEdit")}
-                    </button>
-                    <button
-                      className="btn btn-error"
+                      className="btn btn-ghost"
                       onClick={() => deleteItem.mutate(item.id)}
                     >
                       {t("ctaDelete")}
                     </button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      {t("ctaEdit")}
+                    </button>
                   </>
                 )}
-
-                <form method="dialog">
-                  {/* if there is a button in form, it will close the modal */}
-                  <button className="btn  btn-secondary">
-                    {t("ctaClose")}
-                  </button>
-                </form>
               </div>
             </>
           )}
