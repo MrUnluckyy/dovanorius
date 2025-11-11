@@ -1,0 +1,70 @@
+// app/secret-santa/[slug]/_components/Participants.tsx
+"use client";
+import { Avatar } from "@/components/Avatar";
+import { SsEvent, SsMember } from "@/types/secret-santa";
+import { qq } from "@/utils/qq";
+import { createClient } from "@/utils/supabase/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+export default function Participants({
+  event,
+  members,
+}: {
+  event: SsEvent;
+  members: SsMember[];
+}) {
+  const sb = createClient();
+  const qc = useQueryClient();
+
+  const confirm = useMutation({
+    mutationFn: async () => {
+      const {
+        data: { user },
+      } = await sb.auth.getUser();
+      const me = members.find((m) => m.user_id === user?.id);
+      if (me)
+        await sb
+          .from("ss_members")
+          .update({ is_confirmed: true })
+          .eq("id", me.id);
+      else
+        await sb.from("ss_members").insert({
+          event_id: event.id,
+          user_id: user!.id,
+          is_confirmed: true,
+        });
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: qq.members(event.id) }),
+  });
+
+  return (
+    <div className="card bg-base-100 shadow">
+      <div className="card-body">
+        <h3 className="card-title">Participants</h3>
+        <div className="flex flex-wrap gap-3">
+          {members.map((m) => (
+            <div key={m.id} className="flex gap-2">
+              <Avatar
+                avatar_url={m.profile?.avatar_url}
+                name={m.display_name}
+                size={8}
+              />
+              <p className="text-lg">
+                {m.display_name || m.profile?.display_name}
+              </p>
+            </div>
+          ))}
+          {!members.length && <div className="opacity-60">No members yet.</div>}
+        </div>
+        <div className="card-actions justify-end">
+          <button
+            onClick={() => confirm.mutate()}
+            className={`btn btn-primary ${confirm.isPending ? "loading" : ""}`}
+          >
+            {confirm.isPending ? "Joining..." : "Join / Confirm"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import { Profile } from "@/types/secret-santa";
 import { createClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -35,7 +36,7 @@ export function useBoardMembersMap(boardIds: string[]) {
       (data as MemberRow[]).forEach((r) => {
         const p = Array.isArray(r.profiles)
           ? r.profiles[0]
-          : (r.profiles as any);
+          : (r.profiles as Profile);
         const item = {
           avatar: p?.avatar_url ?? null,
           name: p?.display_name ?? null,
