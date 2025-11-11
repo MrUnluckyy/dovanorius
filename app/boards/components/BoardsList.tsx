@@ -6,7 +6,6 @@ import Link from "next/link";
 import React from "react";
 import { CreateBoard } from "../[boardId]/components/CreateBoard";
 import { useFormatter, useTranslations } from "next-intl";
-import { formatDistanceToNow } from "date-fns";
 import { BoardsLoadingSkeleton } from "@/components/loaders/BoardsLoadingSkeleton";
 import { useBoardMembersMap } from "@/hooks/useMemberMap";
 import { AvatarGroup } from "./AvatarGroup";

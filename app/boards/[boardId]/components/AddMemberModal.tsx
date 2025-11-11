@@ -5,6 +5,8 @@ import { useRef, useState } from "react";
 import { LuUserPlus } from "react-icons/lu";
 import { useFollow } from "@/hooks/useFollow";
 import { createClient } from "@/utils/supabase/client";
+import toast from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 // --- Domain types ---
 type Role = "editor" | "viewer";
@@ -21,9 +23,6 @@ interface UseFollowResult {
   isLoading: boolean;
 }
 
-// RPC return: adjust if your function returns something else
-type AddMemberByUserReturn = boolean;
-
 export function AddMemberModal({
   userId,
   boardId,
@@ -34,6 +33,7 @@ export function AddMemberModal({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const modalRef = useRef<HTMLDialogElement | null>(null);
   const t = useTranslations("Boards");
+  const queryClient = useQueryClient();
 
   const openModal = (): void => {
     setIsOpen(true);
@@ -49,19 +49,15 @@ export function AddMemberModal({
 
   const [selected, setSelected] = useState<string | null>(null);
   const [role, setRole] = useState<Role>("editor");
-  const [msg, setMsg] = useState<string | null>(null);
 
   const supabase = createClient();
 
   if (isLoading) return <p>Loading…</p>;
   if (!following.length)
-    return (
-      <p className="text-sm text-gray-500">You are not following anyone yet.</p>
-    );
+    return <p className="text-sm">You are not following anyone yet.</p>;
 
   async function onAdd(): Promise<void> {
     if (!selected) return;
-    setMsg(null);
 
     const { data, error } = await supabase.rpc("add_member_by_user", {
       p_board_id: boardId,
@@ -69,12 +65,15 @@ export function AddMemberModal({
       p_role: role,
     });
 
-    if (error) {
-      setMsg(error.message);
-      return;
+    if (data) {
+      closeModal();
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
     }
 
-    setMsg(data ? "Added!" : "Could not add (owner only?)");
+    if (error) {
+      toast.error(t("errorAddMember"));
+      return;
+    }
   }
 
   return (
@@ -120,8 +119,6 @@ export function AddMemberModal({
               {t("ctaAdd")}
             </button>
           </div>
-
-          {msg && <span className="text-sm text-gray-600">{msg}</span>}
         </div>
       </dialog>
     </div>
