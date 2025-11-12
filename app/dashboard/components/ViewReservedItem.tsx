@@ -53,7 +53,7 @@ export function ViewReservedItem({
     if (data) {
       toast.success(t("successReserve"));
       queryClient.invalidateQueries({
-        queryKey: ["reservedItems", user?.id],
+        queryKey: ["reservedItems"],
       });
       closeModal();
     }
@@ -71,7 +71,7 @@ export function ViewReservedItem({
     if (data) {
       toast.success(t("successUnreserve"));
       queryClient.invalidateQueries({
-        queryKey: ["reservedItems", user?.id],
+        queryKey: ["reservedItems"],
       });
       closeModal();
     }

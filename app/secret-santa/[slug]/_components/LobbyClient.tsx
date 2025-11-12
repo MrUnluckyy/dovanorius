@@ -6,8 +6,11 @@ import DrawButton from "../_components/DrawButton";
 import type { SsEvent, SsMember } from "@/types/secret-santa";
 import { createClient } from "@/utils/supabase/client";
 import { qq } from "@/utils/qq";
+import { useState } from "react";
+import InviteFollowersModal from "./InviteFollowersModal";
 
 export default function LobbyClient({ slug }: { slug: string }) {
+  const [inviteOpen, setInviteOpen] = useState(false);
   const sb = createClient();
   const qc = useQueryClient();
 
@@ -63,6 +66,7 @@ export default function LobbyClient({ slug }: { slug: string }) {
       {event && (
         <>
           <LobbyHeader ev={event} />
+
           <div className="flex items-center gap-2">
             <button
               className="btn btn-outline"
@@ -71,11 +75,19 @@ export default function LobbyClient({ slug }: { slug: string }) {
             >
               {lockMutation.isPending ? "Locking..." : "Lock joining"}
             </button>
+            <button className="btn" onClick={() => setInviteOpen(true)}>
+              Invite followers
+            </button>
             <DrawButton
               slug={slug}
               disabled={!["locked", "open"].includes(event.status)}
             />
           </div>
+          <InviteFollowersModal
+            slug={slug}
+            open={inviteOpen}
+            onClose={() => setInviteOpen(false)}
+          />
           <Participants event={event} members={members ?? []} />
         </>
       )}

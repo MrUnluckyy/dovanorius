@@ -1,4 +1,3 @@
-// app/secret-santa/[slug]/my/page.tsx
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import RevealCard from "../_components/RevealCard";
@@ -24,7 +23,6 @@ export default function MyRecipientClient({ slug }: { slug: string }) {
     enabled: !!ev?.id,
     queryKey: qq.myAssignment(ev?.id ?? "x", "me"),
     queryFn: async () => {
-      // view ss_my_assignment restricts giver = auth.uid()
       const { data } = await sb
         .from("ss_my_assignment")
         .select("*")
@@ -47,7 +45,7 @@ export default function MyRecipientClient({ slug }: { slug: string }) {
       <h1 className="text-2xl font-bold mb-4">{ev.name}: Your recipient</h1>
       {ev.status !== "drawn" && (
         <div className="alert alert-warning mb-4">
-          <span>The draw isn’t completed yet.</span>
+          <span>The draw isnt completed yet.</span>
         </div>
       )}
       {mine?.receiver ? (

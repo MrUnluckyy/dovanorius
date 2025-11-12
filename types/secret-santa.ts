@@ -1,6 +1,7 @@
 // types/secret-santa.ts
 export type SsStatus = "draft" | "open" | "locked" | "drawn" | "archived";
 export type SsRole = "owner" | "admin" | "member";
+export type SsInviteStatus = "pending" | "accepted" | "declined" | "revoked";
 
 export interface SsEvent {
   id: string;
@@ -43,4 +44,22 @@ export interface MyAssignmentRow {
 
 export interface RecipientResult {
   receiver: Profile;
+}
+
+export interface SsInvite {
+  id: string;
+  event_id: string;
+  from_user: string;
+  to_user: string;
+  status: SsInviteStatus;
+  created_at: string;
+}
+
+export interface NotificationRow {
+  id: string;
+  user_id: string;
+  type: string;
+  payload: Record<string, unknown>;
+  is_read: boolean;
+  created_at: string;
 }

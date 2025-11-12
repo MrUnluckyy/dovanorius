@@ -5,6 +5,7 @@ import { SsEvent, SsMember } from "@/types/secret-santa";
 import { qq } from "@/utils/qq";
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { LuCheck, LuClock, LuCrown } from "react-icons/lu";
 
 export default function Participants({
   event,
@@ -41,7 +42,7 @@ export default function Participants({
     <div className="card bg-base-100 shadow">
       <div className="card-body">
         <h3 className="card-title">Participants</h3>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col gap-3">
           {members.map((m) => (
             <div key={m.id} className="flex gap-2">
               <Avatar
@@ -51,7 +52,13 @@ export default function Participants({
               />
               <p className="text-lg">
                 {m.display_name || m.profile?.display_name}
+                {m.role === "owner" || m.role === "admin" ? (
+                  <span className="badge ml-2">
+                    <LuCrown />
+                  </span>
+                ) : null}
               </p>
+              <div>{m.is_confirmed ? <LuCheck /> : <LuClock />}</div>
             </div>
           ))}
           {!members.length && <div className="opacity-60">No members yet.</div>}

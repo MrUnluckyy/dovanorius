@@ -6,6 +6,8 @@ import { Logo } from "../Logo";
 import { LuX, LuMenu, LuHouse } from "react-icons/lu";
 import { SignOutButton } from "@/app/(auth)/components/SignOutButton";
 import Image from "next/image";
+import NotificationsBell from "../notification/NotificationBell";
+import NotificationsLive from "../notification/NotificationLive";
 
 export function NavigationV2({ user }: { user?: User | null }) {
   const t = useTranslations("Navbar");
@@ -41,17 +43,19 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 NoriuTo
               </Link>
               <div className="lg:hidden">
-                <LocaleSwitcher />
+                <NotificationsLive />
+                <NotificationsBell />
               </div>
             </div>
             <div className="hidden flex-none lg:flex gap-2">
               {user ? (
                 <>
+                  <NotificationsLive />
+                  <NotificationsBell />
                   <Link href="/dashboard" className="btn btn-ghost">
                     <LuHouse />
                     {t("dashboard")}
                   </Link>
-
                   <SignOutButton className="btn btn-ghost" />
                 </>
               ) : (
@@ -103,6 +107,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 </Link>
               </>
             )}
+            <LocaleSwitcher />
           </div>
         </div>
       </div>
