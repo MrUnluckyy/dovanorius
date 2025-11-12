@@ -18,7 +18,7 @@ export default async function SsLobyPage({
   return (
     <main>
       <NavigationV2 user={user} />
-      <LobbyClient slug={slug} />
+      <LobbyClient slug={slug} user={user} />
     </main>
   );
 }

@@ -5,6 +5,7 @@ import { BoardsList } from "../boards/components/BoardsList";
 import { ReservedItems } from "./components/ReservedItems";
 import { FollowingList } from "./components/FollowingList";
 import { DashboardUser } from "./components/DashboardUser";
+import MyEvents from "./components/MyEvents";
 
 export default async function BoardsPage() {
   const supabase = await createClient();
@@ -22,7 +23,7 @@ export default async function BoardsPage() {
         <div className="py-8 mb-4 md:mb-10">
           <DashboardUser />
         </div>
-
+        <MyEvents user={user} />
         <BoardsList user={user} />
         <ReservedItems user={user} />
         <FollowingList userId={user.id} />

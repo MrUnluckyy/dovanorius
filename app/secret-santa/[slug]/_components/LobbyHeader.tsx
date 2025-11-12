@@ -3,7 +3,7 @@ import type { SsEvent } from "@/types/secret-santa";
 
 export default function LobbyHeader({ ev }: { ev: SsEvent }) {
   return (
-    <div className="card bg-base-100 shadow">
+    <div className="card bg-green-700 text-white shadow">
       <div className="card-body">
         <div className="flex items-center justify-between">
           <h2 className="card-title">{ev.name}</h2>

@@ -8,8 +8,15 @@ import { createClient } from "@/utils/supabase/client";
 import { qq } from "@/utils/qq";
 import { useState } from "react";
 import InviteFollowersModal from "./InviteFollowersModal";
+import { User } from "@supabase/supabase-js";
 
-export default function LobbyClient({ slug }: { slug: string }) {
+export default function LobbyClient({
+  slug,
+  user,
+}: {
+  slug: string;
+  user: User;
+}) {
   const [inviteOpen, setInviteOpen] = useState(false);
   const sb = createClient();
   const qc = useQueryClient();
@@ -39,11 +46,10 @@ export default function LobbyClient({ slug }: { slug: string }) {
       return (data as unknown as SsMember[]) ?? [];
     },
   });
-
+  console.log("members", members);
   const lockMutation = useMutation({
     mutationFn: async (): Promise<void> => {
-      const { data: auth } = await sb.auth.getUser();
-      const uid = auth.user?.id;
+      const uid = user?.id;
       if (!uid || !event) throw new Error("Not allowed");
       const amAdmin =
         event.owner_id === uid ||
@@ -66,28 +72,37 @@ export default function LobbyClient({ slug }: { slug: string }) {
       {event && (
         <>
           <LobbyHeader ev={event} />
-
-          <div className="flex items-center gap-2">
-            <button
-              className="btn btn-outline"
-              onClick={() => lockMutation.mutate()}
-              disabled={event.status !== "open" || lockMutation.isPending}
-            >
-              {lockMutation.isPending ? "Locking..." : "Lock joining"}
-            </button>
-            <button className="btn" onClick={() => setInviteOpen(true)}>
-              Invite followers
-            </button>
-            <DrawButton
-              slug={slug}
-              disabled={!["locked", "open"].includes(event.status)}
-            />
-          </div>
-          <InviteFollowersModal
-            slug={slug}
-            open={inviteOpen}
-            onClose={() => setInviteOpen(false)}
-          />
+          {members &&
+            (members.some(
+              (m) =>
+                m.user_id === user.id &&
+                (m.role === "owner" || m.role === "admin")
+            ) ||
+              event.owner_id === user.id) && (
+              <>
+                <div className="flex items-center gap-2">
+                  <button
+                    className="btn btn-outline"
+                    onClick={() => lockMutation.mutate()}
+                    disabled={event.status !== "open" || lockMutation.isPending}
+                  >
+                    {lockMutation.isPending ? "Locking..." : "Lock joining"}
+                  </button>
+                  <button className="btn" onClick={() => setInviteOpen(true)}>
+                    Invite followers
+                  </button>
+                  <DrawButton
+                    slug={slug}
+                    disabled={!["locked", "open"].includes(event.status)}
+                  />
+                </div>
+                <InviteFollowersModal
+                  slug={slug}
+                  open={inviteOpen}
+                  onClose={() => setInviteOpen(false)}
+                />
+              </>
+            )}
           <Participants event={event} members={members ?? []} />
         </>
       )}

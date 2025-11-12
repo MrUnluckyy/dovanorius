@@ -42,7 +42,8 @@ export default function MyRecipientClient({ slug }: { slug: string }) {
 
   return (
     <div className="max-w-md mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">{ev.name}: Your recipient</h1>
+      <h1 className="font-special text-5xl mb-8">{ev.name}</h1>
+      <h2 className="text-2xl font-bold mb-4">Tu ištraukei:</h2>
       {ev.status !== "drawn" && (
         <div className="alert alert-warning mb-4">
           <span>The draw isnt completed yet.</span>
@@ -52,7 +53,7 @@ export default function MyRecipientClient({ slug }: { slug: string }) {
         <RevealCard person={mine.receiver} />
       ) : (
         <div className="alert">
-          <span>No assignment yet.</span>
+          <span>Dar teks palaukti</span>
         </div>
       )}
     </div>

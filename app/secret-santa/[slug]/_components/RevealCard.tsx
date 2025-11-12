@@ -1,7 +1,9 @@
-// app/secret-santa/[slug]/_components/RevealCard.tsx
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
+import { ConfettiBurst } from "../../_components/Confetti";
+
+type Stage = "idle" | "rolling" | "reveal";
 
 export default function RevealCard({
   person,
@@ -10,10 +12,20 @@ export default function RevealCard({
 }) {
   // Slot-roll names for suspense
   const pool = useMemo(
-    () => ["???", "Friend", "Buddy", "Mystery", "Pal", "Colleague", "Neighbor"],
+    () => [
+      "???",
+      "Draugas",
+      "Bičiulis",
+      "Kaimynas",
+      "Partneris",
+      "Kolega",
+      "Mylimasis",
+    ],
     []
   );
-  const [stage, setStage] = useState<"idle" | "rolling" | "reveal">("idle");
+  const [stage, setStage] = useState<Stage>(
+    (localStorage.getItem("ss-reveal-stage") as Stage) || "reveal"
+  );
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -21,6 +33,8 @@ export default function RevealCard({
     const t = setInterval(() => setTick((x) => x + 1), 120);
     const done = setTimeout(() => {
       clearInterval(t);
+      localStorage.setItem("ss-reveal-stage", stage);
+
       setStage("reveal");
     }, 2000);
     return () => {
@@ -50,6 +64,8 @@ export default function RevealCard({
           </motion.div>
         </AnimatePresence>
 
+        {stage === "reveal" && <ConfettiBurst burstKey={person.id} />}
+
         <div className="avatar mt-4">
           <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
             {stage === "reveal" && person.avatar_url ? (
@@ -66,7 +82,7 @@ export default function RevealCard({
               className="btn btn-primary"
               onClick={() => setStage("rolling")}
             >
-              Reveal
+              Atskleisti
             </button>
           )}
           {stage === "reveal" && (
@@ -74,7 +90,7 @@ export default function RevealCard({
               className="btn btn-secondary"
               href={`/users/${person.id}?tab=wishlist`}
             >
-              View wishlist
+              Žiūrėti norų sąrašą
             </a>
           )}
         </div>

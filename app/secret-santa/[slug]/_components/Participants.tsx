@@ -5,6 +5,7 @@ import { SsEvent, SsMember } from "@/types/secret-santa";
 import { qq } from "@/utils/qq";
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { LuCheck, LuClock, LuCrown } from "react-icons/lu";
 
 export default function Participants({
@@ -39,12 +40,12 @@ export default function Participants({
   });
 
   return (
-    <div className="card bg-base-100 shadow">
+    <div className="card bg-base-200 shadow">
       <div className="card-body">
-        <h3 className="card-title">Participants</h3>
-        <div className="flex flex-col gap-3">
+        <h3 className="card-title">Dalyviai:</h3>
+        <div className="flex flex-col gap-4">
           {members.map((m) => (
-            <div key={m.id} className="flex gap-2">
+            <div key={m.id} className="flex items-center gap-2">
               <Avatar
                 avatar_url={m.profile?.avatar_url}
                 name={m.display_name}
@@ -58,19 +59,23 @@ export default function Participants({
                   </span>
                 ) : null}
               </p>
-              <div>{m.is_confirmed ? <LuCheck /> : <LuClock />}</div>
+              <div className="w-6 h-6 flex justify-center items-center bg-success text-success-content rounded-full">
+                {m.is_confirmed ? <LuCheck /> : <LuClock />}
+              </div>
             </div>
           ))}
-          {!members.length && <div className="opacity-60">No members yet.</div>}
+          {!members.length && <div className="opacity-60">Dalyviu nėra</div>}
         </div>
-        <div className="card-actions justify-end">
-          <button
-            onClick={() => confirm.mutate()}
-            className={`btn btn-primary ${confirm.isPending ? "loading" : ""}`}
-          >
-            {confirm.isPending ? "Joining..." : "Join / Confirm"}
-          </button>
-        </div>
+        {event.status === "drawn" ? (
+          <div>
+            <Link
+              href={`/secret-santa/${event.slug}/my`}
+              className="btn btn-primary mt-4"
+            >
+              Traukti
+            </Link>
+          </div>
+        ) : null}
       </div>
     </div>
   );

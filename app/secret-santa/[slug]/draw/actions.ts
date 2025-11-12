@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { create } from "domain";
 
 type Pair = [string, string];
 function drawAssignments(
@@ -59,13 +60,13 @@ export async function runDraw(slug: string) {
   if (ev.status !== "locked" && ev.status !== "open")
     throw new Error("Lock the event before drawing.");
 
-  const { data: mems } = await supabase
+  const { data: members } = await supabase
     .from("ss_members")
     .select("user_id")
     .eq("event_id", ev.id)
     .eq("is_confirmed", true);
 
-  const userIds = (mems ?? []).map((m) => m.user_id);
+  const userIds = (members ?? []).map((m) => m.user_id);
   if (userIds.length < 2)
     throw new Error("Need at least two confirmed members.");
 
@@ -83,11 +84,17 @@ export async function runDraw(slug: string) {
 
   const pairs = drawAssignments(userIds, excluded);
 
-  const { data: draw } = await supabase
+  const { data: draw, error: drawError } = await supabase
     .from("ss_draws")
-    .insert({ event_id: ev.id })
+    .insert({ event_id: ev.id, created_by: ev.owner_id })
     .select()
     .single();
+
+  console.log("draw", draw);
+  if (drawError || !draw) {
+    console.log("drawError", drawError?.message);
+    throw new Error("draw" + drawError?.message);
+  }
 
   const rows = pairs.map(([giver, receiver]) => ({
     draw_id: draw.id,
