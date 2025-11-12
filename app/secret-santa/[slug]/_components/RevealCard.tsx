@@ -23,9 +23,7 @@ export default function RevealCard({
     ],
     []
   );
-  const [stage, setStage] = useState<Stage>(
-    (localStorage.getItem("ss-reveal-stage") as Stage) || "reveal"
-  );
+  const [stage, setStage] = useState<Stage>("idle");
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
