@@ -190,10 +190,10 @@ export function AddItemModal({ boardId }: { boardId: string }) {
               <label className="label">{t("maxImageSizeLabel")}</label>
             </fieldset>
             <div className="modal-action">
-              <button className="btn btn-error" onClick={closeModal}>
+              <button className="btn btn-ghost" onClick={closeModal}>
                 {t("ctaClose")}
               </button>
-              <button className="btn" type="submit">
+              <button className="btn btn-primary" type="submit">
                 {t("ctaSubmit")}
               </button>
             </div>

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Profile } from "@/types/secret-santa";
 import { createClient } from "@/utils/supabase/client";
 import { sendInvites } from "../invites/action";
+import { Avatar } from "@/components/Avatar";
 
 type FollowRow = { followee: Profile };
 
@@ -68,10 +69,10 @@ export default function InviteFollowersModal({ slug, open, onClose }: Props) {
   return (
     <dialog open className="modal">
       <div className="modal-box">
-        <h3 className="font-bold text-lg mb-3">Invite followers</h3>
+        <h3 className="font-bold text-lg mb-3">Pakviesti dalyvius</h3>
         <div className="max-h-80 overflow-auto">
           {isLoading && <div className="skeleton h-10 w-full" />}
-          <ul className="menu bg-base-200 rounded-box">
+          <ul className="menu bg-base-200 rounded-box w-full">
             {(followees ?? []).map((p) => (
               <li key={p.id}>
                 <label className="label cursor-pointer justify-start gap-3">
@@ -82,9 +83,12 @@ export default function InviteFollowersModal({ slug, open, onClose }: Props) {
                     onChange={() => toggle(p.id)}
                   />
                   <div className="avatar">
-                    <div className="w-8 rounded-full">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={p.avatar_url ?? "/avatar.png"} alt="" />
+                    <div className="rounded-full">
+                      <Avatar
+                        avatar_url={p.avatar_url}
+                        name={p.display_name}
+                        size={8}
+                      />
                     </div>
                   </div>
                   <span>{p.display_name ?? p.id.slice(0, 6)}</span>
@@ -92,28 +96,26 @@ export default function InviteFollowersModal({ slug, open, onClose }: Props) {
               </li>
             ))}
             {(followees ?? []).length === 0 && !isLoading && (
-              <div className="p-3 opacity-70">
-                You’re not following anyone yet.
-              </div>
+              <div className="p-3 opacity-70">Nesekate nė vieno vartotojo.</div>
             )}
           </ul>
         </div>
 
         <div className="modal-action">
           <button className="btn btn-ghost" onClick={onClose}>
-            Cancel
+            Atšaukti
           </button>
           <button
             className="btn btn-primary"
             onClick={submit}
             disabled={selected.size === 0}
           >
-            Send {selected.size ? `(${selected.size})` : ""}
+            Išsiųsti {selected.size ? `(${selected.size})` : ""}
           </button>
         </div>
       </div>
       <form method="dialog" className="modal-backdrop" onClick={onClose}>
-        <button>close</button>
+        <button>uždaryti</button>
       </form>
     </dialog>
   );

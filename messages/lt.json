@@ -88,7 +88,7 @@
     "urlValidError": "Prašome įvesti galiojantį URL.",
     "maxImageSizeLabel": "Maximalus paveikslėlio dydis - 2MB.",
 
-    "getMetadata": "Gauti Metaduomenis",
+    "getMetadata": "Gauti info",
 
     "addWish": "Pridėk norą 🎁",
     "addMember": "Pridėti narį",
@@ -138,5 +138,10 @@
     "loading": "Įkeliama...",
     "error": "Įvyko klaida. Bandykite dar kartą.",
     "noData": "Nėra duomenų"
+  },
+  "SecretSanta": {
+    "drawn": "🎉 Paruošta!",
+    "open": "⏳ Laukiama...",
+    "budget": "Biudžetas - {amount}eur"
   }
 }

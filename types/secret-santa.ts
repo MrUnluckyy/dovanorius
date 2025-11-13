@@ -63,3 +63,12 @@ export interface NotificationRow {
   is_read: boolean;
   created_at: string;
 }
+
+export type Participant = {
+  user_id: string;
+  display_name: string;
+  avatar_url: string | null;
+  status: "joined" | "accepted" | "pending" | "declined";
+  role: SsRole;
+  joined_at: string; // optional if you want to show when
+};

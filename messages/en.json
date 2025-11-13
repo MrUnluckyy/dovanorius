@@ -87,7 +87,7 @@
     "urlValidError": "Please enter a valid URL.",
     "maxImageSizeLabel": "Maximum image size is 2MB.",
 
-    "getMetadata": "Get Metadata",
+    "getMetadata": "Autofill",
 
     "addWish": "Add a wish! 🎁",
     "addMember": "Add Member",
@@ -137,5 +137,10 @@
     "loading": "Loading...",
     "error": "An error occurred. Please try again.",
     "noData": "No data available"
+  },
+  "SecretSanta": {
+    "drawn": "🎉 Secret Santa Drawn!",
+    "open": "⏳ Awaiting Secret Santa Draw...",
+    "budget": "Budget - {amount}eur"
   }
 }

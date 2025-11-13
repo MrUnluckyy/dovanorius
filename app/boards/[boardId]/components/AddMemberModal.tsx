@@ -53,8 +53,6 @@ export function AddMemberModal({
   const supabase = createClient();
 
   if (isLoading) return <p>Loading…</p>;
-  if (!following.length)
-    return <p className="text-sm">You are not following anyone yet.</p>;
 
   async function onAdd(): Promise<void> {
     if (!selected) return;

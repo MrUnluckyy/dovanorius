@@ -3,7 +3,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import LobbyHeader from "../_components/LobbyHeader";
 import Participants from "../_components/Participants";
 import DrawButton from "../_components/DrawButton";
-import type { SsEvent, SsMember } from "@/types/secret-santa";
+import type {
+  Participant,
+  SsEvent,
+  SsInvite,
+  SsMember,
+} from "@/types/secret-santa";
 import { createClient } from "@/utils/supabase/client";
 import { qq } from "@/utils/qq";
 import { useState } from "react";
@@ -34,6 +39,19 @@ export default function LobbyClient({
     },
   });
 
+  const { data: invites } = useQuery<SsInvite[]>({
+    enabled: !!event?.id,
+    queryKey: event?.id ? qq.invites(event.id) : ["noop"],
+    queryFn: async () => {
+      const { data, error } = await sb
+        .from("ss_invites")
+        .select("*, to_user:profiles(*)")
+        .eq("event_id", event!.id);
+      if (error) throw error;
+      return (data as unknown as SsInvite[]) ?? [];
+    },
+  });
+
   const { data: members } = useQuery<SsMember[]>({
     enabled: !!event?.id,
     queryKey: event?.id ? qq.members(event.id) : ["noop"],
@@ -46,7 +64,22 @@ export default function LobbyClient({
       return (data as unknown as SsMember[]) ?? [];
     },
   });
-  console.log("members", members);
+
+  const { data: participants } = useQuery<Participant[]>({
+    enabled: !!event?.id,
+    queryKey: event?.id ? qq.participants(event.id) : ["noop"],
+    queryFn: async () => {
+      const { data, error } = await sb
+        .from("ss_participants")
+        .select(
+          "event_id, user_id, display_name, avatar_url, role, status, joined_at"
+        )
+        .eq("event_id", event!.id);
+      if (error) throw error;
+      return (data as unknown as Participant[]) ?? [];
+    },
+  });
+
   const lockMutation = useMutation({
     mutationFn: async (): Promise<void> => {
       const uid = user?.id;
@@ -67,7 +100,7 @@ export default function LobbyClient({
   });
 
   return (
-    <div className="max-w-3xl mx-auto p-4 space-y-6">
+    <div className="max-w-3xl mx-auto p-4 pb-16 space-y-6">
       {isLoading && <div className="skeleton h-24 w-full" />}
       {event && (
         <>
@@ -103,7 +136,7 @@ export default function LobbyClient({
                 />
               </>
             )}
-          <Participants event={event} members={members ?? []} />
+          <Participants event={event} participants={participants ?? []} />
         </>
       )}
     </div>
