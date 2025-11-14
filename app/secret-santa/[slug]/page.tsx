@@ -2,6 +2,7 @@ import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import LobbyClient from "./_components/LobbyClient";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { Snowfall } from "../_components/Snowfall";
 
 export default async function SsLobyPage({
   params,
@@ -19,6 +20,7 @@ export default async function SsLobyPage({
     <main>
       <NavigationV2 user={user} />
       <LobbyClient slug={slug} user={user} />
+      <Snowfall />
     </main>
   );
 }

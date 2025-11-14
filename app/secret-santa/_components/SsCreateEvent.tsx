@@ -2,13 +2,13 @@
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import { generateSlug } from "@/utils/helpers/slugify";
 
 type Form = {
   name: string;
   budget?: number;
   currency?: string;
   event_date?: string;
-  slug: string;
   notes?: string;
 };
 
@@ -25,15 +25,16 @@ export default function SsCreateEvent() {
     const {
       data: { user },
     } = await sb.auth.getUser();
+    const slug = generateSlug(v.name);
     const { data, error } = await sb
       .from("ss_events")
       .insert({
+        slug,
         owner_id: user!.id,
         name: v.name,
         budget: v.budget ?? null,
         currency: v.currency,
         event_date: v.event_date || null,
-        slug: v.slug,
         notes: v.notes ?? null,
         status: "open",
       })
@@ -71,11 +72,6 @@ export default function SsCreateEvent() {
           className="input input-bordered"
           type="date"
           {...register("event_date")}
-        />
-        <input
-          className="input input-bordered"
-          placeholder="Slug (unique)"
-          {...register("slug", { required: true })}
         />
         <textarea
           className="textarea textarea-bordered"

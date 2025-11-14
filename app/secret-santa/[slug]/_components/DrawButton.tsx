@@ -41,7 +41,7 @@ export default function DrawButton({
       disabled={disabled || pending}
       className={`btn btn-secondary ${pending ? "loading" : ""}`}
     >
-      {pending ? "Drawing..." : "Lock & Draw"}
+      {pending ? "Traukiama..." : "Užrakinti ir Traukti"}
     </motion.button>
   );
 }

@@ -14,6 +14,11 @@ import { qq } from "@/utils/qq";
 import { useState } from "react";
 import InviteFollowersModal from "./InviteFollowersModal";
 import { User } from "@supabase/supabase-js";
+import EventSettings from "./EventSettings";
+import { ProgressOfEvent } from "./ProgressOfEvent";
+import { LuInfo } from "react-icons/lu";
+import RevealCard from "./RevealCard";
+import AdminsSettings from "./AdminsSettings";
 
 export default function LobbyClient({
   slug,
@@ -23,6 +28,7 @@ export default function LobbyClient({
   user: User;
 }) {
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const sb = createClient();
   const qc = useQueryClient();
 
@@ -76,6 +82,7 @@ export default function LobbyClient({
         )
         .eq("event_id", event!.id);
       if (error) throw error;
+      setSelectedUserId(data[0].user_id ?? null);
       return (data as unknown as Participant[]) ?? [];
     },
   });
@@ -99,44 +106,104 @@ export default function LobbyClient({
     onSuccess: () => qc.invalidateQueries({ queryKey: qq.event(slug) }),
   });
 
+  const { data: mine } = useQuery({
+    enabled: !!event?.id,
+    queryKey: qq.myAssignment(event?.id ?? "x", "me"),
+    queryFn: async () => {
+      const { data } = await sb
+        .from("ss_my_assignment")
+        .select("*")
+        .eq("event_id", event!.id)
+        .maybeSingle();
+      if (!data) return null;
+      const profile = await sb
+        .from("profiles")
+        .select("id,display_name,avatar_url")
+        .eq("id", data.receiver)
+        .single();
+      return { receiver: profile.data };
+    },
+  });
+
+  const isAdmin =
+    (members &&
+      members.some(
+        (m) =>
+          m.user_id === user.id && (m.role === "owner" || m.role === "admin")
+      )) ||
+    event?.owner_id === user.id;
+
   return (
     <div className="max-w-3xl mx-auto p-4 pb-16 space-y-6">
       {isLoading && <div className="skeleton h-24 w-full" />}
+
       {event && (
         <>
           <LobbyHeader ev={event} />
-          {members &&
-            (members.some(
-              (m) =>
-                m.user_id === user.id &&
-                (m.role === "owner" || m.role === "admin")
-            ) ||
-              event.owner_id === user.id) && (
-              <>
-                <div className="flex items-center gap-2">
+
+          <ProgressOfEvent event={event} />
+          {event.status === "drawn" && mine?.receiver ? (
+            <div className="w-full justify-center items-center">
+              <RevealCard person={mine?.receiver} />
+            </div>
+          ) : null}
+
+          {members && members.length < 4 && (
+            <div role="alert" className="alert alert-info">
+              <LuInfo className="w-6 h-6" />
+              <span>Minimalus dalyviu skaičius yra 3</span>
+            </div>
+          )}
+
+          {isAdmin && (
+            <>
+              <div className="flex items-center gap-2">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => lockMutation.mutate()}
+                  disabled={
+                    event.status !== "open" ||
+                    lockMutation.isPending ||
+                    (members && members.length < 3)
+                  }
+                >
+                  {lockMutation.isPending ? "Uždaroma..." : "Uždaryti"}
+                </button>
+                {
                   <button
-                    className="btn btn-outline"
-                    onClick={() => lockMutation.mutate()}
-                    disabled={event.status !== "open" || lockMutation.isPending}
+                    className="btn btn-primary"
+                    disabled={event.status !== "open"}
+                    onClick={() => setInviteOpen(true)}
                   >
-                    {lockMutation.isPending ? "Locking..." : "Lock joining"}
+                    Pakviesti dalyvių
                   </button>
-                  <button className="btn" onClick={() => setInviteOpen(true)}>
-                    Invite followers
-                  </button>
-                  <DrawButton
-                    slug={slug}
-                    disabled={!["locked", "open"].includes(event.status)}
-                  />
-                </div>
-                <InviteFollowersModal
+                }
+                <DrawButton
                   slug={slug}
-                  open={inviteOpen}
-                  onClose={() => setInviteOpen(false)}
+                  disabled={
+                    !["locked", "open"].includes(event.status) ||
+                    (members && members.length < 3)
+                  }
                 />
-              </>
-            )}
-          <Participants event={event} participants={participants ?? []} />
+              </div>
+              <InviteFollowersModal
+                slug={slug}
+                open={inviteOpen}
+                onClose={() => setInviteOpen(false)}
+              />
+            </>
+          )}
+          <div className="flex flex-col gap-6 md:flex-row">
+            <EventSettings event={event} />
+            <Participants
+              participants={participants ?? []}
+              onUserSelect={(id: string) => setSelectedUserId(id)}
+              isAdmin={isAdmin}
+            />
+          </div>
+          {isAdmin && selectedUserId && (
+            <AdminsSettings eventId={event.id} giverId={selectedUserId} />
+          )}
         </>
       )}
     </div>

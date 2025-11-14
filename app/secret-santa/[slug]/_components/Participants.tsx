@@ -1,25 +1,30 @@
-// app/secret-santa/[slug]/_components/Participants.tsx
 "use client";
 import { Avatar } from "@/components/Avatar";
-import { Participant, SsEvent } from "@/types/secret-santa";
-import Link from "next/link";
+import { Participant } from "@/types/secret-santa";
 import { LuCheck, LuClock, LuCrown, LuX } from "react-icons/lu";
 
 export default function Participants({
-  event,
   participants,
+  onUserSelect,
+  isAdmin = false,
 }: {
-  event: SsEvent;
+  isAdmin?: boolean;
   participants: Participant[];
+  onUserSelect: (id: string) => void;
 }) {
-  console.log("invites", participants);
   return (
-    <div className="card bg-base-200 shadow">
+    <div className="card bg-base-200 shadow flex-1">
       <div className="card-body">
-        <h3 className="card-title">Dalyviai:</h3>
+        <h3 className="card-title font-heading">Dalyviai:</h3>
         <div className="flex flex-col gap-4">
           {participants.map((p) => (
-            <div key={p.user_id} className="flex items-center gap-2">
+            <div
+              key={p.user_id}
+              className={`flex items-center gap-2 ${
+                isAdmin ? "cursor-pointer hover:bg-base-300 p-2 rounded-lg" : ""
+              }`}
+              onClick={() => onUserSelect(p.user_id)}
+            >
               <Avatar
                 avatar_url={p.avatar_url || null}
                 name={p.display_name || "?"}
@@ -33,7 +38,15 @@ export default function Participants({
                   </span>
                 ) : null}
               </p>
-              <div className="w-6 h-6 flex justify-center items-center bg-success text-success-content rounded-full">
+              <div
+                className={`w-6 h-6 flex justify-center items-center ${
+                  p.status === "joined"
+                    ? "bg-success text-success-content"
+                    : p.status === "pending"
+                    ? "bg-warning text-warning-content"
+                    : "bg-error text-error-content"
+                } bg-success text-success-content rounded-full`}
+              >
                 {p.status === "joined" && <LuCheck />}
                 {p.status === "pending" && <LuClock />}
                 {p.status === "declined" && <LuX />}
@@ -44,16 +57,6 @@ export default function Participants({
             <div className="opacity-60">Dalyviu nėra</div>
           )}
         </div>
-        {event.status === "drawn" ? (
-          <div>
-            <Link
-              href={`/secret-santa/${event.slug}/my`}
-              className="btn btn-primary mt-4"
-            >
-              Traukti
-            </Link>
-          </div>
-        ) : null}
       </div>
     </div>
   );
