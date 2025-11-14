@@ -157,7 +157,7 @@ export default function LobbyClient({
 
           {isAdmin && (
             <>
-              <div className="flex flex-col md-flex-row items-center gap-2">
+              <div className="flex flex-col md:flex-row items-center gap-2">
                 <button
                   className="btn btn-primary w-full md:w-auto"
                   onClick={() => lockMutation.mutate()}
