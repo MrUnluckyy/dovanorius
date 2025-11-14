@@ -47,3 +47,13 @@ export async function getBoard(boardId: string) {
   if (error) throw error;
   return data;
 }
+
+export async function getBoardMembers(boardId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("board_members")
+    .select("board_id, role, user_id")
+    .eq("board_id", boardId);
+  if (error) throw error;
+  return data;
+}

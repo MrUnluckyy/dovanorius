@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { WishList } from "./components/WishList";
 import { BoardBar } from "./components/BoardBar";
-import { getBoard } from "@/app/actions/boards/action";
+import { getBoard, getBoardMembers } from "@/app/actions/boards/action";
 import Breadcrumbs from "@/components/navigation/Breadcrumbs";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 
@@ -22,10 +22,14 @@ export default async function BoardPage({
 
   const board = await getBoard(boardId);
 
-  // MAKE MORE ADVANCED ACCESS CHECKS LATER
-  // if (!board || board.owner_id !== user.id) {
-  //   redirect("/boards");
-  // }
+  const members = await getBoardMembers(boardId);
+
+  if (
+    !board ||
+    (board.owner_id !== user.id && !members.find((m) => m.user_id === user.id))
+  ) {
+    redirect("/boards");
+  }
 
   return (
     <main className="pb-20">
