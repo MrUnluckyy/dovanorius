@@ -148,7 +148,7 @@ export default function LobbyClient({
             </div>
           ) : null}
 
-          {members && members.length < 4 && (
+          {members && members.length < 3 && (
             <div role="alert" className="alert alert-info">
               <LuInfo className="w-6 h-6" />
               <span>Minimalus dalyviu skaičius yra 3</span>
@@ -157,9 +157,9 @@ export default function LobbyClient({
 
           {isAdmin && (
             <>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col md-flex-row items-center gap-2">
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-primary w-full md:w-auto"
                   onClick={() => lockMutation.mutate()}
                   disabled={
                     event.status !== "open" ||
@@ -171,7 +171,7 @@ export default function LobbyClient({
                 </button>
                 {
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-primary  w-full md:w-auto"
                     disabled={event.status !== "open"}
                     onClick={() => setInviteOpen(true)}
                   >

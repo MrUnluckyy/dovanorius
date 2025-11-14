@@ -47,7 +47,7 @@ export default function RevealCard({
       : pool[tick % pool.length];
 
   return (
-    <div className="card bg-base-100 shadow-xl min-w-md">
+    <div className="card bg-base-100 shadow-xl w-full md:min-w-md">
       <div className="card-body items-center text-center">
         <div className="card-title">Tu ištraukei:</div>
         <AnimatePresence mode="popLayout">

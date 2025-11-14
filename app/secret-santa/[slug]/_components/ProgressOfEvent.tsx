@@ -14,17 +14,30 @@ export function ProgressOfEvent({ event }: { event: SsEvent }) {
         <hr className="bg-success" />
       </li>
       <li className="flex-1">
-        <hr className={event?.status === "locked" ? "bg-success" : ""} />
+        <hr
+          className={
+            event?.status === "locked" || event?.status === "drawn"
+              ? "bg-success"
+              : ""
+          }
+        />
         <div className="timeline-start">2.</div>
         <div className="timeline-middle">
           <LuCircleCheck
             className={`${
-              event?.status === "locked" && "text-success"
+              (event?.status === "locked" || event?.status === "drawn") &&
+              "text-success"
             } text-xl`}
           />
         </div>
         <div className="timeline-end timeline-box">Narių prisijungimas</div>
-        <hr />
+        <hr
+          className={
+            event?.status === "locked" || event?.status === "drawn"
+              ? "bg-success"
+              : ""
+          }
+        />
       </li>
       <li className="flex-1">
         <hr className={event?.status === "drawn" ? "bg-success" : ""} />
@@ -35,10 +48,10 @@ export function ProgressOfEvent({ event }: { event: SsEvent }) {
           />
         </div>
         <div className="timeline-end timeline-box">Traukimas</div>
-        <hr />
+        <hr className={event?.status === "drawn" ? "bg-success" : ""} />
       </li>
       <li className="flex-1">
-        <hr className={event?.status === "drawn" ? "bg-success" : ""} />
+        <hr />
         <div className="timeline-start">4.</div>
         <div className="timeline-middle">🎅</div>
         <div className="timeline-end timeline-box">Dovanos</div>

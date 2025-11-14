@@ -39,7 +39,9 @@ export default function DrawButton({
       whileTap={{ scale: 0.98 }}
       onClick={go}
       disabled={disabled || pending}
-      className={`btn btn-secondary ${pending ? "loading" : ""}`}
+      className={`btn btn-secondary ${
+        pending ? "loading" : ""
+      }  w-full md:w-auto`}
     >
       {pending ? "Traukiama..." : "Užrakinti ir Traukti"}
     </motion.button>
