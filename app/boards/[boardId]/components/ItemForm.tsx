@@ -2,15 +2,12 @@ import { createClient } from "@/utils/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Item } from "./WishList";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useEffect, useMemo, useState } from "react";
-import { ItemSchema } from "@/schemas/ItemSchema";
-import { z } from "zod";
+import { ItemFormValues, ItemSchema } from "@/schemas/ItemSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useProductImageUpload } from "@/hooks/useImageUpload";
-
-export type ItemFormValues = z.infer<typeof ItemSchema>;
 
 export function ItemForm({
   item,
@@ -158,7 +155,17 @@ export function ItemForm({
             type="number"
             className="input w-full"
             placeholder={t("price")}
-            {...register("price", { valueAsNumber: true })}
+            {...register("price", {
+              setValueAs: (value) => {
+                // allow empty field
+                if (value === "" || value === null || value === undefined) {
+                  return undefined;
+                }
+
+                const n = Number(value);
+                return Number.isNaN(n) ? undefined : n;
+              },
+            })}
           />
           {formState.errors.price ? (
             <p className="text-sm text-error mt-1">
@@ -199,7 +206,10 @@ export function ItemForm({
           <button
             type="button"
             className="btn btn-ghost"
-            onClick={onCloseModal}
+            onClick={() => {
+              onCloseModal();
+              reset(defaultValues);
+            }}
           >
             {t("ctaClose")}
           </button>

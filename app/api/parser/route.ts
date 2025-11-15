@@ -110,8 +110,30 @@ export async function GET(req: Request) {
       signal: ctrl.signal,
       headers: { "User-Agent": "Mozilla/5.0 (Metadata Bot)" },
     });
+
+    // 1) Upstream HTTP error (e.g. 403/503)
+    if (!res.ok) {
+      clearTimeout(timeout);
+      return NextResponse.json(
+        { error: `Upstream error: ${res.status}` },
+        { status: 502 }
+      );
+    }
+
     finalUrl = res.url || target;
     html = await res.text();
+
+    // 2) CAPTCHA / Bot protection detection
+    if (/captcha|are you human|cloudflare/i.test(html)) {
+      clearTimeout(timeout);
+      return NextResponse.json(
+        {
+          error:
+            "Target site is protecting against bots; metadata unavailable.",
+        },
+        { status: 409 }
+      );
+    }
   } catch (e) {
     clearTimeout(timeout);
     console.error("Fetch error:", e);

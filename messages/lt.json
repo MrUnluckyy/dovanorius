@@ -95,6 +95,8 @@
     "addWish": "Pridėk norą 🎁",
     "addMember": "Pridėti narį",
 
+    "toastItemAdded": "🎉 {item} sėkmingai pridėtas!",
+
     "toastBoardCreated": "🎉 {board} lenta sukurta sėkmingai!",
     "toastBoardCreateError": "😵 Upps. Kažkas ne taip. Pamėgink šiek tiek veliau.",
 

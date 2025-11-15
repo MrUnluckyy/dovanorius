@@ -4,11 +4,11 @@ import { useProductImageUpload } from "@/hooks/useImageUpload";
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useState, useRef, useMemo } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { ItemFormValues } from "./ItemForm";
+import { useState, useRef } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ItemSchema } from "@/schemas/ItemSchema";
+import { ItemFormValues, ItemSchema } from "@/schemas/ItemSchema";
+import toast from "react-hot-toast";
 
 export function AddItemModal({
   boardId,
@@ -55,6 +55,7 @@ export function AddItemModal({
     modalRef.current?.showModal();
   };
   const closeModal = () => {
+    reset();
     setIsOpen(false);
     modalRef.current?.close();
   };
@@ -67,6 +68,7 @@ export function AddItemModal({
         `/api/parser?url=${encodeURIComponent(getValues("url") || "")}`
       );
       const data = await res.json();
+      console.log("data", data);
 
       if (data?.title) {
         setValue("title", data.title);
@@ -78,7 +80,7 @@ export function AddItemModal({
         setValue("image_url", data.images[0]);
       }
       if (data?.price) {
-        setValue("price", Number(data.price));
+        setValue("price", Number(data?.price.replace(",", ".")));
       }
     } catch (err) {
       console.error("Error parsing product:", err);
@@ -125,14 +127,15 @@ export function AddItemModal({
         }
       }
     },
-    onSuccess: (data) => {
-      reset();
+    onSuccess: () => {
+      toast.success(t("toastItemAdded", { item: getValues("title") }));
       queryClient.invalidateQueries({ queryKey: ["items", boardId] });
+      reset();
       closeModal();
     },
   });
 
-  const onSubmit: SubmitHandler<ItemFormValues> = async (data) => {
+  const onSubmit = async (data: ItemFormValues) => {
     addItem.mutate(data);
   };
 
@@ -163,8 +166,20 @@ export function AddItemModal({
               <input
                 type="number"
                 className="input w-full"
+                inputMode="decimal"
+                step="0.01"
                 placeholder={t("price")}
-                {...register("price", { valueAsNumber: true })}
+                {...register("price", {
+                  setValueAs: (value) => {
+                    // allow empty field
+                    if (value === "" || value === null || value === undefined) {
+                      return undefined;
+                    }
+
+                    const n = Number(value);
+                    return Number.isNaN(n) ? undefined : n;
+                  },
+                })}
               />
               {formState.errors.price ? (
                 <p className="text-sm text-error mt-1">
@@ -198,7 +213,11 @@ export function AddItemModal({
               <label className="label">{t("maxImageSizeLabel")}</label>
             </fieldset>
             <div className="modal-action">
-              <button className="btn btn-ghost" onClick={closeModal}>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={closeModal}
+              >
                 {t("ctaClose")}
               </button>
               <button className="btn btn-primary" type="submit">

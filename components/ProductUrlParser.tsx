@@ -1,6 +1,6 @@
 "use client";
 
-import { ItemFormValues } from "@/app/boards/[boardId]/components/ItemForm";
+import { ItemFormValues } from "@/schemas/ItemSchema";
 import { useTranslations } from "next-intl";
 import { UseFormRegister } from "react-hook-form";
 

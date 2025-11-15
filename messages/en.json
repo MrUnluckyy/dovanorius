@@ -94,6 +94,8 @@
     "addWish": "Add a wish! 🎁",
     "addMember": "Add Member",
 
+    "toastItemAdded": "🎉 Item {item} added successfully!",
+
     "toastBoardCreated": "🎉 Board {board} created successfully!",
     "toastBoardCreateError": "😵 Oops! Something went wrong while creating the board. Please try again later.",
 

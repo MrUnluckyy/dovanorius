@@ -66,19 +66,10 @@ export function ViewItemModal({
   };
 
   const handleReserve = async () => {
-    // const { error } = await supabase
-    //   .from("items")
-    //   .update({ status: "reserved", reserved_by: user?.id || null })
-    //   .eq("id", id)
-    //   .select();
-    // if (error) {
-    //   toastError({
-    //     title: t("errorReserve"),
-    //     description: t("errorReserveDesc"),
-    //   });
-    //   console.error("Error reserving item:", error);
-    //   return;
-    // }
+    if (!user) {
+      toast.error("Rezervuoti galima tik prisijungus.");
+      return;
+    }
     const { data, error } = await supabase.rpc("reserve_item", {
       p_item_id: id,
     });
@@ -96,19 +87,6 @@ export function ViewItemModal({
   };
 
   const handleUnReserve = async () => {
-    // const { error } = await supabase
-    //   .from("items")
-    //   .update({ status: "wanted", reserved_by: null })
-    //   .eq("id", id)
-    //   .select();
-    // if (error) {
-    //   toastError({
-    //     title: t("errorUnreserve"),
-    //     description: t("errorUnreserveDesc"),
-    //   });
-    //   console.error("Error reserving item:", error);
-    //   return;
-    // }
     const { data, error } = await supabase.rpc("unreserve_item", {
       p_item_id: id,
     });
@@ -174,19 +152,27 @@ export function ViewItemModal({
                   )}
                 </div>
               </div>
+              {!user && inPublicBoard && (
+                <p className="text-error">Rezervuoti galima tik prisijungus</p>
+              )}
+
               <div className="modal-action">
                 <form method="dialog">
-                  {/* if there is a button in form, it will close the modal */}
                   <button className="btn btn-ghost">{t("ctaClose")}</button>
                 </form>
                 {inPublicBoard && item.status === "wanted" && (
-                  <button
-                    disabled={inPublicBoard && item.reserved_by === user?.id}
-                    className="btn btn-primary"
-                    onClick={handleReserve}
-                  >
-                    {t("ctaReserve")}
-                  </button>
+                  <>
+                    <button
+                      disabled={
+                        (inPublicBoard && item.reserved_by === user?.id) ||
+                        !user
+                      }
+                      className="btn btn-primary"
+                      onClick={handleReserve}
+                    >
+                      {t("ctaReserve")}
+                    </button>
+                  </>
                 )}
 
                 {inPublicBoard && item.status === "reserved" && (
