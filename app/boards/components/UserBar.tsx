@@ -1,7 +1,7 @@
 "use client";
 import useProfile from "@/hooks/useProfile";
 import { isWithinInterval, subWeeks } from "date-fns";
-import { UserAvatar } from "@/app/profile/components/UserAvatar";
+import { UserAvatar } from "@/app/dashboard/components/user/UserAvatar";
 import { UserLoadingSkeleton } from "@/components/loaders/UserLoadingSkeleton";
 import { LuShare } from "react-icons/lu";
 import { useState } from "react";
@@ -50,10 +50,7 @@ export function UserBar() {
                 <span className="badge badge-accent ml-2">New</span>
               )}
             </h2>
-            <p className="text-sm">
-              {profile?.about ||
-                "This user prefers to keep an air of mystery about them."}
-            </p>
+            {profile?.about && <p className="text-sm">{profile?.about}</p>}
           </div>
           <div>
             <button

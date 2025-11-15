@@ -10,18 +10,18 @@ export default function EventCard({ ev }: { ev: SsEvent }) {
           <div className="badge badge-outline">{ev.status}</div>
         </div>
         <p className="text-sm opacity-70">
-          Budget: {ev.budget ?? "—"} {ev.currency ?? "EUR"}{" "}
+          Biudžetas: {ev.budget ?? "—"} {ev.currency ?? "EUR"}{" "}
           {ev.event_date ? `· ${ev.event_date}` : ""}
         </p>
         <div className="card-actions justify-end">
           <Link className="btn btn-ghost" href={`/secret-santa/${ev.slug}`}>
-            Open
+            Atidaryti
           </Link>
           <Link
             className="btn btn-primary"
             href={`/secret-santa/${ev.slug}/my`}
           >
-            My recipient
+            Gavėjai
           </Link>
         </div>
       </div>

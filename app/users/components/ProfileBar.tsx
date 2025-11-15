@@ -1,7 +1,7 @@
 "use client";
 import useProfile from "@/hooks/useProfile";
 import { isWithinInterval, subWeeks } from "date-fns";
-import { UserAvatar } from "@/app/profile/components/UserAvatar";
+import { UserAvatar } from "@/app/dashboard/components/user/UserAvatar";
 import { useFollow } from "@/hooks/useFollow";
 import { LuShare, LuUserMinus, LuUserPlus } from "react-icons/lu";
 import { useTranslations } from "next-intl";
@@ -57,13 +57,12 @@ export function ProfileBar({
             <h2 className="text-4xl font-semibold mb-2">
               {profile?.display_name || "Anonimus User"}
               {isNewUser && (
-                <span className="badge badge-accent ml-2">Naujas</span>
+                <span className="badge badge-accent ml-2">
+                  Naujas vartotojas
+                </span>
               )}
             </h2>
-            <p className="text-sm">
-              {profile?.about ||
-                "This user prefers to keep an air of mystery about them."}
-            </p>
+            <p className="text-sm">{profile?.about}</p>
           </div>
         </div>
         <div className="flex gap-4">

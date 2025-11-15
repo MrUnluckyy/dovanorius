@@ -36,7 +36,8 @@
     "board": "Wish Board",
     "users": "Users",
     "user": "User",
-    "userBoards": "Vser's Boards"
+    "userBoards": "Vser's Boards",
+    "createEvent": "Create Event"
   },
 
   "Boards": {

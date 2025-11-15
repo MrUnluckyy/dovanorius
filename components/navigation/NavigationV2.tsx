@@ -3,7 +3,7 @@ import { LocaleSwitcher } from "../LocaleSwitcher";
 import { useTranslations } from "next-intl";
 import { User } from "@supabase/supabase-js";
 import { Logo } from "../Logo";
-import { LuX, LuMenu, LuHouse } from "react-icons/lu";
+import { LuX, LuMenu, LuHouse, LuGift } from "react-icons/lu";
 import { SignOutButton } from "@/app/(auth)/components/SignOutButton";
 import Image from "next/image";
 import NotificationsBell from "../notification/NotificationBell";
@@ -52,6 +52,10 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 <>
                   <NotificationsLive />
                   <NotificationsBell />
+                  <Link href="/secret-santa" className="btn btn-success">
+                    <LuGift />
+                    {t("createEvent")}
+                  </Link>
                   <Link href="/dashboard" className="btn btn-ghost">
                     <LuHouse />
                     {t("dashboard")}
@@ -89,6 +93,10 @@ export function NavigationV2({ user }: { user?: User | null }) {
           <div className="flex flex-col gap-4 items-start text-2xl">
             {user ? (
               <>
+                <Link href="/secret-santa" className="btn btn-success text-2xl">
+                  <LuGift />
+                  {t("createEvent")}
+                </Link>
                 <Link href="/dashboard" className="btn btn-ghost text-2xl">
                   <LuHouse />
                   {t("dashboard")}

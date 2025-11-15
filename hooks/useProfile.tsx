@@ -19,7 +19,10 @@ const useProfile = (publicUserId?: string) => {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
 
+  // Only fetch auth user when we *don’t* have a public id
   useEffect(() => {
+    if (publicUserId) return;
+
     const fetchUser = async () => {
       const { data: currentUser, error } = await supabase.auth.getUser();
 
@@ -30,15 +33,16 @@ const useProfile = (publicUserId?: string) => {
 
       setUser(currentUser.user);
     };
-    if (!publicUserId) {
-      fetchUser();
-    }
-  }, []);
+
+    fetchUser();
+  }, [publicUserId, supabase]);
 
   const userId = publicUserId || user?.id;
-  console.log("publicUserId", userId);
+  console.log("userId used for profile query:", userId);
 
   const fetchProfile = async () => {
+    if (!userId) throw new Error("No user id provided");
+
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
@@ -51,36 +55,39 @@ const useProfile = (publicUserId?: string) => {
     return data as Profile;
   };
 
-  // Edit is possible only with fetched user id
+  const {
+    data: profile,
+    isLoading,
+    isFetching,
+    error,
+  } = useQuery({
+    queryKey: ["profile", userId], // 👈 key per *actual* profile id
+    queryFn: fetchProfile,
+    enabled: !!userId, // 👈 don’t run until we know the id
+  });
+
   const editProfile = async (updatedProfile: Partial<Profile>) => {
     if (!user) {
       throw new Error("User not authenticated");
     }
+
     const { data, error } = await supabase
       .from("profiles")
       .update(updatedProfile)
-      .eq("id", user?.id)
+      .eq("id", user.id)
       .single();
 
     if (error) {
       throw new Error(error.message);
     }
 
-    // Invalidate and refetch the profile query to get the updated data
-    queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
+    // Invalidate the logged-in user’s profile cache
+    queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
 
     return data as Profile;
   };
 
-  const {
-    data: profile,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["profile", user?.id],
-    queryFn: fetchProfile,
-  });
-  return { profile, isLoading, error, editProfile };
+  return { profile, isLoading, isFetching, error, editProfile };
 };
 
 export default useProfile;

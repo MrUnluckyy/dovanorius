@@ -1,12 +1,12 @@
 "use client";
 import useProfile from "@/hooks/useProfile";
 import { isWithinInterval, subWeeks } from "date-fns";
-import { UserAvatar } from "@/app/profile/components/UserAvatar";
+import { UserAvatar } from "@/app/dashboard/components/user/UserAvatar";
 import { UserLoadingSkeleton } from "@/components/loaders/UserLoadingSkeleton";
 import { LuShare } from "react-icons/lu";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { UserEditModal } from "@/app/profile/components/UserEditModal";
+import { UserEditModal } from "@/app/dashboard/components/user/UserEditModal";
 
 export function DashboardUser() {
   const { isLoading, profile } = useProfile();
@@ -51,10 +51,7 @@ export function DashboardUser() {
                 <span className="badge badge-accent ml-2">New</span>
               )}
             </h2>
-            <p className="text-sm">
-              {profile?.about ||
-                "This user prefers to keep an air of mystery about them."}
-            </p>
+            <p className="text-sm">{profile?.about}</p>
           </div>
           <div className="flex flex-col gap-2">
             <button

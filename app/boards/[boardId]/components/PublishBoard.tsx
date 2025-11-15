@@ -1,9 +1,9 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
-import { v4 as uuidv4 } from "uuid";
 import { useTranslations } from "next-intl";
 import { LuLock, LuLockOpen } from "react-icons/lu";
+import { generateSlug } from "@/utils/helpers/slugify";
 
 export function PublishBoard({
   boardId,
@@ -21,22 +21,14 @@ export function PublishBoard({
   const t = useTranslations("Boards");
 
   async function onPublish(e: React.FormEvent) {
-    const slug = boardSlug
-      ? boardSlug
-      : boardName
-          .toLowerCase()
-          .replace(/[^\p{L}\p{N}\s-]/gu, "")
-          .trim()
-          .replace(/\s+/g, "-") +
-        "-" +
-        uuidv4().slice(0, 8);
+    const slug = boardSlug ? boardSlug : generateSlug(boardName);
 
     e.preventDefault();
     const { error } = await supabase
       .from("boards")
       .update({ slug, is_public: !boardPublished })
       .eq("id", boardId);
-    if (!error) qc.invalidateQueries({ queryKey: ["boards"] });
+    if (!error) qc.invalidateQueries({ queryKey: ["board", boardId] });
   }
 
   return (

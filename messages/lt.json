@@ -37,7 +37,8 @@
     "board": "Norų lenta",
     "users": "Vartotojai",
     "user": "Vartotojas",
-    "userBoards": "Vartotojo lentos"
+    "userBoards": "Vartotojo lentos",
+    "createEvent": "Sukurti renginį"
   },
 
   "Boards": {
