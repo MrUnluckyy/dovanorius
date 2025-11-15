@@ -76,7 +76,7 @@ export default async function RootLayout({
   const locale = store.get("locale")?.value || "lt";
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} data-theme="noriuto" suppressHydrationWarning>
       <body
         className={`${headings.variable} ${body.variable} ${special.variable} antialiased relative`}
       >

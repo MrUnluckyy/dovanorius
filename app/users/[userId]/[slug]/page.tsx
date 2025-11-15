@@ -15,6 +15,7 @@ export default async function PublicUserBoardPage({
   } = await supabase.auth.getUser();
 
   // Fetch board by slug when is_public = true
+
   const { data: board, error: bErr } = await supabase
     .from("boards")
     .select("id, name, is_public, created_at, slug, description")

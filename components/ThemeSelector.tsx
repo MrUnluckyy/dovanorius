@@ -8,7 +8,7 @@ const themes = ["retro", "silk", "forest", "cmyk", "business"];
 export default function ThemeSelector() {
   const { setTheme, theme: selectedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  console.log("selectedTheme", selectedTheme);
+
   const t = useTranslations("Profile");
   useEffect(() => setMounted(true), []);
 

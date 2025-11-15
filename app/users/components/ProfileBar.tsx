@@ -6,6 +6,7 @@ import { useFollow } from "@/hooks/useFollow";
 import { LuShare, LuUserMinus, LuUserPlus } from "react-icons/lu";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { UserLoadingSkeleton } from "@/components/loaders/UserLoadingSkeleton";
 
 export function ProfileBar({
   authUserId,
@@ -32,7 +33,7 @@ export function ProfileBar({
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <UserLoadingSkeleton />;
 
   const isNewUser =
     profile?.created_at &&

@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 import { useTranslations } from "next-intl";
+import { LuLock, LuLockOpen } from "react-icons/lu";
 
 export function PublishBoard({
   boardId,
@@ -24,7 +25,7 @@ export function PublishBoard({
       ? boardSlug
       : boardName
           .toLowerCase()
-          .replace(/[^\p{L}\p{N}\s-]/gu, "") // remove emojis & symbols
+          .replace(/[^\p{L}\p{N}\s-]/gu, "")
           .trim()
           .replace(/\s+/g, "-") +
         "-" +
@@ -35,12 +36,13 @@ export function PublishBoard({
       .from("boards")
       .update({ slug, is_public: !boardPublished })
       .eq("id", boardId);
-    if (!error) qc.invalidateQueries({ queryKey: ["board"] });
+    if (!error) qc.invalidateQueries({ queryKey: ["boards"] });
   }
 
   return (
     <form onSubmit={onPublish} className="w-full">
       <button className="btn w-full whitespace-nowrap" type="submit">
+        {boardPublished ? <LuLock /> : <LuLockOpen />}
         {boardPublished ? t("makePrivate") : t("publish")}
       </button>
     </form>

@@ -3,12 +3,14 @@ import { createClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
+import { BoardsLoadingSkeleton } from "@/components/loaders/BoardsLoadingSkeleton";
 
 export function PublicBoardsList({ userId }: { userId: string }) {
   const supabase = createClient();
   const t = useTranslations("Boards");
+  const format = useFormatter();
 
   const { data: boards = [], isLoading } = useQuery({
     queryKey: ["boards", userId],
@@ -23,8 +25,9 @@ export function PublicBoardsList({ userId }: { userId: string }) {
       return data;
     },
   });
+  const now = new Date();
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <BoardsLoadingSkeleton />;
 
   return (
     <div className="flex flex-col gap-4">
@@ -45,19 +48,20 @@ export function PublicBoardsList({ userId }: { userId: string }) {
                     </span>
                   )}
                 </h2>
-                <p className="text-semibold">{`${board.item_count} wishes`}</p>
+                <p className="text-semibold">
+                  {t("itemsCount", { count: board.item_count })}
+                </p>
+
                 <p className="text-semibold">
                   {!board.last_item_added_at
-                    ? "No items added yet"
-                    : `Last updated ${formatDistanceToNow(
-                        new Date(board.last_item_added_at),
-                        {
-                          addSuffix: true,
-                        }
+                    ? t("noItemsYet")
+                    : `${t("lastUpdated")} ${format.relativeTime(
+                        board.last_item_added_at,
+                        now
                       )}`}
                 </p>
                 <div className="justify-end card-actions">
-                  <button className="btn btn-accent">View</button>
+                  <button className="btn btn-accent">{t("ctaView")}</button>
                 </div>
               </div>
             </div>

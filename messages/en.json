@@ -78,6 +78,8 @@
 
     "successUnreserve": "🎉 Success!",
     "successUnreserveDesc": "You have successfully un-reserved this item.!",
+    "successDelete": "🎉 Success!",
+    "successDeleteDesc": "You have successfully deleted this item.!",
     "errorUnreserve": "😵 Opsss!",
     "errorUnreserveDesc": "Something went wrong while un-reserving this item. Please try again later.",
 

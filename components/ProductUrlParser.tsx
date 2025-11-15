@@ -1,19 +1,19 @@
 "use client";
 
+import { ItemFormValues } from "@/app/boards/[boardId]/components/ItemForm";
 import { useTranslations } from "next-intl";
+import { UseFormRegister } from "react-hook-form";
 
 type Props = {
   onParse: () => void;
   loading: boolean;
-  value: string;
-  onChange: (value: string) => void;
+  register: UseFormRegister<ItemFormValues>;
 };
 
 export default function ProductUrlParser({
   onParse,
   loading,
-  onChange,
-  value,
+  register,
 }: Props) {
   const t = useTranslations("Boards");
   return (
@@ -41,11 +41,10 @@ export default function ProductUrlParser({
             <input
               type="url"
               placeholder="https://"
-              value={value}
               pattern="^(https?://)?([a-zA-Z0-9]([a-zA-Z0-9\-].*[a-zA-Z0-9])?\.)+[a-zA-Z].*$"
               title="Must be valid URL"
               className="w-full"
-              onChange={(e) => onChange(e.target.value)}
+              {...register("url")}
             />
           </label>
           <div className="validator-hint hidden">{t("urlValidError")}</div>

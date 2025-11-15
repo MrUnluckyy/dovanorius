@@ -6,6 +6,7 @@ import { User } from "@supabase/supabase-js";
 import { useTranslations } from "next-intl";
 import { BoardsLoadingSkeleton } from "@/components/loaders/BoardsLoadingSkeleton";
 import { WishListItem } from "./WishListItem";
+import { LuPlus } from "react-icons/lu";
 
 export type Item = {
   id: string;
@@ -45,6 +46,7 @@ export function WishList({
         .select(
           "id, board_id, title, notes, price, image_url, url, status, reserved_by ,priority, created_at"
         )
+        .in("status", ["wanted", "reserved"])
         .eq("board_id", boardId)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -60,7 +62,10 @@ export function WishList({
     <div className="">
       {!isPublic && (
         <div className="mb-4">
-          <AddItemModal boardId={boardId} />
+          <AddItemModal boardId={boardId}>
+            <LuPlus />
+            {t("addWish")}
+          </AddItemModal>
         </div>
       )}
       {items.length === 0 ? (

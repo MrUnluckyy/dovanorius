@@ -9,6 +9,7 @@ import { UserLoadingSkeleton } from "@/components/loaders/UserLoadingSkeleton";
 import { AddMemberModal } from "./AddMemberModal";
 import { useBoardMembersMap } from "@/hooks/useMemberMap";
 import { AvatarGroup } from "../../components/AvatarGroup";
+import { LuShare, LuTrash } from "react-icons/lu";
 
 type Board = {
   id: string;
@@ -107,17 +108,18 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
             boardSlug={boardClient?.slug}
           />
           <button
-            className={`whitespace-nowrap btn ${copied ? "btn-success" : ""}`}
+            className={`whitespace-nowrap btn ${copied ? "btn-success" : ""} `}
             onClick={handleCopy}
             disabled={!boardClient?.is_public}
           >
-            {copied ? t("copied") : t("share")}
+            <LuShare /> {copied ? t("copied") : t("share")}
           </button>
           {userId && <AddMemberModal userId={userId} boardId={board.id} />}
           <button
             className="btn btn-ghost whitespace-nowrap"
             onClick={() => deleteBoard.mutate()}
           >
+            <LuTrash />
             {t("delete")}
           </button>
         </div>

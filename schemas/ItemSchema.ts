@@ -6,8 +6,8 @@ export const ItemSchema = z.object({
   notes: z.string().max(2_000).optional().or(z.literal("")),
   image_url: z.url().optional().or(z.literal("")),
   price: z
-    .number("Enter a valid number")
-    .positive("Must be > 0")
-    .max(1_000_000, "Too large")
+    .number("Turėtų būti skaičius")
+    .positive("Gali būti tik teigiamas skaičius")
+    .max(1_000_000, "Per didelė kaina")
     .optional(),
 });

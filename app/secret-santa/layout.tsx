@@ -12,7 +12,7 @@ export default async function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <div data-theme="christmas" className="min-h-screen">
+    <div data-theme="christmas" className="min-h-screen overflow-x-hidden">
       {children}
     </div>
   );

@@ -5,14 +5,13 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import AvatarUploader from "./AvatarUpload";
 import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
-import ThemeSelector from "@/components/ThemeSelector";
 
 export function ProfileEditForm({
   onCloseModal,
 }: {
   onCloseModal: () => void;
 }) {
-  const { profile, isLoading, editProfile } = useProfile();
+  const { profile, editProfile } = useProfile();
   const [uploading, setUploading] = useState(false);
   const t = useTranslations("Profile");
 
@@ -46,8 +45,6 @@ export function ProfileEditForm({
     }
   }, [profile, reset]);
 
-  if (isLoading) return <div>Loading...</div>;
-
   return (
     <div className="flex flex-col items-center">
       <div className="mb-8">
@@ -56,7 +53,6 @@ export function ProfileEditForm({
       <div>
         <AvatarUploader profile={profile} />
       </div>
-      <ThemeSelector />
       <div>
         <form onSubmit={handleSubmit(onSubmit)}>
           <fieldset className="fieldset w-xs p-4">

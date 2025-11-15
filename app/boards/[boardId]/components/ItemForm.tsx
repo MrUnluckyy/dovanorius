@@ -6,11 +6,11 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useEffect, useMemo, useState } from "react";
 import { ItemSchema } from "@/schemas/ItemSchema";
-import z from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useProductImageUpload } from "@/hooks/useImageUpload";
 
-type ItemFormValues = z.infer<typeof ItemSchema>;
+export type ItemFormValues = z.infer<typeof ItemSchema>;
 
 export function ItemForm({
   item,
@@ -48,7 +48,7 @@ export function ItemForm({
     [previewUrl, watch]
   );
 
-  const onSubmit: SubmitHandler<ItemFormValues> = async (data) => {
+  const onSubmit = async (data: ItemFormValues) => {
     try {
       // Optional: basic client-side file guard
       if (uploadedImageFile) {
@@ -76,7 +76,7 @@ export function ItemForm({
           url: data.url || null,
           notes: data.notes || null,
           image_url,
-          price: Number(data.price) ?? null,
+          price: data.price ?? null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", item.id);

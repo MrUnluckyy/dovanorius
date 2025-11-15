@@ -4,22 +4,47 @@ import { useProductImageUpload } from "@/hooks/useImageUpload";
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useState, useRef } from "react";
-import { LuPlus } from "react-icons/lu";
+import { useState, useRef, useMemo } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { ItemFormValues } from "./ItemForm";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ItemSchema } from "@/schemas/ItemSchema";
 
-export function AddItemModal({ boardId }: { boardId: string }) {
-  const [form, setForm] = useState({
+export function AddItemModal({
+  boardId,
+  children,
+}: {
+  boardId: string;
+  children: React.ReactNode;
+}) {
+  const [parsing, setParsing] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
+  const { uploadProductImage } = useProductImageUpload();
+  const t = useTranslations("Boards");
+
+  const defaultValues: ItemFormValues = {
     title: "",
     url: "",
     notes: "",
     image_url: "",
-    price: "",
+    price: undefined,
+  };
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState,
+    getValues,
+    setValue,
+    watch,
+  } = useForm<ItemFormValues>({
+    defaultValues,
+    resolver: zodResolver(ItemSchema),
+    mode: "onSubmit",
   });
-  const [parsing, setParsing] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
-  const { uploadProductImage } = useProductImageUpload();
-  const t = useTranslations("Boards");
 
   const modalRef = useRef<HTMLDialogElement>(null);
   const supabase = createClient();
@@ -35,25 +60,25 @@ export function AddItemModal({ boardId }: { boardId: string }) {
   };
 
   const handleParse = async () => {
-    if (!form.url) return;
+    if (!getValues("url")) return;
     setParsing(true);
     try {
       const res = await fetch(
-        `/api/parser?url=${encodeURIComponent(form.url)}`
+        `/api/parser?url=${encodeURIComponent(getValues("url") || "")}`
       );
       const data = await res.json();
 
       if (data?.title) {
-        setForm((prev) => ({ ...prev, title: data.title }));
+        setValue("title", data.title);
       }
       if (data?.description) {
-        setForm((prev) => ({ ...prev, notes: data.description }));
+        setValue("notes", data.description);
       }
       if (data?.images && data.images.length > 0) {
-        setForm((prev) => ({ ...prev, image_url: data.images?.[0] }));
+        setValue("image_url", data.images[0]);
       }
       if (data?.price) {
-        setForm((prev) => ({ ...prev, price: data.price }));
+        setValue("price", Number(data.price));
       }
     } catch (err) {
       console.error("Error parsing product:", err);
@@ -63,13 +88,7 @@ export function AddItemModal({ boardId }: { boardId: string }) {
   };
 
   const addItem = useMutation({
-    mutationFn: async (payload: {
-      title: string;
-      url?: string;
-      notes?: string;
-      image_url?: string;
-      price?: string;
-    }) => {
+    mutationFn: async (payload: ItemFormValues) => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -81,9 +100,9 @@ export function AddItemModal({ boardId }: { boardId: string }) {
           title: payload.title,
           url: payload.url || null,
           image_url: payload.image_url || null,
-          notes: payload.notes || null,
+          notes: payload?.notes || null,
           created_by: user?.id || null,
-          price: payload?.price ? parseInt(payload?.price) : null,
+          price: payload?.price || null,
           status: "wanted",
           priority: "medium",
         })
@@ -100,7 +119,6 @@ export function AddItemModal({ boardId }: { boardId: string }) {
             .eq("id", data.id)
             .select()
             .single();
-
           if (error) {
             console.error("Error updating item with image URL:", error);
           }
@@ -108,50 +126,37 @@ export function AddItemModal({ boardId }: { boardId: string }) {
       }
     },
     onSuccess: (data) => {
-      console.log("Item added", data);
+      reset();
       queryClient.invalidateQueries({ queryKey: ["items", boardId] });
-      setForm({ title: "", url: "", notes: "", image_url: "", price: "" });
       closeModal();
     },
   });
 
+  const onSubmit: SubmitHandler<ItemFormValues> = async (data) => {
+    addItem.mutate(data);
+  };
+
   return (
     <>
       <button className="btn btn-accent" onClick={openModal}>
-        <LuPlus />
-        {t("ctaAddItem")}
+        {children}
       </button>
       <dialog ref={modalRef} open={isOpen} className="modal">
         <div className="modal-box">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!form.title.trim()) return;
-              addItem.mutate({
-                title: form.title.trim(),
-                url: form.url,
-                notes: form.notes,
-                image_url: form.image_url,
-                price: form.price,
-              });
-            }}
-          >
+          <form onSubmit={handleSubmit(onSubmit)}>
             <h3 className="font-bold text-lg">{t("addWish")}</h3>
             <fieldset className="fieldset w-full">
               <ProductUrlParser
                 onParse={handleParse}
-                onChange={(e) => setForm({ ...form, url: e })}
                 loading={parsing}
-                value={form.url}
+                register={register}
               />
               <label className="label">{t("title")}</label>
               <input
                 type="text"
                 className="input w-full"
                 placeholder={t("title")}
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                required
+                {...register("title")}
               />
 
               <label className="label">{t("price")}</label>
@@ -159,21 +164,24 @@ export function AddItemModal({ boardId }: { boardId: string }) {
                 type="number"
                 className="input w-full"
                 placeholder={t("price")}
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
+                {...register("price", { valueAsNumber: true })}
               />
+              {formState.errors.price ? (
+                <p className="text-sm text-error mt-1">
+                  {formState.errors.price.message}
+                </p>
+              ) : null}
 
               <label className="label">{t("notes")}</label>
               <textarea
                 className="textarea w-full"
                 placeholder={t("notes")}
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                {...register("notes")}
               />
 
               <div>
-                {form.image_url ? (
-                  <img src={form.image_url} alt={form.title} />
+                {getValues("image_url") ? (
+                  <img src={getValues("image_url")} alt={getValues("title")} />
                 ) : null}
               </div>
 
