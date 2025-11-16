@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ItemFormValues, ItemSchema } from "@/schemas/ItemSchema";
 import toast from "react-hot-toast";
+import { stripHtml } from "@/utils/helpers/stripHtml";
 
 export function AddItemModal({
   boardId,
@@ -67,14 +68,16 @@ export function AddItemModal({
       const res = await fetch(
         `/api/parser?url=${encodeURIComponent(getValues("url") || "")}`
       );
+      if (!res.ok) {
+        throw new Error("Failed to fetch parsed data");
+      }
       const data = await res.json();
-      console.log("data", data);
 
       if (data?.title) {
         setValue("title", data.title);
       }
       if (data?.description) {
-        setValue("notes", data.description);
+        setValue("notes", stripHtml(data.description));
       }
       if (data?.images && data.images.length > 0) {
         setValue("image_url", data.images[0]);
@@ -83,7 +86,9 @@ export function AddItemModal({
         setValue("price", Number(data?.price.replace(",", ".")));
       }
     } catch (err) {
-      console.error("Error parsing product:", err);
+      toast.error(
+        "😭 Duomenų nepavyko gauti. Likusią informaciją suveskite patys."
+      );
     } finally {
       setParsing(false);
     }
