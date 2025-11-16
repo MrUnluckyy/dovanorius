@@ -23,7 +23,7 @@ export function BoardsList({ user }: { user: User }) {
       const { data, error } = await supabase
         .from("my_boards_with_stats")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("last_item_added_at", { ascending: false });
       if (error) throw error;
       return data;
     },

@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ItemFormValues, ItemSchema } from "@/schemas/ItemSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useProductImageUpload } from "@/hooks/useImageUpload";
+import imageCompression from "browser-image-compression";
 
 export function ItemForm({
   item,
@@ -49,7 +50,7 @@ export function ItemForm({
     try {
       // Optional: basic client-side file guard
       if (uploadedImageFile) {
-        if (uploadedImageFile.size > 5 * 1024 * 1024) {
+        if (uploadedImageFile.size > 10 * 1024 * 1024) {
           toast.error(t("imageTooLarge", { size: "5MB" }));
           return;
         }
@@ -58,11 +59,20 @@ export function ItemForm({
           return;
         }
       }
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1600,
+        useWebWorker: true,
+      };
 
       // 1) If a new image is chosen, upload to Supabase Storage (public bucket example).
       let image_url = data.image_url || null;
       if (uploadedImageFile) {
-        image_url = await uploadProductImage(uploadedImageFile, item.id);
+        const compressedFile = await imageCompression(
+          uploadedImageFile,
+          options
+        );
+        image_url = await uploadProductImage(compressedFile, item.id);
       }
 
       // 2) Update the row
@@ -187,7 +197,11 @@ export function ItemForm({
 
           <div>
             {formState ? (
-              <img src={currentImage} alt={getValues("title")} />
+              <img
+                src={currentImage}
+                alt={getValues("title")}
+                className="max-w-[300px] mx-auto"
+              />
             ) : null}
           </div>
 

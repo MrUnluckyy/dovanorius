@@ -84,6 +84,8 @@
     "successDeleteDesc": "Sėkmingai ištrynėte!",
     "errorUnreserve": "😵 Upsss!",
     "errorUnreserveDesc": "Įvyko klaida atšaukiant rezervaciją. Bandykite dar kartą vėliau.",
+    "successMarkAsBought": "🎉 Smagaus naudojimo!",
+    "errorMarkAsBought": "😵 Įvyko pažymint kaip nupirką. Bandykite dar kartą vėliau.!",
 
     "boardsCount": "{count, plural, one {# Lenta} other {# Lentos}}",
     "itemsCount": "{count, plural, one {# Noras} other {# Norai}}",
@@ -112,7 +114,8 @@
     "ctaSubmit": "Pateikti",
     "ctaCancel": "Atšaukti",
     "ctaSave": "Išsaugoti",
-    "ctaAdd": "Pridėti"
+    "ctaAdd": "Pridėti",
+    "ctaMarkAsBought": "Nupirkta"
   },
 
   "Profile": {
@@ -147,6 +150,9 @@
   "SecretSanta": {
     "drawn": "🎉 Paruošta!",
     "open": "⏳ Laukiama...",
-    "budget": "Biudžetas - {amount}eur"
+    "budget": "Biudžetas - {amount}eur",
+    "draft": "🧪 Ruošiama",
+    "locked": "🔐 Užrakintas",
+    "archived": "🗃️ Archyvas"
   }
 }

@@ -7,6 +7,8 @@ import { LuPen } from "react-icons/lu";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import imageCompression from "browser-image-compression";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function AvatarUploader({
   profile,
@@ -18,6 +20,7 @@ export default function AvatarUploader({
   const [uploading, setUploading] = useState(false);
   const t = useTranslations("Profile");
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const getPreviewUrl = () => (file ? URL.createObjectURL(file) : undefined);
 
@@ -25,10 +28,18 @@ export default function AvatarUploader({
     e.preventDefault();
     if (!file) return;
 
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1600,
+      useWebWorker: true,
+    };
+
+    const compressedFile = await imageCompression(file, options);
+
     if (!file.type.startsWith("image/"))
       return toast.error("Pasirinkite paveikslėlį.");
-    if (file.size > 4 * 1024 * 1024)
-      return toast.error("Maximalus failo dydis 4 MB.");
+    if (file.size > 10 * 1024 * 1024)
+      return toast.error("Maximalus failo dydis 10 MB.");
 
     setUploading(true);
     try {
@@ -39,7 +50,7 @@ export default function AvatarUploader({
       if (authErr) throw authErr;
       if (!user) throw new Error("Not authenticated");
 
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const ext = (compressedFile.name.split(".").pop() || "jpg").toLowerCase();
       const path = `${user.id}/avatar.${ext}`;
 
       const { error: upErr } = await supabase.storage
@@ -71,6 +82,7 @@ export default function AvatarUploader({
       toast.error(t("errorUploadingAvatar"));
     } finally {
       setUploading(false);
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
     }
   }
 

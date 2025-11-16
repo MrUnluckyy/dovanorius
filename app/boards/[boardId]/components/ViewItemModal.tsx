@@ -4,7 +4,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState, useRef } from "react";
-import { LuExternalLink } from "react-icons/lu";
+import { LuCheck, LuExternalLink } from "react-icons/lu";
 import { Item } from "./WishList";
 import { User } from "@supabase/supabase-js";
 import { ItemForm } from "./ItemForm";
@@ -101,6 +101,26 @@ export function ViewItemModal({
     }
   };
 
+  const markAsBought = async () => {
+    const { data, error } = await supabase
+      .from("items")
+      .update({
+        status: "purchased",
+      })
+      .eq("id", id)
+      .single();
+
+    if (data) {
+      toast.success(t("successMarkAsBought"));
+      queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
+      closeModal();
+    }
+    if (error) {
+      toast.error(t("errorMarkAsBought"));
+      console.error("Error unreserving item:", error);
+    }
+  };
+
   const disablePublicEditing =
     inPublicBoard &&
     item.status === "reserved" &&
@@ -123,7 +143,11 @@ export function ViewItemModal({
             <>
               <figure className="w-full mb-6">
                 {item.image_url ? (
-                  <img src={item.image_url} alt={title} />
+                  <img
+                    src={item.image_url}
+                    alt={title}
+                    className="max-w-[300px]"
+                  />
                 ) : (
                   <img src="/assets/placeholder.jpg" alt="Gift illustration" />
                 )}
@@ -153,13 +177,16 @@ export function ViewItemModal({
                 </div>
               </div>
               {!user && inPublicBoard && (
-                <p className="text-error">Rezervuoti galima tik prisijungus</p>
+                <p className="text-error font-bold">
+                  Rezervuoti galima tik prisijungus
+                </p>
               )}
 
-              <div className="modal-action">
-                <form method="dialog">
-                  <button className="btn btn-ghost">{t("ctaClose")}</button>
-                </form>
+              <div className="modal-action flex-col-reverse md:flex-row">
+                <button className="btn btn-ghost" onClick={closeModal}>
+                  {t("ctaClose")}
+                </button>
+
                 {inPublicBoard && item.status === "wanted" && (
                   <>
                     <button
@@ -202,6 +229,12 @@ export function ViewItemModal({
                       onClick={() => setIsEditing(true)}
                     >
                       {t("ctaEdit")}
+                    </button>
+                    <button
+                      className="btn btn-secondary "
+                      onClick={() => markAsBought()}
+                    >
+                      {t("ctaMarkAsBought")}
                     </button>
                   </>
                 )}

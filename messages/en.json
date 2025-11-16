@@ -83,6 +83,8 @@
     "successDeleteDesc": "You have successfully deleted this item.!",
     "errorUnreserve": "😵 Opsss!",
     "errorUnreserveDesc": "Something went wrong while un-reserving this item. Please try again later.",
+    "successMarkAsBought": "🎉 Success!",
+    "errorMarkAsBought": "😵 Oops!",
 
     "boardsCount": "{count, plural, one {# Board} other {# Boards}}",
     "itemsCount": "{count, plural, one {# Wish} other {# Wishes}}",
@@ -110,7 +112,8 @@
     "ctaSubmit": "Submit",
     "ctaCancel": "Cancel",
     "ctaSave": "Save",
-    "ctaAdd": "Add"
+    "ctaAdd": "Add",
+    "ctaMarkAsBought": "Bought"
   },
 
   "Profile": {
@@ -146,6 +149,9 @@
   "SecretSanta": {
     "drawn": "🎉 Secret Santa Drawn!",
     "open": "⏳ Awaiting Secret Santa Draw...",
-    "budget": "Budget - {amount}eur"
+    "budget": "Budget - {amount}eur",
+    "draft": "🧪 Draft",
+    "locked": "🔐 Locked",
+    "archived": "🗃️ Archived"
   }
 }

@@ -196,6 +196,7 @@ export default function LobbyClient({
           <div className="flex flex-col gap-6 md:flex-row">
             <EventSettings event={event} />
             <Participants
+              event={event}
               participants={participants ?? []}
               onUserSelect={(id: string) => setSelectedUserId(id)}
               isAdmin={isAdmin}

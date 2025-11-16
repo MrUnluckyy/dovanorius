@@ -18,7 +18,7 @@ export default function EventSettings({ event }: { event: SsEvent }) {
           <div className="w-full p-4 bg-base-300 rounded-lg flex items-center text-xl gap-2">
             <LuCalendar className="w-8 h-8" />
             <p>
-              {format.dateTime(dateTime, {
+              {format?.dateTime(dateTime, {
                 year: "numeric",
                 month: "long",
                 day: "numeric",

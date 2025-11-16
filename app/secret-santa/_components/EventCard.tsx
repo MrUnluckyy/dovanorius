@@ -1,13 +1,15 @@
 import { SsEvent } from "@/types/secret-santa";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 export default function EventCard({ ev }: { ev: SsEvent }) {
+  const t = useTranslations("SecretSanta");
   return (
     <div className="card bg-base-100 shadow">
       <div className="card-body">
         <div className="flex items-center justify-between">
           <h2 className="card-title">{ev.name}</h2>
-          <div className="badge badge-outline">{ev.status}</div>
+          <div className="badge badge-outline p-4">{t(ev.status)}</div>
         </div>
         <p className="text-sm opacity-70">
           Biudžetas: {ev.budget ?? "—"} {ev.currency ?? "EUR"}{" "}
