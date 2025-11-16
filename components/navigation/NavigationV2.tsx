@@ -8,43 +8,46 @@ import { SignOutButton } from "@/app/(auth)/components/SignOutButton";
 import Image from "next/image";
 import NotificationsBell from "../notification/NotificationBell";
 import NotificationsLive from "../notification/NotificationLive";
+import { NavSearch } from "./NavSearch";
 
 export function NavigationV2({ user }: { user?: User | null }) {
   const t = useTranslations("Navbar");
   return (
-    <div className="drawer">
+    <div className="drawer drawer-end">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       {/* DRAWER CONTENT: */}
       <div className="drawer-content flex flex-col">
         {/* Navbar */}
         <div className="navbar bg-base-100 w-full shadow-sm">
           <div className="flex w-full max-w-[1440px] px-4 mx-auto items-center">
-            <div className="flex-none lg:hidden">
-              <label
-                htmlFor="my-drawer-2"
-                aria-label="open sidebar"
-                className="btn btn-square btn-ghost text-2xl"
-              >
-                <LuMenu />
-              </label>
-            </div>
+            <div className="mx-2 flex-1 font-bold justify-between flex lg:block">
+              <div className="flex gap-4 md:gap-8">
+                <Link
+                  href="/"
+                  className="text-xl font-bold flex gap-2 items-center"
+                >
+                  <Image
+                    src="/assets/logo.png"
+                    alt="Logo"
+                    width={40}
+                    height={40}
+                    className="shrink-0"
+                  />
+                  <p className="font-heading hidden md:block">NoriuTo</p>
+                </Link>
+                <NavSearch />
+              </div>
 
-            <div className="mx-2 flex-1 px-2 font-bold justify-between flex lg:block">
-              <Link
-                href="/"
-                className="text-xl font-bold flex gap-2 items-center"
-              >
-                <Image
-                  src="/assets/logo.png"
-                  alt="Logo"
-                  width={40}
-                  height={40}
-                />
-                NoriuTo
-              </Link>
-              <div className="lg:hidden">
+              <div className="flex-none lg:hidden">
                 <NotificationsLive />
                 <NotificationsBell />
+                <label
+                  htmlFor="my-drawer-2"
+                  aria-label="open sidebar"
+                  className="btn btn-square btn-ghost text-2xl"
+                >
+                  <LuMenu />
+                </label>
               </div>
             </div>
             <div className="hidden flex-none lg:flex gap-2">
