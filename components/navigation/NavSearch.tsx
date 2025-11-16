@@ -139,10 +139,10 @@ export function NavSearch() {
         if (myId !== latestQueryRef.current) return; // stale
 
         setResults([...profileResults, ...boardResults]);
-      } catch (err: any) {
+      } catch (err) {
         if (myId !== latestQueryRef.current) return;
         setResults([]);
-        setError(err?.message ?? "Something went wrong");
+        setError("Something went wrong");
       } finally {
         if (myId === latestQueryRef.current) {
           setLoading(false);
