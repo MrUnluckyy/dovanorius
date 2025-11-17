@@ -26,7 +26,7 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "NoriuTo - Tavo norų sąrašai vienoje vietoje!",
+  title: "NoriuTo.lt - Tavo norų sąrašai vienoje vietoje!",
   description:
     "Svajok kartu su NoriuTo.lt - kurk norų / dovanų sąrašus ir dalinkis jais su draugais bei šeima. 🎁",
   manifest: "/favicons/site.webmanifest",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "NoriuTo - Tavo norų sąrašai vienoje vietoje!",
     description:
-      "Svajok kartu su NoriuTo.lt – kurk norų / dovanų sąrašus ir dalinkis jais su draugais bei šeima. 🎁",
+      "Svajok kartu su NoriuTo.lt - kurk norų / dovanų sąrašus ir dalinkis jais su draugais bei šeima. 🎁",
     url: "https://www.noriuto.lt",
     siteName: "NoriuTo",
     images: [

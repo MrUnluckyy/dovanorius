@@ -1,4 +1,12 @@
+import { useTranslations } from "next-intl";
 import { RegisterForm } from "../components/RegisterForm";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Noriuto.lt - registruokis",
+  description:
+    "Prisiregistruokite prie Noriuto.lt ir pradėkite kurti savo norų sąrašus bei dalintis jais su draugais ir šeima.",
+};
 
 export default function Register() {
   return (
@@ -6,10 +14,10 @@ export default function Register() {
       <div className="hero bg-base-200 min-h-screen">
         <div className="hero-content flex-col lg:flex-row-reverse">
           <div className="text-center lg:text-left">
-            <h1 className="text-5xl font-bold">Register</h1>
-            <p className="py-6 max-w-prose">
-              Gifting is nott about the thing you give — it is about the thought
-              that says, <i>I see you</i>, <i>I know you</i>, and <i>I care</i>.
+            <h1 className="text-5xl font-bold font-special">Registruokis!</h1>
+            <p className="py-6 max-w-prose font-special">
+              Prisiregistruokite prie Noriuto.lt ir pradėkite kurti savo norų
+              sąrašus bei dalintis jais su draugais ir šeima.
             </p>
           </div>
           <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">

@@ -1,18 +1,35 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
+import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
-import { FaGoogle } from "react-icons/fa6";
 import { LuCheck } from "react-icons/lu";
+
+function useRecoverPassword() {
+  return useMutation({
+    mutationFn: async (email: string) => {
+      const res = await fetch("/api/auth/recover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message ?? "Failed to send reset email");
+      }
+      return data;
+    },
+  });
+}
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [loginError, setLoginError] = useState<string | null>(null);
-  const supabase = createClient();
+  const [loading, setLoading] = useState(false);
   const t = useTranslations("Auth");
+  const supabase = createClient();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,7 +55,7 @@ export function ForgotPasswordForm() {
 
   return (
     <>
-      <h2 className="text-2xl font-semibold mb-8">
+      <h2 className="text-2xl font-semibold font-heading">
         {t("forgotPasswordTitle")}
       </h2>
 
@@ -55,11 +72,11 @@ export function ForgotPasswordForm() {
       ) : (
         <form onSubmit={onSubmit} className="space-y-3">
           <fieldset className="fieldset">
-            <label className="label">Email</label>
+            <label className="label">El. paštas</label>
             <input
               type="email"
               className="input"
-              placeholder="Email"
+              placeholder="El. paštas"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -70,7 +87,11 @@ export function ForgotPasswordForm() {
               </Link>
             </div>
 
-            <button type="submit" className="btn btn-neutral mt-4">
+            <button
+              type="submit"
+              className="btn btn-neutral mt-4"
+              disabled={loading}
+            >
               {loading ? "Siunčiama" : "Siųsti"}
             </button>
           </fieldset>

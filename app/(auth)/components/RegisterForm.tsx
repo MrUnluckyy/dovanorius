@@ -9,35 +9,22 @@ import { FaGoogle } from "react-icons/fa6";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { RegisterSchema } from "@/schemas/RegisterSchema";
 
-const schema = z
-  .object({
-    displayName: z.string().min(1, "Please enter your display name."),
-    email: z.string().email("Please enter a valid email."),
-    password: z
-      .string()
-      .min(6, "Password should be at least 6 characters.")
-      .max(72, "Password is too long."),
-    confirmPassword: z.string().min(1, "Please confirm your password."),
-  })
-  .refine((vals) => vals.password === vals.confirmPassword, {
-    message: "Passwords do not match.",
-    path: ["confirmPassword"],
-  });
-
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<typeof RegisterSchema>;
 
 export function RegisterForm() {
   const t = useTranslations("Auth");
   const supabase = createClient();
   const [completed, setCompleted] = useState(false);
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     setError,
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(RegisterSchema),
     defaultValues: {
       displayName: "",
       email: "",
@@ -78,12 +65,12 @@ export function RegisterForm() {
   if (completed) {
     return (
       <div className="space-y-8">
-        <h2 className="text-2xl font-semibold text-center">All done! 👋</h2>
-        <p className="text-center">
-          Registration complete! Please check your email to verify your account.
-        </p>
+        <h2 className="text-2xl font-semibold text-center">
+          {t("registerCompleteTitle")}
+        </h2>
+        <p className="text-center">{t("registerCompleteBody")}</p>
         <Link href="/login" className="btn">
-          Done
+          {t("ctaDone")}
         </Link>
       </div>
     );
@@ -91,7 +78,9 @@ export function RegisterForm() {
 
   return (
     <>
-      <h2 className="text-2xl font-semibold">Hey There! 👋</h2>
+      <h2 className="text-4xl font-semibold font-heading mb-4">
+        {t("registerFormTitle")}
+      </h2>
 
       <button
         className="btn btn-accent"
@@ -110,96 +99,107 @@ export function RegisterForm() {
         {t("registerWithGoogle")}
       </button>
 
-      <div className="divider">{t("or")}</div>
+      <div className="divider label">{t("or")}</div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-        <fieldset className="fieldset" disabled={isSubmitting}>
-          {/* Display Name */}
-          <label className="label" htmlFor="displayName">
-            Display name
-          </label>
-          <input
-            id="displayName"
-            type="text"
-            className={`input ${errors.displayName ? "input-error" : ""}`}
-            placeholder="Your name"
-            {...register("displayName")}
-          />
-          {errors.displayName && (
-            <p className="text-error text-sm mt-1">
-              {errors.displayName.message}
-            </p>
-          )}
+        <fieldset className="fieldset gap-3" disabled={isSubmitting}>
+          <div className="flex flex-col gap-1">
+            <label className="label" htmlFor="displayName">
+              {t("displayNameLabel")}
+            </label>
+            <input
+              id="displayName"
+              type="text"
+              className={`input ${errors.displayName ? "input-error" : ""}`}
+              placeholder={t("displayNameLabel")}
+              {...register("displayName")}
+            />
+            {errors.displayName?.message && (
+              <p className="text-error text-sm">
+                {t(errors.displayName.message)}
+              </p>
+            )}
+          </div>
 
-          {/* Email */}
-          <label className="label" htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            className={`input ${errors.email ? "input-error" : ""}`}
-            placeholder="Email"
-            autoComplete="email"
-            {...register("email")}
-          />
-          {errors.email && (
-            <p className="text-error text-sm mt-1">{errors.email.message}</p>
-          )}
+          <div className="flex flex-col gap-1">
+            <label className="label" htmlFor="email">
+              {t("emailLabel")}
+            </label>
+            <input
+              id="email"
+              type="email"
+              className={`input ${errors.email ? "input-error" : ""}`}
+              placeholder={t("emailLabel")}
+              autoComplete="email"
+              {...register("email")}
+            />
+            {errors.email?.message && (
+              <p className="text-error text-sm">{t(errors.email.message)}</p>
+            )}
+          </div>
 
-          {/* Password */}
-          <label className="label" htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            className={`input ${errors.password ? "input-error" : ""}`}
-            placeholder="Password"
-            autoComplete="new-password"
-            {...register("password")}
-          />
-          {errors.password && (
-            <p className="text-error text-sm mt-1">{errors.password.message}</p>
-          )}
+          <div className="flex flex-col gap-1">
+            <label className="label" htmlFor="password">
+              {t("passwordLabel")}
+            </label>
+            <input
+              id="password"
+              type="password"
+              className={`input ${errors.password ? "input-error" : ""}`}
+              placeholder={t("passwordLabel")}
+              autoComplete="new-password"
+              {...register("password")}
+            />
+            {errors.password?.message && (
+              <p className="text-error text-sm">{t(errors.password.message)}</p>
+            )}
+          </div>
 
           {/* Confirm Password */}
-          <label className="label" htmlFor="confirmPassword">
-            Confirm password
-          </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            className={`input ${errors.confirmPassword ? "input-error" : ""}`}
-            placeholder="Confirm password"
-            autoComplete="new-password"
-            {...register("confirmPassword")}
-          />
-          {errors.confirmPassword && (
-            <p className="text-error text-sm mt-1">
-              {errors.confirmPassword.message}
-            </p>
-          )}
+          <div className="flex flex-col gap-1">
+            <label className="label" htmlFor="confirmPassword">
+              {t("confirmPasswordLabel")}
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              className={`input ${errors.confirmPassword ? "input-error" : ""}`}
+              placeholder={t("confirmPasswordLabel")}
+              autoComplete="new-password"
+              {...register("confirmPassword")}
+            />
+            {errors.confirmPassword?.message && (
+              <p className="text-error text-sm">
+                {t(errors.confirmPassword.message)}
+              </p>
+            )}
+          </div>
 
           {/* Form-level/server error */}
           {"root" in errors && errors.root?.message && (
-            <p className="text-error text-sm mt-1">{errors.root.message}</p>
+            <p className="text-error text-sm">{t(errors.root.message)}</p>
           )}
 
-          <div>
-            <a className="link link-hover">Forgot password?</a>
-          </div>
+          <div className="flex flex-col gap-1">
+            <Link href="/forgot-password" className="link link-hover">
+              {t("forgotPasswordLink")}
+            </Link>
 
-          <Link href="/login" className="link link-hover">
-            Already with us? Log in here.
-          </Link>
+            <Link href="/login" className="link link-hover">
+              {t("haveAccountLoginLink")}
+            </Link>
+          </div>
 
           <button
             type="submit"
             className="btn btn-neutral mt-4"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Signing up..." : "Register"}
+            {isSubmitting ? (
+              <span className="loading loading-dots loading-md"></span>
+            ) : (
+              t("ctaRegister")
+            )}
           </button>
         </fieldset>
       </form>

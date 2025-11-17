@@ -6,6 +6,7 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
+  // User already created the supabase client
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,

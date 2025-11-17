@@ -88,15 +88,23 @@ export function LoginForm() {
           )}
           <div className="flex flex-col gap-2">
             <Link href="forgot-password" className="link link-hover">
-              Forgot password?
+              {t("forgotPasswordLink")}
             </Link>
             <Link href="/register" className="link link-hover">
-              Do not have an account?
+              {t("doNotHaveAccountLink")}
             </Link>
           </div>
 
-          <button type="submit" className="btn btn-neutral mt-4">
-            {loading ? "Logging in..." : "Log in"}
+          <button
+            type="submit"
+            className="btn btn-neutral mt-4"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="loading loading-dots loading-md"></span>
+            ) : (
+              t("ctaLogin")
+            )}
           </button>
         </fieldset>
       </form>

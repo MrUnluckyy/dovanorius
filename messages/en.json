@@ -8,9 +8,36 @@
     "registerWithGoogle": "Register with Google",
     "or": "or",
     "login": "Login",
+    "forgotPasswordLink": "Forgot Password?",
+    "resetPasswordLink": "Reset Password",
+    "doNotHaveAccountLink": "Don't have an account? Register",
+    "haveAccountLoginLink": "Already have an account? Login",
     "invalidCredentials": "Invalid email or password.",
     "forgotPasswordTitle": "Forgot your password?",
-    "newPasswordTitle": "Set a new password"
+    "newPasswordTitle": "Set a new password",
+
+    "registerTitle": "Create your account",
+    "registerDescription": "Join NoriuTo and start creating your wish boards today!",
+    "registerFormTitle": "Hey there! 👋",
+    "displayNameLabel": "Display Name",
+    "errorDisplayNameRequired": "Display Name is required.",
+    "emailLabel": "Email Address",
+    "errorInvalidEmail": "Please enter a valid email address.",
+    "passwordLabel": "Password",
+    "errorPasswordTooShort": "Password must be at least 6 characters long.",
+    "errorPasswordTooLong": "Password must be no more than 50 characters long.",
+    "confirmPasswordLabel": "Confirm Password",
+    "errorConfirmPasswordRequired": "Confirm Password is required.",
+    "errorPasswordsDoNotMatch": "Passwords do not match.",
+
+    "registerCompleteTitle": "Registration Successful!",
+    "registerCompleteBody": "Your account has been created successfully. Please verify your email to log in.",
+    "registerSuccessToast": "🎉 Registration successful! Welcome aboard!",
+    "registerGenericErrorToast": "😵 Oopsss! An error occurred during registration. Please try again later.",
+
+    "ctaRegister": "Register",
+    "ctaLogin": "Login",
+    "ctaDone": "Done"
   },
   "HomePage": {
     "title": "Make gifting easy and fun.",
