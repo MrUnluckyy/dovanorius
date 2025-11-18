@@ -3,6 +3,7 @@ import { BoardBar } from "@/app/boards/[boardId]/components/BoardBar";
 import Breadcrumbs from "@/components/navigation/Breadcrumbs";
 import { WishList } from "@/app/boards/[boardId]/components/WishList";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
+import Footer from "@/components/footer/Footer";
 
 export default async function PublicUserBoardPage({
   params,
@@ -44,15 +45,18 @@ export default async function PublicUserBoardPage({
     .order("created_at", { ascending: false });
 
   return (
-    <main className="pb-20">
+    <>
       <NavigationV2 user={user} />
-      <div className="max-w-[1440px] mx-auto min-h-screen px-4">
-        <Breadcrumbs />
-        <div className="py-8 mb-10">
-          <BoardBar userId={user?.id} board={board} inPublicView />
+      <main className="pb-20">
+        <div className="max-w-[1440px] mx-auto min-h-screen px-4">
+          <Breadcrumbs />
+          <div className="py-8 mb-10">
+            <BoardBar userId={user?.id} board={board} inPublicView />
+          </div>
+          <WishList boardId={board.id} user={user} isPublic />
         </div>
-        <WishList boardId={board.id} user={user} isPublic />
-      </div>
-    </main>
+      </main>
+      <Footer />
+    </>
   );
 }

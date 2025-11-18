@@ -4,7 +4,14 @@ import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState, useRef } from "react";
-import { LuCheck, LuExternalLink } from "react-icons/lu";
+import {
+  LuCheck,
+  LuExternalLink,
+  LuPencil,
+  LuTrash,
+  LuTrash2,
+  LuX,
+} from "react-icons/lu";
 import { Item } from "./WishList";
 import { User } from "@supabase/supabase-js";
 import { ItemForm } from "./ItemForm";
@@ -136,9 +143,20 @@ export function ViewItemModal({
         {t("ctaView")}
       </button>
       <dialog ref={modalRef} open={isOpen} className="modal">
-        <div className="modal-box pb-16 md:pb-4">
+        <div className="modal-box pb-16 md:pb-4 pt-10">
+          <button
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            onClick={closeModal}
+            about="Uždaryti modalą"
+          >
+            <LuX className="text-lg" />
+          </button>
           {isEditing ? (
-            <ItemForm item={item} onCloseModal={closeModal} />
+            <ItemForm
+              item={item}
+              onCloseModal={closeModal}
+              onCancel={() => setIsEditing(false)}
+            />
           ) : (
             <>
               <figure className="w-full mb-6">
@@ -182,11 +200,7 @@ export function ViewItemModal({
                 </p>
               )}
 
-              <div className="modal-action flex-col-reverse md:flex-row">
-                <button className="btn btn-ghost" onClick={closeModal}>
-                  {t("ctaClose")}
-                </button>
-
+              <div className="modal-action flex-col-reverse md:flex-row mt-8">
                 {inPublicBoard && item.status === "wanted" && (
                   <>
                     <button
@@ -217,31 +231,38 @@ export function ViewItemModal({
                 )}
 
                 {!inPublicBoard && (
-                  <>
+                  <div className="flex justify-between w-full">
+                    <div className="flex gap-2">
+                      <button
+                        className="btn btn-ghost"
+                        onClick={() => deleteItem.mutate(item.id)}
+                        aria-label={t("ctaDelete")}
+                      >
+                        <LuTrash2 className="text-lg" />
+                      </button>
+                      <button
+                        className="btn btn-ghost"
+                        onClick={() => setIsEditing(true)}
+                        aria-label={t("ctaEdit")}
+                      >
+                        <LuPencil className="text-lg" />
+                      </button>
+                    </div>
                     <button
-                      className="btn btn-ghost"
-                      onClick={() => deleteItem.mutate(item.id)}
-                    >
-                      {t("ctaDelete")}
-                    </button>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      {t("ctaEdit")}
-                    </button>
-                    <button
-                      className="btn btn-secondary "
+                      className="btn btn-accent"
                       onClick={() => markAsBought()}
                     >
                       {t("ctaMarkAsBought")}
                     </button>
-                  </>
+                  </div>
                 )}
               </div>
             </>
           )}
         </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>uždaryti</button>
+        </form>
       </dialog>
     </>
   );

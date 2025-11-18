@@ -1,28 +1,26 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
+
 export default function Footer() {
   return (
-    <footer className="footer sm:footer-horizontal bg-neutral text-neutral-content p-10">
-      <nav>
-        <h6 className="footer-title">Services</h6>
-        <a className="link link-hover">Branding</a>
-        <a className="link link-hover">Design</a>
-        <a className="link link-hover">Marketing</a>
-        <a className="link link-hover">Advertisement</a>
+    <footer className="footer footer-horizontal footer-center bg-primary text-primary-content p-10">
+      <aside>
+        <Image src="/assets/logo.png" alt="noriu.lt" width={100} height={100} />
+        <p className="font-bold">
+          Noriuto.lt
+          <br />
+          Tavo norų partneris!
+        </p>
+      </aside>
+      <nav className="flex flex-col md:flex-row gap-4">
+        <Link href={"/privatumo-politika"}>Privatumo Politika</Link>
+        <Link href={"/slapuku-politika"}>Slapukų Politika</Link>
+        <Link href={"/naudojimo-politika"}>Naudojimo Politika</Link>
+        <Link href={"/atsakomybes-apribojimas"}>Atsakomybes Apribojimas</Link>
       </nav>
-      <nav>
-        <h6 className="footer-title">Company</h6>
-        <a className="link link-hover">About us</a>
-        <a className="link link-hover">Contact</a>
-        <a className="link link-hover">Jobs</a>
-        <a className="link link-hover">Press kit</a>
-      </nav>
-      <nav>
-        <h6 className="footer-title">Legal</h6>
-        <a className="link link-hover">Terms of use</a>
-        <a className="link link-hover">Privacy policy</a>
-        <a className="link link-hover">Cookie policy</a>
-      </nav>
+      <p>© {new Date().getFullYear()} Noriuto.lt. Visos teisės saugomos.</p>
     </footer>
   );
 }

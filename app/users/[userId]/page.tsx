@@ -3,6 +3,7 @@ import Breadcrumbs from "@/components/navigation/Breadcrumbs";
 import { ProfileBar } from "@/app/users/components/ProfileBar";
 import { PublicBoardsList } from "../components/PublicBoardsList";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
+import Footer from "@/components/footer/Footer";
 
 export default async function UserPage({
   params,
@@ -16,15 +17,18 @@ export default async function UserPage({
   } = await supabase.auth.getUser();
 
   return (
-    <main className="pb-20">
+    <>
       <NavigationV2 user={user} />
-      <div className="max-w-[1440px] mx-auto min-h-screen px-4">
-        <Breadcrumbs />
-        <div className="py-8 mb-4 md:mb-10">
-          <ProfileBar authUserId={user?.id} userId={userId} />
+      <main className="pb-20">
+        <div className="max-w-[1440px] mx-auto min-h-screen px-4">
+          <Breadcrumbs />
+          <div className="py-8 mb-4 md:mb-10">
+            <ProfileBar authUserId={user?.id} userId={userId} />
+          </div>
+          <PublicBoardsList userId={userId} />
         </div>
-        <PublicBoardsList userId={userId} />
-      </div>
-    </main>
+      </main>
+      <Footer />
+    </>
   );
 }

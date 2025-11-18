@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
-import { LuUserPlus } from "react-icons/lu";
+import { LuUserPlus, LuX } from "react-icons/lu";
 import { useFollow } from "@/hooks/useFollow";
 import { createClient } from "@/utils/supabase/client";
 import toast from "react-hot-toast";
@@ -52,8 +52,6 @@ export function AddMemberModal({
 
   const supabase = createClient();
 
-  if (isLoading) return <p>Loading…</p>;
-
   async function onAdd(): Promise<void> {
     if (!selected) return;
 
@@ -83,6 +81,13 @@ export function AddMemberModal({
 
       <dialog ref={modalRef} open={isOpen} className="modal">
         <div className="modal-box">
+          <button
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            onClick={closeModal}
+            about="Uždaryti modalą"
+          >
+            <LuX className="text-lg" />
+          </button>
           <h3 className="font-bold text-lg mb-3">{t("addMember")}</h3>
 
           <div className="flex gap-2 items-center">
@@ -91,7 +96,7 @@ export function AddMemberModal({
               value={selected ?? ""}
               onChange={(e) => setSelected(e.target.value || null)}
             >
-              <option value="">Select user…</option>
+              <option value="">Pasirinkti vartotoją…</option>
               {following.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.display_name ?? u.id}
@@ -104,20 +109,20 @@ export function AddMemberModal({
               value={role}
               onChange={(e) => setRole(e.target.value as Role)}
             >
-              <option value="editor">Editor</option>
-              <option value="viewer">Viewer</option>
+              <option value="editor">Redagavimo teisės</option>
+              <option value="viewer">Peržiūros teisės</option>
             </select>
           </div>
 
           <div className="modal-action">
-            <button className="btn btn-ghost" onClick={closeModal}>
-              {t("ctaClose")}
-            </button>
             <button className="btn btn-primary" onClick={onAdd}>
               {t("ctaAdd")}
             </button>
           </div>
         </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>uždaryti</button>
+        </form>
       </dialog>
     </div>
   );

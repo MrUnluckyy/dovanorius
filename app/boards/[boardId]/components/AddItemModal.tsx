@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ItemFormValues, ItemSchema } from "@/schemas/ItemSchema";
 import toast from "react-hot-toast";
 import { stripHtml } from "@/utils/helpers/stripHtml";
+import { LuX } from "react-icons/lu";
 
 export function AddItemModal({
   boardId,
@@ -151,6 +152,13 @@ export function AddItemModal({
       </button>
       <dialog ref={modalRef} open={isOpen} className="modal">
         <div className="modal-box">
+          <button
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            onClick={closeModal}
+            aria-label={t("ctaClose")}
+          >
+            <LuX className="text-lg" />
+          </button>
           <form onSubmit={handleSubmit(onSubmit)}>
             <h3 className="font-bold text-lg">{t("addWish")}</h3>
             <fieldset className="fieldset w-full">
@@ -218,19 +226,15 @@ export function AddItemModal({
               <label className="label">{t("maxImageSizeLabel")}</label>
             </fieldset>
             <div className="modal-action">
-              <button
-                type="button"
-                className="btn btn-ghost"
-                onClick={closeModal}
-              >
-                {t("ctaClose")}
-              </button>
               <button className="btn btn-primary" type="submit">
                 {t("ctaSubmit")}
               </button>
             </div>
           </form>
         </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>{t("ctaClose")}</button>
+        </form>
       </dialog>
     </>
   );

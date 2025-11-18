@@ -1,3 +1,4 @@
+import Footer from "@/components/footer/Footer";
 import { ImageHero } from "@/components/hero/ImageHero";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import { createClient } from "@/utils/supabase/server";
@@ -19,6 +20,7 @@ export default async function Home() {
       <main className="pb-20 overflow-hidden">
         <ImageHero />
       </main>
+      <Footer />
     </>
   );
 }

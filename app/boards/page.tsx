@@ -4,6 +4,7 @@ import { UserBar } from "./components/UserBar";
 import { BoardsList } from "./components/BoardsList";
 import Breadcrumbs from "@/components/navigation/Breadcrumbs";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
+import Footer from "@/components/footer/Footer";
 
 export default async function BoardsPage() {
   const supabase = await createClient();
@@ -15,16 +16,19 @@ export default async function BoardsPage() {
   if (!user || error) redirect("/login");
 
   return (
-    <main className="pb-20">
+    <>
       <NavigationV2 user={user} />
-      <div className="max-w-[1440px] mx-auto min-h-screen px-4">
-        <Breadcrumbs />
-        <div className="py-8 mb-4 md:mb-10">
-          <UserBar />
-        </div>
+      <main className="pb-20">
+        <div className="max-w-[1440px] mx-auto min-h-screen px-4">
+          <Breadcrumbs />
+          <div className="py-8 mb-4 md:mb-10">
+            <UserBar />
+          </div>
 
-        <BoardsList user={user} />
-      </div>
-    </main>
+          <BoardsList user={user} />
+        </div>
+      </main>
+      <Footer />
+    </>
   );
 }

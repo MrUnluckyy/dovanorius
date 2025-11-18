@@ -13,9 +13,11 @@ import imageCompression from "browser-image-compression";
 export function ItemForm({
   item,
   onCloseModal,
+  onCancel,
 }: {
   item: Item;
   onCloseModal: () => void;
+  onCancel: () => void;
 }) {
   const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -221,11 +223,11 @@ export function ItemForm({
             type="button"
             className="btn btn-ghost"
             onClick={() => {
-              onCloseModal();
               reset(defaultValues);
+              onCancel();
             }}
           >
-            {t("ctaClose")}
+            {t("ctaCancel")}
           </button>
           <button className="btn btn-primary" type="submit">
             {t("ctaSubmit")}

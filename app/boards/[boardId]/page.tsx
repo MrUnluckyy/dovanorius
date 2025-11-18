@@ -5,6 +5,7 @@ import { BoardBar } from "./components/BoardBar";
 import { getBoard, getBoardMembers } from "@/app/actions/boards/action";
 import Breadcrumbs from "@/components/navigation/Breadcrumbs";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
+import Footer from "@/components/footer/Footer";
 
 export default async function BoardPage({
   params,
@@ -32,15 +33,18 @@ export default async function BoardPage({
   }
 
   return (
-    <main className="pb-20">
+    <>
       <NavigationV2 user={user} />
-      <div className="max-w-[1440px] mx-auto min-h-screen px-4">
-        <Breadcrumbs />
-        <div className="py-8 mb-10">
-          <BoardBar userId={user.id} board={board} />
+      <main className="pb-20">
+        <div className="max-w-[1440px] mx-auto min-h-screen px-4">
+          <Breadcrumbs />
+          <div className="py-8 mb-10">
+            <BoardBar userId={user.id} board={board} />
+          </div>
+          <WishList boardId={board.id} />
         </div>
-        <WishList boardId={board.id} />
-      </div>
-    </main>
+      </main>
+      <Footer />
+    </>
   );
 }

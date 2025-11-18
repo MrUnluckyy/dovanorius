@@ -1,7 +1,7 @@
 "use client";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
-import { LuPen } from "react-icons/lu";
+import { LuPen, LuX } from "react-icons/lu";
 import { ProfileEditForm } from "./ProfileEditForm";
 
 export function UserEditModal() {
@@ -26,8 +26,18 @@ export function UserEditModal() {
       </button>
       <dialog ref={modalRef} open={isOpen} className="modal">
         <div className="modal-box">
+          <button
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            onClick={closeModal}
+            about="Uždaryti modalą"
+          >
+            <LuX className="text-lg" />
+          </button>
           <ProfileEditForm onCloseModal={closeModal} />
         </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>uždaryti</button>
+        </form>
       </dialog>
     </>
   );

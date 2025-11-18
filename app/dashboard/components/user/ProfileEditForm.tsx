@@ -115,14 +115,6 @@ export function ProfileEditForm({
             >
               {t("ctaSave")}
             </button>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              disabled={uploading}
-              onClick={onCloseModal}
-            >
-              {t("ctaClose")}
-            </button>
           </fieldset>
         </form>
       </div>

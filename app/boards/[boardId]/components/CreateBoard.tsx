@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { FormEvent, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { LuClipboardPlus } from "react-icons/lu";
+import { LuClipboardPlus, LuX } from "react-icons/lu";
 
 type FormData = {
   name: string;
@@ -69,6 +69,13 @@ export function CreateBoard({ user }: { user: User | null }) {
       </button>
       <dialog ref={modalRef} open={isOpen} className="modal">
         <div className="modal-box">
+          <button
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            onClick={closeModal}
+            about="Uždaryti modalą"
+          >
+            <LuX className="text-lg" />
+          </button>
           <h3 className="font-bold text-lg">{t("createBoardTitle")}</h3>
           <form onSubmit={handleSubmit(onSubmit)}>
             <fieldset className="fieldset w-full">
@@ -89,19 +96,15 @@ export function CreateBoard({ user }: { user: User | null }) {
               />
             </fieldset>
             <div className="modal-action">
-              <button
-                type="button"
-                className="btn btn-ghost"
-                onClick={closeModal}
-              >
-                {t("ctaCancel")}
-              </button>
               <button className="btn btn-primary" type="submit">
                 {t("ctaSave")}
               </button>
             </div>
           </form>
         </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>uždaryti</button>
+        </form>
       </dialog>
     </div>
   );

@@ -2,6 +2,7 @@ import Breadcrumbs from "@/components/navigation/Breadcrumbs";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import { createClient } from "@/utils/supabase/server";
 import { SearchUsers } from "./components/SearchUsers";
+import Footer from "@/components/footer/Footer";
 
 export default async function Users() {
   const supabase = await createClient();
@@ -17,8 +18,8 @@ export default async function Users() {
 
   return (
     <>
+      <NavigationV2 user={user} />
       <main className="pb-20">
-        <NavigationV2 user={user} />
         <div className="max-w-[1440px] mx-auto min-h-screen px-4">
           <Breadcrumbs />
           <div className="py-8 mb-4 md:mb-10">
@@ -26,6 +27,7 @@ export default async function Users() {
           </div>
         </div>
       </main>
+      <Footer />
     </>
   );
 }
