@@ -119,10 +119,10 @@ export function NavigationV2({ user }: { user?: User | null }) {
               </>
             ) : (
               <>
-                <Link href="login" className="btn btn-ghost text-2xl">
+                <Link href="/login" className="btn btn-ghost text-2xl">
                   {t("login")}
                 </Link>
-                <Link href="register" className="btn btn-ghost text-2xl">
+                <Link href="/register" className="btn btn-ghost text-2xl">
                   {t("register")}
                 </Link>
               </>
