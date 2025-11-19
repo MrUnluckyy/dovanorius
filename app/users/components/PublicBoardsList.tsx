@@ -16,15 +16,16 @@ export function PublicBoardsList({ userId }: { userId: string }) {
     queryKey: ["boards", userId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("boards_with_stats")
+        .from("public_boards_for_user")
         .select("*")
-        .eq("owner_id", userId)
-        .eq("is_public", true)
+        .eq("access_user_id", userId)
         .order("created_at", { ascending: false });
+
       if (error) throw error;
       return data;
     },
   });
+
   const now = new Date();
 
   if (isLoading) return <BoardsLoadingSkeleton />;
