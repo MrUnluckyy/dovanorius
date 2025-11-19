@@ -31,8 +31,6 @@ export function ReservedItems({ user }: { user: User }) {
     },
   });
 
-  console.log("Reserved items:", items);
-
   return (
     <div className="my-8">
       <h2 className="font-heading text-2xl font-bold">Išsaugoti pirkiniai</h2>

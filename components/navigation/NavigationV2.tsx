@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { LocaleSwitcher } from "../LocaleSwitcher";
 import { useTranslations } from "next-intl";
@@ -9,9 +10,12 @@ import Image from "next/image";
 import NotificationsBell from "../notification/NotificationBell";
 import NotificationsLive from "../notification/NotificationLive";
 import { NavSearch } from "./NavSearch";
+import { usePathname } from "next/navigation";
 
 export function NavigationV2({ user }: { user?: User | null }) {
   const t = useTranslations("Navbar");
+  const pathnames = usePathname();
+
   return (
     <div className="drawer drawer-end">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
@@ -100,7 +104,12 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   <LuGift />
                   {t("createEvent")}
                 </Link>
-                <Link href="/dashboard" className="btn btn-ghost text-2xl">
+                <Link
+                  href="/dashboard"
+                  className={`btn btn-ghost text-2xl ${
+                    pathnames.includes("dashboard") ? "font-bold underline" : ""
+                  }`}
+                >
                   <LuHouse />
                   {t("dashboard")}
                 </Link>

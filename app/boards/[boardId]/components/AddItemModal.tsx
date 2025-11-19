@@ -21,7 +21,6 @@ export function AddItemModal({
 }) {
   const [parsing, setParsing] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
   const { uploadProductImage } = useProductImageUpload();
   const t = useTranslations("Boards");

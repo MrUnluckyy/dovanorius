@@ -17,6 +17,7 @@ const special = Over_the_Rainbow({
   weight: ["400"],
   variable: "--font-special",
   display: "swap",
+  adjustFontFallback: false,
 });
 const body = Inter({
   subsets: ["latin"],
@@ -81,8 +82,8 @@ export default async function RootLayout({
         className={`${headings.variable} ${body.variable} ${special.variable} antialiased relative`}
       >
         <NextIntlClientProvider>
-          <Providers>{children}</Providers>
           <Toaster />
+          <Providers>{children}</Providers>
         </NextIntlClientProvider>
       </body>
     </html>

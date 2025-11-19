@@ -5,6 +5,9 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import AvatarUploader from "./AvatarUpload";
 import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
+import { useConfirm } from "@/components/ConfirmDialogProvider";
+import { deleteUserAction } from "@/app/actions/user/delete";
+import { useRouter } from "next/navigation";
 
 export function ProfileEditForm({
   onCloseModal,
@@ -14,6 +17,8 @@ export function ProfileEditForm({
   const { profile, editProfile } = useProfile();
   const [uploading, setUploading] = useState(false);
   const t = useTranslations("Profile");
+  const confirm = useConfirm();
+  const router = useRouter();
 
   const { register, handleSubmit, reset, formState } = useForm<Profile>({
     defaultValues: {
@@ -36,6 +41,28 @@ export function ProfileEditForm({
     } finally {
       setUploading(false);
       onCloseModal();
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    const confirmed = await confirm({
+      title: t("confirmDeleteAccountTitle"),
+      message: t.rich("confirmDeleteAccountMessage", {
+        format: (chunks) => <b>{chunks}</b>,
+      }),
+      confirmText: t("deleteAccount"),
+      cancelText: t("ctaCancel"),
+    });
+
+    if (!confirmed || !profile?.id) return;
+
+    try {
+      const res = await deleteUserAction(profile.id);
+      if (res.success) {
+        router.push("/");
+      }
+    } catch (error) {
+      toast.error(t("toastAccountDeleteError"));
     }
   };
 
@@ -108,6 +135,13 @@ export function ProfileEditForm({
               placeholder="Short info about you"
               {...register("about")}
             />
+            <button
+              type="button"
+              className="btn btn-error"
+              onClick={handleDeleteUser}
+            >
+              {t("deleteAccount")}
+            </button>
             <button
               type="submit"
               className="btn btn-primary"

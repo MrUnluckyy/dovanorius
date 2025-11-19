@@ -10,6 +10,7 @@ import { AddMemberModal } from "./AddMemberModal";
 import { useBoardMembersMap } from "@/hooks/useMemberMap";
 import { AvatarGroup } from "../../components/AvatarGroup";
 import { LuShare, LuTrash } from "react-icons/lu";
+import { useConfirm } from "@/components/ConfirmDialogProvider";
 
 type Board = {
   id: string;
@@ -32,6 +33,7 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const t = useTranslations("Boards");
+  const confirm = useConfirm();
 
   const handleCopy = async () => {
     if (!boardClient?.is_public) return;
@@ -73,9 +75,18 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
     },
   });
 
-  const { membersByBoard } = useBoardMembersMap([board.id]);
+  const handleDelete = async () => {
+    const ok = await confirm({
+      title: t("confirmDeleteTitle"),
+      message: t("confirmDeleteMessage", { title: boardClient?.name || "" }),
+      confirmText: t("confirmDeleteButton"),
+    });
 
-  console.log("Public?", boardClient?.is_public);
+    if (!ok) return;
+
+    deleteBoard.mutate();
+  };
+  const { membersByBoard } = useBoardMembersMap([board.id]);
 
   if (isLoading) return <UserLoadingSkeleton />;
 
@@ -117,7 +128,7 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
           {userId && <AddMemberModal userId={userId} boardId={board.id} />}
           <button
             className="btn btn-ghost whitespace-nowrap"
-            onClick={() => deleteBoard.mutate()}
+            onClick={handleDelete}
           >
             <LuTrash />
             {t("delete")}

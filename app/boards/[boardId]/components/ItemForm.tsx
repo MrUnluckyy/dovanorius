@@ -135,7 +135,7 @@ export function ItemForm({
     <div>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <h3 className="font-bold text-lg">{t("addWish")}</h3>
-        <fieldset className="fieldset w-full">
+        <fieldset className="fieldset w-full max-h-[60vh] overflow-y-auto">
           <label className="label">{t("url")}</label>
           <input
             type="url"

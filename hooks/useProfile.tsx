@@ -38,7 +38,6 @@ const useProfile = (publicUserId?: string) => {
   }, [publicUserId, supabase]);
 
   const userId = publicUserId || user?.id;
-  console.log("userId used for profile query:", userId);
 
   const fetchProfile = async () => {
     if (!userId) throw new Error("No user id provided");

@@ -4,18 +4,12 @@ import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState, useRef } from "react";
-import {
-  LuCheck,
-  LuExternalLink,
-  LuPencil,
-  LuTrash,
-  LuTrash2,
-  LuX,
-} from "react-icons/lu";
+import { LuExternalLink, LuPencil, LuTrash2, LuX } from "react-icons/lu";
 import { Item } from "./WishList";
 import { User } from "@supabase/supabase-js";
 import { ItemForm } from "./ItemForm";
 import toast from "react-hot-toast";
+import { useConfirm } from "@/components/ConfirmDialogProvider";
 
 export function ViewItemModal({
   item,
@@ -29,20 +23,17 @@ export function ViewItemModal({
   const { title, notes, price, url, id } = item;
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [showConfirmView, setShowConfirmView] = useState(false);
   const t = useTranslations("Boards");
+  const confirm = useConfirm();
 
-  const modalRef = useRef<HTMLDialogElement>(null);
   const supabase = createClient();
   const queryClient = useQueryClient();
 
   const openModal = () => {
     setIsOpen(true);
-    modalRef.current?.showModal();
   };
   const closeModal = () => {
     setIsOpen(false);
-    modalRef.current?.close();
     setIsEditing(false);
   };
 
@@ -52,7 +43,7 @@ export function ViewItemModal({
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success(t("successDelete"));
+      toast(t("successDelete", { icon: "🗑️" }));
       closeModal();
       queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
     },
@@ -128,6 +119,18 @@ export function ViewItemModal({
     }
   };
 
+  const handleDelete = async (id: string, title: string) => {
+    const ok = await confirm({
+      title: t("confirmDeleteTitle"),
+      message: t("confirmDeleteMessage", { title }),
+      confirmText: t("confirmDeleteButton"),
+    });
+
+    if (!ok) return;
+
+    deleteItem.mutate(id);
+  };
+
   const disablePublicEditing =
     inPublicBoard &&
     item.status === "reserved" &&
@@ -142,128 +145,136 @@ export function ViewItemModal({
       >
         {t("ctaView")}
       </button>
-      <dialog ref={modalRef} open={isOpen} className="modal">
-        <div className="modal-box pb-16 md:pb-4 pt-10">
-          <button
-            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-            onClick={closeModal}
-            about="Uždaryti modalą"
-          >
-            <LuX className="text-lg" />
-          </button>
-          {isEditing ? (
-            <ItemForm
-              item={item}
-              onCloseModal={closeModal}
-              onCancel={() => setIsEditing(false)}
-            />
-          ) : (
-            <>
-              <figure className="w-full mb-6">
-                {item.image_url ? (
-                  <img
-                    src={item.image_url}
-                    alt={title}
-                    className="max-w-[300px]"
-                  />
-                ) : (
-                  <img src="/assets/placeholder.jpg" alt="Gift illustration" />
-                )}
-              </figure>
-              <h3 className="font-bold text-lg">{title}</h3>
-              <p className="py-4">{notes}</p>
-              <div className="flex flex-col gap-2">
-                <div className="flex justify-between items-center w-full">
-                  <p className="text-start">{t("price")}</p>
-                  <p className="text-end">&euro;{price ?? "-"}</p>
+      {isOpen && (
+        <dialog open={isOpen} className="modal">
+          <div className="modal-box pb-10 md:pb-4 pt-10">
+            <button
+              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+              onClick={closeModal}
+              about="Uždaryti modalą"
+            >
+              <LuX className="text-lg" />
+            </button>
+            {isEditing ? (
+              <ItemForm
+                item={item}
+                onCloseModal={closeModal}
+                onCancel={() => setIsEditing(false)}
+              />
+            ) : (
+              <>
+                <div className="flex flex-col max-h-[60vh] overflow-auto">
+                  <figure className="w-full mb-6 shrink-0">
+                    {item.image_url ? (
+                      <img
+                        src={item.image_url}
+                        alt={title}
+                        className="max-w-[300px]"
+                      />
+                    ) : (
+                      <img
+                        src="/assets/placeholder.jpg"
+                        alt="Gift illustration"
+                      />
+                    )}
+                  </figure>
+                  <h3 className="font-bold text-lg">{title}</h3>
+                  <p className="py-4">{notes}</p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex justify-between items-center w-full">
+                      <p className="text-start">{t("price")}</p>
+                      <p className="text-end">&euro;{price ?? "-"}</p>
+                    </div>
+                    <div className="flex justify-between items-center w-full">
+                      <p className="text-start">{t("shop")}</p>
+                      {!url ? (
+                        <p className="text-end">{t("notProvided")}</p>
+                      ) : (
+                        <a
+                          href={url || ""}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-end flex gap-1 items-center link"
+                        >
+                          {getDomain(url)}
+                          <LuExternalLink className="w-3" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center w-full">
-                  <p className="text-start">{t("shop")}</p>
-                  {!url ? (
-                    <p className="text-end">{t("notProvided")}</p>
-                  ) : (
-                    <a
-                      href={url || ""}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-end flex gap-1 items-center link"
-                    >
-                      {getDomain(url)}
-                      <LuExternalLink className="w-3" />
-                    </a>
-                  )}
-                </div>
-              </div>
-              {!user && inPublicBoard && (
-                <p className="text-error font-bold">
-                  Rezervuoti galima tik prisijungus
-                </p>
-              )}
 
-              <div className="modal-action flex-col-reverse md:flex-row mt-8">
-                {inPublicBoard && item.status === "wanted" && (
-                  <>
+                {!user && inPublicBoard && (
+                  <p className="text-error font-bold">
+                    Rezervuoti galima tik prisijungus
+                  </p>
+                )}
+
+                <div className="modal-action flex-col-reverse md:flex-row mt-8">
+                  {inPublicBoard && item.status === "wanted" && (
+                    <>
+                      <button
+                        disabled={
+                          (inPublicBoard && item.reserved_by === user?.id) ||
+                          !user
+                        }
+                        className="btn btn-primary"
+                        onClick={handleReserve}
+                      >
+                        {t("ctaReserve")}
+                      </button>
+                    </>
+                  )}
+
+                  {inPublicBoard && item.status === "reserved" && (
                     <button
                       disabled={
-                        (inPublicBoard && item.reserved_by === user?.id) ||
-                        !user
+                        inPublicBoard &&
+                        item.status === "reserved" &&
+                        item.reserved_by !== user?.id
                       }
                       className="btn btn-primary"
-                      onClick={handleReserve}
+                      onClick={handleUnReserve}
                     >
-                      {t("ctaReserve")}
+                      {t("ctaUnreserve")}
                     </button>
-                  </>
-                )}
+                  )}
 
-                {inPublicBoard && item.status === "reserved" && (
-                  <button
-                    disabled={
-                      inPublicBoard &&
-                      item.status === "reserved" &&
-                      item.reserved_by !== user?.id
-                    }
-                    className="btn btn-primary"
-                    onClick={handleUnReserve}
-                  >
-                    {t("ctaUnreserve")}
-                  </button>
-                )}
-
-                {!inPublicBoard && (
-                  <div className="flex justify-between w-full">
-                    <div className="flex gap-2">
+                  {!inPublicBoard && (
+                    <div className="flex justify-between w-full">
+                      <div className="flex gap-2">
+                        <button
+                          className="btn btn-ghost"
+                          onClick={() => handleDelete(item.id, item.title)}
+                          aria-label={t("ctaDelete")}
+                        >
+                          <LuTrash2 className="text-lg" />
+                        </button>
+                        <button
+                          className="btn btn-ghost"
+                          onClick={() => setIsEditing(true)}
+                          aria-label={t("ctaEdit")}
+                        >
+                          <LuPencil className="text-lg" />
+                        </button>
+                      </div>
                       <button
-                        className="btn btn-ghost"
-                        onClick={() => deleteItem.mutate(item.id)}
-                        aria-label={t("ctaDelete")}
+                        className="btn btn-accent"
+                        onClick={() => markAsBought()}
                       >
-                        <LuTrash2 className="text-lg" />
-                      </button>
-                      <button
-                        className="btn btn-ghost"
-                        onClick={() => setIsEditing(true)}
-                        aria-label={t("ctaEdit")}
-                      >
-                        <LuPencil className="text-lg" />
+                        {t("ctaMarkAsBought")}
                       </button>
                     </div>
-                    <button
-                      className="btn btn-accent"
-                      onClick={() => markAsBought()}
-                    >
-                      {t("ctaMarkAsBought")}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>uždaryti</button>
-        </form>
-      </dialog>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+          <div className="modal-backdrop" onClick={closeModal}>
+            <button>uždaryti</button>
+          </div>
+        </dialog>
+      )}
     </>
   );
 }

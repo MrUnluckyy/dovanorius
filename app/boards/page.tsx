@@ -19,11 +19,8 @@ export default async function BoardsPage() {
     <>
       <NavigationV2 user={user} />
       <main className="pb-20">
-        <div className="max-w-[1440px] mx-auto min-h-screen px-4">
+        <div className="max-w-[1440px] mx-auto min-h-screen px-4 flex flex-col gap-8">
           <Breadcrumbs />
-          <div className="py-8 mb-4 md:mb-10">
-            <UserBar />
-          </div>
 
           <BoardsList user={user} />
         </div>

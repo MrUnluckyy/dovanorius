@@ -33,7 +33,7 @@ export default function MyEvents({ user }: { user: User }) {
   if (!events || events.length === 0 || isLoading) return null;
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-bold mb-2">Mano šventės:</h2>
+      <h2 className="text-xl font-bold mb-2 font-heading">Mano šventės:</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {events.map((e) => (
           <EventCard

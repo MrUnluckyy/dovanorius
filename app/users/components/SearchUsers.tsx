@@ -116,8 +116,10 @@ export function SearchUsers() {
       {/* Header */}
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Search profiles</h1>
-          <p className="text-sm opacity-70">Find people by display name.</p>
+          <h1 className="text-2xl font-bold">Ieškoti vartotojų</h1>
+          <p className="text-sm opacity-70">
+            Surask žmones pagal jų slapyvardžius
+          </p>
         </div>
       </div>
 
@@ -225,8 +227,8 @@ export function SearchUsers() {
       {!loading && searched && profiles.length === 0 && !error && (
         <div className="card">
           <div className="card-body items-center text-center">
-            <h2 className="card-title">No profiles found</h2>
-            <p className="opacity-70">Try a different display name.</p>
+            <h2 className="card-title">Nerasta</h2>
+            <p className="opacity-70">Pabandyk kitą vardą</p>
           </div>
         </div>
       )}
@@ -257,7 +259,7 @@ export function SearchUsers() {
                           {p.display_name}
                         </h3>
                         {!p.public && (
-                          <span className="badge badge-outline">Private</span>
+                          <span className="badge badge-outline">Privatus</span>
                         )}
                       </div>
                       {p.about && (
@@ -284,7 +286,7 @@ export function SearchUsers() {
       )}
 
       <p className="mt-6 text-xs opacity-70">
-        Tip: results include only public profiles.
+        Rezultatai rodo tik viešus profilius.
       </p>
     </div>
   );

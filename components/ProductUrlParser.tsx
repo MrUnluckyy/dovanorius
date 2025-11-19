@@ -39,9 +39,8 @@ export default function ProductUrlParser({
               </g>
             </svg>
             <input
-              type="url"
+              type="text"
               placeholder="https://"
-              pattern="^(https?://)?([a-zA-Z0-9]([a-zA-Z0-9\-].*[a-zA-Z0-9])?\.)+[a-zA-Z].*$"
               title="Must be valid URL"
               className="w-full"
               {...register("url")}

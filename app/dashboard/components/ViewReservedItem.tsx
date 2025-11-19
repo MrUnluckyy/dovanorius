@@ -1,10 +1,10 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useState, useRef } from "react";
-import { LuExternalLink } from "react-icons/lu";
+import { useState } from "react";
+import { LuExternalLink, LuX } from "react-icons/lu";
 import { User } from "@supabase/supabase-js";
 import toast from "react-hot-toast";
 import { Item } from "@/app/boards/[boardId]/components/WishList";
@@ -22,17 +22,14 @@ export function ViewReservedItem({
   const [isOpen, setIsOpen] = useState(false);
   const t = useTranslations("Boards");
 
-  const modalRef = useRef<HTMLDialogElement>(null);
   const supabase = createClient();
   const queryClient = useQueryClient();
 
   const openModal = () => {
     setIsOpen(true);
-    modalRef.current?.showModal();
   };
   const closeModal = () => {
     setIsOpen(false);
-    modalRef.current?.close();
   };
 
   const getDomain = (urlString: string | null) => {
@@ -95,73 +92,89 @@ export function ViewReservedItem({
       >
         {t("ctaView")}
       </button>
-      <dialog ref={modalRef} open={isOpen} className="modal">
-        <div className="modal-box">
-          <>
-            <figure className="w-full mb-6">
-              {item.image_url ? (
-                <img src={item.image_url} alt={title} />
-              ) : (
-                <img src="/assets/placeholder.jpg" alt="Gift illustration" />
-              )}
-            </figure>
-            <h3 className="font-bold text-lg">{title}</h3>
-            <p className="py-4">{notes}</p>
-            <div className="flex flex-col gap-2">
-              <div className="flex justify-between items-center w-full">
-                <p className="text-start">{t("price")}</p>
-                <p className="text-end">&euro;{price ?? "-"}</p>
+      {isOpen && (
+        <dialog open={isOpen} className="modal">
+          <div className="modal-box pt-10">
+            <button
+              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+              onClick={closeModal}
+              about="Uždaryti modalą"
+            >
+              <LuX className="text-lg" />
+            </button>
+            <>
+              <div className="flex flex-col max-h-[60vh] overflow-auto">
+                <figure className="w-full mb-6 shrink-0">
+                  {item.image_url ? (
+                    <img
+                      src={item.image_url}
+                      alt={title}
+                      className="max-w-[300px]"
+                    />
+                  ) : (
+                    <img
+                      src="/assets/placeholder.jpg"
+                      alt="Gift illustration"
+                    />
+                  )}
+                </figure>
+                <h3 className="font-bold text-lg">{title}</h3>
+                <p className="py-4">{notes}</p>
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between items-center w-full">
+                    <p className="text-start">{t("price")}</p>
+                    <p className="text-end">&euro;{price ?? "-"}</p>
+                  </div>
+                  <div className="flex justify-between items-center w-full">
+                    <p className="text-start">{t("shop")}</p>
+                    {!url ? (
+                      <p className="text-end">{t("notProvided")}</p>
+                    ) : (
+                      <a
+                        href={url || ""}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-end flex gap-1 items-center link"
+                      >
+                        {getDomain(url)}
+                        <LuExternalLink className="w-3" />
+                      </a>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between items-center w-full">
-                <p className="text-start">{t("shop")}</p>
-                {!url ? (
-                  <p className="text-end">{t("notProvided")}</p>
-                ) : (
-                  <a
-                    href={url || ""}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-end flex gap-1 items-center link"
+              <div className="modal-action">
+                {item.status === "wanted" && (
+                  <button
+                    disabled={inPublicBoard && item.reserved_by === user?.id}
+                    className="btn btn-primary"
+                    onClick={handleReserve}
                   >
-                    {getDomain(url)}
-                    <LuExternalLink className="w-3" />
-                  </a>
+                    {t("ctaReserve")}
+                  </button>
+                )}
+
+                {item.status === "reserved" && (
+                  <button
+                    disabled={
+                      inPublicBoard &&
+                      item.status === "reserved" &&
+                      item.reserved_by !== user?.id
+                    }
+                    className="btn btn-primary"
+                    onClick={handleUnReserve}
+                  >
+                    {t("ctaUnreserve")}
+                  </button>
                 )}
               </div>
-            </div>
-            <div className="modal-action">
-              {item.status === "wanted" && (
-                <button
-                  disabled={inPublicBoard && item.reserved_by === user?.id}
-                  className="btn btn-primary"
-                  onClick={handleReserve}
-                >
-                  {t("ctaReserve")}
-                </button>
-              )}
-
-              {item.status === "reserved" && (
-                <button
-                  disabled={
-                    inPublicBoard &&
-                    item.status === "reserved" &&
-                    item.reserved_by !== user?.id
-                  }
-                  className="btn btn-primary"
-                  onClick={handleUnReserve}
-                >
-                  {t("ctaUnreserve")}
-                </button>
-              )}
-
-              <form method="dialog">
-                {/* if there is a button in form, it will close the modal */}
-                <button className="btn  btn-secondary">{t("ctaClose")}</button>
-              </form>
-            </div>
-          </>
-        </div>
-      </dialog>
+            </>
+          </div>
+          <div className="modal-backdrop" onClick={closeModal}>
+            <button>uždaryti</button>
+          </div>
+        </dialog>
+      )}
     </>
   );
 }

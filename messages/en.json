@@ -106,7 +106,7 @@
 
     "successUnreserve": "🎉 Success!",
     "successUnreserveDesc": "You have successfully un-reserved this item.!",
-    "successDelete": "🎉 Success!",
+    "successDelete": "Deleted!",
     "successDeleteDesc": "You have successfully deleted this item.!",
     "errorUnreserve": "😵 Opsss!",
     "errorUnreserveDesc": "Something went wrong while un-reserving this item. Please try again later.",
@@ -128,6 +128,10 @@
 
     "toastBoardCreated": "🎉 Board {board} created successfully!",
     "toastBoardCreateError": "😵 Oops! Something went wrong while creating the board. Please try again later.",
+
+    "confirmDeleteTitle": "Delete?",
+    "confirmDeleteMessage": "Are you sure you want to delete {title}? This action cannot be undone.",
+    "confirmDeleteButton": "Yes, delete it",
 
     "ctaCreateBoard": "Create New Board",
     "ctaView": "View",
@@ -158,7 +162,11 @@
     "ctaEdit": "Edit Profile",
     "ctaSave": "Save",
     "ctaClose": "Close",
-    "toastProfileUpdated": "Profile updated successfully!"
+    "ctaCancel": "Cancel",
+    "toastProfileUpdated": "Profile updated successfully!",
+    "deleteAccount": "Delete Account",
+    "confirmDeleteAccountTitle": "Are you sure you want to delete your account?",
+    "confirmDeleteAccountMessage": "This action is irreversible. <format>All your data will be permanently deleted</format>."
   },
 
   "Actions": {
@@ -173,6 +181,7 @@
     "error": "An error occurred. Please try again.",
     "noData": "No data available"
   },
+
   "SecretSanta": {
     "drawn": "🎉 Secret Santa Drawn!",
     "open": "⏳ Awaiting Secret Santa Draw...",

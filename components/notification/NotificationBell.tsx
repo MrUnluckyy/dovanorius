@@ -36,8 +36,6 @@ export default function NotificationsBell() {
     },
   });
 
-  console.log("NotificationsBell notifs:", notifs);
-
   const pendingInvites = (notifs ?? []).filter((n) => n.is_read === false);
 
   const onAccept = async (p: NotificationPayload) => {

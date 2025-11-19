@@ -108,7 +108,7 @@
 
     "successUnreserve": "🎉 Pavyko!",
     "successUnreserveDesc": "Sėkmingai atšaukėte rezervaciją!",
-    "successDelete": "🎉 Pavyko!",
+    "successDelete": "Ištrinta!",
     "successDeleteDesc": "Sėkmingai ištrynėte!",
     "errorUnreserve": "😵 Upsss!",
     "errorUnreserveDesc": "Įvyko klaida atšaukiant rezervaciją. Bandykite dar kartą vėliau.",
@@ -130,6 +130,10 @@
 
     "toastBoardCreated": "🎉 {board} lenta sukurta sėkmingai!",
     "toastBoardCreateError": "😵 Upps. Kažkas ne taip. Pamėgink šiek tiek veliau.",
+
+    "confirmDeleteTitle": "Ištrinti?",
+    "confirmDeleteMessage": "Ar tikrai norite ištrinti {title}? Šis veiksmas yra negrįžtamas.",
+    "confirmDeleteButton": "Taip, ištrinti",
 
     "ctaView": "Atidaryti",
     "ctaCreateBoard": "Sukurti naują lentą",
@@ -161,14 +165,19 @@
     "ctaEdit": "Redaguoti profilį",
     "ctaSave": "Išsaugoti",
     "ctaClose": "Uždaryti",
-    "toastProfileUpdated": "Profilis sėkmingai atnaujintas!"
+    "ctaCancel": "Atšaukti",
+    "toastProfileUpdated": "Profilis sėkmingai atnaujintas!",
+    "deleteAccount": "Ištrinti paskyrą",
+    "confirmDeleteAccountTitle": "Ar tikrai ištrinti paskyrą?",
+    "confirmDeleteAccountMessage": "Šis veiksmas yra negrįžtamas. <format>Visi jūsų duomenys bus prarasti.</format>"
   },
   "Actions": {
     "add": "Pridėti",
     "edit": "Redaguoti",
     "delete": "Ištrinti",
     "save": "Išsaugoti",
-    "cancel": "Atšaukti"
+    "cancel": "Atšaukti",
+    "close": "Uždaryti"
   },
   "States": {
     "loading": "Įkeliama...",
