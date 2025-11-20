@@ -5,6 +5,7 @@ import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";
 import { Toaster } from "react-hot-toast";
+import { Analytics } from "@vercel/analytics/next";
 
 const headings = Baloo_2({
   subsets: ["latin"],
@@ -83,7 +84,10 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider>
           <Toaster />
-          <Providers>{children}</Providers>
+          <Providers>
+            {children}
+            <Analytics mode="production" />
+          </Providers>
         </NextIntlClientProvider>
       </body>
     </html>
