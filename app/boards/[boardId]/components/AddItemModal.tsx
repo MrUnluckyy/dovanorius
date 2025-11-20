@@ -4,7 +4,7 @@ import { useProductImageUpload } from "@/hooks/useImageUpload";
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ItemFormValues, ItemSchema } from "@/schemas/ItemSchema";
@@ -47,18 +47,15 @@ export function AddItemModal({
     mode: "onSubmit",
   });
 
-  const modalRef = useRef<HTMLDialogElement>(null);
   const supabase = createClient();
   const queryClient = useQueryClient();
 
   const openModal = () => {
     setIsOpen(true);
-    modalRef.current?.showModal();
   };
   const closeModal = () => {
     reset();
     setIsOpen(false);
-    modalRef.current?.close();
   };
 
   const handleParse = async () => {
@@ -149,92 +146,101 @@ export function AddItemModal({
       <button className="btn btn-accent" onClick={openModal}>
         {children}
       </button>
-      <dialog ref={modalRef} open={isOpen} className="modal">
-        <div className="modal-box">
-          <button
-            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-            onClick={closeModal}
-            aria-label={t("ctaClose")}
-          >
-            <LuX className="text-lg" />
-          </button>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <h3 className="font-bold text-lg">{t("addWish")}</h3>
-            <fieldset className="fieldset w-full">
-              <ProductUrlParser
-                onParse={handleParse}
-                loading={parsing}
-                register={register}
-              />
-              <label className="label">{t("title")}</label>
-              <input
-                type="text"
-                className="input w-full"
-                placeholder={t("title")}
-                {...register("title")}
-              />
+      {isOpen && (
+        <dialog open={isOpen} className="modal">
+          <div className="modal-box">
+            <button
+              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+              onClick={closeModal}
+              aria-label={t("ctaClose")}
+            >
+              <LuX className="text-lg" />
+            </button>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <h3 className="font-bold text-lg">{t("addWish")}</h3>
+              <fieldset className="fieldset w-full">
+                <ProductUrlParser
+                  onParse={handleParse}
+                  loading={parsing}
+                  register={register}
+                />
+                <label className="label">{t("title")}</label>
+                <input
+                  type="text"
+                  className="input w-full"
+                  placeholder={t("title")}
+                  {...register("title")}
+                />
 
-              <label className="label">{t("price")}</label>
-              <input
-                type="number"
-                className="input w-full"
-                inputMode="decimal"
-                step="0.01"
-                placeholder={t("price")}
-                {...register("price", {
-                  setValueAs: (value) => {
-                    // allow empty field
-                    if (value === "" || value === null || value === undefined) {
-                      return undefined;
-                    }
+                <label className="label">{t("price")}</label>
+                <input
+                  type="number"
+                  className="input w-full"
+                  inputMode="decimal"
+                  step="0.01"
+                  placeholder={t("price")}
+                  {...register("price", {
+                    setValueAs: (value) => {
+                      // allow empty field
+                      if (
+                        value === "" ||
+                        value === null ||
+                        value === undefined
+                      ) {
+                        return undefined;
+                      }
 
-                    const n = Number(value);
-                    return Number.isNaN(n) ? undefined : n;
-                  },
-                })}
-              />
-              {formState.errors.price ? (
-                <p className="text-sm text-error mt-1">
-                  {formState.errors.price.message}
-                </p>
-              ) : null}
-
-              <label className="label">{t("notes")}</label>
-              <textarea
-                className="textarea w-full"
-                placeholder={t("notes")}
-                {...register("notes")}
-              />
-
-              <div>
-                {getValues("image_url") ? (
-                  <img src={getValues("image_url")} alt={getValues("title")} />
+                      const n = Number(value);
+                      return Number.isNaN(n) ? undefined : n;
+                    },
+                  })}
+                />
+                {formState.errors.price ? (
+                  <p className="text-sm text-error mt-1">
+                    {formState.errors.price.message}
+                  </p>
                 ) : null}
-              </div>
 
-              <label className="label">{t("image")}</label>
-              <input
-                type="file"
-                className="file-input w-full"
-                onChange={(e) =>
-                  setUploadedImageFile(
-                    e.target.files ? e.target.files[0] : null
-                  )
-                }
-              />
-              <label className="label">{t("maxImageSizeLabel")}</label>
-            </fieldset>
-            <div className="modal-action">
-              <button className="btn btn-primary" type="submit">
-                {t("ctaSubmit")}
-              </button>
-            </div>
-          </form>
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>{t("ctaClose")}</button>
-        </form>
-      </dialog>
+                <label className="label">{t("notes")}</label>
+                <textarea
+                  className="textarea w-full"
+                  placeholder={t("notes")}
+                  {...register("notes")}
+                />
+
+                <div>
+                  {getValues("image_url") ? (
+                    <img
+                      src={getValues("image_url")}
+                      alt={getValues("title")}
+                    />
+                  ) : null}
+                </div>
+
+                <label className="label">{t("image")}</label>
+                <input
+                  type="file"
+                  className="file-input w-full"
+                  onChange={(e) =>
+                    setUploadedImageFile(
+                      e.target.files ? e.target.files[0] : null
+                    )
+                  }
+                />
+                <label className="label">{t("maxImageSizeLabel")}</label>
+              </fieldset>
+              <div className="modal-action">
+                <button className="btn btn-primary" type="submit">
+                  {t("ctaSubmit")}
+                </button>
+              </div>
+            </form>
+          </div>
+          <div className="modal-backdrop" onClick={closeModal}>
+            <button>{t("ctaClose")}</button>
+          </div>
+        </dialog>
+      )}
     </>
   );
 }
