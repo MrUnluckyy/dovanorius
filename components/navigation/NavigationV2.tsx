@@ -4,21 +4,34 @@ import { LocaleSwitcher } from "../LocaleSwitcher";
 import { useTranslations } from "next-intl";
 import { User } from "@supabase/supabase-js";
 import { Logo } from "../Logo";
-import { LuX, LuMenu, LuHouse, LuGift } from "react-icons/lu";
+import {
+  LuX,
+  LuMenu,
+  LuHouse,
+  LuGift,
+  LuLayoutDashboard,
+} from "react-icons/lu";
 import { SignOutButton } from "@/app/(auth)/components/SignOutButton";
 import Image from "next/image";
 import NotificationsBell from "../notification/NotificationBell";
 import NotificationsLive from "../notification/NotificationLive";
 import { NavSearch } from "./NavSearch";
 import { usePathname } from "next/navigation";
+import { useRef } from "react";
 
 export function NavigationV2({ user }: { user?: User | null }) {
   const t = useTranslations("Navbar");
+  const ref = useRef<HTMLInputElement>(null);
   const pathnames = usePathname();
 
   return (
-    <div className="drawer drawer-end">
-      <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
+    <div className="drawer drawer-end font-heading">
+      <input
+        ref={ref}
+        id="my-drawer-2"
+        type="checkbox"
+        className="drawer-toggle"
+      />
       {/* DRAWER CONTENT: */}
       <div className="drawer-content flex flex-col">
         {/* Navbar */}
@@ -37,7 +50,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                     height={40}
                     className="shrink-0"
                   />
-                  <p className="font-heading hidden md:block">NoriuTo</p>
+                  <p className="font-heading hidden md:block">Noriuto.lt</p>
                 </Link>
                 <NavSearch />
               </div>
@@ -87,19 +100,33 @@ export function NavigationV2({ user }: { user?: User | null }) {
 
       <div className="drawer-side">
         <div className="menu bg-base-200 min-h-full w-full p-4">
-          <label
-            htmlFor="my-drawer-2"
-            aria-label="close sidebar"
-            className="drawer-overlay text-4xl cursor-pointer mb-12"
-          >
-            <LuX />
-          </label>
-          <div className="my-8">
-            <Logo />
+          <div className="mb-8 flex justify-between">
+            <Logo size="md" />
+            <label
+              htmlFor="my-drawer-2"
+              aria-label="close sidebar"
+              className="drawer-overlay text-4xl cursor-pointer mb-10"
+            >
+              <LuX />
+            </label>
           </div>
           <div className="flex flex-col gap-4 items-start text-2xl">
             {user ? (
               <>
+                <Link
+                  href="/dashboard"
+                  className={`btn btn-ghost text-2xl ${
+                    pathnames.includes("dashboard")
+                      ? "font-bold "
+                      : "font-normal"
+                  }`}
+                  onClick={() => ref.current?.click()}
+                >
+                  <LuHouse />
+                  {t("dashboard")}
+                </Link>
+
+                <div className="divider" />
                 <Link
                   href="/secret-santa"
                   className="btn btn-success text-2xl font-normal"
@@ -107,18 +134,6 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   <LuGift />
                   {t("createEvent")}
                 </Link>
-                <Link
-                  href="/dashboard"
-                  className={`btn btn-ghost text-2xl  ${
-                    pathnames.includes("dashboard")
-                      ? "font-bold "
-                      : "font-normal"
-                  }`}
-                >
-                  <LuHouse />
-                  {t("dashboard")}
-                </Link>
-
                 <div className="divider" />
                 <SignOutButton className="btn btn-ghost text-2xl font-normal" />
               </>
@@ -132,7 +147,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 </Link>
               </>
             )}
-            <LocaleSwitcher />
+            {/* <LocaleSwitcher /> */}
           </div>
         </div>
       </div>

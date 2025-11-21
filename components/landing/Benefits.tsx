@@ -12,26 +12,26 @@ export default function Benefits() {
         />
         <div>
           <div className="mb-8">
-            <h3 className="font-special text-3xl mb-4">
+            <h3 className="font-heading text-3xl mb-4">
               Nėra pasikartojančių dovanų!
             </h3>
-            <p className="font-heading">
+            <p className="font-body">
               Niekas nenori gauti trijų tokių pačių puodelių (nebent labai
               mėgsti puodelius). Rezervavimas išsprendžia viską.
             </p>
           </div>
           <div className="mb-8">
-            <h3 className="font-special text-3xl mb-4">
+            <h3 className="font-heading text-3xl mb-4">
               Bendros norų lentos? Taip!
             </h3>
-            <p className="font-heading">
+            <p className="font-body">
               Tobula šventėms, šeimos renginiams, Kalėdoms, vaikams ar bendroms
               idėjoms. Vienas sąrašas — daug laimingų žmonių.
             </p>
           </div>
           <div className="mb-8">
-            <h3 className="font-special text-3xl mb-4">Norimos dovanos</h3>
-            <p className="font-heading">
+            <h3 className="font-heading text-3xl mb-4">Norimos dovanos</h3>
+            <p className="font-body">
               Gaukite tai, ko iš tikrųjų norite ir reikia. Jokių daugiau
               nepageidaujamų dovanų!
             </p>

@@ -60,7 +60,7 @@ export function ImageHero({ user }: { user?: User | null }) {
         <h2 className="font-bold font-special text-4xl md:text-5xl mb-4">
           {t("title")}
         </h2>
-        <p className="font-special mt-6 text-xl md:text-2xl max-w-xl mx-auto">
+        <p className="font-heading mt-6 text-xl md:text-2xl max-w-xl mx-auto">
           {t("description")}
         </p>
         <Link

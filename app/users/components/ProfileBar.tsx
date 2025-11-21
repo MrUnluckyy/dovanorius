@@ -54,7 +54,7 @@ export function ProfileBar({
         </div>
         <div className="flex flex-col md:flex-row justify-between w-full gap-6">
           <div>
-            <h2 className="text-4xl font-semibold mb-2">
+            <h2 className="text-4xl font-semibold mb-2 font-heading">
               {profile?.display_name || "Anonimus User"}
               {isNewUser && (
                 <span className="badge badge-accent ml-2">

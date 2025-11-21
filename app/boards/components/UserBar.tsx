@@ -44,7 +44,7 @@ export function UserBar() {
         </div>
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 w-full">
           <div>
-            <h2 className="text-4xl font-semibold mb-2">
+            <h2 className="text-4xl font-semibold mb-2 font-heading">
               {profile?.display_name || "Anonimus User"}
               {isNewUser && (
                 <span className="badge badge-accent ml-2">New</span>

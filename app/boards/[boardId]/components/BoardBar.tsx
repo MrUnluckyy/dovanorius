@@ -71,7 +71,7 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
       <div className="flex flex-col  gap-6 md:flex-row items-start md:gap-12 w-full">
         <div className="flex flex-col gap-6">
           <div>
-            <h2 className="text-4xl font-semibold mb-2">
+            <h2 className="text-4xl font-semibold mb-2 font-heading">
               {boardClient?.name}
               {!boardClient?.is_public && (
                 <span className="badge badge-info ml-2">{t("private")}</span>

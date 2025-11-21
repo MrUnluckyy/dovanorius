@@ -4,11 +4,12 @@ import Breadcrumbs from "@/components/navigation/Breadcrumbs";
 import { WishList } from "@/app/boards/[boardId]/components/WishList";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import Footer from "@/components/footer/Footer";
+import BreadCrumbsManual from "@/components/navigation/BreadCrumbsManual";
 
 export default async function PublicUserBoardPage({
   params,
 }: {
-  params: { slug: string };
+  params: { slug: string; userId: string };
 }) {
   const supabase = await createClient();
   const {
@@ -49,7 +50,13 @@ export default async function PublicUserBoardPage({
       <NavigationV2 user={user} />
       <main className="pb-20">
         <div className="max-w-[1440px] mx-auto min-h-screen px-4">
-          <Breadcrumbs />
+          <BreadCrumbsManual
+            crumbs={[
+              { label: "userBoards", href: `/users/${params.userId}` },
+              { label: "board", href: `/users/boards/${board.slug}` },
+            ]}
+          />
+
           <div className="py-8 mb-10">
             <BoardBar userId={user?.id} board={board} inPublicView />
           </div>

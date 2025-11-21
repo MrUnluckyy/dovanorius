@@ -17,7 +17,7 @@ export default async function Login() {
   } = await client.auth.getUser();
 
   if (user) {
-    redirect("boards");
+    redirect("dashboard");
   }
 
   return (

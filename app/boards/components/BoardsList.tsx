@@ -46,7 +46,7 @@ export function BoardsList({ user }: { user: User }) {
           >
             <div key={board.id} className="card bg-base-300 card-sm shadow-sm">
               <div className="card-body">
-                <h2 className="card-title text-2xl">
+                <h2 className="card-title text-2xl font-heading">
                   {board.name}
                   {membersByBoard[board.id]?.length > 1 && <LuUsers />}
                   {!board.is_public && (

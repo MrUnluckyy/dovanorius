@@ -45,13 +45,13 @@ export function DashboardUser() {
         </div>
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 w-full">
           <div>
-            <h2 className="text-4xl font-semibold mb-2">
+            <h2 className="text-4xl font-semibold font-heading mb-2">
               {profile?.display_name || "Anonimus User"}
               {isNewUser && (
-                <span className="badge badge-accent ml-2">New</span>
+                <span className="badge badge-accent ml-2">Naujas</span>
               )}
             </h2>
-            <p className="text-sm">{profile?.about}</p>
+            <p className="text-sm font-body">{profile?.about}</p>
           </div>
           <div className="flex flex-col gap-2">
             <button

@@ -59,12 +59,14 @@
     "signOut": "Sign Out",
     "boards": "Wish Boards",
     "dashboard": "Dashboard",
+    "homepage": "Home",
     "wishBoards": "Wish Boards",
     "board": "Wish Board",
     "users": "Users",
     "user": "User",
-    "userBoards": "Vser's Boards",
-    "createEvent": "Create Event"
+    "userBoards": "User's Boards",
+    "createEvent": "Create Event",
+    "myBoard": "My Board"
   },
 
   "Boards": {
