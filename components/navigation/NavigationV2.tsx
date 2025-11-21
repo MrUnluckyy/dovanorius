@@ -100,14 +100,19 @@ export function NavigationV2({ user }: { user?: User | null }) {
           <div className="flex flex-col gap-4 items-start text-2xl">
             {user ? (
               <>
-                <Link href="/secret-santa" className="btn btn-success text-2xl">
+                <Link
+                  href="/secret-santa"
+                  className="btn btn-success text-2xl font-normal"
+                >
                   <LuGift />
                   {t("createEvent")}
                 </Link>
                 <Link
                   href="/dashboard"
-                  className={`btn btn-ghost text-2xl ${
-                    pathnames.includes("dashboard") ? "font-bold underline" : ""
+                  className={`btn btn-ghost text-2xl  ${
+                    pathnames.includes("dashboard")
+                      ? "font-bold "
+                      : "font-normal"
                   }`}
                 >
                   <LuHouse />
@@ -115,7 +120,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 </Link>
 
                 <div className="divider" />
-                <SignOutButton className="btn btn-ghost text-2xl" />
+                <SignOutButton className="btn btn-ghost text-2xl font-normal" />
               </>
             ) : (
               <>

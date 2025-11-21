@@ -11,8 +11,9 @@ import { useBoardMembersMap } from "@/hooks/useMemberMap";
 import { AvatarGroup } from "../../components/AvatarGroup";
 import { LuShare, LuTrash } from "react-icons/lu";
 import { useConfirm } from "@/components/ConfirmDialogProvider";
+import { EditBoard } from "./EditBoard";
 
-type Board = {
+export type Board = {
   id: string;
   name: string;
   slug?: string;
@@ -61,45 +62,20 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
     },
   });
 
-  const deleteBoard = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from("boards")
-        .delete()
-        .eq("id", board.id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["boards"] });
-      router.push("/boards");
-    },
-  });
-
-  const handleDelete = async () => {
-    const ok = await confirm({
-      title: t("confirmDeleteTitle"),
-      message: t("confirmDeleteMessage", { title: boardClient?.name || "" }),
-      confirmText: t("confirmDeleteButton"),
-    });
-
-    if (!ok) return;
-
-    deleteBoard.mutate();
-  };
   const { membersByBoard } = useBoardMembersMap([board.id]);
 
   if (isLoading) return <UserLoadingSkeleton />;
 
   return (
     <div className="flex flex-col md:flex-row gap-4">
-      <div className="flex flex-col items-center gap-6 md:flex-row md:items-start md:gap-12 w-full">
+      <div className="flex flex-col  gap-6 md:flex-row items-start md:gap-12 w-full">
         <div className="flex flex-col gap-6">
           <div>
             <h2 className="text-4xl font-semibold mb-2">
               {boardClient?.name}
-              <span className="badge badge-info ml-2">
-                {boardClient?.is_public ? t("public") : t("private")}
-              </span>
+              {!boardClient?.is_public && (
+                <span className="badge badge-info ml-2">{t("private")}</span>
+              )}
             </h2>
             <p className="text-sm">{boardClient?.description}</p>
           </div>
@@ -112,12 +88,12 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
       </div>
       {inPublicView ? null : (
         <div className="flex flex-col gap-2 ">
-          <PublishBoard
+          {/* <PublishBoard
             boardId={boardClient?.id || ""}
             boardName={boardClient?.name || ""}
             boardPublished={boardClient?.is_public || false}
             boardSlug={boardClient?.slug}
-          />
+          /> */}
           <button
             className={`whitespace-nowrap btn ${copied ? "btn-success" : ""} `}
             onClick={handleCopy}
@@ -125,14 +101,13 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
           >
             <LuShare /> {copied ? t("copied") : t("share")}
           </button>
-          {userId && <AddMemberModal userId={userId} boardId={board.id} />}
-          <button
-            className="btn btn-ghost whitespace-nowrap"
-            onClick={handleDelete}
-          >
-            <LuTrash />
-            {t("delete")}
-          </button>
+
+          {userId && boardClient && (
+            <>
+              <EditBoard board={boardClient} userId={userId} />
+              <AddMemberModal userId={userId} boardId={board.id} />
+            </>
+          )}
         </div>
       )}
     </div>

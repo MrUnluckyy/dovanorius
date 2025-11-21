@@ -78,6 +78,8 @@
     "edited": "{item} edited successfully",
     "makePrivate": "Make Private",
     "publish": "Publish",
+    "isPublic": "Board is Public",
+    "isPrivate": "Board is private",
     "noItems": "List is empty. 😭",
     "notProvided": "Not Provided",
     "reserved": "Reserved",
@@ -88,6 +90,7 @@
     "noItemsYet": "No items yet. 😢",
 
     "createBoardTitle": "Create a New Wish Board",
+    "editBoardTitle": "Edit Wish Board",
     "boardTitle": "Board Title",
     "boardTitlePlaceholder": "e.g., Birthday Wishes, Holiday Gifts",
     "boardDescription": "Board Description",
@@ -134,6 +137,7 @@
     "confirmDeleteButton": "Yes, delete it",
 
     "ctaCreateBoard": "Create New Board",
+    "ctaEditBoard": "Edit Board",
     "ctaView": "View",
     "ctaAddItem": "Add",
     "ctaReserve": "Reserve",

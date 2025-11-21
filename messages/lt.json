@@ -70,8 +70,8 @@
   },
 
   "Boards": {
-    "public": "Viešas",
-    "private": "Privatus",
+    "public": "Vieša",
+    "private": "Privati",
     "delete": "Ištrinti lentą",
     "share": "Dalintis lenta",
     "url": "Url",
@@ -79,6 +79,8 @@
     "copied": "Nukopijuota į iškarpinę",
     "edited": "{item} sėkmingai redaguotas",
     "makePrivate": "Padaryti privačia",
+    "isPublic": "Lenta yra vieša",
+    "isPrivate": "Lenta yra privati",
     "publish": "Viešinti",
     "noItems": "Sąrašas tuščias. 😭",
     "notProvided": "Nenurodyta",
@@ -90,6 +92,7 @@
     "noItemsYet": "Norų dar nėra. 😢",
 
     "createBoardTitle": "Sukurti naują norų lentą",
+    "editBoardTitle": "Redaguoti norų lentą",
     "boardTitle": "Lentos pavadinimas",
     "boardTitlePlaceholder": "Pvz., Kalėdų norai, Gimtadienio dovanos ir kt.",
     "boardDescription": "Lentos aprašymas",
@@ -137,6 +140,7 @@
 
     "ctaView": "Atidaryti",
     "ctaCreateBoard": "Sukurti naują lentą",
+    "ctaEditBoard": "Redaguoti lentą",
     "ctaAddItem": "Pridėti",
     "ctaReserve": "Rezervuoti",
     "ctaUnreserve": "Atšaukti rezervaciją",

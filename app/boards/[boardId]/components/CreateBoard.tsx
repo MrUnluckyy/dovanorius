@@ -1,4 +1,5 @@
 "use client";
+import { generateSlug } from "@/utils/helpers/slugify";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -41,7 +42,12 @@ export function CreateBoard({ user }: { user: User | null }) {
     mutationFn: async ({ name, description }: FormData) => {
       const { error } = await supabase
         .from("boards")
-        .insert({ owner_id: user?.id, name, description });
+        .insert({
+          owner_id: user?.id,
+          name,
+          description,
+          slug: generateSlug(name),
+        });
       if (error) throw error;
     },
     onSuccess: () => {
