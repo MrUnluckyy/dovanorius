@@ -29,6 +29,7 @@ const UrlSchema = z
 
 export const ItemSchema = z.object({
   title: z.string().min(1, "Reikia pavadinimo"),
+  boardId: z.uuid(),
   // Result type: string | "" (and because it's optional: string | "" | undefined)
   url: UrlSchema.optional(),
 

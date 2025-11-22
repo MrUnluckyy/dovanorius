@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Item } from "./WishList";
 import { useForm } from "react-hook-form";
@@ -34,6 +34,7 @@ export function ItemForm({
     notes: item.notes || "",
     image_url: item.image_url || "",
     price: item.price || undefined,
+    boardId: item.board_id || "",
   };
 
   const { register, handleSubmit, reset, formState, getValues, watch } =
@@ -47,6 +48,18 @@ export function ItemForm({
     () => previewUrl || watch("image_url") || "/assets/placeholder.jpg",
     [previewUrl, watch]
   );
+
+  const { data: boards = [], isLoading } = useQuery({
+    queryKey: ["boards"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("my_boards_with_stats")
+        .select("*")
+        .order("last_item_added_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const onSubmit = async (data: ItemFormValues) => {
     try {
@@ -82,6 +95,7 @@ export function ItemForm({
         .from("items")
         .update({
           title: data.title,
+          board_id: data.boardId,
           url: data.url || null,
           notes: data.notes || null,
           image_url,
@@ -136,6 +150,20 @@ export function ItemForm({
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <h3 className="font-bold text-lg">{t("addWish")}</h3>
         <fieldset className="fieldset w-full max-h-[60vh] overflow-y-auto">
+          <label className="label">{t("selectBoard")}</label>
+          <select
+            defaultValue="Pick a color"
+            className="select w-full"
+            disabled={isLoading}
+            {...register("boardId")}
+          >
+            {boards.map((board) => (
+              <option key={board.id} value={board.id}>
+                {board.name}
+              </option>
+            ))}
+          </select>
+
           <label className="label">{t("url")}</label>
           <input
             type="url"

@@ -33,8 +33,6 @@ export function EditBoard({ userId, board }: { userId: string; board: Board }) {
     },
   });
 
-  console.log("board", board);
-
   const openModal = () => {
     setIsOpen(true);
   };
