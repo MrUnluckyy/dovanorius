@@ -9,19 +9,21 @@ import BreadCrumbsManual from "@/components/navigation/BreadCrumbsManual";
 export default async function PublicUserBoardPage({
   params,
 }: {
-  params: { slug: string; userId: string };
+  params: Promise<{ slug: string; userId: string }>;
 }) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const { slug, userId } = await params;
+
   // Fetch board by slug when is_public = true
 
   const { data: board, error: bErr } = await supabase
     .from("boards")
     .select("id, name, is_public, created_at, slug, description")
-    .eq("slug", params.slug)
+    .eq("slug", slug)
     .eq("is_public", true)
     .single();
 
@@ -52,7 +54,7 @@ export default async function PublicUserBoardPage({
         <div className="max-w-[1440px] mx-auto min-h-screen px-4">
           <BreadCrumbsManual
             crumbs={[
-              { label: "userBoards", href: `/users/${params.userId}` },
+              { label: "userBoards", href: `/users/${userId}` },
               { label: "board", href: `/users/boards/${board.slug}` },
             ]}
           />
