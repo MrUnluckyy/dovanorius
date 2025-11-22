@@ -100,22 +100,26 @@ export function ViewItemModal({
   };
 
   const markAsBought = async () => {
-    const { data, error } = await supabase
-      .from("items")
-      .update({
-        status: "purchased",
-      })
-      .eq("id", id)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("items")
+        .update({ status: "purchased" })
+        .eq("id", id)
+        .select("board_id")
+        .single();
 
-    if (data) {
+      if (error) throw error;
+
       toast.success(t("successMarkAsBought"));
-      queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["items", data.board_id],
+      });
+
       closeModal();
-    }
-    if (error) {
+    } catch (err) {
+      console.error("Error marking item as bought:", err);
       toast.error(t("errorMarkAsBought"));
-      console.error("Error unreserving item:", error);
     }
   };
 

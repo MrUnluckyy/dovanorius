@@ -31,6 +31,7 @@ export function AddItemModal({
     notes: "",
     image_url: "",
     price: undefined,
+    boardId: boardId,
   };
 
   const {

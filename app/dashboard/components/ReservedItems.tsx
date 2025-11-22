@@ -12,11 +12,7 @@ export function ReservedItems({ user }: { user: User }) {
   const supabase = createClient();
   const t = useTranslations("Boards");
 
-  const {
-    data: items = [],
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: items = [], isLoading } = useQuery({
     queryKey: ["reservedItems", user.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -25,6 +21,7 @@ export function ReservedItems({ user }: { user: User }) {
           "id, board_id, title, notes, price, image_url, url, status, reserved_by, reserved_at, priority, created_at, created_by(display_name, avatar_url)"
         )
         .eq("reserved_by", user.id)
+        .neq("status", "purchased")
         .order("reserved_at", { ascending: false });
       if (error) throw error;
       return data as Item[];

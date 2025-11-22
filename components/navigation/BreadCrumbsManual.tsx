@@ -10,7 +10,7 @@ export type Crumb = {
 export default function BreadCrumbsManual({ crumbs }: { crumbs: Crumb[] }) {
   const t = useTranslations("Navbar");
   return (
-    <div className="breadcrumbs text-sm font-heading my-4">
+    <div className="breadcrumbs font-heading my-4">
       <ul>
         <li>
           <Link href="/dashboard">{t("dashboard")}</Link>
