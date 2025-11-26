@@ -9,7 +9,7 @@ export function ReservedItemsList({ items }: { items: Item[] }) {
   return (
     <div>
       {items.length === 0 ? (
-        <div className="flex flex-col justify-center items-center">
+        <div className="flex flex-col justify-center items-start mt-4">
           <p className="text-center">{t("noItems")}</p>
         </div>
       ) : null}
