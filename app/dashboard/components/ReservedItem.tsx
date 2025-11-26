@@ -2,12 +2,12 @@
 import React from "react";
 import { User } from "@supabase/supabase-js";
 import { useTranslations } from "next-intl";
-import { Item } from "@/app/boards/[boardId]/components/WishList";
 import PriceCategoryBadge from "@/app/boards/[boardId]/components/PriceCategoryBadge";
 import { ViewReservedItem } from "./ViewReservedItem";
+import { ReservedWishlistItem } from "./ReservedItems";
 
 type Props = {
-  item: Item;
+  item: ReservedWishlistItem;
   boardId: string;
   inPublicBoard?: boolean;
   user?: User | null;

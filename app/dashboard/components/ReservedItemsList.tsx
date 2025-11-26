@@ -1,9 +1,13 @@
 "use client";
 import { useTranslations } from "next-intl";
-import { Item } from "@/app/boards/[boardId]/components/WishList";
 import { ReservedItem } from "./ReservedItem";
+import { ReservedWishlistItem } from "./ReservedItems";
 
-export function ReservedItemsList({ items }: { items: Item[] }) {
+export function ReservedItemsList({
+  items,
+}: {
+  items: ReservedWishlistItem[];
+}) {
   const t = useTranslations("Boards");
 
   return (

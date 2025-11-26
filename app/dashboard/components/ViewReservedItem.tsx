@@ -7,14 +7,16 @@ import { useState } from "react";
 import { LuExternalLink, LuX } from "react-icons/lu";
 import { User } from "@supabase/supabase-js";
 import toast from "react-hot-toast";
-import { Item } from "@/app/boards/[boardId]/components/WishList";
+import { ReservedWishlistItem } from "./ReservedItems";
+import Link from "next/link";
+import { Avatar } from "@/components/Avatar";
 
 export function ViewReservedItem({
   item,
   inPublicBoard,
   user,
 }: {
-  item: Item;
+  item: ReservedWishlistItem;
   inPublicBoard?: boolean;
   user?: User | null;
 }) {
@@ -140,6 +142,20 @@ export function ViewReservedItem({
                         <LuExternalLink className="w-3" />
                       </a>
                     )}
+                  </div>
+                  <div className="flex justify-between items-center w-full">
+                    <p className="text-start">{t("wishOwner")}</p>
+                    <Link
+                      href={`/users/${item.created_by.id}`}
+                      className="flex gap-1 items-center link"
+                    >
+                      <Avatar
+                        avatar_url={item.created_by.avatar_url}
+                        name={item.created_by.display_name}
+                        size={4}
+                      />
+                      <p>{item.created_by.display_name}</p>
+                    </Link>
                   </div>
                 </div>
               </div>
