@@ -64,7 +64,7 @@ export function ImageHero({ user }: { user?: User | null }) {
           {t("description")}
         </p>
         <Link
-          href="boards"
+          href="/dashboard"
           className="btn btn-primary font-heading btn-md md:btn-lg mt-8"
         >
           {t("ctaTryOut")}

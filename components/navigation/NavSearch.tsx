@@ -175,7 +175,7 @@ export function NavSearch() {
         className="form-control"
         onFocus={() => setOpen(true)}
       >
-        <label className="input input-bordered flex items-center gap-2 max-w-xs">
+        <label className="input input-bordered flex items-center gap-2 max-w-md w-full">
           <LuSearch />
           <input
             type="search"
@@ -185,7 +185,7 @@ export function NavSearch() {
               setOpen(true);
             }}
             onKeyDown={onKeyDown}
-            placeholder="Ieškoti.."
+            placeholder="Ieškoti žmonių..."
             aria-label="ieškoti"
             className="grow"
           />
