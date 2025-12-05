@@ -134,6 +134,7 @@ export function AddItemModal({
       toast.success(t("toastItemAdded", { item: getValues("title") }));
       queryClient.invalidateQueries({ queryKey: ["items", boardId] });
       reset();
+      setUploadedImageFile(null);
       closeModal();
     },
   });
