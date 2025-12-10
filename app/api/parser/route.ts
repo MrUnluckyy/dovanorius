@@ -33,6 +33,15 @@ type Product = {
 type JsonLdNode = Record<string, unknown>;
 type MaybeGraph = JsonLdNode & { "@graph"?: unknown };
 
+const failureMarkers = [
+  "attention required",
+  "cloudflare",
+  "are you a robot",
+  "ar jūs ne robotas",
+  "captcha",
+  "backend fetch failed",
+];
+
 /** Utilities */
 function abs(u: string | undefined, base: string): string | undefined {
   try {
@@ -120,6 +129,24 @@ export async function GET(req: Request) {
   clearTimeout(timeout);
   const $ = cheerio.load(html);
 
+  const titleTag = $("title").first().text().trim().toLowerCase();
+  const htmlLower = html.toLowerCase();
+
+  const seemsBlocked = failureMarkers.some(
+    (m) => titleTag.includes(m) || htmlLower.includes(m)
+  );
+
+  if (seemsBlocked) {
+    return NextResponse.json(
+      {
+        error: "SCRAPER_BLOCKED",
+        message:
+          "Website blocked automated access. Please enter the product details manually.",
+      },
+      { status: 422 }
+    );
+  }
+
   const og = (p: string): string | undefined =>
     $(`meta[property="og:${p}"]`).attr("content") ?? undefined;
   const tw = (n: string): string | undefined =>
@@ -127,14 +154,17 @@ export async function GET(req: Request) {
   const meta = (n: string): string | undefined =>
     $(`meta[name="${n}"]`).attr("content") ?? undefined;
 
+  console.log("Parsed og:", og);
+  console.log("Parsed meta:", meta);
   // Basic/OG/Twitter
   const title =
     og("title") ||
     $("title").first().text().trim() ||
     meta("title") ||
     undefined;
-  const description =
+  const descriptionRaw =
     og("description") || meta("description") || tw("description") || undefined;
+  const description = descriptionRaw?.slice(0, 500); // limit length
 
   const images = [
     og("image"),

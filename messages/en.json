@@ -100,6 +100,7 @@
     "boardDescription": "Board Description",
     "boardDescriptionPlaceholder": "Describe the purpose of this wish board.",
 
+    "board": "Board",
     "price": "Price",
     "shop": "Shop",
     "title": "Title",
@@ -149,8 +150,10 @@
     "ctaDelete": "Delete",
     "ctaEdit": "Edit",
     "ctaSubmit": "Submit",
+    "ctaSubmitting": "Submitting...",
     "ctaCancel": "Cancel",
     "ctaSave": "Save",
+    "ctaSaving": "Saving...",
     "ctaAdd": "Add",
     "ctaMarkAsBought": "🎉 Received"
   },

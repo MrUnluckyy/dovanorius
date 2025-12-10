@@ -28,9 +28,9 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "NoriuTo.lt - Tavo norų sąrašai vienoje vietoje!",
+  title: "Noriuto.lt - Tavo norų sąrašai vienoje vietoje!",
   description:
-    "Svajok kartu su NoriuTo.lt - kurk norų / dovanų sąrašus ir dalinkis jais su draugais bei šeima. 🎁",
+    "Svajok kartu su Noriuto.lt - kurk norų / dovanų sąrašus ir dalinkis jais su draugais bei šeima. 🎁",
   manifest: "/favicons/site.webmanifest",
   icons: {
     icon: [
@@ -44,11 +44,11 @@ export const metadata: Metadata = {
     "msapplication-TileColor": "#31473A",
   },
   openGraph: {
-    title: "NoriuTo - Tavo norų sąrašai vienoje vietoje!",
+    title: "Noriuto - Tavo norų sąrašai vienoje vietoje!",
     description:
-      "Svajok kartu su NoriuTo.lt - kurk norų / dovanų sąrašus ir dalinkis jais su draugais bei šeima. 🎁",
+      "Svajok kartu su Noriuto.lt - kurk norų / dovanų sąrašus ir dalinkis jais su draugais bei šeima. 🎁",
     url: "https://www.noriuto.lt",
-    siteName: "NoriuTo",
+    siteName: "Noriuto",
     images: [
       {
         url: "/assets/dovanorius.png",
@@ -62,9 +62,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "NoriuTo - Tavo norų sąrašai vienoje vietoje!",
+    title: "Noriuto - Tavo norų sąrašai vienoje vietoje!",
     description:
-      "Svajok kartu su NoriuTo.lt – kurk norų / dovanų sąrašus ir dalinkis jais su draugais bei šeima. 🎁",
+      "Svajok kartu su Noriuto.lt - kurk norų / dovanų sąrašus ir dalinkis jais su draugais bei šeima. 🎁",
     images: ["/assets/dovanorius.png"],
   },
 };

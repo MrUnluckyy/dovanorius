@@ -18,6 +18,7 @@ import NotificationsLive from "../notification/NotificationLive";
 import { NavSearch } from "./NavSearch";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
+import { CreateTriggerButton } from "../create/CreateTriggerButton";
 
 export function NavigationV2({ user }: { user?: User | null }) {
   const t = useTranslations("Navbar");
@@ -72,10 +73,8 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 <>
                   <NotificationsLive />
                   <NotificationsBell />
-                  <Link href="/secret-santa" className="btn btn-success">
-                    <LuGift />
-                    {t("createEvent")}
-                  </Link>
+
+                  <CreateTriggerButton />
                   <Link href="/dashboard" className="btn btn-ghost">
                     <LuHouse />
                     {t("dashboard")}
@@ -127,13 +126,8 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 </Link>
 
                 <div className="divider" />
-                <Link
-                  href="/secret-santa"
-                  className="btn btn-success text-2xl font-normal"
-                >
-                  <LuGift />
-                  {t("createEvent")}
-                </Link>
+                <CreateTriggerButton />
+
                 <div className="divider" />
                 <SignOutButton className="btn btn-ghost text-2xl font-normal" />
               </>

@@ -202,7 +202,7 @@ export default function LobbyClient({
               isAdmin={isAdmin}
             />
           </div>
-          {isAdmin && selectedUserId && (
+          {event.status !== "drawn" && isAdmin && selectedUserId && (
             <AdminsSettings eventId={event.id} giverId={selectedUserId} />
           )}
         </>

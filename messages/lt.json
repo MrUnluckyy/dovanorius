@@ -102,6 +102,7 @@
     "boardDescription": "Lentos aprašymas",
     "boardDescriptionPlaceholder": "Papildoma informacija apie jūsų norų lentą (neprivaloma)",
 
+    "board": "Lenta",
     "price": "Kaina",
     "shop": "Parduotuvė",
     "title": "Pavadinimas",
@@ -152,8 +153,10 @@
     "ctaDelete": "Ištrinti",
     "ctaEdit": "Redaguoti",
     "ctaSubmit": "Pateikti",
+    "ctaSubmitting": "Pateikiama...",
     "ctaCancel": "Atšaukti",
     "ctaSave": "Išsaugoti",
+    "ctaSaving": "Įrašoma...",
     "ctaAdd": "Pridėti",
     "ctaMarkAsBought": "🎉 Gavau"
   },

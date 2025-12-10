@@ -108,12 +108,9 @@ export default function AdminsSettings({
   return (
     <div className="card bg-base-200 shadow-lg">
       <div className="card-body gap-4">
-        <h2 className="card-title">
-          Kam <span className="font-bold">{titleName}</span> negali ištraukti?
-        </h2>
+        <h2 className="card-title">Traukimo apribojimai - {titleName}</h2>
         <p className="text-sm opacity-70">
-          Pažymėk dalyvius, kurių {titleName.toLowerCase?.() ?? "šis dalyvis"}{" "}
-          negali ištraukti šiais metais.
+          Pažymėk dalyvius, kurių {titleName} negali ištraukti šiais metais.
         </p>
 
         <div className="max-h-64 overflow-auto rounded-xl border border-base-200">
