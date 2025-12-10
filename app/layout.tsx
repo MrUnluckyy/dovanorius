@@ -7,6 +7,7 @@ import { cookies } from "next/headers";
 import { Toaster } from "react-hot-toast";
 import { Analytics } from "@vercel/analytics/next";
 import Clarity from "@microsoft/clarity";
+import ClarityProvider from "@/components/providers/Clarity";
 
 const headings = Baloo_2({
   subsets: ["latin"],
@@ -78,10 +79,6 @@ export default async function RootLayout({
   const store = await cookies();
   const locale = store.get("locale")?.value || "lt";
 
-  if (process.env.NODE_ENV === "production") {
-    Clarity.init("ujhfbpkjx8");
-  }
-
   return (
     <html lang={locale} data-theme="noriuto" suppressHydrationWarning>
       <body
@@ -92,6 +89,7 @@ export default async function RootLayout({
           <Providers>
             {children}
             <Analytics mode="production" />
+            <ClarityProvider />
           </Providers>
         </NextIntlClientProvider>
       </body>
