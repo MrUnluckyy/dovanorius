@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers/Providers";
-import { Baloo_2, Inter, Over_the_Rainbow } from "next/font/google";
+import { Inter, Over_the_Rainbow, Rubik } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";
 import { Toaster } from "react-hot-toast";
 import { Analytics } from "@vercel/analytics/next";
-import Clarity from "@microsoft/clarity";
-import ClarityProvider from "@/components/providers/Clarity";
+import { ClarityProvider } from "@/components/providers/Clarity";
+import { GoogleTagManager } from "@next/third-parties/google";
+import { GtmPageView } from "@/components/GtmPageView";
 
-const headings = Baloo_2({
+const headings = Rubik({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   variable: "--font-heading",
@@ -85,6 +86,8 @@ export default async function RootLayout({
         className={`${headings.variable} ${body.variable} ${special.variable} antialiased relative`}
       >
         <NextIntlClientProvider>
+          <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID!} />
+          <GtmPageView />
           <Toaster />
           <Providers>
             {children}

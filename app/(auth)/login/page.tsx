@@ -26,7 +26,7 @@ export default async function Login() {
         <div className="hero-content flex-col lg:flex-row-reverse">
           <div className="text-center lg:text-left w-full px-4 md:min-w-md">
             <h1 className="text-5xl font-bold font-special">Prisijunk</h1>
-            <p className="py-6 max-w-prose font-special">
+            <p className="py-6 max-w-prose font-heading">
               Prisijunkite prie Noriuto.lt ir pradėkite kurti savo norų lentas
               šiandien!
             </p>

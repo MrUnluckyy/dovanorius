@@ -64,7 +64,7 @@ export function LoginForm() {
       <div className="divider">{t("or")}</div>
       <form onSubmit={onSubmit} className="space-y-3">
         <fieldset className="fieldset">
-          <label className="label">Email</label>
+          <label className="label">{t("emailLabel")}</label>
           <input
             type="email"
             className="input"
@@ -74,7 +74,7 @@ export function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
           />
 
-          <label className="label">Password</label>
+          <label className="label">{t("passwordLabel")}</label>
           <input
             type="password"
             className="input"

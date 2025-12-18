@@ -57,6 +57,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
               </div>
 
               <div className="flex-none lg:hidden">
+                <CreateTriggerButton />
                 <NotificationsLive />
                 <NotificationsBell />
                 <label
@@ -124,9 +125,6 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   <LuHouse />
                   {t("dashboard")}
                 </Link>
-
-                <div className="divider" />
-                <CreateTriggerButton />
 
                 <div className="divider" />
                 <SignOutButton className="btn btn-ghost text-2xl font-normal" />
