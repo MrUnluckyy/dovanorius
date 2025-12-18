@@ -6,7 +6,6 @@ import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";
 import { Toaster } from "react-hot-toast";
 import { Analytics } from "@vercel/analytics/next";
-import { ClarityProvider } from "@/components/providers/Clarity";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { GtmPageView } from "@/components/GtmPageView";
 
@@ -92,7 +91,7 @@ export default async function RootLayout({
           <Providers>
             {children}
             <Analytics mode="production" />
-            <ClarityProvider />
+            {/* <ClarityProvider /> */}
           </Providers>
         </NextIntlClientProvider>
       </body>
