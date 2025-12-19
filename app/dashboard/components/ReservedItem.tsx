@@ -30,6 +30,7 @@ export function ReservedItem({ item, inPublicBoard, user }: Props) {
             className="h-full w-full object-cover object-center"
             loading="lazy"
             decoding="async"
+            data-clarity-mask="true"
             onError={(e) => {
               e.currentTarget.src = "/assets/placeholder.jpg";
             }}
@@ -45,7 +46,12 @@ export function ReservedItem({ item, inPublicBoard, user }: Props) {
         )}
       </figure>
       <div className="card-body items-center text-center p-4 justify-between">
-        <h2 className="card-title text-md text-sm line-clamp-2">{title}</h2>
+        <h2
+          className="card-title text-md text-sm line-clamp-2"
+          data-clarity-mask="true"
+        >
+          {title}
+        </h2>
         <div className="card-actions">
           <ViewReservedItem
             item={item}

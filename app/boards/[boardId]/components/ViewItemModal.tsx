@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { LuExternalLink, LuPencil, LuTrash2, LuX } from "react-icons/lu";
 import { Item } from "./WishList";
 import { User } from "@supabase/supabase-js";
@@ -174,6 +174,7 @@ export function ViewItemModal({
                         src={item.image_url}
                         alt={title}
                         className="max-w-[300px]"
+                        data-clarity-mask="true"
                       />
                     ) : (
                       <img
@@ -182,8 +183,12 @@ export function ViewItemModal({
                       />
                     )}
                   </figure>
-                  <h3 className="font-bold text-lg">{title}</h3>
-                  <p className="py-4">{notes}</p>
+                  <h3 className="font-bold text-lg" data-clarity-mask="true">
+                    {title}
+                  </h3>
+                  <p className="py-4" data-clarity-mask="true">
+                    {notes}
+                  </p>
                   <div className="flex flex-col gap-2">
                     <div className="flex justify-between items-center w-full">
                       <p className="text-start">{t("price")}</p>
@@ -199,6 +204,7 @@ export function ViewItemModal({
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-end flex gap-1 items-center link"
+                          data-clarity-mask="true"
                         >
                           {getDomain(url)}
                           <LuExternalLink className="w-3" />

@@ -112,6 +112,7 @@ export function ViewReservedItem({
                       src={item.image_url}
                       alt={title}
                       className="max-w-[300px]"
+                      data-clarity-mask="true"
                     />
                   ) : (
                     <img
@@ -120,8 +121,12 @@ export function ViewReservedItem({
                     />
                   )}
                 </figure>
-                <h3 className="font-bold text-lg">{title}</h3>
-                <p className="py-4">{notes}</p>
+                <h3 className="font-bold text-lg" data-clarity-mask="true">
+                  {title}
+                </h3>
+                <p className="py-4" data-clarity-mask="true">
+                  {notes}
+                </p>
                 <div className="flex flex-col gap-2">
                   <div className="flex justify-between items-center w-full">
                     <p className="text-start">{t("price")}</p>
@@ -137,6 +142,7 @@ export function ViewReservedItem({
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-end flex gap-1 items-center link"
+                        data-clarity-mask="true"
                       >
                         {getDomain(url)}
                         <LuExternalLink className="w-3" />
@@ -148,6 +154,7 @@ export function ViewReservedItem({
                     <Link
                       href={`/users/${item.created_by.id}`}
                       className="flex gap-1 items-center link"
+                      data-clarity-mask="true"
                     >
                       <Avatar
                         avatar_url={item.created_by.avatar_url}

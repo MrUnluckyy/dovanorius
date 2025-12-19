@@ -33,11 +33,15 @@ export function WishListItem({ item, inPublicBoard, user }: Props) {
             onError={(e) => {
               e.currentTarget.src = "/assets/placeholder.jpg";
             }}
+            data-clarity-mask="true"
           />
         </div>
 
         {inPublicBoard && status === "reserved" && reserved_by ? (
-          <div className="badge badge-sm badge-warning absolute top-2 left-2">
+          <div
+            className="badge badge-sm badge-warning absolute top-2 left-2"
+            data-clarity-mask="true"
+          >
             {reserved_by === user?.id ? t("myReservation") : t("reserved")}
           </div>
         ) : (
@@ -45,7 +49,12 @@ export function WishListItem({ item, inPublicBoard, user }: Props) {
         )}
       </figure>
       <div className="card-body items-center text-center p-4 justify-between">
-        <h2 className="card-title text-md text-sm line-clamp-2">{title}</h2>
+        <h2
+          className="card-title text-md text-sm line-clamp-2"
+          data-clarity-mask="true"
+        >
+          {title}
+        </h2>
         <div className="card-actions">
           <ViewItemModal
             item={item}
