@@ -2,7 +2,6 @@ import { createClient } from "@/utils/supabase/server";
 import { LoginForm } from "../components/LoginForm";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
-import { useTranslations } from "next-intl";
 
 export const metadata: Metadata = {
   title: "Noriuto.lt - prisijunk",
@@ -17,7 +16,7 @@ export default async function Login() {
   } = await client.auth.getUser();
 
   if (user) {
-    redirect("dashboard");
+    redirect("/dashboard");
   }
 
   return (

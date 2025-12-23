@@ -4,12 +4,17 @@ import HowItWorks from "@/components/landing/HowItWorks";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import { createClient } from "@/utils/supabase/server";
 import Benefits from "@/components/landing/Benefits";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect("/dashboard");
+  }
 
   return (
     <>

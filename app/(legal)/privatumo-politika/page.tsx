@@ -58,8 +58,17 @@ export default async function PrivacyPage() {
           atstatymo ir svarbiems pranešimams);
         </li>
         <li>
-          ateityje - <strong>Google Analytics</strong> (apie tai informuosime
-          prieš pradedant naudoti).
+          Microsoft Clarity - svetainės naudojimo analizei (anonimizuoti
+          naudotojų sąveikos duomenys, tokie kaip paspaudimai, slinkimas, sesijų
+          įrašai);
+        </li>
+        <li>
+          CookieYes - slapukų sutikimų valdymui ir slapukų kategorijų kontrolei.
+        </li>
+        <li>
+          Microsoft Clarity duomenys naudojami tik statistinei analizei ir
+          platformos tobulinimui, nenaudojami naudotojų identifikavimui ar
+          reklamos tikslais.
         </li>
       </ul>
 
@@ -70,7 +79,10 @@ export default async function PrivacyPage() {
         <li>draugų paieškai ir viešų norų peržiūrai;</li>
         <li>būtiniems pranešimams siųsti (pvz., slaptažodžio atkūrimui);</li>
         <li>techniniam saugumui ir apsaugai nuo piktnaudžiavimo;</li>
-        <li>ateityje - statistinei analitikai ir platformos tobulinimui.</li>
+        <li>
+          svetainės naudojimo statistinei analizei ir naudotojo patirties
+          gerinimui (naudojant Microsoft Clarity, tik gavus sutikimą).
+        </li>
       </ul>
       <p>
         Mes <strong>neparduodame</strong> jūsų asmens duomenų ir jų{" "}
@@ -89,8 +101,8 @@ export default async function PrivacyPage() {
           paslaugų kokybę ir techninį stabilumą;
         </li>
         <li>
-          <strong>Sutikimas</strong> - pvz., kai ateityje pritariate
-          analitiniams slapukams;
+          <strong>Sutikimas</strong> - kai pritariate analitiniams ir
+          nebūtiniems slapukams per CookieYes slapukų valdymo įrankį.
         </li>
         <li>
           <strong>Teisinė prievolė</strong> - kai duomenų tvarkymas būtinas
@@ -141,7 +153,14 @@ export default async function PrivacyPage() {
         apsaugoti, įskaitant šifruotą ryšį (HTTPS) ir prieigos ribojimą.
       </p>
 
-      <h2>8. Privatumo politikos pakeitimai</h2>
+      <h2>9. Slapukai</h2>
+      <p>
+        Svetainėje naudojami būtini ir, gavus jūsų sutikimą, analitiniai
+        slapukai. Slapukų sutikimus galite bet kada peržiūrėti ar pakeisti
+        naudodamiesi CookieYes slapukų nustatymų funkcija, pateikta svetainėje.
+      </p>
+
+      <h2>9. Privatumo politikos pakeitimai</h2>
       <p>
         Ši privatumo politika gali būti atnaujinama. Atnaujinta versija visada
         bus skelbiama svetainėje noriuto.lt, nurodant atnaujinimo datą.

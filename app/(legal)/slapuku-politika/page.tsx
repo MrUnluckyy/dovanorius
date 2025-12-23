@@ -14,55 +14,58 @@ export default function CookiesPolicyPage() {
 
       <h2>1. Kas yra slapukai?</h2>
       <p>
-        Slapukai – tai nedidelės rinkmenos, saugomos jūsų naršyklėje. Jie padeda
-        svetainei tinkamai veikti ir prisiminti tam tikrą informaciją (pvz.,
-        prisijungimo sesiją ar pasirinkimus).
+        Slapukai - tai nedidelės rinkmenos, saugomos jūsų naršyklėje. Jie padeda
+        svetainei tinkamai veikti, užtikrina saugumą ir leidžia analizuoti
+        svetainės naudojimą.
       </p>
 
       <h2>2. Kokius slapukus naudojame?</h2>
 
       <h3>2.1. Būtini slapukai</h3>
-      <p>Naudojami tam, kad svetainė veiktų korektiškai:</p>
+      <p>Šie slapukai yra būtini svetainės veikimui ir negali būti išjungti:</p>
       <ul>
-        <li>prisijungimui ir sesijos palaikymui;</li>
-        <li>saugumo ir apsaugos funkcijoms;</li>
-        <li>būtiniems naršymo nustatymams išsaugoti.</li>
+        <li>naudotojo prisijungimo ir sesijos palaikymui;</li>
+        <li>saugumo ir apsaugos nuo piktnaudžiavimo užtikrinimui;</li>
+        <li>pagrindiniams svetainės nustatymams išsaugoti.</li>
       </ul>
 
-      <h3>2.2. Analitiniai slapukai (ateityje)</h3>
+      <h3>2.2. Analitiniai slapukai</h3>
       <p>
-        Ateityje galime naudoti <strong>Google Analytics</strong> ar panašius
-        sprendimus svetainės naudojimui analizuoti (lankomumui, puslapių
-        peržiūroms ir pan.).
+        Gavus jūsų sutikimą, naudojame <strong>Microsoft Clarity</strong> -
+        svetainės naudojimo analizei ir naudotojo patirties gerinimui.
       </p>
-      <p>Analitiniai slapukai bus naudojami tik gavus jūsų sutikimą.</p>
+      <p>
+        Šie slapukai padeda suprasti, kaip lankytojai naudojasi svetaine (pvz.,
+        paspaudimai, slinkimas, puslapių peržiūros). Duomenys renkami
+        apibendrintai ir nenaudojami naudotojų identifikavimui ar reklamos
+        tikslais.
+      </p>
 
       <h3>2.3. Marketinginiai slapukai</h3>
-      <p>Šiuo metu marketinginių slapukų nenaudojame.</p>
+      <p>Šiuo metu marketinginių ar reklamos slapukų nenaudojame.</p>
 
       <h2>3. Slapukų valdymas</h2>
       <p>
-        Svetainėje naudojame slapukų valdymo įrankį <strong>CookieYes</strong>.
-        Per šį įrankį galite:
+        Svetainėje naudojame slapukų sutikimų valdymo įrankį
+        <strong> CookieYes</strong>. Per jį galite:
       </p>
       <ul>
-        <li>priimti ar atmesti nebūtinius slapukus;</li>
-        <li>keisti savo pasirinkimus bet kuriuo metu;</li>
-        <li>gauti daugiau informacijos apie naudojamus slapukus.</li>
+        <li>duoti arba atšaukti sutikimą nebūtiniems slapukams;</li>
+        <li>bet kuriuo metu keisti savo pasirinkimus;</li>
+        <li>peržiūrėti informaciją apie naudojamas slapukų kategorijas.</li>
       </ul>
 
       <h2>4. Slapukų išjungimas naršyklėje</h2>
       <p>
-        Slapukus galite išjungti ar ištrinti ir per savo naršyklės nustatymus.
-        Atkreipiame dėmesį, kad būtini slapukai reikalingi tam, kad svetainė
-        veiktų tinkamai, todėl išjungus visus slapukus dalis funkcijų gali
-        neveikti.
+        Slapukus taip pat galite ištrinti arba blokuoti savo naršyklės
+        nustatymuose. Atkreipiame dėmesį, kad išjungus būtinus slapukus dalis
+        svetainės funkcijų gali neveikti tinkamai.
       </p>
 
       <h2>5. Slapukų politikos pakeitimai</h2>
       <p>
-        Esant pokyčiams, šią politiką atnaujinsime svetainėje ir nurodysime
-        atnaujinimo datą.
+        Ši slapukų politika gali būti atnaujinama. Naujausia versija visada bus
+        skelbiama svetainėje noriuto.lt, nurodant atnaujinimo datą.
       </p>
     </>
   );
