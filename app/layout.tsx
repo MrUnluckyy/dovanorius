@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     siteName: "Noriuto",
     images: [
       {
-        url: "/assets/dovanorius.png",
+        url: "/assets/meta/noriuto-meta.jpg",
         width: 1200,
         height: 630,
         alt: "Dovanorius illustration",
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     title: "Noriuto - Tavo norų sąrašai vienoje vietoje!",
     description:
       "Svajok kartu su Noriuto.lt - kurk norų / dovanų sąrašus ir dalinkis jais su draugais bei šeima. 🎁",
-    images: ["/assets/dovanorius.png"],
+    images: ["/assets/meta/noriuto-meta.jpg"],
   },
 };
 
