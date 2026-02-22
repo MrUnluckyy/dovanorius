@@ -81,56 +81,69 @@
   prefersdark: false;
   color-scheme: light;
 
-  /* --- NOTEPAD / NOTES PALETTE --- */
+  /* ------------------------------------------------------------------
+   * BASE / BACKGROUND
+   * ------------------------------------------------------------------ */
+  --color-base-100: oklch(100% 0 0); /* #FFFFFF */
+  --color-base-200: oklch(96% 0 0); /* #F6F6F6 */
+  --color-base-300: oklch(91% 0 0); /* #E8E8E8 */
+  --color-base-content: oklch(13% 0 0); /* #111111 */
 
-  /* background: warm paper */
-  --color-base-100: oklch(97% 0.03 95); /* light cream paper */
-  --color-base-200: oklch(94% 0.04 95); /* soft beige sheet */
-  --color-base-300: oklch(90% 0.04 95); /* light notebook shadow */
-  --color-base-content: oklch(30% 0.03 100); /* pencil-like warm grey */
+  /* ------------------------------------------------------------------
+   * PRIMARY (black CTA)
+   * ------------------------------------------------------------------ */
+  --color-primary: oklch(13% 0 0); /* #111111 */
+  --color-primary-content: oklch(100% 0 0); /* #FFFFFF */
 
-  /* primary: soft yellow highlighter */
-  --color-primary: oklch(90% 0.12 100); /* pale yellow */
-  --color-primary-content: oklch(28% 0.03 100);
+  /* ------------------------------------------------------------------
+   * SECONDARY (warm yellow)
+   * ------------------------------------------------------------------ */
+  --color-secondary: oklch(93% 0.07 95); /* #FFE7A3 */
+  --color-secondary-content: oklch(18% 0 0); /* #1A1A1A */
 
-  /* secondary: pastel sky blue tab */
-  --color-secondary: oklch(88% 0.1 230); /* soft sky */
-  --color-secondary-content: oklch(25% 0.03 230);
+  /* ------------------------------------------------------------------
+   * ACCENT (friendly green)
+   * ------------------------------------------------------------------ */
+  --color-accent: oklch(69% 0.13 160); /* #28B57A */
+  --color-accent-content: oklch(20% 0.05 160); /* #0B2A1C */
 
-  /* accent: pastel coral sticky note */
-  --color-accent: oklch(85% 0.14 30); /* warm peach */
-  --color-accent-content: oklch(28% 0.03 30);
+  /* ------------------------------------------------------------------
+   * NEUTRAL (UI greys)
+   * ------------------------------------------------------------------ */
+  --color-neutral: oklch(45% 0 0); /* #6B6B6B */
+  --color-neutral-content: oklch(100% 0 0); /* white */
 
-  /* neutral: soft graphite pencil */
-  --color-neutral: oklch(45% 0.05 100); /* graphite */
-  --color-neutral-content: oklch(97% 0.01 100);
+  /* ------------------------------------------------------------------
+   * FEEDBACK STATES
+   * ------------------------------------------------------------------ */
+  --color-info: oklch(88% 0.05 240); /* #BFDDF6 */
+  --color-info-content: oklch(25% 0.03 240);
 
-  /* semantic colors softened */
-  --color-info: oklch(85% 0.1 220); /* light cyan info */
-  --color-info-content: oklch(25% 0.02 220);
+  --color-success: oklch(90% 0.06 160); /* #BFEED6 */
+  --color-success-content: oklch(28% 0.04 160);
 
-  --color-success: oklch(85% 0.12 140); /* mint success */
-  --color-success-content: oklch(25% 0.03 140);
+  --color-warning: oklch(92% 0.08 90); /* #FFE29A */
+  --color-warning-content: oklch(30% 0.05 90);
 
-  --color-warning: oklch(88% 0.12 85); /* beige-yellow warn */
-  --color-warning-content: oklch(30% 0.05 85);
+  --color-error: oklch(82% 0.09 25); /* #F3B6B6 */
+  --color-error-content: oklch(30% 0.06 25);
 
-  --color-error: oklch(80% 0.15 25); /* soft red pencil */
-  --color-error-content: oklch(98% 0.01 25);
-
-  /* shapes */
+  /* ------------------------------------------------------------------
+   * SHAPES / SPACING (kept from your theme)
+   * ------------------------------------------------------------------ */
   --radius-selector: 0.75rem;
   --radius-field: 0.25rem;
   --radius-box: 0.5rem;
 
-  /* spacing / border */
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
 
-  /* effects */
-  --depth: 0; /* flatter, more “paper” */
-  --noise: 0.04; /* subtle grain for notepad feel */
+  /* ------------------------------------------------------------------
+   * EFFECTS
+   * ------------------------------------------------------------------ */
+  --depth: 0;
+  --noise: 0;
 }
 
 @layer components {

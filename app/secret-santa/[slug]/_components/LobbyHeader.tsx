@@ -7,7 +7,7 @@ export default function LobbyHeader({ ev }: { ev: SsEvent }) {
     <div className="card bg-secondary text-secondary-content shadow overflow-hidden">
       <div className="card-body min-h-[300px] bg-[url('/assets/christmas/christmas-cover.svg')] bg-center bg-cover justify-center items-center">
         <div className="">
-          <h2 className="text-3xl font-special text-accent-content">
+          <h2 className="text-3xl font-heading text-accent-content">
             {ev.name}
           </h2>
         </div>

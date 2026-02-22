@@ -2,39 +2,52 @@ import React from "react";
 
 export default function HowItWorks() {
   return (
-    <div className="max-w-[1440px] mx-auto px-8">
-      <h2 className="text-4xl font-special">Kaip tai veikia?</h2>
-      <div className="flex flex-col md:flex-row gap-4 mt-10 items-center">
-        <div className="p-8 bg-base-300 shadow-lg rounded-2xl rotate-1 flex-1">
-          <h3 className="font-heading text-3xl mb-4">1. Susikurk norų lentą</h3>
-          <p className="font-body">
-            Sukurk asmeninę norų lentą mūsų platformoje per kelias minutes.
-          </p>
+    <div className="max-w-[1440px] mx-auto px-8 mt-30">
+      <div className="flex flex-col md:flex-row gap-4 mt-10 items-start">
+        <div className="card bg-transparent flex-1">
+          <figure className="rounded-2xl">
+            <img
+              src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+              alt="Shoes"
+            />
+          </figure>
+          <div className="card-body justify-center align-center text-center">
+            <h2 className="font-heading text-2xl font-bold">Konkretūs norai</h2>
+            <p className="line-clamp-2 text-neutral">
+              Išsisaugok konkrečius daiktus ar patirtis kurių nori
+            </p>
+          </div>
         </div>
-        <img
-          src="/assets/doodles/arrows.png"
-          alt="arrow"
-          className="w-12 h-12 rotate-90 md:rotate-45"
-        />
-        <div className="p-8 bg-base-300 shadow-lg rounded-2xl -rotate-2 flex-1">
-          <h3 className="font-heading text-3xl mb-4">2. Pridėk norus</h3>
-          <p className="font-body">
-            Pridėk norimus daiktus, patinkančias patirtis ar tikslus, kuriuos
-            nori pasiekti.
-          </p>
+        <div className="card bg-transparent flex-1">
+          <figure className="rounded-2xl">
+            <img
+              src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+              alt="Shoes"
+            />
+          </figure>
+          <div className="card-body justify-center align-center text-center">
+            <h2 className="font-heading text-2xl font-bold">Norų lentos</h2>
+            <p className="line-clamp-2 text-neutral">
+              Sugrupuok visus norus pagal temą ir pasidalik juo su šeima ar
+              draugais
+            </p>
+          </div>
         </div>
-
-        <img
-          src="/assets/doodles/arrows.png"
-          alt="arrow"
-          className="w-12 h-12 -rotate-90 scale-x-[-1] md:rotate-[120deg]"
-        />
-
-        <div className="p-8 bg-base-300 shadow-lg rounded-2xl rotate-2 flex-1">
-          <h3 className="font-heading text-3xl mb-4">3. Dalinkis</h3>
-          <p className="font-body">
-            Pasidalink savo norų lentos nuoroda su draugais ir šeima.
-          </p>
+        <div className="card bg-transparent flex-1">
+          <figure className="rounded-2xl">
+            <img
+              src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+              alt="Shoes"
+            />
+          </figure>
+          <div className="card-body justify-center align-center text-center">
+            <h2 className="font-heading text-2xl font-bold">
+              Dovanų keitimasis
+            </h2>
+            <p className="line-clamp-2 text-neutral">
+              Susibūrimas, šventė ar kita proga, prie kurios jungsime norus.
+            </p>
+          </div>
         </div>
       </div>
     </div>

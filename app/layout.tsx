@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers/Providers";
-import { Inter, Over_the_Rainbow, Rubik } from "next/font/google";
+import {
+  Baloo_2,
+  Funnel_Display,
+  Inter,
+  Over_the_Rainbow,
+  Rubik,
+} from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";
@@ -9,7 +15,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { GtmPageView } from "@/components/GtmPageView";
 
-const headings = Rubik({
+const headings = Funnel_Display({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   variable: "--font-heading",
@@ -22,7 +28,7 @@ const special = Over_the_Rainbow({
   display: "swap",
   adjustFontFallback: false,
 });
-const body = Inter({
+const body = Baloo_2({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   variable: "--font-body",

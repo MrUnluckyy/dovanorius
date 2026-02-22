@@ -42,7 +42,7 @@ export default function MyRecipientClient({ slug }: { slug: string }) {
 
   return (
     <div className="max-w-md mx-auto p-6 flex flex-col justify-center items-center gap-4">
-      <h1 className="font-special text-5xl mb-8">{ev.name}</h1>
+      <h1 className="font-heading text-5xl mb-8">{ev.name}</h1>
       {ev.status !== "drawn" && (
         <div className="alert alert-warning mb-4">
           <span>Traukimas dar nepasibaigė</span>
