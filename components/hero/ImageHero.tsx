@@ -6,7 +6,7 @@ export function ImageHero() {
   const t = useTranslations("HomePage");
 
   return (
-    <div className="mx-auto py-12 px-4 relative flex items-center justify-center gap-12 max-w-[1440px] w-full">
+    <div className="mx-auto py-12 px-4 relative flex flex-col lg:flex-row items-center justify-center gap-12 max-w-[1440px] w-full">
       <div className="flex-1">
         <h2 className="font-bold font-heading text-6xl md:text-6xl mb-4">
           {t("title")}
@@ -23,10 +23,10 @@ export function ImageHero() {
         <img
           src="/assets/dovanorius-animated.gif"
           alt="illustration of woman"
-          className="max-w-md mx-auto"
+          className="max-w-sm lg:max-w-md mx-auto"
         />
       </div>
-      <div className="bg-secondary absolute w-[600px] h-[800px] -z-10 -top-60 right-16 rounded-b-[80px]" />
+      <div className="bg-secondary absolute w-full lg:w-[500px] xl:w-[600px] h-[900px] lg:h-[800px] -z-10 lg:-z-10 top-0 right-0 lg:-top-60 lg:right-0 xl:right-16 rounded-b-[80px]" />
     </div>
   );
 }

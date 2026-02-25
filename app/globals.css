@@ -13,6 +13,18 @@
 @theme {
   --font-special: var(--font-special), sans-serif;
   --font-heading: var(--font-heading), sans-serif;
+
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-marquee-safe: marquee 40s linear infinite;
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
 }
 
 @plugin "daisyui/theme" {

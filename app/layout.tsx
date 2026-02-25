@@ -95,7 +95,9 @@ export default async function RootLayout({
           <GtmPageView />
           <Toaster />
           <Providers>
-            {children}
+            <div className="bg-gradient-to-b from-secondary/20 via-base-100 to-[#FFE035]">
+              {children}
+            </div>
             <Analytics mode="production" />
             {/* <ClarityProvider /> */}
           </Providers>

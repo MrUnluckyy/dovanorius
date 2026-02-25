@@ -23,9 +23,9 @@ export default async function PublicUserBoardPage({
     .select("id, name, owner_id, is_public, created_at, slug, description")
     .eq("slug", slug)
     .eq("is_public", true)
-    .single();
+    .maybeSingle();
 
-  if (!board || bErr) {
+  if (!board) {
     notFound();
   }
 
