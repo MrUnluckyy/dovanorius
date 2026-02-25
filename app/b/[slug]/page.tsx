@@ -37,7 +37,7 @@ export async function generateMetadata({
       siteName: "Noriuto",
       images: [
         {
-          url: "https://noriuto.lt/assets/dovanorius-3d.png",
+          url: "https://noriuto.lt/assets/meta/noriuto-meta.jpg",
           width: 1200,
           height: 630,
         },
@@ -48,7 +48,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: board.name,
       description: "Pažiūrėk mano Noriuto norų lentą 👇",
-      images: "https://noriuto.lt/assets/dovanorius-3d.png",
+      images: "https://noriuto.lt/assets/meta/noriuto-meta.jpg",
     },
   };
 }

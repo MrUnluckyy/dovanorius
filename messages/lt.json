@@ -41,8 +41,10 @@
     "ctaDone": "Patvirtinta"
   },
   "HomePage": {
-    "title": "Įkvėpk dovanų idėjoms!",
-    "description": "Susikurk savo norų lentą ir gauk būtent tai, ko trokšti. Lengva. Naudinga. Smagu.",
+    "title": "Viena vieta visiems tavo norams",
+    "description": "Išvenk klausimų “Ko nori per gimtadienį?” - susikurk savo norų lentą ir pasidalink ja su draugais, kad jie žinotų ko iš tikrųjų nori dovanų. Tinka viskam nuo naujagimių gimtadienių iki knygų ir prekių namams!",
+    "soon": "jau greitai",
+    "recommend": "Rekomenduoja",
     "buttonText": "Kurti Svajones",
     "board1title": "🏋 Sporto lentyna",
     "board1description": "Nauji bėgimo bateliai šiam sezonui, atnaujintos pasipriešinimo gumos ir sportinis laikrodis, kurio seniai noriu.",
@@ -50,8 +52,38 @@
     "board2description": "Įranga plaukimui baidarėmis, žygio kuprinė ir bilietai į kitą dviračių maratoną.",
     "board3title": "🎨 Hobiams",
     "board3description": "Naujas objektyvas fotoaparatui, eskizų knyga idėjoms ir keramikos pamoka, kurią vis noriu išbandyti.",
+
+    "concreteWish": "Konkretūs norai",
+    "concreteWishDescription": "Išsisaugok konkrečius daiktus ar patirtis kurių nori",
+
+    "wishBoards": "Norų lentos",
+    "wishBoardsDescription": "Sugrupuok visus norus pagal temą ir pasidalik juo su šeima ar draugais",
+
+    "giftExchange": "Dovanų keitimasis",
+    "giftExchangeDescription": "Susibūrimas, šventė ar kita proga, prie kurios jungsime norus.",
+    "featuresTitle": "Viskas, ko reikia tavo norams",
+
+    "featureOneTitle": "Ir telefone, ir kompiuteryje",
+    "featureOneDescription": "Tavo norų sąrašas keliauja kartu su tavimi. Nesvarbu, ar naršai telefone, ar ieškai kompiuteryje — viskas automatiškai išlieka sinchronizuota.",
+
+    "featureTwoTitle": "Dalinkis arba laikyk privačiai",
+    "featureTwoDescription": "Ne visi norai skirti viešumai. Laikyk sąrašus privačius asmeninėms idėjoms ar staigmenoms, o kai būsi pasiruošęs — lengvai pasidalink jais su šeima ar draugais.",
+
+    "featureThreeTitle": "Išsaugok tiesiai iš interneto",
+    "featureThreeDescription": "Pamiršk nuorodų kopijavimą ir įklijavimą. Radęs patikusį daiktą internete, tiesiog pasinaudok telefono „Share“ funkcija ir išsaugok jį tiesiai į savo norų sąrašą.",
+
+    "testimonialsTitle": "Rekomendacijos",
+    "preFooterCTATitle": "Saugok savo norus su Noriuto",
+    "preFooterCTADescription": "Svajok drąsiai - išsisaugok savo norus vienoje vietoje ir dalinkis jais su šeima bei draugais. Prisijunk prie Noriuto ir paversk svajones planais!",
+
+    "examplesTitle": "Taip galėtų atrodyti tavo norų lentos",
+
+    "appDownloadDivider": "Jau greitai ir programėlėje",
     "ctaCreate": "Sukurti",
-    "ctaTryOut": "Išbandyk!"
+    "ctaStartBuilding": "Pradėk kurti",
+    "ctaStartToUse": "Pradėk naudotis",
+    "ctaTryOut": "Išbandyk!",
+    "ctaBuildYourWishList": "Sukurk savo norų lentą"
   },
 
   "Navbar": {

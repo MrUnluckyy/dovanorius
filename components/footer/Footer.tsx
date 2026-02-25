@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="footer footer-horizontal footer-center bg-primary text-primary-content p-10">
+    <footer className="footer footer-horizontal footer-center bg-[#FFE035] text-secondary-content p-10">
       <aside>
         <Image src="/assets/logo.png" alt="noriu.lt" width={100} height={100} />
         <p className="font-bold">

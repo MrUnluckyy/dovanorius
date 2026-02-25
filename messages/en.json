@@ -1,6 +1,6 @@
 {
   "Meta": {
-    "description": "Don't stress about gift ideas! Create wish boards, share with friends, and make every occasion special. NoriuTo - your ultimate wish board app."
+    "description": "Don't stress about gift ideas! Create wish boards, share with friends, and make every occasion special. Noriuto - your ultimate wish board app."
   },
   "Auth": {
     "loginTitle": "👋 Hey there!",
@@ -40,8 +40,9 @@
     "ctaDone": "Done"
   },
   "HomePage": {
-    "title": "Make gifting easy and fun.",
-    "description": "Create wish boards, share with friends, and make every occasion special.",
+    "title": "One place for all your wishes",
+    "description": "Avoid the question “What do you want for your birthday?” — create your own wishlist and share it with friends so they know what you really want as a gift. Perfect for everything from newborn birthdays to books and home items.",
+    "soon": "soon",
     "buttonText": "Build Dreams",
     "board1title": "🏋 My Sports Board",
     "board1description": "New running shoes for the season, resistance bands upgrade, and that sleek fitness watch I've been eyeing.",
@@ -49,8 +50,38 @@
     "board2description": "Kayaking trip gear, hiking backpack, and tickets for the next cycling marathon.",
     "board3title": "🎨 Hobbies Board",
     "board3description": "A new lens for my camera, sketchbook for ideas, and a pottery class I've been meaning to try.",
+
+    "concreteWish": "Concrete wishes",
+    "concreteWishDescription": "Keep track of the exact items or experiences you'd love to receive",
+
+    "wishBoards": "Wish boards",
+    "wishBoardsDescription": "Organise your wishes by theme and share them with family or friends.",
+
+    "giftExchange": "Gift exchange",
+    "giftExchangeDescription": "Create or join an event — a party, celebration, or special occasion — and link your wishes to it",
+
+    "featuresTitle": "Everything you need for your wishes",
+
+    "featureOneTitle": "On your phone and your computer",
+    "featureOneDescription": "Your wishlist should follow you everywhere. Whether you're browsing on your phone or researching on your computer, everything stays perfectly in sync.",
+
+    "featureTwoTitle": "Share it or keep it private",
+    "featureTwoDescription": "Some wishes are meant to be shared, others kept to yourself. Keep your lists private for personal ideas and surprises, or make them public when you're ready to share with friends and family.",
+
+    "featureThreeTitle": "Save directly from the web",
+    "featureThreeDescription": "No more copying and pasting links. When you find something you like online, just use your device's built-in Share option to send it straight to your wishlist.",
+
+    "testimonialsTitle": "Testimonials",
+    "preFooterCTATitle": "Save your wishes with Noriuto",
+    "preFooterCTADescription": "Dream big — save your wishes in one place, share them with family and friends, and let Noriuto help turn dreams into plans.",
+
+    "examplesTitle": "Here's what your wish boards could look like",
+
     "ctaCreate": "Create",
-    "ctaTryOut": "Try Out!"
+    "ctaStartBuilding": "Start building",
+    "ctaStartToUse": "Start using",
+    "ctaTryOut": "Try Out!",
+    "ctaBuildYourWishList": "Build Your Wishlist"
   },
   "Navbar": {
     "login": "Login",
