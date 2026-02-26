@@ -78,12 +78,8 @@ export function RegisterForm() {
 
   return (
     <>
-      <h2 className="text-4xl font-semibold font-heading mb-4">
-        {t("registerFormTitle")}
-      </h2>
-
       <button
-        className="btn btn-accent"
+        className="btn btn-primary"
         type="button"
         disabled={isSubmitting}
         onClick={() =>

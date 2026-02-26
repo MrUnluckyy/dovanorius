@@ -55,7 +55,7 @@ const CategoryMosaicCard = React.memo(function CategoryMosaicCard({
   return (
     <div className="group block rounded-3xl bg-neutral-50 p-3 shadow-sm ring-1 ring-black/5">
       {/* Mosaic */}
-      <div className="overflow-hidden rounded-2xl bg-neutral-100">
+      <div className="overflow-hidden rounded-xl lg:rounded-2xl bg-neutral-100">
         <div
           className={cn(
             "grid h-[150px] grid-cols-3 gap-2 md:h-[170px] lg:h-[350px]",
@@ -111,7 +111,7 @@ const CategoryMosaicCard = React.memo(function CategoryMosaicCard({
           </span>
         ) : null}
 
-        <h3 className="text-xl font-extrabold tracking-tight text-neutral-900 md:text-2xl">
+        <h3 className="text-md lg:text-xl xl:text-2xl font-extrabold tracking-tight text-neutral-900 md:text-2xl">
           {item.title}
         </h3>
       </div>
@@ -131,7 +131,12 @@ function MosaicCell({
   sizes: string;
 }) {
   return (
-    <div className={cn("relative overflow-hidden rounded-2xl", className)}>
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-lg lg:rounded-2xl",
+        className
+      )}
+    >
       {image?.src ? (
         <Image
           src={image.src}

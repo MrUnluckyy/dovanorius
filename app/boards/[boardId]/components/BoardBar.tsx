@@ -95,7 +95,9 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
             boardSlug={boardClient?.slug}
           /> */}
           <button
-            className={`whitespace-nowrap btn ${copied ? "btn-success" : ""} `}
+            className={`whitespace-nowrap btn ${
+              copied ? "btn-success" : "btn-outline"
+            } `}
             onClick={handleCopy}
             disabled={!boardClient?.is_public}
           >

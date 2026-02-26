@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function Register() {
   return (
     <main>
-      <div className="hero bg-base-200 min-h-screen">
+      <div className="hero min-h-screen">
         <div className="hero-content flex-col lg:flex-row-reverse">
           <div className="text-center lg:text-left w-full px-4 md:min-w-md">
             <h1 className="text-5xl font-bold font-heading">Registruokis!</h1>

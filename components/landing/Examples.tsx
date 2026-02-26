@@ -109,7 +109,7 @@ export function Examples() {
 
   return (
     <div className="mt-18 text-center">
-      <h2 className="text-5xl font-heading text-center font-bold mb-14">
+      <h2 className="text-4xl md:text-5xl font-heading text-center font-bold mb-14">
         {t("examplesTitle")}
       </h2>
       <CategoryMosaicGrid items={items} aboveTheFoldCount={4} />

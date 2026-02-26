@@ -2,19 +2,23 @@
 import Link from "next/link";
 import Image from "next/image";
 import React from "react";
+import { BoardWithPreview } from "./BoardsList";
+import { useFormatter, useTranslations } from "next-intl";
+import { useBoardMembersMap } from "@/hooks/useMemberMap";
+import { AvatarGroup } from "./AvatarGroup";
 
-type MosaicImage = {
-  src: string;
-  alt: string;
-};
+// type MosaicImage = {
+//   src: string;
+//   alt: string;
+// };
 
-export type CategoryMosaicItem = {
-  key: string;
-  title: string;
-  emoji?: string;
-  href: string;
-  images: MosaicImage[]; // 3 (preferred) or 4
-};
+// export type CategoryMosaicItem = {
+//   key: string;
+//   title: string;
+//   emoji?: string;
+//   href: string;
+//   images: MosaicImage[]; // 3 (preferred) or 4
+// };
 
 function cn(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -24,16 +28,16 @@ export function CategoryMosaicGrid({
   items,
   aboveTheFoldCount = 4,
 }: {
-  items: CategoryMosaicItem[];
+  items: BoardWithPreview[];
   /** how many cards should load images with priority */
   aboveTheFoldCount?: number;
 }) {
   return (
-    <section className="mx-auto w-full max-w-5xl px-4 py-6">
-      <div className="grid grid-cols-2 gap-4 md:gap-5 lg:grid-cols-3">
+    <section className="mx-auto w-full max-w-[1440px] py-6">
+      <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((item, idx) => (
           <CategoryMosaicCard
-            key={item.key}
+            key={item.id}
             item={item}
             priority={idx < aboveTheFoldCount}
           />
@@ -47,20 +51,25 @@ const CategoryMosaicCard = React.memo(function CategoryMosaicCard({
   item,
   priority,
 }: {
-  item: CategoryMosaicItem;
+  item: BoardWithPreview;
   priority?: boolean;
 }) {
-  const imgs = item.images.slice(0, 4);
+  const format = useFormatter();
+  const t = useTranslations<"Boards">("Boards");
+  const imgs = item.preview_images.slice(0, 4);
+  const now = new Date();
+
+  const { membersByBoard } = useBoardMembersMap([item.id]);
 
   return (
     <Link
-      href={item.href}
+      href={`/boards/${item.id}`} // fallback to id if slug is missing
       className={cn(
         "group block rounded-3xl bg-neutral-50 p-3 shadow-sm ring-1 ring-black/5",
         "transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-black/30"
       )}
       prefetch={false} // avoid extra work on landing; enable if you want
-      aria-label={item.title}
+      aria-label={item.name}
     >
       {/* Mosaic */}
       <div className="overflow-hidden rounded-2xl bg-neutral-100">
@@ -100,8 +109,8 @@ const CategoryMosaicCard = React.memo(function CategoryMosaicCard({
         {imgs[3] ? (
           <div className="relative -mt-10 ml-3 h-12 w-12 overflow-hidden rounded-xl ring-2 ring-white md:-mt-11 md:h-14 md:w-14">
             <Image
-              src={imgs[3].src}
-              alt={imgs[3].alt}
+              src={imgs[3]}
+              alt={`Preview image for ${item.name}`}
               fill
               className="object-cover"
               sizes="56px"
@@ -112,21 +121,33 @@ const CategoryMosaicCard = React.memo(function CategoryMosaicCard({
       </div>
 
       {/* Title */}
-      <div className="mt-3 flex items-baseline gap-2 px-1">
-        {item.emoji ? (
-          <span className="text-lg leading-none" aria-hidden="true">
-            {item.emoji}
-          </span>
-        ) : null}
-
-        <h3 className="text-xl font-extrabold tracking-tight text-neutral-900 md:text-2xl">
-          {item.title}
-        </h3>
+      <div className="mt-3 flex flex-col items-baseline gap-2 px-1">
+        <div className="flex justify-between items-center w-full">
+          <h3 className="text-xl font-extrabold tracking-tight text-neutral-900 md:text-2xl">
+            {item.name}
+          </h3>
+          <div>
+            {membersByBoard[item.id]?.length > 1 && (
+              <AvatarGroup members={membersByBoard[item.id] || []} />
+            )}
+          </div>
+        </div>
+        <p className="text-semibold text-sm">
+          {t("itemsCount", { count: item.item_count })}
+        </p>
+        <p className="text-semibold text-sm">
+          {!item.last_item_added_at
+            ? t("noItemsYet")
+            : `${t("lastUpdated")} ${format.relativeTime(
+                item.last_item_added_at,
+                now
+              )}`}
+        </p>
       </div>
 
       {/* Subtle hover cue */}
       <div className="mt-1 px-1 text-sm text-neutral-500 opacity-0 transition group-hover:opacity-100">
-        Atidaryti →
+        {t("ctaView")} &rarr;
       </div>
     </Link>
   );
@@ -139,22 +160,19 @@ function MosaicCell({
   sizes,
 }: {
   className: string;
-  image?: MosaicImage;
+  image?: string;
   priority?: boolean;
   sizes: string;
 }) {
   return (
     <div className={cn("relative overflow-hidden rounded-2xl", className)}>
-      {image?.src ? (
-        <Image
-          src={image.src}
-          alt={image.alt}
-          fill
-          className="object-cover transition duration-300 group-hover:scale-[1.02]"
-          sizes={sizes}
-          priority={priority}
-          // Keep default lazy loading when not priority:
+      {image ? (
+        <img
+          src={image}
+          alt="Preview image for board"
+          className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
           loading={priority ? "eager" : "lazy"}
+          decoding="async"
         />
       ) : (
         <div className="h-full w-full animate-pulse bg-neutral-200" />

@@ -17,7 +17,7 @@ export function UserEditModal() {
 
   return (
     <>
-      <button className="btn" onClick={openModal}>
+      <button className="btn btn-outline" onClick={openModal}>
         <LuPen />
         {t("ctaEdit")}
       </button>

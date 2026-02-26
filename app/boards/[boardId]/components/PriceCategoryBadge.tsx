@@ -7,7 +7,7 @@ export default function PriceCategoryBadge({
   price: number | null;
 }) {
   return (
-    <div className="badge badge-accent absolute top-2 left-2 gap-0">
+    <div className="badge badge-dash absolute top-2 left-2 gap-0">
       <LuEuro />
       {price}
     </div>

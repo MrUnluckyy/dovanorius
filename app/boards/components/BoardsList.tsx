@@ -10,35 +10,48 @@ import { BoardsLoadingSkeleton } from "@/components/loaders/BoardsLoadingSkeleto
 import { useBoardMembersMap } from "@/hooks/useMemberMap";
 import { AvatarGroup } from "./AvatarGroup";
 import { LuUsers } from "react-icons/lu";
+import { CategoryMosaicGrid } from "./BoardsCardWithPreview";
+
+export type BoardWithPreview = {
+  id: string;
+  name: string;
+  description: string | null;
+  last_item_added_at: Date;
+  slug: string | null;
+  is_owner: boolean;
+  item_count: number;
+  preview_images: string[];
+  is_public: boolean;
+};
 
 export function BoardsList({ user }: { user: User }) {
   const supabase = createClient();
   const t = useTranslations<"Boards">("Boards");
   const format = useFormatter();
-  const now = new Date();
 
-  const { data: boards = [], isLoading } = useQuery({
+  const { data: boardsWithPreview = [], isLoading } = useQuery<
+    BoardWithPreview[]
+  >({
     queryKey: ["boards"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("my_boards_with_stats")
-        .select("*")
+        .rpc("get_boards_v3")
         .order("last_item_added_at", { ascending: false });
       if (error) throw error;
-      return data;
+      return (data ?? []) as BoardWithPreview[];
     },
   });
-
-  const ids = boards.map((b) => b.id);
-  const { membersByBoard } = useBoardMembersMap(ids);
 
   if (isLoading) return <BoardsLoadingSkeleton />;
 
   return (
     <div className="flex flex-col gap-4">
       <CreateBoard user={user} />
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {boards.map((board) => (
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"> */}
+      {boardsWithPreview?.length && boardsWithPreview?.length > 0 && (
+        <CategoryMosaicGrid items={boardsWithPreview} />
+      )}
+      {/* {boards.map((board) => (
           <Link
             key={board.id}
             href={`/boards/${board.id}`}
@@ -79,8 +92,8 @@ export function BoardsList({ user }: { user: User }) {
               </div>
             </div>
           </Link>
-        ))}
-      </div>
+        ))} */}
+      {/* </div> */}
     </div>
   );
 }

@@ -47,7 +47,7 @@ export function LoginForm() {
     <>
       <h2 className="text-2xl font-semibold mb-8">{t("loginTitle")}</h2>
       <button
-        className="btn btn-accent"
+        className="btn btn-primary"
         type="button"
         onClick={() =>
           supabase.auth.signInWithOAuth({

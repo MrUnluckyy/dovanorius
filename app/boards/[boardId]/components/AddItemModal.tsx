@@ -145,7 +145,7 @@ export function AddItemModal({
 
   return (
     <>
-      <button className="btn btn-accent" onClick={openModal}>
+      <button className="btn btn-primary" onClick={openModal}>
         {children}
       </button>
       {isOpen && (

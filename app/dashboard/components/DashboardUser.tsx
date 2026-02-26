@@ -55,7 +55,7 @@ export function DashboardUser() {
           </div>
           <div className="flex flex-col gap-2">
             <button
-              className={`btn ${copied ? "btn-success" : ""}`}
+              className={`btn ${copied ? "btn-success" : "btn-outline"}`}
               onClick={handleCopy}
             >
               <LuShare />

@@ -9,7 +9,7 @@ const testimonials = [
     name: "Tomas Rimkus",
     imageUrl: "/assets/images/tomas.jpg",
     quote:
-      "Esu iš tų, kurie šiandien labai kažko nori, o po savaitės jau net neprisimena ko. Šitas appsas realiai gelbsti nuo mano pačio smegenų. Primena, ko noriu aš — o dar geriau, ko nori kiti. Jokių daugiau “o ką čia dabar pirkt?“ Iš esmės — tai mano smegenys, tik veikiančios.",
+      "Esu is tu, kurie siandien labai kazko nori, o po savaitės jau net neprisimena ko. Sitas appsas realiai gelbsti nuo mano pacio smegenu. Primena, ko noriu as - o dar geriau, ko nori kiti. Jokiu daugiau “o ka cia dabar pirkt?“ Is esmes - tai mano smegenys, tik veikiancios.",
   },
   {
     name: "Kornelija Sobutienė",
@@ -21,19 +21,19 @@ const testimonials = [
     name: "Armandas Dargis",
     imageUrl: "/assets/images/armandas.jpg",
     quote:
-      "Latogi platforma, kur gali parodyti draugams ir artimiesiems, kokių dovanų norėtum artėjančia proga ar bet kada. Tai padeda išvengti nereikalingų ar mažai naudojamų dovanų. Čia gali ne tik dalintis norimomis dovanomis, bet ir susirašyti, ko apskritai trūksta, pavyzdžiui, namų reikmenų. O geriausia - savo lentas gali kurti bendras su draugais ar šeima.",
-  },
-  {
-    name: "Gintare Katkute - Lacke",
-    imageUrl: "/assets/images/gintare.jpg",
-    quote:
-      "Noriuto.lt yra labai naudinga platforma, ypač turint kūdikį. Artimieji gali tiksliai žinoti, ko jums reikia, todėl nedovanoja nereikalingų daiktų, kurie vėliau tiesiog guli spintose.",
+      "Man kaip studentui norai dazniausiai ir lieka tik norais. Bet pradejus naudotis noriuto.lt, dovanos, kuriu is tikruju noriu, pagaliau tapo realybe. Artimieji nustebina mazomis, bet labai lauktomis dovanomis, kurios tikrai praskaidrina diena.",
   },
   {
     name: "Austėja Rimkė",
     imageUrl: "/assets/images/austeja.jpg",
     quote:
       "Esu praktiškas žmogus, nemėgstu gauti dovanų, kurių man nereikia, bet dabar, kai kas nors paklausia, ko norėčiau - nusiunčiu savo noriuto.lt norų lentą ir žinau, kad gausiu kažką, ko tikrai noriu. Taip pat programėlę naudoju ir kaip savo “wish list”, kai kažko užsimanau - įsidedu jį čia ir atėjus laikui, pati sau nusiperku. Mažesnis galvos skausmas ir kai kitiems reikia pirkti dovaną, visi draugai prisijungė prie noriuto.lt ir dabar nebereikia sukti galvos ar dovanoti kažko nenaudingo, visi gauna, ką įsideda į savo wish list'ą!",
+  },
+  {
+    name: "Gintare Katkute - Lacke",
+    imageUrl: "/assets/images/gintare.jpg",
+    quote:
+      "Kai atsirado kūdikis, supratom, kad dovanos tampa ne tik mielos, bet ir labai praktiškos. Visi nori atvažiuoti su kažkuo „nuo savęs“, bet dažnai gaunasi trys tie patys pledukai ar penki žaisliukai, kurie nugula spintoje. Su noriuto.lt galim paprastai pasidalinti, ko iš tikrųjų reikia, ir išvengti bereikalingų daiktų. Mažiau chaoso, daugiau tikro džiaugsmo.",
   },
 ];
 
@@ -45,7 +45,7 @@ export function Testimonials() {
 
   return (
     <section className="relative py-8 pt-20 overflow-hidden">
-      <h2 className="text-5xl font-heading text-center font-bold mb-14">
+      <h2 className="text-4xl md:text-5xl font-heading text-center font-bold mb-14">
         {t("testimonialsTitle")}
       </h2>
 
@@ -66,7 +66,7 @@ export function Testimonials() {
                     <span>{t("recommend")}</span>
                   </div>
 
-                  <p className="mb-4 line-clamp-6">{testimonial.quote}</p>
+                  <p className="mb-4">{testimonial.quote}</p>
 
                   <div className="flex items-center gap-2">
                     <div className="avatar">

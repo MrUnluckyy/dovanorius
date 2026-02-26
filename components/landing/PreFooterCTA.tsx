@@ -13,7 +13,7 @@ export function PreFooterCTA() {
         <img src="/assets/doodles/heart-lines.svg" className="w-16" />
       </div>
 
-      <h2 className="text-5xl font-heading text-center font-bold max-w-md">
+      <h2 className="text-4xl md:text-5xl font-heading text-center font-bold max-w-md">
         {t("preFooterCTATitle")}
       </h2>
       <p className="max-w-md text-neutral">{t("preFooterCTADescription")}</p>

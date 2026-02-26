@@ -105,7 +105,7 @@ export function EditBoard({ userId, board }: { userId: string; board: Board }) {
   return (
     <div className="w-full justify-end">
       <button
-        className="btn whitespace-nowrap w-full md:w-auto"
+        className="btn btn-outline whitespace-nowrap w-full md:w-auto"
         onClick={openModal}
       >
         <LuClipboardPen />

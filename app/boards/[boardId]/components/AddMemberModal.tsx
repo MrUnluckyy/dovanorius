@@ -74,7 +74,10 @@ export function AddMemberModal({
 
   return (
     <div className="w-full">
-      <button className="btn w-full whitespace-nowrap" onClick={openModal}>
+      <button
+        className="btn btn-outline w-full whitespace-nowrap"
+        onClick={openModal}
+      >
         <LuUserPlus />
         {t("addMember")}
       </button>

@@ -8,7 +8,7 @@ export function DetailedFeatures() {
   return (
     <div className=" mx-auto px-8 pt-8 mt-20 relative bg-secondary">
       <div className="max-w-[1440px] mx-auto">
-        <h2 className="text-5xl font-heading text-center font-bold mb-14">
+        <h2 className="text-4xl md:text-5xl font-heading text-center font-bold mb-14">
           {t("featuresTitle")}
         </h2>
         <div className="flex flex-col md:flex-row justify-center gap-8 mt-10 items-end">
@@ -24,7 +24,7 @@ export function DetailedFeatures() {
           </div>
           <div className="max-w-xl">
             <div className="mb-8">
-              <h3 className="font-heading text-4xl font-semibold mb-4">
+              <h3 className="font-heading text-4xl  font-semibold mb-4">
                 {t("featureOneTitle")}{" "}
                 <span className="badge badge-neutral badge-outline badge-md">
                   {t("soon")}
