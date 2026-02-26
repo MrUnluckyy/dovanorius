@@ -36,7 +36,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
       {/* DRAWER CONTENT: */}
       <div className="drawer-content flex flex-col">
         {/* Navbar */}
-        <div className="navbar bg-transparent w-full shadow-sm">
+        <div className="navbar bg-base-100 w-full shadow-sm">
           <div className="flex w-full max-w-[1440px] px-4 mx-auto items-center">
             <div className="mx-2 flex-1 font-bold justify-between flex lg:block">
               <div className="flex gap-4 md:gap-8">
@@ -99,7 +99,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
       </div>
 
       <div className="drawer-side">
-        <div className="menu bg-transparent min-h-full w-full p-4">
+        <div className="menu bg-base-100 min-h-full w-full p-4">
           <div className="mb-8 flex justify-between">
             <Logo size="md" />
             <label
