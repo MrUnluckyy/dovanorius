@@ -9,9 +9,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ItemFormValues, ItemSchema } from "@/schemas/ItemSchema";
 import toast from "react-hot-toast";
 import { stripHtml } from "@/utils/helpers/stripHtml";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCurrentBoardId } from "@/hooks/useCurrentBoardId";
 import { useBoards } from "@/hooks/useBoards";
+import { ImageUploadGrid, ImageSlot } from "@/components/ui/ImageUploadGrid";
+import imageCompression from "browser-image-compression";
 
 type WishFormProps = {
   onCancel: () => void;
@@ -23,11 +25,12 @@ export function WishForm({ onCancel, onSuccess }: WishFormProps) {
   const supabase = createClient();
   const queryClient = useQueryClient();
   const currentBoardId = useCurrentBoardId();
-  const { uploadProductImage } = useProductImageUpload();
+  const { uploadMultipleProductImages } = useProductImageUpload();
   const { data: boards = [], isLoading: boardsLoading } = useBoards();
 
   const [parsing, setParsing] = useState(false);
-  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   const defaultValues: ItemFormValues = {
     title: "",
@@ -52,7 +55,37 @@ export function WishForm({ onCancel, onSuccess }: WishFormProps) {
     mode: "onSubmit",
   });
 
-  const imageUrl = watch("image_url");
+  const parsedImageUrl = watch("image_url");
+
+  // Build slots: parsed image (if any) + pending file previews
+  const slots: ImageSlot[] = [
+    ...(parsedImageUrl ? [{ url: parsedImageUrl, isNew: false }] : []),
+    ...previewUrls.map((url) => ({ url, isNew: true })),
+  ];
+
+  // Manage object URLs for preview
+  useEffect(() => {
+    const urls = pendingFiles.map((f) => URL.createObjectURL(f));
+    setPreviewUrls(urls);
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, [pendingFiles]);
+
+  const handleAdd = (file: File) => {
+    if (slots.length >= 5) return;
+    setPendingFiles((prev) => [...prev, file]);
+  };
+
+  const handleRemove = (index: number) => {
+    // The first slot may be the parsed image_url
+    const parsedOffset = parsedImageUrl ? 1 : 0;
+    if (index < parsedOffset) {
+      // Remove parsed image_url
+      setValue("image_url", "");
+    } else {
+      const fileIndex = index - parsedOffset;
+      setPendingFiles((prev) => prev.filter((_, i) => i !== fileIndex));
+    }
+  };
 
   const handleParse = async () => {
     const url = getValues("url");
@@ -90,7 +123,6 @@ export function WishForm({ onCancel, onSuccess }: WishFormProps) {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      console.log("Adding item to board:", payload);
       const { data, error } = await supabase
         .from("items")
         .insert({
@@ -109,18 +141,39 @@ export function WishForm({ onCancel, onSuccess }: WishFormProps) {
 
       if (error) throw error;
 
-      if (uploadedImageFile) {
-        const imageUrl = await uploadProductImage(uploadedImageFile, data.id);
-        if (imageUrl) {
-          const { error: updateError } = await supabase
-            .from("items")
-            .update({ image_url: imageUrl })
-            .eq("id", data.id)
-            .single();
+      const compressionOptions = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1600,
+        useWebWorker: true,
+      };
 
-          if (updateError) {
-            console.error("Error updating item with image URL:", updateError);
-          }
+      // Upload pending files
+      let uploadedUrls: string[] = [];
+      if (pendingFiles.length > 0) {
+        const compressed = await Promise.all(
+          pendingFiles.map((f) => imageCompression(f, compressionOptions))
+        );
+        uploadedUrls = await uploadMultipleProductImages(compressed, data.id);
+      }
+
+      // Build final image_urls: parsed URL first, then uploaded
+      const parsedUrl = payload.image_url || null;
+      const finalUrls = [
+        ...(parsedUrl ? [parsedUrl] : []),
+        ...uploadedUrls,
+      ].slice(0, 5);
+
+      if (finalUrls.length > 0) {
+        const { error: updateError } = await supabase
+          .from("items")
+          .update({
+            image_urls: finalUrls,
+            image_url: finalUrls[0],
+          })
+          .eq("id", data.id);
+
+        if (updateError) {
+          console.error("Error updating item with image URLs:", updateError);
         }
       }
     },
@@ -128,7 +181,7 @@ export function WishForm({ onCancel, onSuccess }: WishFormProps) {
       toast.success(t("toastItemAdded", { item: getValues("title") }));
       queryClient.invalidateQueries({ queryKey: ["items"] });
       reset();
-      setUploadedImageFile(null);
+      setPendingFiles([]);
       onSuccess?.();
     },
   });
@@ -230,26 +283,15 @@ export function WishForm({ onCancel, onSuccess }: WishFormProps) {
           )}
         </div>
 
-        {imageUrl && (
-          <div className="mt-2">
-            <img
-              src={imageUrl}
-              alt={getValues("title")}
-              className="max-h-48 rounded-md object-contain"
-            />
-          </div>
-        )}
-
         <div>
           <label className="label">
             <span className="label-text">{t("image")}</span>
           </label>
-          <input
-            type="file"
-            className="file-input file-input-bordered w-full"
-            onChange={(e) =>
-              setUploadedImageFile(e.target.files ? e.target.files[0] : null)
-            }
+          <ImageUploadGrid
+            slots={slots}
+            onAdd={handleAdd}
+            onRemove={handleRemove}
+            maxImages={5}
           />
           <label className="label">
             <span className="label-text-alt">{t("maxImageSizeLabel")}</span>
@@ -263,7 +305,7 @@ export function WishForm({ onCancel, onSuccess }: WishFormProps) {
           className="btn btn-ghost"
           onClick={() => {
             reset();
-            setUploadedImageFile(null);
+            setPendingFiles([]);
             onCancel();
           }}
         >

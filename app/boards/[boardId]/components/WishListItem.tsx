@@ -22,11 +22,11 @@ export function WishListItem({ item, inPublicBoard, user }: Props) {
       <figure className="px-10 pt-10">
         <div
           className="aspect-square w-32 overflow-hidden rounded-md relative"
-          aria-hidden={!item?.image_url} // image is decorative if there's no real image
+          aria-hidden={!item?.image_url && !item?.image_urls?.length}
         >
           <img
-            src={item?.image_url || "/assets/placeholder.jpg"}
-            alt={title ?? "Gift image"} // meaningful alt
+            src={item?.image_urls?.[0] ?? item?.image_url ?? "/assets/placeholder.jpg"}
+            alt={title ?? "Gift image"}
             className="h-full w-full object-cover object-center"
             loading="lazy"
             decoding="async"
@@ -35,6 +35,11 @@ export function WishListItem({ item, inPublicBoard, user }: Props) {
             }}
             data-clarity-mask="true"
           />
+          {(item?.image_urls?.length ?? 0) > 1 && (
+            <span className="absolute bottom-1 right-1 badge badge-xs badge-neutral opacity-90">
+              +{item.image_urls.length - 1}
+            </span>
+          )}
         </div>
 
         {inPublicBoard && status === "reserved" && reserved_by ? (

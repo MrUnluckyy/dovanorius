@@ -35,6 +35,7 @@ export const ItemSchema = z.object({
 
   notes: z.string().max(2_000).optional().or(z.literal("")),
   image_url: z.url().optional().or(z.literal("")),
+  image_urls: z.array(z.string().url()).max(5).optional(),
   price: z
     .number("Turėtų būti skaičius")
     .positive("Gali būti tik teigiamas skaičius")

@@ -56,7 +56,7 @@ const CategoryMosaicCard = React.memo(function CategoryMosaicCard({
 }) {
   const format = useFormatter();
   const t = useTranslations<"Boards">("Boards");
-  const imgs = item.preview_images.slice(0, 4);
+  const imgs = item?.preview_images?.slice(0, 4);
   const now = new Date();
 
   const { membersByBoard } = useBoardMembersMap([item.id]);
@@ -76,7 +76,7 @@ const CategoryMosaicCard = React.memo(function CategoryMosaicCard({
         <div
           className={cn(
             "grid h-[150px] grid-cols-3 gap-2 md:h-[170px] lg:h-[190px]",
-            imgs.length >= 4 ? "grid-rows-2" : "grid-rows-2"
+            imgs?.length && imgs?.length >= 4 ? "grid-rows-2" : "grid-rows-2"
           )}
         >
           {/* Large (left) */}
