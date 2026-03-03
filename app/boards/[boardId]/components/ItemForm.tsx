@@ -4,11 +4,12 @@ import { useTranslations } from "next-intl";
 import { Item } from "./WishList";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ItemFormValues, ItemSchema } from "@/schemas/ItemSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useProductImageUpload } from "@/hooks/useImageUpload";
 import imageCompression from "browser-image-compression";
+import { ImageUploadGrid, ImageSlot } from "@/components/ui/ImageUploadGrid";
 
 export function ItemForm({
   item,
@@ -19,12 +20,21 @@ export function ItemForm({
   onCloseModal: () => void;
   onCancel: () => void;
 }) {
-  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // Existing images already stored in the DB
+  const [existingUrls, setExistingUrls] = useState<string[]>(
+    item.image_urls?.length
+      ? item.image_urls
+      : item.image_url
+      ? [item.image_url]
+      : []
+  );
+  // New files the user picks in this edit session
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newFilePreviewUrls, setNewFilePreviewUrls] = useState<string[]>([]);
 
   const supabase = createClient();
   const queryClient = useQueryClient();
-  const { uploadProductImage } = useProductImageUpload();
+  const { uploadMultipleProductImages } = useProductImageUpload();
 
   const t = useTranslations("Boards");
 
@@ -37,17 +47,12 @@ export function ItemForm({
     boardId: item.board_id || "",
   };
 
-  const { register, handleSubmit, reset, formState, getValues, watch } =
+  const { register, handleSubmit, reset, formState } =
     useForm<ItemFormValues>({
       defaultValues,
       resolver: zodResolver(ItemSchema),
       mode: "onSubmit",
     });
-
-  const currentImage = useMemo(
-    () => previewUrl || watch("image_url") || "/assets/placeholder.jpg",
-    [previewUrl, watch]
-  );
 
   const { data: boards = [], isLoading } = useQuery({
     queryKey: ["boards"],
@@ -61,36 +66,50 @@ export function ItemForm({
     },
   });
 
+  // Maintain object URLs for new-file previews
+  useEffect(() => {
+    const urls = newFiles.map((f) => URL.createObjectURL(f));
+    setNewFilePreviewUrls(urls);
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, [newFiles]);
+
+  const slots: ImageSlot[] = [
+    ...existingUrls.map((url) => ({ url, isNew: false })),
+    ...newFilePreviewUrls.map((url) => ({ url, isNew: true })),
+  ];
+
+  const handleAdd = (file: File) => {
+    if (slots.length >= 5) return;
+    setNewFiles((prev) => [...prev, file]);
+  };
+
+  const handleRemove = (index: number) => {
+    if (index < existingUrls.length) {
+      setExistingUrls((prev) => prev.filter((_, i) => i !== index));
+    } else {
+      const fileIndex = index - existingUrls.length;
+      setNewFiles((prev) => prev.filter((_, i) => i !== fileIndex));
+    }
+  };
+
   const onSubmit = async (data: ItemFormValues) => {
     try {
-      // Optional: basic client-side file guard
-      if (uploadedImageFile) {
-        if (uploadedImageFile.size > 10 * 1024 * 1024) {
-          toast.error(t("imageTooLarge", { size: "5MB" }));
-          return;
-        }
-        if (!/^image\/(png|jpe?g|webp)$/i.test(uploadedImageFile.type)) {
-          toast.error(t("imageTypeInvalid"));
-          return;
-        }
-      }
-      const options = {
+      const compressionOptions = {
         maxSizeMB: 1,
         maxWidthOrHeight: 1600,
         useWebWorker: true,
       };
 
-      // 1) If a new image is chosen, upload to Supabase Storage (public bucket example).
-      let image_url = data.image_url || null;
-      if (uploadedImageFile) {
-        const compressedFile = await imageCompression(
-          uploadedImageFile,
-          options
+      let uploadedUrls: string[] = [];
+      if (newFiles.length > 0) {
+        const compressed = await Promise.all(
+          newFiles.map((f) => imageCompression(f, compressionOptions))
         );
-        image_url = await uploadProductImage(compressedFile, item.id);
+        uploadedUrls = await uploadMultipleProductImages(compressed, item.id);
       }
 
-      // 2) Update the row
+      const finalUrls = [...existingUrls, ...uploadedUrls].slice(0, 5);
+
       const { error: updateErr } = await supabase
         .from("items")
         .update({
@@ -98,7 +117,8 @@ export function ItemForm({
           board_id: data.boardId,
           url: data.url || null,
           notes: data.notes || null,
-          image_url,
+          image_url: finalUrls[0] ?? null,
+          image_urls: finalUrls,
           price: data.price ?? null,
           updated_at: new Date().toISOString(),
         })
@@ -106,8 +126,6 @@ export function ItemForm({
 
       if (updateErr) throw updateErr;
 
-      // 3) Invalidate relevant caches
-      // Adjust these keys to match how you query (e.g., ["items", board_id], ["item", id])
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["items"] }),
         item.board_id
@@ -134,16 +152,6 @@ export function ItemForm({
       toast.error(t("somethingWentWrong"));
     }
   };
-
-  useEffect(() => {
-    if (!uploadedImageFile) {
-      setPreviewUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(uploadedImageFile);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [uploadedImageFile]);
 
   return (
     <div>
@@ -197,7 +205,6 @@ export function ItemForm({
             placeholder={t("price")}
             {...register("price", {
               setValueAs: (value) => {
-                // allow empty field
                 if (value === "" || value === null || value === undefined) {
                   return undefined;
                 }
@@ -225,24 +232,12 @@ export function ItemForm({
             </p>
           ) : null}
 
-          <div>
-            {formState ? (
-              <img
-                src={currentImage}
-                alt={getValues("title")}
-                className="max-w-[300px] mx-auto"
-              />
-            ) : null}
-          </div>
-
           <label className="label">{t("image")}</label>
-          <input
-            type="file"
-            className="file-input w-full"
-            accept="image/png,image/jpeg,image/webp"
-            onChange={(e) =>
-              setUploadedImageFile(e.target.files ? e.target.files[0] : null)
-            }
+          <ImageUploadGrid
+            slots={slots}
+            onAdd={handleAdd}
+            onRemove={handleRemove}
+            maxImages={5}
           />
           <label className="label">{t("maxImageSizeLabel")}</label>
         </fieldset>

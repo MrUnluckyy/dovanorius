@@ -16,6 +16,7 @@ export type Item = {
   url: string | null;
   price: number | null;
   image_url: string | null;
+  image_urls: string[];
   status: "wanted" | "reserved" | "purchased";
   reserved_by: string | null;
   priority: "low" | "medium" | "high";
@@ -44,7 +45,7 @@ export function WishList({
       const { data, error } = await supabase
         .from("items")
         .select(
-          "id, board_id, title, notes, price, image_url, url, status, reserved_by ,priority, created_at"
+          "id, board_id, title, notes, price, image_url, image_urls, url, status, reserved_by ,priority, created_at"
         )
         .in("status", ["wanted", "reserved"])
         .eq("board_id", boardId)

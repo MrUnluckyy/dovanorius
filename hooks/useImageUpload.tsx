@@ -46,8 +46,21 @@ export function useProductImageUpload() {
     }
   };
 
+  const uploadMultipleProductImages = async (
+    files: File[],
+    itemId: string
+  ): Promise<string[]> => {
+    const urls: string[] = [];
+    for (const file of files) {
+      const url = await uploadProductImage(file, itemId);
+      if (url) urls.push(url);
+    }
+    return urls;
+  };
+
   return {
     uploadProductImage,
+    uploadMultipleProductImages,
     uploading,
     error,
     imageUrl,

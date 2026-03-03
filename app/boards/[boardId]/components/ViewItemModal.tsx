@@ -23,6 +23,14 @@ export function ViewItemModal({
   const { title, notes, price, url, id } = item;
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const images =
+    item.image_urls?.length
+      ? item.image_urls
+      : item.image_url
+      ? [item.image_url]
+      : [];
   const t = useTranslations("Boards");
   const confirm = useConfirm();
 
@@ -31,6 +39,7 @@ export function ViewItemModal({
 
   const openModal = () => {
     setIsOpen(true);
+    setActiveIndex(0);
   };
   const closeModal = () => {
     setIsOpen(false);
@@ -168,19 +177,37 @@ export function ViewItemModal({
             ) : (
               <>
                 <div className="flex flex-col max-h-[60vh] overflow-auto">
-                  <figure className="w-full mb-6 shrink-0">
-                    {item.image_url ? (
-                      <img
-                        src={item.image_url}
-                        alt={title}
-                        className="max-w-[300px]"
-                        data-clarity-mask="true"
-                      />
-                    ) : (
-                      <img
-                        src="/assets/placeholder.jpg"
-                        alt="Gift illustration"
-                      />
+                  <figure className="w-full mb-6 shrink-0 flex flex-col items-center gap-3 md:flex-row md:items-start md:gap-4">
+                    <img
+                      src={images[activeIndex] ?? "/assets/placeholder.jpg"}
+                      alt={title}
+                      className="max-w-[300px] w-full rounded-md object-contain md:flex-1"
+                      data-clarity-mask="true"
+                      onError={(e) => {
+                        e.currentTarget.src = "/assets/placeholder.jpg";
+                      }}
+                    />
+                    {images.length > 1 && (
+                      <div className="flex flex-row gap-2 justify-center md:flex-col">
+                        {images.map((url, i) => (
+                          <button
+                            key={url}
+                            type="button"
+                            onClick={() => setActiveIndex(i)}
+                            className={`w-12 h-12 rounded overflow-hidden border-2 transition-colors ${
+                              i === activeIndex
+                                ? "border-primary"
+                                : "border-transparent opacity-60 hover:opacity-100"
+                            }`}
+                          >
+                            <img
+                              src={url}
+                              alt={`Image ${i + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </figure>
                   <h3 className="font-bold text-lg" data-clarity-mask="true">

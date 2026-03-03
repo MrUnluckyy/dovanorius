@@ -4,13 +4,15 @@ import { useProductImageUpload } from "@/hooks/useImageUpload";
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ItemFormValues, ItemSchema } from "@/schemas/ItemSchema";
 import toast from "react-hot-toast";
 import { stripHtml } from "@/utils/helpers/stripHtml";
 import { LuX } from "react-icons/lu";
+import { ImageUploadGrid, ImageSlot } from "@/components/ui/ImageUploadGrid";
+import imageCompression from "browser-image-compression";
 
 export function AddItemModal({
   boardId,
@@ -21,8 +23,10 @@ export function AddItemModal({
 }) {
   const [parsing, setParsing] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
-  const { uploadProductImage } = useProductImageUpload();
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  const { uploadMultipleProductImages } = useProductImageUpload();
   const t = useTranslations("Boards");
 
   const defaultValues: ItemFormValues = {
@@ -48,6 +52,8 @@ export function AddItemModal({
     mode: "onSubmit",
   });
 
+  const parsedImageUrl = watch("image_url");
+
   const supabase = createClient();
   const queryClient = useQueryClient();
 
@@ -56,7 +62,36 @@ export function AddItemModal({
   };
   const closeModal = () => {
     reset();
+    setPendingFiles([]);
     setIsOpen(false);
+  };
+
+  // Manage object URLs for new file previews
+  useEffect(() => {
+    const urls = pendingFiles.map((f) => URL.createObjectURL(f));
+    setPreviewUrls(urls);
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, [pendingFiles]);
+
+  // Combined slots: parsed image (if any) + new file previews
+  const slots: ImageSlot[] = [
+    ...(parsedImageUrl ? [{ url: parsedImageUrl, isNew: false }] : []),
+    ...previewUrls.map((url) => ({ url, isNew: true })),
+  ];
+
+  const handleAdd = (file: File) => {
+    if (slots.length >= 5) return;
+    setPendingFiles((prev) => [...prev, file]);
+  };
+
+  const handleRemove = (index: number) => {
+    const parsedOffset = parsedImageUrl ? 1 : 0;
+    if (index < parsedOffset) {
+      setValue("image_url", "");
+    } else {
+      const fileIndex = index - parsedOffset;
+      setPendingFiles((prev) => prev.filter((_, i) => i !== fileIndex));
+    }
   };
 
   const handleParse = async () => {
@@ -71,12 +106,8 @@ export function AddItemModal({
       }
       const data = await res.json();
 
-      if (data?.title) {
-        setValue("title", data.title);
-      }
-      if (data?.description) {
-        setValue("notes", stripHtml(data.description));
-      }
+      if (data?.title) setValue("title", data.title);
+      if (data?.description) setValue("notes", stripHtml(data.description));
       if (data?.images && data.images.length > 0) {
         setValue("image_url", data.images[0]);
       }
@@ -98,6 +129,7 @@ export function AddItemModal({
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
+
       const { data, error } = await supabase
         .from("items")
         .insert({
@@ -115,18 +147,37 @@ export function AddItemModal({
         .single();
       if (error) throw error;
 
-      if (uploadedImageFile) {
-        const imageUrl = await uploadProductImage(uploadedImageFile, data?.id);
-        if (imageUrl) {
-          const { error } = await supabase
-            .from("items")
-            .update({ image_url: imageUrl })
-            .eq("id", data.id)
-            .select()
-            .single();
-          if (error) {
-            console.error("Error updating item with image URL:", error);
-          }
+      const compressionOptions = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1600,
+        useWebWorker: true,
+      };
+
+      let uploadedUrls: string[] = [];
+      if (pendingFiles.length > 0) {
+        const compressed = await Promise.all(
+          pendingFiles.map((f) => imageCompression(f, compressionOptions))
+        );
+        uploadedUrls = await uploadMultipleProductImages(compressed, data.id);
+      }
+
+      const parsedUrl = payload.image_url || null;
+      const finalUrls = [
+        ...(parsedUrl ? [parsedUrl] : []),
+        ...uploadedUrls,
+      ].slice(0, 5);
+
+      if (finalUrls.length > 0) {
+        const { error: updateError } = await supabase
+          .from("items")
+          .update({
+            image_urls: finalUrls,
+            image_url: finalUrls[0],
+          })
+          .eq("id", data.id);
+
+        if (updateError) {
+          console.error("Error updating item with image URLs:", updateError);
         }
       }
     },
@@ -134,7 +185,7 @@ export function AddItemModal({
       toast.success(t("toastItemAdded", { item: getValues("title") }));
       queryClient.invalidateQueries({ queryKey: ["items", boardId] });
       reset();
-      setUploadedImageFile(null);
+      setPendingFiles([]);
       closeModal();
     },
   });
@@ -183,7 +234,6 @@ export function AddItemModal({
                   placeholder={t("price")}
                   {...register("price", {
                     setValueAs: (value) => {
-                      // allow empty field
                       if (
                         value === "" ||
                         value === null ||
@@ -191,7 +241,6 @@ export function AddItemModal({
                       ) {
                         return undefined;
                       }
-
                       const n = Number(value);
                       return Number.isNaN(n) ? undefined : n;
                     },
@@ -210,30 +259,24 @@ export function AddItemModal({
                   {...register("notes")}
                 />
 
-                <div>
-                  {getValues("image_url") ? (
-                    <img
-                      src={getValues("image_url")}
-                      alt={getValues("title")}
-                    />
-                  ) : null}
-                </div>
-
                 <label className="label">{t("image")}</label>
-                <input
-                  type="file"
-                  className="file-input w-full"
-                  onChange={(e) =>
-                    setUploadedImageFile(
-                      e.target.files ? e.target.files[0] : null
-                    )
-                  }
+                <ImageUploadGrid
+                  slots={slots}
+                  onAdd={handleAdd}
+                  onRemove={handleRemove}
+                  maxImages={5}
                 />
                 <label className="label">{t("maxImageSizeLabel")}</label>
               </fieldset>
               <div className="modal-action">
-                <button className="btn btn-primary" type="submit">
-                  {t("ctaSubmit")}
+                <button
+                  className="btn btn-primary"
+                  type="submit"
+                  disabled={addItem.isPending}
+                >
+                  {addItem.isPending
+                    ? t("ctaSubmitting") ?? "Saving..."
+                    : t("ctaSubmit")}
                 </button>
               </div>
             </form>
