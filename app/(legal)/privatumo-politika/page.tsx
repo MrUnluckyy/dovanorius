@@ -3,7 +3,7 @@ export default async function PrivacyPage() {
     <>
       <h1>Privatumo politika</h1>
       <p>
-        <strong>Paskutinį kartą atnaujinta: 2025 m.</strong>
+        <strong>Paskutinį kartą atnaujinta: 2026 m. kovo mėn.</strong>
       </p>
 
       <p>
@@ -66,9 +66,19 @@ export default async function PrivacyPage() {
           CookieYes - slapukų sutikimų valdymui ir slapukų kategorijų kontrolei.
         </li>
         <li>
-          Microsoft Clarity duomenys naudojami tik statistinei analizei ir
-          platformos tobulinimui, nenaudojami naudotojų identifikavimui ar
-          reklamos tikslais.
+          Sentry - mobiliosios programėlės klaidų ir gedimų stebėjimui (techninė
+          informacija apie klaidas, įrenginio tipas ir operacinė sistema);
+          naudojama tik techniniam stabilumui užtikrinti.
+        </li>
+        <li>
+          PostHog - mobiliosios programėlės naudojimo analizei (anonimizuoti
+          naudojimo įvykiai, tokie kaip funkcijų naudojimas ir navigacija);
+          naudojama paslaugos kokybei gerinti, nenaudojama reklamos tikslais.
+        </li>
+        <li>
+          Microsoft Clarity, Sentry ir PostHog duomenys naudojami tik statistinei
+          analizei ir platformos tobulinimui, nenaudojami naudotojų
+          identifikavimui ar reklamos tikslais.
         </li>
       </ul>
 
@@ -153,7 +163,7 @@ export default async function PrivacyPage() {
         apsaugoti, įskaitant šifruotą ryšį (HTTPS) ir prieigos ribojimą.
       </p>
 
-      <h2>9. Slapukai</h2>
+      <h2>8. Slapukai</h2>
       <p>
         Svetainėje naudojami būtini ir, gavus jūsų sutikimą, analitiniai
         slapukai. Slapukų sutikimus galite bet kada peržiūrėti ar pakeisti
