@@ -1,17 +1,14 @@
 "use client";
-import React, { useState } from "react";
-import { PublishBoard } from "./PublishBoard";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { UserLoadingSkeleton } from "@/components/loaders/UserLoadingSkeleton";
 import { AddMemberModal } from "./AddMemberModal";
 import { useBoardMembersMap } from "@/hooks/useMemberMap";
 import { AvatarGroup } from "../../components/AvatarGroup";
-import { LuShare, LuTrash } from "react-icons/lu";
-import { useConfirm } from "@/components/ConfirmDialogProvider";
 import { EditBoard } from "./EditBoard";
+import { ShareModal } from "./ShareModal";
 
 export type Board = {
   id: string;
@@ -20,55 +17,39 @@ export type Board = {
   description?: string;
   created_at: string;
   is_public: boolean;
+  share_token?: string | null;
 };
 
 type Props = {
-  board: Board;
+  boardId: string;
   inPublicView?: boolean;
   userId?: string | null;
 };
 
-export function BoardBar({ board, inPublicView, userId }: Props) {
-  const [copied, setCopied] = useState(false);
+export function BoardBar({ boardId, inPublicView, userId }: Props) {
   const supabase = createClient();
-  const queryClient = useQueryClient();
-  const router = useRouter();
   const t = useTranslations("Boards");
-  const confirm = useConfirm();
-
-  const handleCopy = async () => {
-    if (!boardClient?.is_public) return;
-    const url = `${window.location.origin}/users/${userId}/${board.slug}`;
-
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // reset after 2 seconds
-    } catch (err) {
-      console.error("Failed to copy:", err);
-    }
-  };
 
   const { data: boardClient, isLoading } = useQuery({
-    queryKey: ["board", board.id],
+    queryKey: ["board", boardId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("boards")
-        .select("id, name, description, created_at, is_public, slug")
-        .eq("id", board?.id)
+        .select("id, name, description, created_at, is_public, slug, share_token")
+        .eq("id", boardId)
         .single();
       if (error) throw error;
       return data as Board;
     },
   });
 
-  const { membersByBoard } = useBoardMembersMap([board.id]);
+  const { membersByBoard } = useBoardMembersMap([boardId]);
 
   if (isLoading) return <UserLoadingSkeleton />;
 
   return (
     <div className="flex flex-col md:flex-row gap-4">
-      <div className="flex flex-col  gap-6 md:flex-row items-start md:gap-12 w-full">
+      <div className="flex flex-col gap-6 md:flex-row items-start md:gap-12 w-full">
         <div className="flex flex-col gap-6">
           <div>
             <h2 className="text-4xl font-semibold mb-2 font-heading">
@@ -80,34 +61,19 @@ export function BoardBar({ board, inPublicView, userId }: Props) {
             <p className="text-sm">{boardClient?.description}</p>
           </div>
           <div>
-            {membersByBoard[board.id]?.length > 1 && (
-              <AvatarGroup members={membersByBoard[board.id] || []} />
+            {membersByBoard[boardId]?.length > 1 && (
+              <AvatarGroup members={membersByBoard[boardId] || []} />
             )}
           </div>
         </div>
       </div>
       {inPublicView ? null : (
-        <div className="flex flex-col gap-2 ">
-          {/* <PublishBoard
-            boardId={boardClient?.id || ""}
-            boardName={boardClient?.name || ""}
-            boardPublished={boardClient?.is_public || false}
-            boardSlug={boardClient?.slug}
-          /> */}
-          <button
-            className={`whitespace-nowrap btn ${
-              copied ? "btn-success" : "btn-outline"
-            } `}
-            onClick={handleCopy}
-            disabled={!boardClient?.is_public}
-          >
-            <LuShare /> {copied ? t("copied") : t("share")}
-          </button>
-
+        <div className="flex flex-col gap-2">
+          {boardClient && <ShareModal board={boardClient} />}
           {userId && boardClient && (
             <>
               <EditBoard board={boardClient} userId={userId} />
-              <AddMemberModal userId={userId} boardId={board.id} />
+              <AddMemberModal userId={userId} boardId={boardId} />
             </>
           )}
         </div>

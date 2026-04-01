@@ -28,18 +28,20 @@ export default function AvatarUploader({
     e.preventDefault();
     if (!file) return;
 
+    const isHeic = /\.heic$/i.test(file.name) || /\.heif$/i.test(file.name);
+    const isImage = file.type.startsWith("image/") || isHeic;
+    if (!isImage) return toast.error("Pasirinkite paveikslėlį.");
+    if (file.size > 10 * 1024 * 1024)
+      return toast.error("Maximalus failo dydis 10 MB.");
+
     const options = {
       maxSizeMB: 1,
       maxWidthOrHeight: 1600,
       useWebWorker: true,
+      fileType: "image/jpeg" as const,
     };
 
     const compressedFile = await imageCompression(file, options);
-
-    if (!file.type.startsWith("image/"))
-      return toast.error("Pasirinkite paveikslėlį.");
-    if (file.size > 10 * 1024 * 1024)
-      return toast.error("Maximalus failo dydis 10 MB.");
 
     setUploading(true);
     try {
@@ -50,16 +52,15 @@ export default function AvatarUploader({
       if (authErr) throw authErr;
       if (!user) throw new Error("Not authenticated");
 
-      const ext = (compressedFile.name.split(".").pop() || "jpg").toLowerCase();
+      const ext = compressedFile.type === "image/png" ? "png" : "jpg";
       const path = `${user.id}/avatar.${ext}`;
 
       const { error: upErr } = await supabase.storage
         .from("avatars")
-        .upload(path, file, {
+        .upload(path, compressedFile, {
           upsert: true,
-          // reduce caching of the object itself
           cacheControl: "0",
-          contentType: file.type,
+          contentType: compressedFile.type,
         });
       if (upErr) throw upErr;
 

@@ -73,85 +73,88 @@ export function ProfileEditForm({
   }, [profile, reset]);
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="mb-8">
-        <h2 className="text-2xl">{t("editProfile")}</h2>
+    <div className="flex flex-col items-center w-full">
+      <div className="mb-6 w-full">
+        <h2 className="text-xl font-bold">{t("editProfile")}</h2>
       </div>
-      <div>
-        <AvatarUploader profile={profile} />
-      </div>
-      <div>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <fieldset className="fieldset w-xs p-4">
-            <div className="flex justify-between mb-4">
-              <label className="text-lg">{t("makeProfilePublic")}</label>
-              <label className="toggle text-base-content">
-                <input
-                  id="makePublic"
-                  type="checkbox"
-                  {...register("public")}
-                />
-                <svg
-                  aria-label="disabled"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
+
+      <AvatarUploader profile={profile} />
+
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+        <fieldset className="fieldset w-full gap-3">
+          <div className="flex justify-between items-center py-2">
+            <label className="text-sm font-medium">{t("makeProfilePublic")}</label>
+            <label className="toggle text-base-content">
+              <input
+                id="makePublic"
+                type="checkbox"
+                {...register("public")}
+              />
+              <svg
+                aria-label="disabled"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+              <svg
+                aria-label="enabled"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                <g
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  strokeWidth="4"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
                 >
-                  <path d="M18 6 6 18" />
-                  <path d="m6 6 12 12" />
-                </svg>
-                <svg
-                  aria-label="enabled"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                >
-                  <g
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                    strokeWidth="4"
-                    fill="none"
-                    stroke="currentColor"
-                  >
-                    <path d="M20 6 9 17l-5-5"></path>
-                  </g>
-                </svg>
-              </label>
-            </div>
-            <label className="label">{t("displayName")}</label>
-            <input
-              type="text"
-              className="input"
-              placeholder="Display name"
-              {...register("display_name")}
-            />
+                  <path d="M20 6 9 17l-5-5"></path>
+                </g>
+              </svg>
+            </label>
+          </div>
 
-            <label className="label">{t("description")}</label>
-            <textarea
-              className="textarea"
-              placeholder="Short info about you"
-              {...register("about")}
-            />
-            <button
-              type="button"
-              className="btn btn-error"
-              onClick={handleDeleteUser}
-            >
-              {t("deleteAccount")}
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={uploading || !formState.isDirty}
-            >
-              {t("ctaSave")}
-            </button>
-          </fieldset>
-        </form>
-      </div>
+          <label className="label text-sm font-medium">{t("displayName")}</label>
+          <input
+            type="text"
+            className="input w-full"
+            placeholder="Display name"
+            {...register("display_name")}
+          />
+
+          <label className="label text-sm font-medium">{t("description")}</label>
+          <textarea
+            className="textarea w-full"
+            placeholder="Short info about you"
+            {...register("about")}
+          />
+
+          <button
+            type="submit"
+            className="btn btn-primary w-full mt-2"
+            disabled={uploading || !formState.isDirty}
+          >
+            {t("ctaSave")}
+          </button>
+        </fieldset>
+
+        <div className="mt-8 pt-4 border-t border-base-300 text-center">
+          <button
+            type="button"
+            className="text-xs text-base-content/30 hover:text-error transition-colors underline-offset-2 hover:underline"
+            onClick={handleDeleteUser}
+          >
+            {t("deleteAccount")}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

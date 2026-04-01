@@ -42,7 +42,7 @@ export default async function BoardPage({
         <div className="max-w-[1440px] mx-auto min-h-screen px-4">
           <BreadCrumbsManual crumbs={crumbs} />
           <div className="py-8 mb-10">
-            <BoardBar userId={user.id} board={board} />
+            <BoardBar userId={user.id} boardId={board.id} />
           </div>
           <WishList boardId={board.id} />
         </div>

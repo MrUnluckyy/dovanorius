@@ -45,7 +45,7 @@ export default async function PublicUserBoardPage({
           />
 
           <div className="py-8 mb-10">
-            <BoardBar userId={user?.id} board={board} inPublicView />
+            <BoardBar userId={user?.id} boardId={board.id} inPublicView />
           </div>
           <WishList boardId={board.id} user={user} isPublic />
         </div>
