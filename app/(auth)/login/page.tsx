@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Noriuto.lt - prisijunk",
   description:
     "Prisijunkite prie Noriuto.lt ir pradėkite kurti savo norų sąrašus bei dalintis jais su draugais ir šeima.",
+  robots: { index: false, follow: false },
 };
 
 export default async function Login() {

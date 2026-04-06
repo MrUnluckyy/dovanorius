@@ -1,4 +1,11 @@
 @import "tailwindcss";
+
+@utility scrollbar-hide {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
 @plugin "daisyui" {
   themes: retro, black, lofi, forest, cmyk, silk, business, sunset;
 }

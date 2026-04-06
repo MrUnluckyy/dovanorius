@@ -78,7 +78,9 @@
 
     "examplesTitle": "Taip galėtų atrodyti tavo norų lentos",
 
-    "appDownloadDivider": "Jau greitai ir programėlėje",
+    "appDownloadDivider": "Parsisiųsk programėlę",
+    "iosOnly": "Tik iOS",
+    "androidComingSoon": "Android – greitai",
     "ctaCreate": "Sukurti",
     "ctaStartBuilding": "Pradėk kurti",
     "ctaStartToUse": "Pradėk naudotis",

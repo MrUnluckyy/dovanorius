@@ -14,6 +14,8 @@ import { Toaster } from "react-hot-toast";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { GtmPageView } from "@/components/GtmPageView";
+import { PostHogProvider } from "@/components/providers/PostHogProvider";
+import { createClient } from "@/utils/supabase/server";
 
 const headings = Funnel_Display({
   subsets: ["latin"],
@@ -84,6 +86,8 @@ export default async function RootLayout({
 }>) {
   const store = await cookies();
   const locale = store.get("locale")?.value || "lt";
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   return (
     <html lang={locale} data-theme="noriuto" suppressHydrationWarning>
@@ -95,6 +99,7 @@ export default async function RootLayout({
           <GtmPageView />
           <Toaster />
           <Providers>
+            <PostHogProvider userId={user?.id} userEmail={user?.email} />
             <div className="bg-gradient-to-b from-secondary/20 via-base-100 to-[#FFE035]">
               {children}
             </div>

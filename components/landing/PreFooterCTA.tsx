@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { AppStoreBadge } from "@/components/landing/AppStoreBadge";
 
 export function PreFooterCTA() {
   const t = useTranslations("HomePage");
@@ -28,21 +29,16 @@ export function PreFooterCTA() {
       <div className="divider text-neutral text-xs">
         {t("appDownloadDivider")}
       </div>
-      <div className="flex gap-4">
-        <Image
-          src="/assets/appStore.png"
-          alt="App Store"
-          width={100}
-          height={250}
-          style={{ filter: "grayscale(100%)" }}
-        />
-        <Image
-          src="/assets/googlePlay.png"
-          alt="App Store"
-          width={100}
-          height={250}
-          style={{ filter: "grayscale(100%)" }}
-        />
+      <div className="flex flex-col items-center gap-3">
+        <AppStoreBadge />
+        <div className="opacity-35 grayscale">
+          <Image
+            src="/assets/googlePlay.png"
+            alt="Google Play – coming soon"
+            width={135}
+            height={40}
+          />
+        </div>
       </div>
     </div>
   );

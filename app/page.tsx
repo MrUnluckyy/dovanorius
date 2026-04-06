@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import { ImageHero } from "@/components/hero/ImageHero";
@@ -9,6 +10,12 @@ import { Testimonials } from "@/components/landing/Testimonials";
 import Footer from "@/components/footer/Footer";
 import { PreFooterCTA } from "@/components/landing/PreFooterCTA";
 import { Examples } from "@/components/landing/Examples";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "https://www.noriuto.lt",
+  },
+};
 
 export default async function Home() {
   const supabase = await createClient();

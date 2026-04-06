@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Noriuto.lt - registruokis",
   description:
     "Prisiregistruokite prie Noriuto.lt ir pradėkite kurti savo norų sąrašus bei dalintis jais su draugais ir šeima.",
+  robots: { index: false, follow: false },
 };
 
 export default function Register() {

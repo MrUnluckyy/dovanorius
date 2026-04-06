@@ -25,7 +25,7 @@ export function Logo({ size = "md" }: Props) {
       >
         <Image
           src="/assets/logo.png"
-          alt="Logo"
+          alt="Noriuto.lt"
           width={getLogoSize()}
           height={getLogoSize()}
         />
