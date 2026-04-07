@@ -56,7 +56,7 @@ const CategoryMosaicCard = React.memo(function CategoryMosaicCard({
 }) {
   const format = useFormatter();
   const t = useTranslations<"Boards">("Boards");
-  const imgs = item?.preview_images?.slice(0, 4);
+  const imgs = item?.preview_images?.slice(0, 4) ?? [];
   const now = new Date();
 
   const { membersByBoard } = useBoardMembersMap([item.id]);
