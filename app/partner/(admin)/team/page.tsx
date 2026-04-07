@@ -1,5 +1,13 @@
 import { createClient } from "@/utils/supabase/server";
 import { TeamClient } from "./_components/TeamClient";
+import type { PartnerInvite } from "@/types/partner";
+
+type MemberRow = {
+  id: string;
+  role: string;
+  created_at: string;
+  user: { id: string; email: string; raw_user_meta_data: Record<string, unknown> };
+};
 
 export default async function TeamPage() {
   const supabase = await createClient();
@@ -31,8 +39,8 @@ export default async function TeamPage() {
 
   return (
     <TeamClient
-      members={(members ?? []) as any[]}
-      invites={(invites ?? []) as any[]}
+      members={(members ?? []) as unknown as MemberRow[]}
+      invites={(invites ?? []) as PartnerInvite[]}
       partnerId={partnerId}
       currentUserId={user!.id}
       currentRole={partnerUser!.role}

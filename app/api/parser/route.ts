@@ -33,14 +33,20 @@ type Product = {
 type JsonLdNode = Record<string, unknown>;
 type MaybeGraph = JsonLdNode & { "@graph"?: unknown };
 
-const failureMarkers = [
+// Checked only in <title> — avoids false positives from CDN scripts in page body
+const titleBlockMarkers = [
   "attention required",
   "cloudflare",
   "are you a robot",
   "ar jūs ne robotas",
   "captcha",
+  "just a moment",
   "backend fetch failed",
 ];
+
+// These are serious enough to check anywhere in the (small) HTML body,
+// but only when the page is suspiciously small (likely a challenge page)
+const CHALLENGE_PAGE_MAX_BYTES = 50_000;
 
 /** Utilities */
 function abs(u: string | undefined, base: string): string | undefined {
@@ -106,12 +112,14 @@ export async function GET(req: Request) {
   if (!target)
     return NextResponse.json({ error: "Missing url" }, { status: 400 });
 
-  // Fetch server-side (avoid CORS), follow redirects, short timeout
+  console.log(`[parser] ── START ── ${target}`);
+
   const ctrl = new AbortController();
   const timeout = setTimeout(() => ctrl.abort(), 10_000);
 
   let html = "";
   let finalUrl = target;
+  let httpStatus = 0;
 
   try {
     const res = await fetch(target, {
@@ -120,23 +128,31 @@ export async function GET(req: Request) {
       headers: { "User-Agent": "Mozilla/5.0 (Metadata Bot)" },
     });
     finalUrl = res.url || target;
+    httpStatus = res.status;
     html = await res.text();
+    console.log(`[parser] fetch ok — status=${httpStatus} finalUrl=${finalUrl} htmlLength=${html.length}`);
   } catch (e) {
     clearTimeout(timeout);
-    console.error("Fetch error:", e);
+    console.error(`[parser] fetch failed — ${target}`, e);
     return NextResponse.json({ error: "Fetch failed" }, { status: 500 });
   }
   clearTimeout(timeout);
+
   const $ = cheerio.load(html);
 
-  const titleTag = $("title").first().text().trim().toLowerCase();
-  const htmlLower = html.toLowerCase();
+  const titleTag = $("title").first().text().trim();
+  console.log(`[parser] <title> = "${titleTag}"`);
 
-  const seemsBlocked = failureMarkers.some(
-    (m) => titleTag.includes(m) || htmlLower.includes(m)
+  const titleLower = titleTag.toLowerCase();
+  const isSmallPage = html.length < CHALLENGE_PAGE_MAX_BYTES;
+  const htmlLower = isSmallPage ? html.toLowerCase() : "";
+
+  const blockedBy = titleBlockMarkers.find(
+    (m) => titleLower.includes(m) || (isSmallPage && htmlLower.includes(m))
   );
 
-  if (seemsBlocked) {
+  if (blockedBy) {
+    console.warn(`[parser] BLOCKED — matched marker: "${blockedBy}" (titleMatch=${titleLower.includes(blockedBy)}, smallPage=${isSmallPage})`);
     return NextResponse.json(
       {
         error: "SCRAPER_BLOCKED",
@@ -154,17 +170,30 @@ export async function GET(req: Request) {
   const meta = (n: string): string | undefined =>
     $(`meta[name="${n}"]`).attr("content") ?? undefined;
 
-  console.log("Parsed og:", og);
-  console.log("Parsed meta:", meta);
-  // Basic/OG/Twitter
+  // Log all OG tags found
+  const ogTags: Record<string, string> = {};
+  $("meta[property^='og:']").each((_, el) => {
+    const prop = $(el).attr("property") ?? "";
+    const content = $(el).attr("content") ?? "";
+    ogTags[prop] = content;
+  });
+  console.log(`[parser] og tags (${Object.keys(ogTags).length}):`, ogTags);
+
+  // Log key meta tags
+  console.log(`[parser] meta description = "${meta("description")}"`);
+  console.log(`[parser] twitter:image = "${tw("image")}"`);
+
   const title =
     og("title") ||
-    $("title").first().text().trim() ||
+    titleTag ||
     meta("title") ||
     undefined;
   const descriptionRaw =
     og("description") || meta("description") || tw("description") || undefined;
-  const description = descriptionRaw?.slice(0, 500); // limit length
+  const description = descriptionRaw?.slice(0, 500);
+
+  console.log(`[parser] resolved title = "${title}"`);
+  console.log(`[parser] resolved description = "${description?.slice(0, 80)}…"`);
 
   const images = [
     og("image"),
@@ -176,7 +205,8 @@ export async function GET(req: Request) {
     .map((u) => abs(u, finalUrl))
     .filter((u): u is string => typeof u === "string");
 
-  // Favicon(s)
+  console.log(`[parser] og/twitter images (${images.length}):`, images);
+
   const favicons = [
     $('link[rel="icon"]').attr("href") ?? undefined,
     $('link[rel="shortcut icon"]').attr("href") ?? undefined,
@@ -186,27 +216,35 @@ export async function GET(req: Request) {
     .map((u) => abs(u, finalUrl))
     .filter((u): u is string => typeof u === "string");
 
-  // Site name
   const siteName = og("site_name") || new URL(finalUrl).hostname;
 
-  // Try Schema.org JSON-LD for rich product data
+  // JSON-LD
   let mergedProduct: Product | undefined;
+  const jsonLdBlocks: unknown[] = [];
 
   $('script[type="application/ld+json"]').each((_, el) => {
+    const raw = $(el).contents().text();
+    if (!raw) return;
     try {
-      const raw = $(el).contents().text();
-      if (!raw) return;
       const data: unknown = JSON.parse(raw);
+      jsonLdBlocks.push(data);
       const products = extractProductsFromJsonLd(data);
+      if (products.length) {
+        console.log(`[parser] JSON-LD: found ${products.length} Product node(s)`);
+      }
       for (const p of products) {
         mergedProduct = { ...(mergedProduct ?? {}), ...p };
       }
-    } catch {
-      // ignore invalid JSON
+    } catch (e) {
+      console.warn(`[parser] JSON-LD parse error:`, e);
     }
   });
 
-  // Extract fields from Product & Offers
+  console.log(`[parser] JSON-LD blocks found: ${jsonLdBlocks.length}, product extracted: ${!!mergedProduct}`);
+  if (mergedProduct) {
+    console.log(`[parser] JSON-LD product:`, JSON.stringify(mergedProduct, null, 2));
+  }
+
   let price: string | number | undefined;
   let priceCurrency: string | undefined;
   let availability: string | undefined;
@@ -249,13 +287,16 @@ export async function GET(req: Request) {
     productImages = toStringArray(mergedProduct.image)
       .map((u) => abs(u, finalUrl))
       .filter((u): u is string => typeof u === "string");
+
+    console.log(`[parser] offers → price=${price} currency=${priceCurrency} availability=${availability}`);
+    console.log(`[parser] product images from JSON-LD (${productImages.length}):`, productImages);
   }
 
   const uniqueImages = Array.from(
     new Set([...(productImages ?? []), ...images])
   );
 
-  return NextResponse.json({
+  const result = {
     url: finalUrl,
     siteName,
     title,
@@ -269,5 +310,15 @@ export async function GET(req: Request) {
     sku,
     gtin,
     mpn,
+  };
+
+  console.log(`[parser] ── RESULT ──`, {
+    title: result.title,
+    price: result.price,
+    currency: result.currency,
+    imageCount: result.images.length,
+    hasDescription: !!result.description,
   });
+
+  return NextResponse.json(result);
 }
