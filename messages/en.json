@@ -225,6 +225,22 @@
     "confirmDeleteAccountMessage": "This action is irreversible. <format>All your data will be permanently deleted</format>."
   },
 
+  "DeleteAccount": {
+    "warningTitle": "This action cannot be undone",
+    "warningBody": "Deleting your account will permanently remove all your boards, wishes, events, and profile data.",
+    "emailLabel": "Your email address",
+    "ctaSendCode": "Send verification code",
+    "otpDescription": "We sent a 6-digit code to {email}. Enter it below to confirm deletion.",
+    "codeLabel": "Verification code",
+    "ctaConfirmDelete": "Delete my account permanently",
+    "ctaBack": "Back",
+    "accountDeleted": "Account deleted",
+    "accountDeletedSub": "Your account and all associated data have been permanently removed.",
+    "errorNoAccount": "No account found with that email address.",
+    "errorInvalidCode": "Invalid or expired code. Please try again.",
+    "errorDeleting": "Something went wrong. Please try again."
+  },
+
   "Actions": {
     "add": "Add",
     "edit": "Edit",

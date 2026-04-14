@@ -5,9 +5,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import AvatarUploader from "./AvatarUpload";
 import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
-import { useConfirm } from "@/components/ConfirmDialogProvider";
-import { deleteUserAction } from "@/app/actions/user/delete";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export function ProfileEditForm({
   onCloseModal,
@@ -17,8 +15,6 @@ export function ProfileEditForm({
   const { profile, editProfile } = useProfile();
   const [uploading, setUploading] = useState(false);
   const t = useTranslations("Profile");
-  const confirm = useConfirm();
-  const router = useRouter();
 
   const { register, handleSubmit, reset, formState } = useForm<Profile>({
     defaultValues: {
@@ -41,28 +37,6 @@ export function ProfileEditForm({
     } finally {
       setUploading(false);
       onCloseModal();
-    }
-  };
-
-  const handleDeleteUser = async () => {
-    const confirmed = await confirm({
-      title: t("confirmDeleteAccountTitle"),
-      message: t.rich("confirmDeleteAccountMessage", {
-        format: (chunks) => <b>{chunks}</b>,
-      }),
-      confirmText: t("deleteAccount"),
-      cancelText: t("ctaCancel"),
-    });
-
-    if (!confirmed || !profile?.id) return;
-
-    try {
-      const res = await deleteUserAction(profile.id);
-      if (res.success) {
-        router.push("/");
-      }
-    } catch (error) {
-      toast.error(t("toastAccountDeleteError"));
     }
   };
 
@@ -146,13 +120,12 @@ export function ProfileEditForm({
         </fieldset>
 
         <div className="mt-8 pt-4 border-t border-base-300 text-center">
-          <button
-            type="button"
+          <Link
+            href="/delete-account"
             className="text-xs text-base-content/30 hover:text-error transition-colors underline-offset-2 hover:underline"
-            onClick={handleDeleteUser}
           >
             {t("deleteAccount")}
-          </button>
+          </Link>
         </div>
       </form>
     </div>

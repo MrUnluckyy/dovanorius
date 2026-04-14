@@ -227,6 +227,22 @@
     "confirmDeleteAccountTitle": "Ar tikrai ištrinti paskyrą?",
     "confirmDeleteAccountMessage": "Šis veiksmas yra negrįžtamas. <format>Visi jūsų duomenys bus prarasti.</format>"
   },
+
+  "DeleteAccount": {
+    "warningTitle": "Šio veiksmo negalima atšaukti",
+    "warningBody": "Ištrynus paskyrą, visi jūsų norų sąrašai, norai, renginiai ir profilio duomenys bus negrįžtamai pašalinti.",
+    "emailLabel": "Jūsų el. pašto adresas",
+    "ctaSendCode": "Siųsti patvirtinimo kodą",
+    "otpDescription": "Išsiuntėme 6 skaitmenų kodą į {email}. Įveskite jį žemiau, kad patvirtintumėte ištrynimą.",
+    "codeLabel": "Patvirtinimo kodas",
+    "ctaConfirmDelete": "Ištrinti paskyrą visam laikui",
+    "ctaBack": "Atgal",
+    "accountDeleted": "Paskyra ištrinta",
+    "accountDeletedSub": "Jūsų paskyra ir visi susiję duomenys buvo negrįžtamai pašalinti.",
+    "errorNoAccount": "Paskyra su šiuo el. pašto adresu nerasta.",
+    "errorInvalidCode": "Neteisingas arba pasibaigęs kodas. Bandykite dar kartą.",
+    "errorDeleting": "Įvyko klaida. Bandykite dar kartą."
+  },
   "Actions": {
     "add": "Pridėti",
     "edit": "Redaguoti",

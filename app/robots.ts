@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
         "/register/",
         "/forgot-password/",
         "/reset-password/",
+        "/delete-account/",
         "/notifications/",
         "/api/",
       ],
