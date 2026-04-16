@@ -13,6 +13,10 @@ type FormData = {
   product_url: string;
   sku: string;
   is_active: boolean;
+  min_age: string;
+  max_age: string;
+  gender: "male" | "female" | "";
+  categories: string;
 };
 
 const empty: FormData = {
@@ -24,6 +28,10 @@ const empty: FormData = {
   product_url: "",
   sku: "",
   is_active: true,
+  min_age: "",
+  max_age: "",
+  gender: "",
+  categories: "",
 };
 
 export function ProductFormModal({
@@ -49,6 +57,10 @@ export function ProductFormModal({
           product_url: product.product_url ?? "",
           sku: product.sku ?? "",
           is_active: product.is_active,
+          min_age: product.min_age != null ? String(product.min_age) : "",
+          max_age: product.max_age != null ? String(product.max_age) : "",
+          gender: product.gender ?? "",
+          categories: product.categories.join(", "),
         }
       : empty
   );
@@ -78,6 +90,12 @@ export function ProductFormModal({
       product_url: form.product_url.trim() || null,
       sku: form.sku.trim() || null,
       is_active: form.is_active,
+      min_age: form.min_age ? parseInt(form.min_age) : null,
+      max_age: form.max_age ? parseInt(form.max_age) : null,
+      gender: form.gender || null,
+      categories: form.categories
+        ? form.categories.split(",").map((c) => c.trim()).filter(Boolean)
+        : [],
     };
 
     if (product) {
@@ -194,6 +212,60 @@ export function ProductFormModal({
               Aktyvus
             </label>
           </div>
+
+          <div className="divider text-xs text-base-content/40 my-1">Tikslinė auditorija</div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="label label-text text-xs">Amžius nuo</label>
+              <input
+                className="input input-bordered w-full input-sm"
+                type="number"
+                min="0"
+                max="120"
+                placeholder="pvz. 18"
+                value={form.min_age}
+                onChange={(e) => set("min_age", e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label label-text text-xs">Amžius iki</label>
+              <input
+                className="input input-bordered w-full input-sm"
+                type="number"
+                min="0"
+                max="120"
+                placeholder="pvz. 35"
+                value={form.max_age}
+                onChange={(e) => set("max_age", e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="label label-text text-xs">Lytis</label>
+            <select
+              className="select select-bordered w-full select-sm"
+              value={form.gender}
+              onChange={(e) => set("gender", e.target.value)}
+            >
+              <option value="">Visi</option>
+              <option value="female">Moterys</option>
+              <option value="male">Vyrai</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="label label-text text-xs">Kategorijos</label>
+            <input
+              className="input input-bordered w-full input-sm"
+              placeholder="pvz. sportas, technika, namai"
+              value={form.categories}
+              onChange={(e) => set("categories", e.target.value)}
+            />
+            <p className="text-xs text-base-content/40 mt-1">Atskirkite kableliu</p>
+          </div>
+
           <div className="modal-action mt-6">
             <button
               type="button"

@@ -38,6 +38,10 @@ export type PartnerProduct = {
   product_url: string | null;
   sku: string | null;
   is_active: boolean;
+  min_age: number | null;
+  max_age: number | null;
+  gender: "male" | "female" | null;
+  categories: string[];
   created_at: string;
   updated_at: string;
 };

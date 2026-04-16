@@ -19,9 +19,8 @@ export function PartnerLoginForm() {
       password,
     });
 
-    setLoading(false);
-
     if (error) {
+      setLoading(false);
       setError(
         error.code === "invalid_credentials"
           ? "Neteisingas el. paštas arba slaptažodis."

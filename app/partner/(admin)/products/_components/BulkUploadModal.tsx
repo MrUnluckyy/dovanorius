@@ -14,6 +14,10 @@ type ParsedRow = {
   product_url: string | null;
   sku: string | null;
   is_active: boolean;
+  min_age: number | null;
+  max_age: number | null;
+  gender: "male" | "female" | null;
+  categories: string[];
 };
 
 // Shopify export CSV columns we care about:
@@ -61,6 +65,10 @@ function parseShopifyCSV(text: string): ParsedRow[] {
         : null,
       sku: cells[skuIdx]?.trim() || null,
       is_active: published !== "false",
+      min_age: null,
+      max_age: null,
+      gender: null,
+      categories: [],
     });
   }
 
@@ -105,6 +113,10 @@ function parseGenericCSV(text: string): ParsedRow[] {
       product_url: cells[urlIdx]?.trim() || null,
       sku: cells[skuIdx]?.trim() || null,
       is_active: active !== "false" && active !== "0",
+      min_age: null,
+      max_age: null,
+      gender: null,
+      categories: [],
     });
   }
   return rows;
@@ -113,6 +125,86 @@ function parseGenericCSV(text: string): ParsedRow[] {
 function isShopifyCSV(text: string): boolean {
   const firstLine = text.split(/\r?\n/)[0].toLowerCase();
   return firstLine.includes("body (html)") || firstLine.includes("variant price");
+}
+
+function parseXML(text: string): ParsedRow[] {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(text, "application/xml");
+
+  if (doc.querySelector("parsererror")) {
+    throw new Error("Invalid XML");
+  }
+
+  function parseGender(val: string | null): "male" | "female" | null {
+    if (!val) return null;
+    const v = val.toLowerCase();
+    if (v === "male" || v === "vyras" || v === "m") return "male";
+    if (v === "female" || v === "moteris" || v === "f") return "female";
+    return null;
+  }
+
+  function parseCategories(val: string | null): string[] {
+    if (!val) return [];
+    return val.split(/[,;]/).map((c) => c.trim()).filter(Boolean);
+  }
+
+  // Google Shopping / Merchant Center feed format
+  const isGoogleFeed = !!doc.querySelector("entry");
+  if (isGoogleFeed) {
+    return Array.from(doc.querySelectorAll("entry")).map((entry) => {
+      const getText = (tag: string) =>
+        entry.querySelector(tag)?.textContent?.trim() || null;
+      const rawPrice = getText("price") ?? getText("g\\:price");
+      const price = rawPrice ? parseFloat(rawPrice.replace(/[^0-9.]/g, "")) : null;
+      const minAge = getText("min_age");
+      const maxAge = getText("max_age");
+      return {
+        title: getText("title") ?? "",
+        description: getText("description") ?? null,
+        price: isNaN(price!) ? null : price,
+        currency: "EUR",
+        image_url: getText("image_link") ?? getText("g\\:image_link"),
+        product_url: getText("link") ?? getText("g\\:link"),
+        sku: getText("id") ?? getText("g\\:id"),
+        is_active: true,
+        min_age: minAge ? parseInt(minAge) : null,
+        max_age: maxAge ? parseInt(maxAge) : null,
+        gender: parseGender(getText("gender")),
+        categories: parseCategories(getText("categories")),
+      };
+    }).filter((r) => r.title);
+  }
+
+  // Generic XML — look for repeating product/item elements
+  const itemTag =
+    doc.querySelector("product") ? "product" :
+    doc.querySelector("item") ? "item" :
+    doc.querySelector("Product") ? "Product" : null;
+
+  if (!itemTag) return [];
+
+  return Array.from(doc.querySelectorAll(itemTag)).map((el) => {
+    const getText = (tag: string) =>
+      el.querySelector(tag)?.textContent?.trim() || null;
+    const rawPrice = getText("price") ?? getText("Price");
+    const price = rawPrice ? parseFloat(rawPrice.replace(/[^0-9.]/g, "")) : null;
+    const minAge = getText("min_age");
+    const maxAge = getText("max_age");
+    return {
+      title: getText("title") ?? getText("Title") ?? getText("name") ?? getText("Name") ?? "",
+      description: getText("description") ?? getText("Description") ?? null,
+      price: isNaN(price!) ? null : price,
+      currency: getText("currency") ?? getText("Currency") ?? "EUR",
+      image_url: getText("image_url") ?? getText("image") ?? getText("Image") ?? null,
+      product_url: getText("product_url") ?? getText("url") ?? getText("URL") ?? null,
+      sku: getText("sku") ?? getText("SKU") ?? getText("id") ?? null,
+      is_active: true,
+      min_age: minAge ? parseInt(minAge) : null,
+      max_age: maxAge ? parseInt(maxAge) : null,
+      gender: parseGender(getText("gender")),
+      categories: parseCategories(getText("categories")),
+    };
+  }).filter((r) => r.title);
 }
 
 function stripHtml(html: string): string | null {
@@ -167,8 +259,10 @@ export function BulkUploadModal({
   }, []);
 
   function handleFile(file: File) {
-    if (!file.name.endsWith(".csv")) {
-      setError("Tik CSV formatas.");
+    const isCSV = file.name.endsWith(".csv");
+    const isXML = file.name.endsWith(".xml");
+    if (!isCSV && !isXML) {
+      setError("Palaikomi tik CSV ir XML formatai.");
       return;
     }
     setError(null);
@@ -177,17 +271,20 @@ export function BulkUploadModal({
     reader.onload = (e) => {
       const text = e.target?.result as string;
       try {
-        const rows = isShopifyCSV(text)
-          ? parseShopifyCSV(text)
-          : parseGenericCSV(text);
+        let rows: ParsedRow[];
+        if (isXML) {
+          rows = parseXML(text);
+        } else {
+          rows = isShopifyCSV(text) ? parseShopifyCSV(text) : parseGenericCSV(text);
+        }
         if (rows.length === 0) {
-          setError("Nerasta produktų. Patikrinkite CSV formatą.");
+          setError("Nerasta produktų. Patikrinkite failo formatą.");
           setParsed(null);
         } else {
           setParsed(rows);
         }
       } catch {
-        setError("Nepavyko nuskaityti CSV failo.");
+        setError("Nepavyko nuskaityti failo.");
         setParsed(null);
       }
     };
@@ -221,8 +318,8 @@ export function BulkUploadModal({
       <div className="modal-box max-w-lg">
         <h3 className="font-heading font-bold text-lg mb-1">Importuoti produktus</h3>
         <p className="text-sm text-base-content/60 mb-4">
-          Palaikomas standartinis CSV ir{" "}
-          <span className="font-medium text-base-content">Shopify</span> eksportas.
+          Palaikomas standartinis CSV,{" "}
+          <span className="font-medium text-base-content">Shopify</span> eksportas ir XML (Google Shopping).
         </p>
 
         {/* Drop zone */}
@@ -245,15 +342,15 @@ export function BulkUploadModal({
           >
             <LuUpload size={28} className="text-base-content/40" />
             <p className="text-sm text-base-content/60">
-              Nutempkite CSV failą čia arba <span className="text-primary underline">pasirinkite</span>
+              Nutempkite CSV arba XML failą čia arba <span className="text-primary underline">pasirinkite</span>
             </p>
             <p className="text-xs text-base-content/40">
-              Shopify: Products export → CSV
+              Shopify CSV · Google Shopping XML · Standartinis CSV/XML
             </p>
             <input
               id="csv-file-input"
               type="file"
-              accept=".csv"
+              accept=".csv,.xml"
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];
