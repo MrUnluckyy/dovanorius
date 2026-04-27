@@ -5,7 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { EventCard } from "./EventCard";
 
-type SsEventRow = { id: string; name: string; slug: string };
+type SsEventRow = {
+  id: string;
+  name: string;
+  slug: string;
+  type: string | null;
+  cover_image_url: string | null;
+};
 type MemberWithEvent = { id: string; event: SsEventRow };
 
 export default function MyEvents({ user }: { user: User }) {
@@ -19,7 +25,7 @@ export default function MyEvents({ user }: { user: User }) {
           `
           id,
           event:ss_events!ss_members_event_id_fkey (
-            id, name, slug
+            id, name, slug, type, cover_image_url
           )
         `
         )
@@ -33,13 +39,14 @@ export default function MyEvents({ user }: { user: User }) {
   if (!events || events.length === 0 || isLoading) return null;
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-bold mb-2 font-heading">Mano šventės:</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
         {events.map((e) => (
           <EventCard
             key={e.id}
             title={e.event.name}
             url={`/secret-santa/${e.event.slug}`}
+            type={e.event.type}
+            coverImageUrl={e.event.cover_image_url}
           />
         ))}
       </div>

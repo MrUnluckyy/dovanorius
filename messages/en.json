@@ -261,5 +261,11 @@
     "draft": "🧪 Draft",
     "locked": "🔐 Locked",
     "archived": "🗃️ Archived"
+  },
+  "Dashboard": {
+    "tabWishes": "Wishes",
+    "tabEvents": "Events",
+    "tabFriends": "Friends",
+    "openButton": "Open"
   }
 }

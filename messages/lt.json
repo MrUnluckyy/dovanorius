@@ -263,5 +263,11 @@
     "draft": "🧪 Ruošiama",
     "locked": "🔐 Užrakintas",
     "archived": "🗃️ Archyvas"
+  },
+  "Dashboard": {
+    "tabWishes": "Norai",
+    "tabEvents": "Šventės",
+    "tabFriends": "Draugai",
+    "openButton": "Atidaryti"
   }
 }

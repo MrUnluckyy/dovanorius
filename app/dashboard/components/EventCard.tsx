@@ -1,20 +1,52 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
-export function EventCard({ title, url }: { title: string; url: string }) {
+type EventType = "secret_santa" | "name_draw" | "group_gift" | string | null;
+
+const TYPE_META: Record<string, { icon: string; bg: string }> = {
+  secret_santa: { icon: "🎅", bg: "bg-primary/10" },
+  name_draw: { icon: "🎲", bg: "bg-secondary/10" },
+  group_gift: { icon: "🎁", bg: "bg-accent/10" },
+};
+
+function getTypeMeta(type: EventType) {
+  return TYPE_META[type ?? ""] ?? { icon: "🎉", bg: "bg-base-300" };
+}
+
+export function EventCard({
+  title,
+  url,
+  type,
+  coverImageUrl,
+}: {
+  title: string;
+  url: string;
+  type: EventType;
+  coverImageUrl?: string | null;
+}) {
+  const t = useTranslations("Dashboard");
+  const { icon, bg } = getTypeMeta(type);
+
   return (
-    <div className="card bg-base-300 card-xs shadow-sm">
-      <div className="card-body justify-center items-center gap-6">
-        <h2 className="card-title">{title}</h2>
-
-        <div className="avatar avatar-placeholder">
-          <div className="bg-green-700 text-neutral-content w-16 rounded-full">
-            <span className="text-2xl">🎅</span>
-          </div>
-        </div>
-
-        <div className="justify-end card-actions">
-          <Link href={url} className="btn btn-primary">
-            Atidaryti
+    <div className="card bg-base-100 shadow-sm overflow-hidden">
+      <div className={`h-28 flex items-center justify-center ${bg}`}>
+        {coverImageUrl ? (
+          <img
+            src={coverImageUrl}
+            alt={title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <span className="text-5xl">{icon}</span>
+        )}
+      </div>
+      <div className="card-body p-3 gap-2">
+        <h2 className="card-title text-sm leading-tight line-clamp-2">
+          {title}
+        </h2>
+        <div className="card-actions">
+          <Link href={url} className="btn btn-primary btn-xs w-full">
+            {t("openButton")}
           </Link>
         </div>
       </div>
