@@ -2,6 +2,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { FaGoogle } from "react-icons/fa6";
 
@@ -12,6 +13,10 @@ export function LoginForm() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const supabase = createClient();
   const t = useTranslations("Auth");
+  const searchParams = useSearchParams();
+  const nextParam = searchParams.get("next");
+  // Only allow relative paths to avoid open-redirects.
+  const next = nextParam?.startsWith("/") ? nextParam : "/dashboard";
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -33,7 +38,7 @@ export function LoginForm() {
       }
 
       if (data.user) {
-        window.location.href = `/dashboard`;
+        window.location.href = next;
         return;
       }
     } catch (error) {
@@ -53,7 +58,7 @@ export function LoginForm() {
           supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
-              redirectTo: `${process.env.NEXT_PUBLIC_WEB_URL}/api/auth/callback`,
+              redirectTo: `${process.env.NEXT_PUBLIC_WEB_URL}/api/auth/callback?next=${encodeURIComponent(next)}`,
             },
           })
         }

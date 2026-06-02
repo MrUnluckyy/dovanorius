@@ -38,6 +38,9 @@ const body = Baloo_2({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_WEB_URL ?? "https://noriuto.lt"
+  ),
   title: "Noriuto.lt - Tavo norų sąrašai vienoje vietoje!",
   description:
     "Svajok kartu su Noriuto.lt - kurk norų / dovanų sąrašus ir dalinkis jais su draugais bei šeima. 🎁",

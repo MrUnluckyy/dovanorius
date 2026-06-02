@@ -2,8 +2,12 @@
 
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { format } from "date-fns";
+import { enUS, lt } from "date-fns/locale";
 import { LuExternalLink, LuPencil, LuTrash2, LuX } from "react-icons/lu";
 import { Item } from "./WishList";
 import { User } from "@supabase/supabase-js";
@@ -24,6 +28,9 @@ export function ViewItemModal({
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [reminderStep, setReminderStep] = useState(false);
+  const [reminderEmail, setReminderEmail] = useState("");
+  const [savingReminder, setSavingReminder] = useState(false);
 
   const images =
     item.image_urls?.length
@@ -32,18 +39,44 @@ export function ViewItemModal({
       ? [item.image_url]
       : [];
   const t = useTranslations("Boards");
+  const locale = useLocale();
   const confirm = useConfirm();
 
   const supabase = createClient();
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const turnstileRef = useRef<TurnstileInstance>(null);
+
+  const isMyReservation =
+    item.status === "reserved" && item.reserved_by === user?.id;
+
+  const expiryLabel = item.reserve_expires_at
+    ? format(new Date(item.reserve_expires_at), "PPP", {
+        locale: locale === "lt" ? lt : enUS,
+      })
+    : null;
 
   const openModal = () => {
     setIsOpen(true);
     setActiveIndex(0);
+    // Renew-on-activity: re-opening your own hold pushes the expiry out.
+    if (inPublicBoard && isMyReservation) {
+      supabase
+        .rpc("renew_reservation", { p_item_id: id })
+        .then(({ data }) => {
+          if (data) {
+            queryClient.invalidateQueries({
+              queryKey: ["items", item.board_id],
+            });
+          }
+        });
+    }
   };
   const closeModal = () => {
     setIsOpen(false);
     setIsEditing(false);
+    setReminderStep(false);
+    setReminderEmail("");
   };
 
   const deleteItem = useMutation({
@@ -73,10 +106,31 @@ export function ViewItemModal({
   };
 
   const handleReserve = async () => {
+    // Guests can reserve without an account: create a silent anonymous
+    // session on first reserve, then proceed with the same reserve flow.
     if (!user) {
-      toast.error("Rezervuoti galima tik prisijungus.");
-      return;
+      // Solve the (invisible) captcha before creating the guest session so
+      // bots can't spam anonymous sign-ins.
+      let captchaToken: string | undefined;
+      try {
+        captchaToken = await turnstileRef.current?.getResponsePromise();
+      } catch (captchaError) {
+        toast.error(t("errorReserve"));
+        console.error("Captcha verification failed:", captchaError);
+        return;
+      }
+
+      const { error: authError } = await supabase.auth.signInAnonymously({
+        options: { captchaToken },
+      });
+      if (authError) {
+        toast.error(t("errorReserve"));
+        console.error("Error creating guest session:", authError);
+        turnstileRef.current?.reset();
+        return;
+      }
     }
+
     const { data, error } = await supabase.rpc("reserve_item", {
       p_item_id: id,
     });
@@ -84,13 +138,42 @@ export function ViewItemModal({
     if (data) {
       toast.success(t("successReserve"));
       queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
-      closeModal();
+      // Refresh so the server re-renders with the new (anonymous) session,
+      // keeping the "my reservation" badge and unreserve action in sync.
+      router.refresh();
+      // Offer an optional reminder email instead of closing right away.
+      setReminderStep(true);
     }
 
     if (error) {
-      toast.success(t("errorReserve"));
+      toast.error(t("errorReserve"));
       console.error("Error reserving item:", error);
     }
+  };
+
+  const saveReminder = async () => {
+    setSavingReminder(true);
+    const { error } = await supabase.rpc("set_reservation_reminder", {
+      p_item_id: id,
+      p_email: reminderEmail,
+    });
+    setSavingReminder(false);
+    if (error) {
+      toast.error(t("reminderError"));
+      console.error(
+        "Error saving reminder:",
+        error.message,
+        "| code:",
+        error.code,
+        "| details:",
+        error.details,
+        "| hint:",
+        error.hint
+      );
+      return;
+    }
+    toast.success(t("reminderSaved"));
+    closeModal();
   };
 
   const handleUnReserve = async () => {
@@ -241,20 +324,55 @@ export function ViewItemModal({
                   </div>
                 </div>
 
-                {!user && inPublicBoard && (
-                  <p className="text-error font-bold">
-                    Rezervuoti galima tik prisijungus
-                  </p>
-                )}
+                {reminderStep ? (
+                  <div className="mt-8 border-t border-base-300 pt-6">
+                    <p className="font-semibold">{t("reminderPrompt")}</p>
+                    <p className="text-sm opacity-70">{t("reminderHint")}</p>
+                    <p className="text-sm font-medium text-success mb-3">
+                      {expiryLabel
+                        ? t("reservedUntil", { date: expiryLabel })
+                        : t("reminderValidity")}
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="email"
+                        className="input input-bordered flex-1"
+                        placeholder={t("reminderPlaceholder")}
+                        value={reminderEmail}
+                        onChange={(e) => setReminderEmail(e.target.value)}
+                      />
+                      <button
+                        className="btn btn-primary"
+                        onClick={saveReminder}
+                        disabled={savingReminder || !reminderEmail}
+                      >
+                        {savingReminder ? t("ctaSaving") : t("reminderSave")}
+                      </button>
+                    </div>
+                    <button
+                      className="btn btn-ghost btn-sm mt-2"
+                      onClick={closeModal}
+                    >
+                      {t("reminderSkip")}
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {!user &&
+                      inPublicBoard &&
+                      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+                        <Turnstile
+                          ref={turnstileRef}
+                          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                          options={{ size: "invisible" }}
+                        />
+                      )}
 
-                <div className="modal-action flex-col-reverse md:flex-row mt-8">
+                    <div className="modal-action flex-col-reverse md:flex-row mt-8">
                   {inPublicBoard && item.status === "wanted" && (
                     <>
                       <button
-                        disabled={
-                          (inPublicBoard && item.reserved_by === user?.id) ||
-                          !user
-                        }
+                        disabled={inPublicBoard && item.reserved_by === user?.id}
                         className="btn btn-primary"
                         onClick={handleReserve}
                       >
@@ -264,17 +382,20 @@ export function ViewItemModal({
                   )}
 
                   {inPublicBoard && item.status === "reserved" && (
-                    <button
-                      disabled={
-                        inPublicBoard &&
-                        item.status === "reserved" &&
-                        item.reserved_by !== user?.id
-                      }
-                      className="btn btn-primary"
-                      onClick={handleUnReserve}
-                    >
-                      {t("ctaUnreserve")}
-                    </button>
+                    <div className="flex flex-col gap-2 w-full md:w-auto">
+                      {isMyReservation && expiryLabel && (
+                        <p className="text-sm text-success font-medium text-center md:text-left">
+                          {t("reservedUntil", { date: expiryLabel })}
+                        </p>
+                      )}
+                      <button
+                        disabled={item.reserved_by !== user?.id}
+                        className="btn btn-primary"
+                        onClick={handleUnReserve}
+                      >
+                        {t("ctaUnreserve")}
+                      </button>
+                    </div>
                   )}
 
                   {!inPublicBoard && (
@@ -303,7 +424,9 @@ export function ViewItemModal({
                       </button>
                     </div>
                   )}
-                </div>
+                    </div>
+                  </>
+                )}
               </>
             )}
           </div>

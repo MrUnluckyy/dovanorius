@@ -27,10 +27,10 @@ export function Navigation({ user }: { user: User | null }) {
             </>
           ) : (
             <>
-              <Link href="login" className="btn">
+              <Link href="/login" className="btn">
                 {t("login")}
               </Link>
-              <Link href="register" className="btn">
+              <Link href="/register" className="btn">
                 {t("register")}
               </Link>
             </>

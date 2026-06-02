@@ -2,11 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
-import { LuUserPlus, LuX } from "react-icons/lu";
+import { LuUserPlus, LuX, LuCopy, LuTrash2 } from "react-icons/lu";
 import { useFollow } from "@/hooks/useFollow";
 import { createClient } from "@/utils/supabase/client";
 import toast from "react-hot-toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createBoardInvite } from "@/app/actions/boards/invite";
 
 // --- Domain types ---
 type Role = "editor" | "viewer";
@@ -15,6 +16,12 @@ interface FollowUser {
   id: string;
   avatar_url: string | null;
   display_name: string | null;
+}
+
+interface BoardInvite {
+  id: string;
+  email: string | null;
+  token: string;
 }
 
 // If your hook is already typed, remove this interface and rely on the hook's return type.
@@ -45,12 +52,30 @@ export function AddMemberModal({
     modalRef.current?.close();
   };
 
-  const { following, isLoading } = useFollow(userId) as UseFollowResult;
+  const { following } = useFollow(userId) as UseFollowResult;
 
   const [selected, setSelected] = useState<string | null>(null);
   const [role, setRole] = useState<Role>("editor");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviting, setInviting] = useState(false);
 
   const supabase = createClient();
+
+  const { data: invites = [] } = useQuery({
+    queryKey: ["boardInvites", boardId],
+    enabled: isOpen,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("board_invites")
+        .select("id, email, token")
+        .eq("board_id", boardId)
+        .is("accepted_at", null)
+        .gt("expires_at", new Date().toISOString())
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as BoardInvite[];
+    },
+  });
 
   async function onAdd(): Promise<void> {
     if (!selected) return;
@@ -70,6 +95,41 @@ export function AddMemberModal({
       toast.error(t("errorAddMember"));
       return;
     }
+  }
+
+  async function onInvite(e: React.FormEvent): Promise<void> {
+    e.preventDefault();
+    if (!inviteEmail.trim()) return;
+    setInviting(true);
+    const result = await createBoardInvite(boardId, inviteEmail);
+    setInviting(false);
+
+    if (!result.ok) {
+      toast.error(t("inviteError"));
+      return;
+    }
+    toast.success(result.emailSent ? t("inviteSent") : t("inviteCreated"));
+    setInviteEmail("");
+    queryClient.invalidateQueries({ queryKey: ["boardInvites", boardId] });
+  }
+
+  async function revokeInvite(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("board_invites")
+      .delete()
+      .eq("id", id);
+    if (error) {
+      toast.error(t("inviteError"));
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["boardInvites", boardId] });
+  }
+
+  function copyInviteLink(token: string): void {
+    navigator.clipboard.writeText(
+      `${window.location.origin}/boards/join/${token}`
+    );
+    toast.success(t("inviteLinkCopied"));
   }
 
   return (
@@ -115,13 +175,67 @@ export function AddMemberModal({
               <option value="editor">Redagavimo teisės</option>
               <option value="viewer">Peržiūros teisės</option>
             </select>
-          </div>
 
-          <div className="modal-action">
             <button className="btn btn-primary" onClick={onAdd}>
               {t("ctaAdd")}
             </button>
           </div>
+
+          <div className="divider text-xs text-base-content/50">
+            {t("inviteByEmail")}
+          </div>
+
+          {/* Invite a guest by email (no account required to join) */}
+          <form onSubmit={onInvite} className="flex gap-2">
+            <input
+              type="email"
+              className="input input-bordered flex-1"
+              placeholder={t("inviteEmailPlaceholder")}
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              required
+            />
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={inviting}
+            >
+              {inviting ? (
+                <span className="loading loading-spinner loading-sm" />
+              ) : (
+                t("ctaInvite")
+              )}
+            </button>
+          </form>
+
+          {invites.length > 0 && (
+            <div className="mt-4 space-y-2">
+              <p className="text-xs text-base-content/50">
+                {t("pendingInvites")}
+              </p>
+              {invites.map((inv) => (
+                <div key={inv.id} className="flex items-center gap-2 text-sm">
+                  <span className="flex-1 truncate text-base-content/70">
+                    {inv.email}
+                  </span>
+                  <button
+                    className="btn btn-ghost btn-xs gap-1"
+                    onClick={() => copyInviteLink(inv.token)}
+                  >
+                    <LuCopy size={12} />
+                    {t("copyInviteLink")}
+                  </button>
+                  <button
+                    className="btn btn-ghost btn-xs text-error"
+                    onClick={() => revokeInvite(inv.id)}
+                    aria-label={t("revokeInvite")}
+                  >
+                    <LuTrash2 size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>uždaryti</button>

@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 type MemberRow = {
   board_id: string;
   role: "owner" | "editor" | "viewer";
+  display_name: string | null; // guest-provided name (anonymous members)
   profiles: { avatar_url: string | null; display_name: string | null }[]; // joined array
 };
 
@@ -23,7 +24,9 @@ export function useBoardMembersMap(boardIds: string[]) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("board_members")
-        .select("board_id, role, profiles: user_id (avatar_url, display_name)")
+        .select(
+          "board_id, role, display_name, profiles: user_id (avatar_url, display_name)"
+        )
         .in("board_id", boardIds);
 
       if (error) throw error;
@@ -39,7 +42,7 @@ export function useBoardMembersMap(boardIds: string[]) {
           : (r.profiles as Profile);
         const item = {
           avatar: p?.avatar_url ?? null,
-          name: p?.display_name ?? null,
+          name: r.display_name ?? p?.display_name ?? null,
           role: r.role,
         };
         if (!map[r.board_id]) map[r.board_id] = [];

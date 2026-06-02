@@ -15,7 +15,6 @@
     "invalidCredentials": "Invalid email or password.",
     "forgotPasswordTitle": "Forgot your password?",
     "newPasswordTitle": "Set a new password",
-
     "registerTitle": "Create your account",
     "registerDescription": "Join NoriuTo and start creating your wish boards today!",
     "registerFormTitle": "Hey there! 👋",
@@ -29,12 +28,10 @@
     "confirmPasswordLabel": "Confirm Password",
     "errorConfirmPasswordRequired": "Confirm Password is required.",
     "errorPasswordsDoNotMatch": "Passwords do not match.",
-
     "registerCompleteTitle": "Registration Successful!",
     "registerCompleteBody": "Your account has been created successfully. Please verify your email to log in.",
     "registerSuccessToast": "🎉 Registration successful! Welcome aboard!",
     "registerGenericErrorToast": "😵 Oopsss! An error occurred during registration. Please try again later.",
-
     "ctaRegister": "Register",
     "ctaLogin": "Login",
     "ctaDone": "Done"
@@ -50,33 +47,23 @@
     "board2description": "Kayaking trip gear, hiking backpack, and tickets for the next cycling marathon.",
     "board3title": "🎨 Hobbies Board",
     "board3description": "A new lens for my camera, sketchbook for ideas, and a pottery class I've been meaning to try.",
-
     "concreteWish": "Concrete wishes",
     "concreteWishDescription": "Keep track of the exact items or experiences you'd love to receive",
-
     "wishBoards": "Wish boards",
     "wishBoardsDescription": "Organise your wishes by theme and share them with family or friends.",
-
     "giftExchange": "Gift exchange",
     "giftExchangeDescription": "Create or join an event — a party, celebration, or special occasion — and link your wishes to it",
-
     "featuresTitle": "Everything you need for your wishes",
-
     "featureOneTitle": "On your phone and your computer",
     "featureOneDescription": "Your wishlist should follow you everywhere. Whether you're browsing on your phone or researching on your computer, everything stays perfectly in sync.",
-
     "featureTwoTitle": "Share it or keep it private",
     "featureTwoDescription": "Some wishes are meant to be shared, others kept to yourself. Keep your lists private for personal ideas and surprises, or make them public when you're ready to share with friends and family.",
-
     "featureThreeTitle": "Save directly from the web",
     "featureThreeDescription": "No more copying and pasting links. When you find something you like online, just use your device's built-in Share option to send it straight to your wishlist.",
-
     "testimonialsTitle": "Testimonials",
     "preFooterCTATitle": "Save your wishes with Noriuto",
     "preFooterCTADescription": "Dream big — save your wishes in one place, share them with family and friends, and let Noriuto help turn dreams into plans.",
-
     "examplesTitle": "Here's what your wish boards could look like",
-
     "appDownloadDivider": "Download the app",
     "iosOnly": "iOS only",
     "androidComingSoon": "Android – coming soon",
@@ -102,7 +89,6 @@
     "createEvent": "Create Event",
     "myBoard": "My Board"
   },
-
   "Boards": {
     "public": "Public",
     "private": "Private",
@@ -137,26 +123,22 @@
     "sharePrivateTitle": "Private link",
     "sharePrivateDesc": "Only people with this link can view",
     "generatePrivateLink": "Generate private link",
-
     "createBoardTitle": "Create a New Wish Board",
     "editBoardTitle": "Edit Wish Board",
     "boardTitle": "Board Title",
     "boardTitlePlaceholder": "e.g., Birthday Wishes, Holiday Gifts",
     "boardDescription": "Board Description",
     "boardDescriptionPlaceholder": "Describe the purpose of this wish board.",
-
     "board": "Board",
     "price": "Price",
     "shop": "Shop",
     "title": "Title",
     "notes": "Notes",
     "image": "Image",
-
     "successReserve": "🎉 Success!",
     "successReserveDesc": "You have successfully reserved this item.",
     "errorReserve": "😵 Oppps!",
     "errorReserveDesc": "Something went wrong while reserving this item. Please try again later.",
-
     "successUnreserve": "🎉 Success!",
     "successUnreserveDesc": "You have successfully un-reserved this item.!",
     "successDelete": "Deleted!",
@@ -165,27 +147,19 @@
     "errorUnreserveDesc": "Something went wrong while un-reserving this item. Please try again later.",
     "successMarkAsBought": "🎉 Success!",
     "errorMarkAsBought": "😵 Oops!",
-
     "boardsCount": "{count, plural, one {# Board} other {# Boards}}",
     "itemsCount": "{count, plural, one {# Wish} other {# Wishes}}",
-
     "urlValidError": "Please enter a valid URL.",
     "maxImageSizeLabel": "Maximum image size is 2MB.",
-
     "getMetadata": "Autofill",
-
     "addWish": "Add a wish! 🎁",
     "addMember": "Add Member",
-
     "toastItemAdded": "🎉 Item {item} added successfully!",
-
     "toastBoardCreated": "🎉 Board {board} created successfully!",
     "toastBoardCreateError": "😵 Oops! Something went wrong while creating the board. Please try again later.",
-
     "confirmDeleteTitle": "Delete?",
     "confirmDeleteMessage": "Are you sure you want to delete {title}? This action cannot be undone.",
     "confirmDeleteButton": "Yes, delete it",
-
     "ctaCreateBoard": "Create New Board",
     "ctaEditBoard": "Edit Board",
     "ctaView": "View",
@@ -200,9 +174,27 @@
     "ctaSave": "Save",
     "ctaSaving": "Saving...",
     "ctaAdd": "Add",
-    "ctaMarkAsBought": "🎉 Received"
+    "ctaMarkAsBought": "🎉 Received",
+    "reminderPrompt": "Want a reminder, in case you forget?",
+    "reminderHint": "We will email you before the reservation expires. Email is optional.",
+    "reminderPlaceholder": "you@email.com",
+    "reminderSave": "Save",
+    "reminderSkip": "Skip",
+    "reminderSaved": "Reminder saved 🎉",
+    "reminderError": "Couldn’t save the reminder",
+    "reminderValidity": "🕒 The reservation is valid for 30 days.",
+    "reservedUntil": "🕒 Reserved until {date}",
+    "inviteByEmail": "Invite by email",
+    "inviteEmailPlaceholder": "name@email.com",
+    "ctaInvite": "Invite",
+    "pendingInvites": "Pending invites",
+    "copyInviteLink": "Link",
+    "revokeInvite": "Revoke invite",
+    "inviteSent": "Invitation emailed 🎉",
+    "inviteCreated": "Invitation created",
+    "inviteError": "Couldn’t create the invitation",
+    "reservedWish": "Reserved wish"
   },
-
   "Profile": {
     "displayName": "Display Name",
     "description": "About Me",
@@ -224,7 +216,6 @@
     "confirmDeleteAccountTitle": "Are you sure you want to delete your account?",
     "confirmDeleteAccountMessage": "This action is irreversible. <format>All your data will be permanently deleted</format>."
   },
-
   "DeleteAccount": {
     "warningTitle": "This action cannot be undone",
     "warningBody": "Deleting your account will permanently remove all your boards, wishes, events, and profile data.",
@@ -240,7 +231,6 @@
     "errorInvalidCode": "Invalid or expired code. Please try again.",
     "errorDeleting": "Something went wrong. Please try again."
   },
-
   "Actions": {
     "add": "Add",
     "edit": "Edit",
@@ -253,7 +243,6 @@
     "error": "An error occurred. Please try again.",
     "noData": "No data available"
   },
-
   "SecretSanta": {
     "drawn": "🎉 Secret Santa Drawn!",
     "open": "⏳ Awaiting Secret Santa Draw...",

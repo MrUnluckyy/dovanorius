@@ -84,10 +84,10 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 </>
               ) : (
                 <>
-                  <Link href="login" className="btn btn-ghost">
+                  <Link href="/login" className="btn btn-ghost">
                     {t("login")}
                   </Link>
-                  <Link href="register" className="btn btn-ghost">
+                  <Link href="/register" className="btn btn-ghost">
                     {t("register")}
                   </Link>
                 </>

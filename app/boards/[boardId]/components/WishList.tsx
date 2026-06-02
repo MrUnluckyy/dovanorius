@@ -19,6 +19,7 @@ export type Item = {
   image_urls: string[];
   status: "wanted" | "reserved" | "purchased";
   reserved_by: string | null;
+  reserve_expires_at: string | null;
   priority: "low" | "medium" | "high";
   created_at: string;
 };
@@ -42,16 +43,13 @@ export function WishList({
   } = useQuery({
     queryKey: ["items", boardId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("items")
-        .select(
-          "id, board_id, title, notes, price, image_url, image_urls, url, status, reserved_by ,priority, created_at"
-        )
-        .in("status", ["wanted", "reserved"])
-        .eq("board_id", boardId)
-        .order("created_at", { ascending: false });
+      // Reservation visibility is enforced server-side: recipient-side viewers
+      // (board owner + collaborators) never receive others' reserved_by/status.
+      const { data, error } = await supabase.rpc("get_board_items", {
+        p_board_id: boardId,
+      });
       if (error) throw error;
-      return data as Item[];
+      return (data ?? []) as Item[];
     },
   });
 

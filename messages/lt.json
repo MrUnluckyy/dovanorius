@@ -15,7 +15,6 @@
     "invalidCredentials": "Neteisingas el. paštas arba slaptažodis.",
     "forgotPasswordTitle": "Pamiršote slaptažodį?",
     "newPasswordTitle": "Nustatyti naują slaptažodį",
-
     "loginDescription": "Prisijunkite prie savo paskyros ir pradėkite kurti norų lentas!",
     "registerTitle": "Sukurti paskyrą",
     "registerDescription": "Prisijunkite prie Noriuto.lt ir pradėkite kurti savo norų lentas šiandien!",
@@ -30,12 +29,10 @@
     "confirmPasswordLabel": "Patvirtinkite slaptažodį",
     "errorConfirmPasswordRequired": "Patvirtinimo slaptažodis yra privalomas.",
     "errorPasswordsDoNotMatch": "Slaptažodžiai nesutampa.",
-
     "registerCompleteTitle": "Sėkmingai prisigetistravote!",
     "registerCompleteBody": "Jūsų paskyra sėkmingai sukurta. Kad prisijungtumėte, patvirtinkite savo el. paštą.",
     "registerSuccessToast": "🎉 Registracija sėkminga! Sveiki prisijungę!",
     "registerGenericErrorToast": "😵 Upsss! Įvyko klaida registruojantis. Bandykite dar kartą vėliau.",
-
     "ctaRegister": "Registruotis",
     "ctaLogin": "Prisijungti",
     "ctaDone": "Patvirtinta"
@@ -52,32 +49,23 @@
     "board2description": "Įranga plaukimui baidarėmis, žygio kuprinė ir bilietai į kitą dviračių maratoną.",
     "board3title": "🎨 Hobiams",
     "board3description": "Naujas objektyvas fotoaparatui, eskizų knyga idėjoms ir keramikos pamoka, kurią vis noriu išbandyti.",
-
     "concreteWish": "Konkretūs norai",
     "concreteWishDescription": "Išsisaugok konkrečius daiktus ar patirtis kurių nori",
-
     "wishBoards": "Norų lentos",
     "wishBoardsDescription": "Sugrupuok visus norus pagal temą ir pasidalik juo su šeima ar draugais",
-
     "giftExchange": "Dovanų keitimasis",
     "giftExchangeDescription": "Susibūrimas, šventė ar kita proga, prie kurios jungsime norus.",
     "featuresTitle": "Viskas, ko reikia tavo norams",
-
     "featureOneTitle": "Ir telefone, ir kompiuteryje",
     "featureOneDescription": "Tavo norų sąrašas keliauja kartu su tavimi. Nesvarbu, ar naršai telefone, ar ieškai kompiuteryje — viskas automatiškai išlieka sinchronizuota.",
-
     "featureTwoTitle": "Dalinkis arba laikyk privačiai",
     "featureTwoDescription": "Ne visi norai skirti viešumai. Laikyk sąrašus privačius asmeninėms idėjoms ar staigmenoms, o kai būsi pasiruošęs — lengvai pasidalink jais su šeima ar draugais.",
-
     "featureThreeTitle": "Išsaugok tiesiai iš interneto",
     "featureThreeDescription": "Pamiršk nuorodų kopijavimą ir įklijavimą. Radęs patikusį daiktą internete, tiesiog pasinaudok telefono „Share“ funkcija ir išsaugok jį tiesiai į savo norų sąrašą.",
-
     "testimonialsTitle": "Rekomendacijos",
     "preFooterCTATitle": "Saugok savo norus su Noriuto",
     "preFooterCTADescription": "Svajok drąsiai - išsisaugok savo norus vienoje vietoje ir dalinkis jais su šeima bei draugais. Prisijunk prie Noriuto ir paversk svajones planais!",
-
     "examplesTitle": "Taip galėtų atrodyti tavo norų lentos",
-
     "appDownloadDivider": "Parsisiųsk programėlę",
     "iosOnly": "Tik iOS",
     "androidComingSoon": "Android – greitai",
@@ -87,7 +75,6 @@
     "ctaTryOut": "Išbandyk!",
     "ctaBuildYourWishList": "Sukurk savo norų lentą"
   },
-
   "Navbar": {
     "login": "Prisijungti",
     "register": "Registruotis",
@@ -104,7 +91,6 @@
     "createEvent": "Sukurti renginį",
     "myBoard": "Mano lenta"
   },
-
   "Boards": {
     "public": "Vieša",
     "private": "Privati",
@@ -139,26 +125,22 @@
     "sharePrivateTitle": "Privati nuoroda",
     "sharePrivateDesc": "Tik turintys šią nuorodą gali peržiūrėti",
     "generatePrivateLink": "Sukurti privačią nuorodą",
-
     "createBoardTitle": "Sukurti naują norų lentą",
     "editBoardTitle": "Redaguoti norų lentą",
     "boardTitle": "Lentos pavadinimas",
     "boardTitlePlaceholder": "Pvz., Kalėdų norai, Gimtadienio dovanos ir kt.",
     "boardDescription": "Lentos aprašymas",
     "boardDescriptionPlaceholder": "Papildoma informacija apie jūsų norų lentą (neprivaloma)",
-
     "board": "Lenta",
     "price": "Kaina",
     "shop": "Parduotuvė",
     "title": "Pavadinimas",
     "notes": "Pastabos",
     "image": "Paveikslėlis",
-
     "successReserve": "🎉 Pavyko!",
     "successReserveDesc": "Sėkmingai rezervavote šį daiktą!",
     "errorReserve": "😵 Upsss!",
     "errorReserveDesc": "Įvyko klaida rezervuojant šį daiktą. Bandykite dar kartą vėliau.",
-
     "successUnreserve": "🎉 Pavyko!",
     "successUnreserveDesc": "Sėkmingai atšaukėte rezervaciją!",
     "successDelete": "Ištrinta!",
@@ -167,27 +149,19 @@
     "errorUnreserveDesc": "Įvyko klaida atšaukiant rezervaciją. Bandykite dar kartą vėliau.",
     "successMarkAsBought": "🎉 Smagaus naudojimo!",
     "errorMarkAsBought": "😵 Įvyko pažymint kaip nupirką. Bandykite dar kartą vėliau.!",
-
     "boardsCount": "{count, plural, one {# Lenta} other {# Lentos}}",
     "itemsCount": "{count, plural, one {# Noras} other {# Norai}}",
-
     "urlValidError": "Prašome įvesti galiojantį URL.",
     "maxImageSizeLabel": "Maximalus paveikslėlio dydis - 2MB.",
-
     "getMetadata": "Gauti info",
-
     "addWish": "Pridėk norą 🎁",
     "addMember": "Pridėti narį",
-
     "toastItemAdded": "🎉 {item} sėkmingai pridėtas!",
-
     "toastBoardCreated": "🎉 {board} lenta sukurta sėkmingai!",
     "toastBoardCreateError": "😵 Upps. Kažkas ne taip. Pamėgink šiek tiek veliau.",
-
     "confirmDeleteTitle": "Ištrinti?",
     "confirmDeleteMessage": "Ar tikrai norite ištrinti {title}? Šis veiksmas yra negrįžtamas.",
     "confirmDeleteButton": "Taip, ištrinti",
-
     "ctaView": "Atidaryti",
     "ctaCreateBoard": "Sukurti naują lentą",
     "ctaEditBoard": "Redaguoti lentą",
@@ -203,9 +177,27 @@
     "ctaSave": "Išsaugoti",
     "ctaSaving": "Įrašoma...",
     "ctaAdd": "Pridėti",
-    "ctaMarkAsBought": "🎉 Gavau"
+    "ctaMarkAsBought": "🎉 Gavau",
+    "reminderPrompt": "Priminti, jei pamirši?",
+    "reminderHint": "Atsiųsime priminimą prieš rezervacijai pasibaigiant. El. paštas neprivalomas.",
+    "reminderPlaceholder": "tavo@elpastas.lt",
+    "reminderSave": "Išsaugoti",
+    "reminderSkip": "Praleisti",
+    "reminderSaved": "Priminimas išsaugotas 🎉",
+    "reminderError": "Nepavyko išsaugoti priminimo",
+    "reminderValidity": "🕒 Rezervacija galioja 30 dienų.",
+    "reservedUntil": "🕒 Galioja iki {date}",
+    "inviteByEmail": "Pakviesti el. paštu",
+    "inviteEmailPlaceholder": "el@pastas.lt",
+    "ctaInvite": "Pakviesti",
+    "pendingInvites": "Laukiantys kvietimai",
+    "copyInviteLink": "Nuoroda",
+    "revokeInvite": "Panaikinti kvietimą",
+    "inviteSent": "Kvietimas išsiųstas el. paštu 🎉",
+    "inviteCreated": "Kvietimas sukurtas",
+    "inviteError": "Nepavyko sukurti kvietimo",
+    "reservedWish": "Rezervuotas noras"
   },
-
   "Profile": {
     "displayName": "Slapyvardis",
     "description": "Apie mane",
@@ -227,7 +219,6 @@
     "confirmDeleteAccountTitle": "Ar tikrai ištrinti paskyrą?",
     "confirmDeleteAccountMessage": "Šis veiksmas yra negrįžtamas. <format>Visi jūsų duomenys bus prarasti.</format>"
   },
-
   "DeleteAccount": {
     "warningTitle": "Šio veiksmo negalima atšaukti",
     "warningBody": "Ištrynus paskyrą, visi jūsų norų sąrašai, norai, renginiai ir profilio duomenys bus negrįžtamai pašalinti.",
