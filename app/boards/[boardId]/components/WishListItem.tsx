@@ -18,6 +18,8 @@ export function WishListItem({ item, inPublicBoard, user }: Props) {
   const t = useTranslations("Boards");
 
   const isMine = reserved_by === user?.id;
+  // Infinite ("unlimited") wish: can be given many times, never reserved.
+  const isInfinite = item.is_reservable === false;
   // Reserved by someone else → hide the gift: blur image + strip metadata.
   const isBlocked =
     !!inPublicBoard && status === "reserved" && !!reserved_by && !isMine;
@@ -54,7 +56,12 @@ export function WishListItem({ item, inPublicBoard, user }: Props) {
           )}
         </div>
 
-        {inPublicBoard && status === "reserved" && reserved_by ? (
+        {isInfinite ? (
+          <div className="badge badge-sm badge-info absolute top-2 left-2 gap-1">
+            <span aria-hidden>∞</span>
+            {t("infiniteShort")}
+          </div>
+        ) : inPublicBoard && status === "reserved" && reserved_by ? (
           <div
             className="badge badge-sm badge-warning absolute top-2 left-2"
             data-clarity-mask="true"

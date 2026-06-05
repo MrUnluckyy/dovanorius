@@ -41,6 +41,8 @@ export const ItemSchema = z.object({
     .positive("Gali būti tik teigiamas skaičius")
     .max(1_000_000, "Per didelė kaina")
     .optional(),
+  // Infinite ("unlimited") wish: when true the wish can't be reserved.
+  is_infinite: z.boolean().optional(),
 });
 
 export type ItemFormValues = z.infer<typeof ItemSchema>;

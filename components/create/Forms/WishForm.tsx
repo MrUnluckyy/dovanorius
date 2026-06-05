@@ -39,6 +39,7 @@ export function WishForm({ onCancel, onSuccess }: WishFormProps) {
     image_url: "",
     price: undefined,
     boardId: currentBoardId || "",
+    is_infinite: false,
   };
 
   const {
@@ -133,6 +134,7 @@ export function WishForm({ onCancel, onSuccess }: WishFormProps) {
           notes: payload.notes || null,
           created_by: user.id,
           price: payload.price || null,
+          is_reservable: !payload.is_infinite,
           status: "wanted",
           priority: "medium",
         })
@@ -297,6 +299,19 @@ export function WishForm({ onCancel, onSuccess }: WishFormProps) {
             <span className="label-text-alt">{t("maxImageSizeLabel")}</span>
           </label>
         </div>
+
+        <div className="divider my-1" />
+        <label className="label cursor-pointer items-start gap-3 justify-start">
+          <input
+            type="checkbox"
+            className="toggle toggle-primary mt-1"
+            {...register("is_infinite")}
+          />
+          <span className="flex flex-col text-left">
+            <span className="font-semibold">{t("infiniteLabel")}</span>
+            <span className="text-sm opacity-70">{t("infiniteHint")}</span>
+          </span>
+        </label>
       </fieldset>
 
       <div className="modal-action mt-4">

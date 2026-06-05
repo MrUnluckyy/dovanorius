@@ -36,6 +36,7 @@ export function AddItemModal({
     image_url: "",
     price: undefined,
     boardId: boardId,
+    is_infinite: false,
   };
 
   const {
@@ -140,6 +141,7 @@ export function AddItemModal({
           notes: payload?.notes || null,
           created_by: user?.id || null,
           price: payload?.price || null,
+          is_reservable: !payload.is_infinite,
           status: "wanted",
           priority: "medium",
         })
@@ -267,6 +269,21 @@ export function AddItemModal({
                   maxImages={5}
                 />
                 <label className="label">{t("maxImageSizeLabel")}</label>
+
+                <div className="divider my-1" />
+                <label className="label cursor-pointer items-start gap-3 justify-start">
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-primary mt-1"
+                    {...register("is_infinite")}
+                  />
+                  <span className="flex flex-col text-left">
+                    <span className="font-semibold">{t("infiniteLabel")}</span>
+                    <span className="text-sm opacity-70">
+                      {t("infiniteHint")}
+                    </span>
+                  </span>
+                </label>
               </fieldset>
               <div className="modal-action">
                 <button

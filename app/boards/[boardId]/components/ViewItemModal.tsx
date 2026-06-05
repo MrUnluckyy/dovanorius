@@ -50,6 +50,9 @@ export function ViewItemModal({
   const isMyReservation =
     item.status === "reserved" && item.reserved_by === user?.id;
 
+  // Infinite ("unlimited") wish: can be given many times, never reserved.
+  const isInfinite = item.is_reservable === false;
+
   const expiryLabel = item.reserve_expires_at
     ? format(new Date(item.reserve_expires_at), "PPP", {
         locale: locale === "lt" ? lt : enUS,
@@ -293,9 +296,17 @@ export function ViewItemModal({
                       </div>
                     )}
                   </figure>
-                  <h3 className="font-bold text-lg" data-clarity-mask="true">
-                    {title}
-                  </h3>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-bold text-lg" data-clarity-mask="true">
+                      {title}
+                    </h3>
+                    {isInfinite && (
+                      <span className="badge badge-info gap-1">
+                        <span aria-hidden>∞</span>
+                        {t("infiniteShort")}
+                      </span>
+                    )}
+                  </div>
                   <p className="py-4" data-clarity-mask="true">
                     {notes}
                   </p>
@@ -360,6 +371,7 @@ export function ViewItemModal({
                   <>
                     {!user &&
                       inPublicBoard &&
+                      !isInfinite &&
                       process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
                         <Turnstile
                           ref={turnstileRef}
@@ -368,8 +380,17 @@ export function ViewItemModal({
                         />
                       )}
 
+                    {inPublicBoard && isInfinite && (
+                      <div className="alert mt-8 justify-start">
+                        <span aria-hidden className="text-xl">
+                          ∞
+                        </span>
+                        <span>{t("infiniteBadge")}</span>
+                      </div>
+                    )}
+
                     <div className="modal-action flex-col-reverse md:flex-row mt-8">
-                  {inPublicBoard && item.status === "wanted" && (
+                  {inPublicBoard && !isInfinite && item.status === "wanted" && (
                     <>
                       <button
                         disabled={inPublicBoard && item.reserved_by === user?.id}
@@ -381,7 +402,7 @@ export function ViewItemModal({
                     </>
                   )}
 
-                  {inPublicBoard && item.status === "reserved" && (
+                  {inPublicBoard && !isInfinite && item.status === "reserved" && (
                     <div className="flex flex-col gap-2 w-full md:w-auto">
                       {isMyReservation && expiryLabel && (
                         <p className="text-sm text-success font-medium text-center md:text-left">

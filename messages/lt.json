@@ -196,7 +196,11 @@
     "inviteSent": "Kvietimas išsiųstas el. paštu 🎉",
     "inviteCreated": "Kvietimas sukurtas",
     "inviteError": "Nepavyko sukurti kvietimo",
-    "reservedWish": "Rezervuotas noras"
+    "reservedWish": "Rezervuotas noras",
+    "infiniteLabel": "Begalinis noras",
+    "infiniteHint": "Draugai negalės rezervuoti šio noro — jis tinka kelis kartus.",
+    "infiniteShort": "Begalinis",
+    "infiniteBadge": "Šis noras nerezervuojamas"
   },
   "Profile": {
     "displayName": "Slapyvardis",

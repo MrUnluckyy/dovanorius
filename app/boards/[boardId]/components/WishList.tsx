@@ -17,6 +17,7 @@ export type Item = {
   price: number | null;
   image_url: string | null;
   image_urls: string[];
+  is_reservable: boolean;
   status: "wanted" | "reserved" | "purchased";
   reserved_by: string | null;
   reserve_expires_at: string | null;

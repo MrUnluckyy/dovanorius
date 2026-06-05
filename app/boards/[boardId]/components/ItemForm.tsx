@@ -45,6 +45,7 @@ export function ItemForm({
     image_url: item.image_url || "",
     price: item.price || undefined,
     boardId: item.board_id || "",
+    is_infinite: item.is_reservable === false,
   };
 
   const { register, handleSubmit, reset, formState } =
@@ -120,6 +121,7 @@ export function ItemForm({
           image_url: finalUrls[0] ?? null,
           image_urls: finalUrls,
           price: data.price ?? null,
+          is_reservable: !data.is_infinite,
           updated_at: new Date().toISOString(),
         })
         .eq("id", item.id);
@@ -240,6 +242,19 @@ export function ItemForm({
             maxImages={5}
           />
           <label className="label">{t("maxImageSizeLabel")}</label>
+
+          <div className="divider my-1" />
+          <label className="label cursor-pointer items-start gap-3 justify-start">
+            <input
+              type="checkbox"
+              className="toggle toggle-primary mt-1"
+              {...register("is_infinite")}
+            />
+            <span className="flex flex-col text-left">
+              <span className="font-semibold">{t("infiniteLabel")}</span>
+              <span className="text-sm opacity-70">{t("infiniteHint")}</span>
+            </span>
+          </label>
         </fieldset>
         <div className="modal-action">
           <button

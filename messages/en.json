@@ -193,7 +193,11 @@
     "inviteSent": "Invitation emailed 🎉",
     "inviteCreated": "Invitation created",
     "inviteError": "Couldn’t create the invitation",
-    "reservedWish": "Reserved wish"
+    "reservedWish": "Reserved wish",
+    "infiniteLabel": "Infinite wish",
+    "infiniteHint": "Friends won't be able to reserve this wish — it can be given multiple times.",
+    "infiniteShort": "Infinite",
+    "infiniteBadge": "This wish cannot be reserved"
   },
   "Profile": {
     "displayName": "Display Name",
