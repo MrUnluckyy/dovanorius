@@ -1,4 +1,4 @@
-// app/secret-santa/[slug]/_components/DrawButton.tsx
+// app/events/[slug]/_components/DrawButton.tsx
 "use client";
 import { useTransition } from "react";
 import { runDraw } from "../draw/actions";

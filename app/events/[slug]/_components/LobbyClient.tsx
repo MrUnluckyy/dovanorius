@@ -19,6 +19,9 @@ import { ProgressOfEvent } from "./ProgressOfEvent";
 import { LuInfo } from "react-icons/lu";
 import RevealCard from "./RevealCard";
 import AdminsSettings from "./AdminsSettings";
+import { getEventTypeMeta } from "@/utils/events/typeMeta";
+import { Snowfall } from "../../_components/Snowfall";
+import { useTranslations } from "next-intl";
 
 export default function LobbyClient({
   slug,
@@ -31,6 +34,7 @@ export default function LobbyClient({
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const sb = createClient();
   const qc = useQueryClient();
+  const t = useTranslations("Events");
 
   const { data: event, isLoading } = useQuery<SsEvent>({
     queryKey: qq.event(slug),
@@ -133,29 +137,44 @@ export default function LobbyClient({
       )) ||
     event?.owner_id === user.id;
 
+  const meta = getEventTypeMeta(event?.type);
+  const notEnoughMembers = !!members && members.length < meta.minMembers;
+  // Group Gift has no draw — its item-claim UI is only in the mobile app for now.
+  const isGroup = meta.type === "group";
+
   return (
-    <div className="max-w-3xl mx-auto p-4 pb-16 space-y-6">
+    <div
+      data-theme={meta.theme ?? undefined}
+      className="max-w-3xl mx-auto p-4 pb-16 space-y-6"
+    >
       {isLoading && <div className="skeleton h-24 w-full" />}
 
       {event && (
         <>
           <LobbyHeader ev={event} />
 
-          <ProgressOfEvent event={event} />
-          {event.status === "drawn" && mine?.receiver ? (
+          {!isGroup && <ProgressOfEvent event={event} />}
+          {!isGroup && event.status === "drawn" && mine?.receiver ? (
             <div className="w-full justify-center items-center">
-              <RevealCard person={mine?.receiver} />
+              <RevealCard person={mine?.receiver} type={meta.type} />
             </div>
           ) : null}
 
-          {members && members.length < 3 && (
+          {isGroup && (
             <div role="alert" className="alert alert-info">
               <LuInfo className="w-6 h-6" />
-              <span>Minimalus dalyviu skaičius yra 3</span>
+              <span>{t("groupManageInApp")}</span>
             </div>
           )}
 
-          {isAdmin && (
+          {!isGroup && notEnoughMembers && (
+            <div role="alert" className="alert alert-info">
+              <LuInfo className="w-6 h-6" />
+              <span>{t("minMembersInfo", { count: meta.minMembers })}</span>
+            </div>
+          )}
+
+          {!isGroup && isAdmin && (
             <>
               <div className="flex flex-col md:flex-row items-center gap-2">
                 <button
@@ -164,25 +183,23 @@ export default function LobbyClient({
                   disabled={
                     event.status !== "open" ||
                     lockMutation.isPending ||
-                    (members && members.length < 3)
+                    notEnoughMembers
                   }
                 >
-                  {lockMutation.isPending ? "Uždaroma..." : "Uždaryti"}
+                  {lockMutation.isPending ? t("locking") : t("lockEvent")}
                 </button>
-                {
-                  <button
-                    className="btn btn-primary  w-full md:w-auto"
-                    disabled={event.status !== "open"}
-                    onClick={() => setInviteOpen(true)}
-                  >
-                    Pakviesti dalyvių
-                  </button>
-                }
+                <button
+                  className="btn btn-primary  w-full md:w-auto"
+                  disabled={event.status !== "open"}
+                  onClick={() => setInviteOpen(true)}
+                >
+                  {t("inviteMembers")}
+                </button>
                 <DrawButton
                   slug={slug}
                   disabled={
                     !["locked", "open"].includes(event.status) ||
-                    (members && members.length < 3)
+                    notEnoughMembers
                   }
                 />
               </div>
@@ -202,11 +219,13 @@ export default function LobbyClient({
               isAdmin={isAdmin}
             />
           </div>
-          {event.status !== "drawn" && isAdmin && selectedUserId && (
+          {!isGroup && event.status !== "drawn" && isAdmin && selectedUserId && (
             <AdminsSettings eventId={event.id} giverId={selectedUserId} />
           )}
         </>
       )}
+
+      {meta.theme === "christmas" && <Snowfall />}
     </div>
   );
 }

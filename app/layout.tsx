@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers/Providers";
-import {
-  Baloo_2,
-  Funnel_Display,
-  Inter,
-  Over_the_Rainbow,
-  Rubik,
-} from "next/font/google";
+import { Baloo_2, Funnel_Display, Over_the_Rainbow } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";

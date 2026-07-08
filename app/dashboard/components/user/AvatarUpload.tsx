@@ -7,7 +7,7 @@ import { LuPen } from "react-icons/lu";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-import imageCompression from "browser-image-compression";
+import { prepareImageForUpload } from "@/utils/images/prepareImage";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function AvatarUploader({
@@ -34,14 +34,11 @@ export default function AvatarUploader({
     if (file.size > 10 * 1024 * 1024)
       return toast.error("Maximalus failo dydis 10 MB.");
 
-    const options = {
-      maxSizeMB: 1,
-      maxWidthOrHeight: 1600,
-      useWebWorker: true,
-      fileType: "image/jpeg" as const,
-    };
-
-    const compressedFile = await imageCompression(file, options);
+    // Converts iPhone HEIC → JPEG, then resizes/compresses. Avatars are always
+    // JPEG (no transparency needed), so force the output type.
+    const compressedFile = await prepareImageForUpload(file, {
+      outputType: "image/jpeg",
+    });
 
     setUploading(true);
     try {

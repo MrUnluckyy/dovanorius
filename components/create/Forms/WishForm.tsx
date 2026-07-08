@@ -13,7 +13,6 @@ import { useEffect, useState } from "react";
 import { useCurrentBoardId } from "@/hooks/useCurrentBoardId";
 import { useBoards } from "@/hooks/useBoards";
 import { ImageUploadGrid, ImageSlot } from "@/components/ui/ImageUploadGrid";
-import imageCompression from "browser-image-compression";
 
 type WishFormProps = {
   onCancel: () => void;
@@ -143,19 +142,10 @@ export function WishForm({ onCancel, onSuccess }: WishFormProps) {
 
       if (error) throw error;
 
-      const compressionOptions = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1600,
-        useWebWorker: true,
-      };
-
-      // Upload pending files
+      // Files are already HEIC-converted + compressed at pick time (grid).
       let uploadedUrls: string[] = [];
       if (pendingFiles.length > 0) {
-        const compressed = await Promise.all(
-          pendingFiles.map((f) => imageCompression(f, compressionOptions))
-        );
-        uploadedUrls = await uploadMultipleProductImages(compressed, data.id);
+        uploadedUrls = await uploadMultipleProductImages(pendingFiles, data.id);
       }
 
       // Build final image_urls: parsed URL first, then uploaded
