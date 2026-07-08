@@ -12,7 +12,6 @@ import toast from "react-hot-toast";
 import { stripHtml } from "@/utils/helpers/stripHtml";
 import { LuX } from "react-icons/lu";
 import { ImageUploadGrid, ImageSlot } from "@/components/ui/ImageUploadGrid";
-import imageCompression from "browser-image-compression";
 
 export function AddItemModal({
   boardId,
@@ -149,18 +148,10 @@ export function AddItemModal({
         .single();
       if (error) throw error;
 
-      const compressionOptions = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1600,
-        useWebWorker: true,
-      };
-
       let uploadedUrls: string[] = [];
       if (pendingFiles.length > 0) {
-        const compressed = await Promise.all(
-          pendingFiles.map((f) => imageCompression(f, compressionOptions))
-        );
-        uploadedUrls = await uploadMultipleProductImages(compressed, data.id);
+        // Files are already HEIC-converted + compressed at pick time (grid).
+        uploadedUrls = await uploadMultipleProductImages(pendingFiles, data.id);
       }
 
       const parsedUrl = payload.image_url || null;
