@@ -11,13 +11,14 @@ import Footer from "@/components/footer/Footer";
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  const { slug } = await params;
   const supabase = await createClient();
   const { data: board } = await supabase
     .from("boards")
     .select("id, name, is_public, created_at, slug, description")
-    .eq("slug", params.slug)
+    .eq("slug", slug)
     .eq("is_public", true)
     .single();
 
