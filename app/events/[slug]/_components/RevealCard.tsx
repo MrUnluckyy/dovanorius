@@ -1,15 +1,22 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ConfettiBurst } from "../../_components/Confetti";
+import type { SsEventType } from "@/types/secret-santa";
 
 type Stage = "idle" | "rolling" | "reveal";
 
 export default function RevealCard({
   person,
+  type = "secret_santa",
 }: {
   person: { id: string; display_name?: string; avatar_url?: string };
+  type?: SsEventType;
 }) {
+  const t = useTranslations("Events");
+  // Only Secret Santa points to a wish list — Name Draw has no gifts.
+  const showWishlist = type === "secret_santa";
   // Slot-roll names for suspense
   const pool = useMemo(
     () => [
@@ -49,7 +56,9 @@ export default function RevealCard({
   return (
     <div className="card bg-base-100 shadow-xl w-full md:min-w-md">
       <div className="card-body items-center text-center">
-        <div className="card-title">Tu ištraukei:</div>
+        <div className="card-title">
+          {showWishlist ? t("revealTitle") : t("drawRecipientLabel")}
+        </div>
         <AnimatePresence mode="popLayout">
           <motion.div
             key={face}
@@ -81,15 +90,15 @@ export default function RevealCard({
               className="btn btn-primary"
               onClick={() => setStage("rolling")}
             >
-              Atskleisti
+              {t("revealBtn")}
             </button>
           )}
-          {stage === "reveal" && (
+          {stage === "reveal" && showWishlist && (
             <a
               className="btn btn-secondary"
               href={`/users/${person.id}?tab=wishlist`}
             >
-              Žiūrėti norų sąrašą
+              {t("viewWishlist")}
             </a>
           )}
         </div>

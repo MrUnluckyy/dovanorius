@@ -6,9 +6,11 @@ import Link from "next/link";
 import React from "react";
 import EventCard from "./EventCard";
 import { qq } from "@/utils/qq";
+import { useTranslations } from "next-intl";
 
 export default function SsHomeScreen() {
   const sb = createClient();
+  const t = useTranslations("Events");
 
   const { data: events, isLoading } = useQuery<SsEvent[]>({
     queryKey: qq.myEvents("me"),
@@ -53,9 +55,9 @@ export default function SsHomeScreen() {
     <>
       <div className="max-w-3xl mx-auto p-4">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold font-heading">🎅 Secret Santa</h1>
-          <Link href="/secret-santa/new" className="btn btn-primary">
-            Naujas renginys
+          <h1 className="text-2xl font-bold font-heading">{t("title")}</h1>
+          <Link href="/events/new" className="btn btn-primary">
+            {t("newEvent")}
           </Link>
         </div>
         {isLoading && <div className="skeleton h-24 w-full" />}
@@ -64,8 +66,9 @@ export default function SsHomeScreen() {
             <EventCard key={ev.id} ev={ev} />
           ))}
           {(!events || events.length === 0) && !isLoading && (
-            <div className="alert">
-              <span>Renginių nera.</span>
+            <div className="alert flex-col items-start">
+              <span>{t("empty")}</span>
+              <span className="text-sm opacity-70">{t("createFirst")}</span>
             </div>
           )}
         </div>
