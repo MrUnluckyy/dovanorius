@@ -1,18 +1,33 @@
+"use client";
 import { Profile } from "@/hooks/useProfile";
-import { useTranslations } from "next-intl";
 import Link from "next/link";
-import React from "react";
+import Image from "next/image";
+import React, { useState } from "react";
 
 export function UserCard({ profile }: { profile: Partial<Profile> }) {
-  const t = useTranslations("Dashboard");
+  // Fall back to initials if the avatar URL is stale/unreachable (e.g. an
+  // expired Google avatar) instead of showing a broken image.
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const showAvatar = !!profile.avatar_url && !avatarFailed;
 
+  // Whole card is the link — people expect to click the card, not just a button.
   return (
-    <div className="card bg-base-100 shadow-sm overflow-hidden">
+    <Link
+      href={`/users/${profile.id}`}
+      className="card bg-base-100 shadow-sm overflow-hidden transition-shadow hover:shadow-md"
+    >
       <div className="h-28 flex items-center justify-center bg-base-200">
-        {profile.avatar_url ? (
+        {showAvatar ? (
           <div className="avatar">
             <div className="w-20 rounded-full">
-              <img src={profile.avatar_url} alt={profile.display_name ?? ""} />
+              <Image
+                src={profile.avatar_url!}
+                alt={profile.display_name ?? ""}
+                width={80}
+                height={80}
+                className="w-full h-full object-cover"
+                onError={() => setAvatarFailed(true)}
+              />
             </div>
           </div>
         ) : (
@@ -29,12 +44,7 @@ export function UserCard({ profile }: { profile: Partial<Profile> }) {
         <h2 className="card-title text-sm leading-tight line-clamp-1">
           {profile.display_name}
         </h2>
-        <div className="card-actions">
-          <Link href={`/users/${profile.id}`} className="btn btn-primary btn-xs w-full">
-            {t("openButton")}
-          </Link>
-        </div>
       </div>
-    </div>
+    </Link>
   );
 }

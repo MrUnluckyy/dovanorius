@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import Image from "next/image";
 
-type EventType = "secret_santa" | "name_draw" | "group_gift" | string | null;
+type EventType = "secret_santa" | "name_draw" | "group" | string | null;
 
 const TYPE_META: Record<string, { icon: string; bg: string }> = {
   secret_santa: { icon: "🎅", bg: "bg-primary/10" },
   name_draw: { icon: "🎲", bg: "bg-secondary/10" },
-  group_gift: { icon: "🎁", bg: "bg-accent/10" },
+  group: { icon: "🎁", bg: "bg-accent/10" },
 };
 
 function getTypeMeta(type: EventType) {
@@ -24,17 +24,22 @@ export function EventCard({
   type: EventType;
   coverImageUrl?: string | null;
 }) {
-  const t = useTranslations("Dashboard");
   const { icon, bg } = getTypeMeta(type);
 
+  // Whole card is the link — people expect to click the card, not just a button.
   return (
-    <div className="card bg-base-100 shadow-sm overflow-hidden">
-      <div className={`h-28 flex items-center justify-center ${bg}`}>
+    <Link
+      href={url}
+      className="card bg-base-100 shadow-sm overflow-hidden transition-shadow hover:shadow-md"
+    >
+      <div className={`relative h-28 flex items-center justify-center ${bg}`}>
         {coverImageUrl ? (
-          <img
+          <Image
             src={coverImageUrl}
             alt={title}
-            className="w-full h-full object-cover"
+            fill
+            sizes="(max-width: 768px) 45vw, 240px"
+            className="object-cover"
           />
         ) : (
           <span className="text-5xl">{icon}</span>
@@ -44,12 +49,7 @@ export function EventCard({
         <h2 className="card-title text-sm leading-tight line-clamp-2">
           {title}
         </h2>
-        <div className="card-actions">
-          <Link href={url} className="btn btn-primary btn-xs w-full">
-            {t("openButton")}
-          </Link>
-        </div>
       </div>
-    </div>
+    </Link>
   );
 }

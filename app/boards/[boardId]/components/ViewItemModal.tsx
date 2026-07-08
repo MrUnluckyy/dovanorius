@@ -3,9 +3,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { enUS, lt } from "date-fns/locale";
 import { LuExternalLink, LuPencil, LuTrash2, LuX } from "react-icons/lu";
@@ -14,23 +12,55 @@ import { User } from "@supabase/supabase-js";
 import { ItemForm } from "./ItemForm";
 import toast from "react-hot-toast";
 import { useConfirm } from "@/components/ConfirmDialogProvider";
+import { useReserveItem } from "@/hooks/useReserveItem";
 
 export function ViewItemModal({
   item,
   inPublicBoard,
   user,
+  getCaptchaToken,
+  resetCaptcha,
+  triggerClassName = "btn btn-sm btn-primary",
+  open,
+  onOpenChange,
+  hideTrigger = false,
 }: {
   item: Item;
   inPublicBoard?: boolean;
   user?: User | null;
+  getCaptchaToken?: () => Promise<string | undefined>;
+  resetCaptcha?: () => void;
+  triggerClassName?: string;
+  // Optional controlled mode: let a parent (e.g. a clickable card) drive the
+  // modal's open state and hide the built-in trigger button.
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
 }) {
   const { title, notes, price, url, id } = item;
-  const [isOpen, setIsOpen] = useState(false);
+  const isControlled = open !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = isControlled ? open : internalOpen;
+  const setIsOpen = (next: boolean) => {
+    if (!isControlled) setInternalOpen(next);
+    onOpenChange?.(next);
+  };
   const [isEditing, setIsEditing] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [reminderStep, setReminderStep] = useState(false);
   const [reminderEmail, setReminderEmail] = useState("");
   const [savingReminder, setSavingReminder] = useState(false);
+
+  // Tall images can hide the details below the fold with no cue to scroll.
+  // Show a subtle bottom fade whenever the content area is scrollable.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showScrollCue, setShowScrollCue] = useState(false);
+  const updateScrollCue = () => {
+    const el = scrollRef.current;
+    setShowScrollCue(
+      !!el && el.scrollHeight - el.scrollTop - el.clientHeight > 8
+    );
+  };
 
   const images =
     item.image_urls?.length
@@ -44,8 +74,14 @@ export function ViewItemModal({
 
   const supabase = createClient();
   const queryClient = useQueryClient();
-  const router = useRouter();
-  const turnstileRef = useRef<TurnstileInstance>(null);
+
+  const { reserve, unreserve } = useReserveItem({
+    itemId: id,
+    boardId: item.board_id,
+    user,
+    getCaptchaToken,
+    resetCaptcha,
+  });
 
   const isMyReservation =
     item.status === "reserved" && item.reserved_by === user?.id;
@@ -59,8 +95,10 @@ export function ViewItemModal({
       })
     : null;
 
-  const openModal = () => {
-    setIsOpen(true);
+  // Run open side-effects whenever the modal opens — works for both the
+  // built-in trigger and a parent (clickable card) opening it in controlled mode.
+  useEffect(() => {
+    if (!isOpen) return;
     setActiveIndex(0);
     // Renew-on-activity: re-opening your own hold pushes the expiry out.
     if (inPublicBoard && isMyReservation) {
@@ -74,7 +112,16 @@ export function ViewItemModal({
           }
         });
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  // Re-measure the scroll cue after the layout settles (open, image swap, mode).
+  useEffect(() => {
+    const raf = requestAnimationFrame(updateScrollCue);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, activeIndex, isEditing, reminderStep, notes]);
+
   const closeModal = () => {
     setIsOpen(false);
     setIsEditing(false);
@@ -109,49 +156,9 @@ export function ViewItemModal({
   };
 
   const handleReserve = async () => {
-    // Guests can reserve without an account: create a silent anonymous
-    // session on first reserve, then proceed with the same reserve flow.
-    if (!user) {
-      // Solve the (invisible) captcha before creating the guest session so
-      // bots can't spam anonymous sign-ins.
-      let captchaToken: string | undefined;
-      try {
-        captchaToken = await turnstileRef.current?.getResponsePromise();
-      } catch (captchaError) {
-        toast.error(t("errorReserve"));
-        console.error("Captcha verification failed:", captchaError);
-        return;
-      }
-
-      const { error: authError } = await supabase.auth.signInAnonymously({
-        options: { captchaToken },
-      });
-      if (authError) {
-        toast.error(t("errorReserve"));
-        console.error("Error creating guest session:", authError);
-        turnstileRef.current?.reset();
-        return;
-      }
-    }
-
-    const { data, error } = await supabase.rpc("reserve_item", {
-      p_item_id: id,
-    });
-
-    if (data) {
-      toast.success(t("successReserve"));
-      queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
-      // Refresh so the server re-renders with the new (anonymous) session,
-      // keeping the "my reservation" badge and unreserve action in sync.
-      router.refresh();
-      // Offer an optional reminder email instead of closing right away.
-      setReminderStep(true);
-    }
-
-    if (error) {
-      toast.error(t("errorReserve"));
-      console.error("Error reserving item:", error);
-    }
+    const ok = await reserve();
+    // Offer an optional reminder email instead of closing right away.
+    if (ok) setReminderStep(true);
   };
 
   const saveReminder = async () => {
@@ -180,18 +187,8 @@ export function ViewItemModal({
   };
 
   const handleUnReserve = async () => {
-    const { data, error } = await supabase.rpc("unreserve_item", {
-      p_item_id: id,
-    });
-    if (data) {
-      toast.success(t("successUnreserve"));
-      queryClient.invalidateQueries({ queryKey: ["items", item.board_id] });
-      closeModal();
-    }
-    if (error) {
-      toast.error(t("errorUnreserve"));
-      console.error("Error unreserving item:", error);
-    }
+    const ok = await unreserve();
+    if (ok) closeModal();
   };
 
   const markAsBought = async () => {
@@ -237,13 +234,15 @@ export function ViewItemModal({
 
   return (
     <>
-      <button
-        className="btn btn-sm btn-primary"
-        disabled={disablePublicEditing}
-        onClick={openModal}
-      >
-        {t("ctaView")}
-      </button>
+      {!hideTrigger && (
+        <button
+          className={triggerClassName}
+          disabled={disablePublicEditing}
+          onClick={() => setIsOpen(true)}
+        >
+          {t("ctaView")}
+        </button>
+      )}
       {isOpen && (
         <dialog open={isOpen} className="modal">
           <div className="modal-box pb-10 md:pb-4 pt-10">
@@ -262,13 +261,19 @@ export function ViewItemModal({
               />
             ) : (
               <>
-                <div className="flex flex-col max-h-[60vh] overflow-auto">
+                <div className="relative">
+                <div
+                  ref={scrollRef}
+                  onScroll={updateScrollCue}
+                  className="flex flex-col max-h-[60vh] overflow-auto"
+                >
                   <figure className="w-full mb-6 shrink-0 flex flex-col items-center gap-3 md:flex-row md:items-start md:gap-4">
                     <img
                       src={images[activeIndex] ?? "/assets/placeholder.jpg"}
                       alt={title}
-                      className="max-w-[300px] w-full rounded-md object-contain md:flex-1"
+                      className="max-w-[300px] max-h-[42vh] w-full rounded-md object-contain md:flex-1"
                       data-clarity-mask="true"
+                      onLoad={updateScrollCue}
                       onError={(e) => {
                         e.currentTarget.src = "/assets/placeholder.jpg";
                       }}
@@ -334,6 +339,14 @@ export function ViewItemModal({
                     </div>
                   </div>
                 </div>
+                {/* Subtle fade hinting there's more to scroll to. */}
+                <div
+                  aria-hidden
+                  className={`pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-base-100 to-transparent transition-opacity duration-200 ${
+                    showScrollCue ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              </div>
 
                 {reminderStep ? (
                   <div className="mt-8 border-t border-base-300 pt-6">
@@ -369,17 +382,6 @@ export function ViewItemModal({
                   </div>
                 ) : (
                   <>
-                    {!user &&
-                      inPublicBoard &&
-                      !isInfinite &&
-                      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-                        <Turnstile
-                          ref={turnstileRef}
-                          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-                          options={{ size: "invisible" }}
-                        />
-                      )}
-
                     {inPublicBoard && isInfinite && (
                       <div className="alert mt-8 justify-start">
                         <span aria-hidden className="text-xl">
