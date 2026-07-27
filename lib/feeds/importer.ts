@@ -16,7 +16,6 @@ export type ImportResult = {
   feedsProcessed: number;
   upserted: number;
   markedOutOfStock: number;
-  skipped: number;
 };
 
 /** Shape written to public.inspo_products. */
@@ -63,7 +62,6 @@ export async function runImport(
   const feeds = adapter.listFeeds();
   const seenMerchantIds = new Set<string>();
   let upserted = 0;
-  let skipped = 0;
 
   let batch: ReturnType<typeof toRow>[] = [];
 
@@ -95,16 +93,16 @@ export async function runImport(
   // whole merchant's catalogue. Runs only after every feed parsed cleanly.
   let markedOutOfStock = 0;
   if (seenMerchantIds.size) {
-    const { data, error } = await supabase
+    // count-only (no representation) — avoids pulling back every swept id.
+    const { count, error } = await supabase
       .from("inspo_products")
-      .update({ in_stock: false })
+      .update({ in_stock: false }, { count: "exact" })
       .eq("network", adapter.network)
       .in("merchant_id", [...seenMerchantIds])
       .lt("synced_at", runStartedAt)
-      .eq("in_stock", true)
-      .select("id");
+      .eq("in_stock", true);
     if (error) throw new Error(`stale sweep failed: ${error.message}`);
-    markedOutOfStock = data?.length ?? 0;
+    markedOutOfStock = count ?? 0;
   }
 
   return {
@@ -112,6 +110,5 @@ export async function runImport(
     feedsProcessed: feeds.length,
     upserted,
     markedOutOfStock,
-    skipped,
   };
 }
