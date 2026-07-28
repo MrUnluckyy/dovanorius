@@ -238,9 +238,12 @@ export function SearchUsers() {
         <ul className="grid grid-cols-1 gap-3">
           {profiles.map((p) => (
             <li key={p.id}>
-              <div className="card hover:shadow-md border border-base-300 transition">
+              <Link
+                href={`/users/${p?.id}`}
+                className="card hover:shadow-md border border-base-300 transition block"
+              >
                 <div className="card-body py-4">
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-center gap-4">
                     <div className="avatar">
                       <div className="w-12 rounded-full">
                         {p.avatar_url ? (
@@ -269,17 +272,12 @@ export function SearchUsers() {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/users/${p?.id}`}
-                        className="btn btn-outline btn-sm"
-                      >
-                        Atidaryti
-                      </Link>
-                    </div>
+                    <span className="text-sm opacity-50" aria-hidden>
+                      →
+                    </span>
                   </div>
                 </div>
-              </div>
+              </Link>
             </li>
           ))}
         </ul>

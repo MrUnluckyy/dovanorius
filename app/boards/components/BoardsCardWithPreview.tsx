@@ -1,6 +1,5 @@
 // components/CategoryMosaicGrid.tsx
 import Link from "next/link";
-import Image from "next/image";
 import React from "react";
 import { BoardWithPreview } from "./BoardsList";
 import { useFormatter, useTranslations } from "next-intl";
@@ -108,13 +107,15 @@ const CategoryMosaicCard = React.memo(function CategoryMosaicCard({
         {/* Optional 4th image as a small “chip” */}
         {imgs[3] ? (
           <div className="relative -mt-10 ml-3 h-12 w-12 overflow-hidden rounded-xl ring-2 ring-white md:-mt-11 md:h-14 md:w-14">
-            <Image
+            {/* Wish preview images are arbitrary retailer URLs — a plain <img>
+                avoids next/image's host allow-list (matches MosaicCell). */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={imgs[3]}
               alt={`Preview image for ${item.name}`}
-              fill
-              className="object-cover"
-              sizes="56px"
-              priority={priority}
+              className="absolute inset-0 h-full w-full object-cover"
+              loading={priority ? "eager" : "lazy"}
+              decoding="async"
             />
           </div>
         ) : null}

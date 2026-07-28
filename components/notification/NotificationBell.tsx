@@ -7,7 +7,7 @@ import { createClient } from "@/utils/supabase/client";
 import {
   acceptInvite,
   declineInvite,
-} from "@/app/secret-santa/[slug]/invites/action";
+} from "@/app/events/[slug]/invites/action";
 import { LuBell, LuMegaphone } from "react-icons/lu";
 import { markNotificationsRead } from "@/app/notifications/actions";
 import Link from "next/link";
@@ -194,7 +194,7 @@ export default function NotificationsBell() {
                     </div>
                     <div className="flex justify-end gap-2 w-full">
                       <Link
-                        href={`/secret-santa/${p.slug}`}
+                        href={`/events/${p.slug}`}
                         className="btn btn-primary btn-sm"
                       >
                         Atidaryti

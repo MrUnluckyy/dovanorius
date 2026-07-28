@@ -24,6 +24,7 @@
     "cheerio": "^1.1.2",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.24",
+    "heic-to": "^1.5.2",
     "next": "15.5.7",
     "next-intl": "^4.3.12",
     "next-sanity": "^11.6.13",

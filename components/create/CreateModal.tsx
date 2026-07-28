@@ -31,7 +31,7 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
   const handleRenginys = () => {
     handleClose();
-    router.push("/secret-santa");
+    router.push("/events");
   };
 
   if (!isOpen) return null;

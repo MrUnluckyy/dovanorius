@@ -13,7 +13,7 @@ export default function MyRecipientClient({ slug }: { slug: string }) {
       (
         await sb
           .from("ss_events")
-          .select("id,name,status")
+          .select("id,name,status,type")
           .eq("slug", slug)
           .single()
       ).data!,
@@ -49,7 +49,7 @@ export default function MyRecipientClient({ slug }: { slug: string }) {
         </div>
       )}
       {mine?.receiver ? (
-        <RevealCard person={mine.receiver} />
+        <RevealCard person={mine.receiver} type={ev.type} />
       ) : (
         <div className="alert">
           <span>Dar teks palaukti</span>

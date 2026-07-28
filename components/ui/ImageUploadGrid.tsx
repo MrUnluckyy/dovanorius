@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { LuPlus, LuX } from "react-icons/lu";
+import { prepareImageForUpload } from "@/utils/images/prepareImage";
 
 export type ImageSlot = { url: string; isNew: boolean };
 
@@ -19,13 +20,23 @@ export function ImageUploadGrid({
   maxImages = 5,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [processing, setProcessing] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    // Reset immediately so the same file can be re-selected after removal.
+    e.target.value = "";
+    if (!file) return;
+    // Convert iPhone HEIC → JPEG (and compress) up front, so the preview
+    // thumbnail renders instead of appearing broken in Chrome/Firefox.
+    setProcessing(true);
+    try {
+      const prepared = await prepareImageForUpload(file);
+      onAdd(prepared);
+    } catch {
       onAdd(file);
-      // Reset so the same file can be re-selected after removal
-      e.target.value = "";
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -57,15 +68,20 @@ export function ImageUploadGrid({
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="w-20 h-20 flex items-center justify-center rounded-md border-2 border-dashed border-base-300 hover:border-primary transition-colors text-base-content/50 hover:text-primary"
+            disabled={processing}
+            className="w-20 h-20 flex items-center justify-center rounded-md border-2 border-dashed border-base-300 hover:border-primary transition-colors text-base-content/50 hover:text-primary disabled:opacity-60"
             aria-label="Add image"
           >
-            <LuPlus className="text-2xl" />
+            {processing ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : (
+              <LuPlus className="text-2xl" />
+            )}
           </button>
           <input
             ref={inputRef}
             type="file"
-            accept="image/png,image/jpeg,image/webp"
+            accept="image/png,image/jpeg,image/webp,image/heic,image/heif,.heic,.heif"
             className="hidden"
             onChange={handleFileChange}
           />

@@ -7,6 +7,8 @@ import { useTranslations } from "next-intl";
 import { BoardsLoadingSkeleton } from "@/components/loaders/BoardsLoadingSkeleton";
 import { WishListItem } from "./WishListItem";
 import { LuPlus } from "react-icons/lu";
+import { useCallback, useRef } from "react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 export type Item = {
   id: string;
@@ -36,6 +38,18 @@ export function WishList({
 }) {
   const supabase = createClient();
   const t = useTranslations("Boards");
+
+  // One shared invisible captcha for the whole list: guests reserve one item at
+  // a time, so a single Turnstile instance backs every card's quick-reserve
+  // button (and the detail modal) instead of one iframe per card.
+  const turnstileRef = useRef<TurnstileInstance>(null);
+  const needsCaptcha =
+    !!isPublic && !user && !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const getCaptchaToken = useCallback(
+    async () => turnstileRef.current?.getResponsePromise(),
+    []
+  );
+  const resetCaptcha = useCallback(() => turnstileRef.current?.reset(), []);
 
   const {
     data: items = [],
@@ -74,6 +88,14 @@ export function WishList({
         </div>
       ) : null}
 
+      {needsCaptcha && (
+        <Turnstile
+          ref={turnstileRef}
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+          options={{ size: "invisible" }}
+        />
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {items.map((item) => (
           <WishListItem
@@ -82,6 +104,8 @@ export function WishList({
             item={item}
             inPublicBoard={isPublic}
             user={user}
+            getCaptchaToken={getCaptchaToken}
+            resetCaptcha={resetCaptcha}
           />
         ))}
       </div>
