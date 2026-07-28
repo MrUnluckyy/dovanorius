@@ -260,5 +260,23 @@
     "tabEvents": "Events",
     "tabFriends": "Friends",
     "openButton": "Open"
+  },
+  "Blog": {
+    "metaTitle": "Blog — Noriuto.lt",
+    "metaDescription": "Gift ideas, tips and inspiration for every occasion.",
+    "title": "Blog",
+    "subtitle": "Gift ideas, tips and inspiration.",
+    "empty": "No posts yet.",
+    "backToList": "Back to the blog",
+    "viewItem": "View",
+    "browseByFacet": "Browse by topic",
+    "eyebrow": "The Noriuto blog",
+    "minutes": "min read",
+    "facetRecipient": "For whom",
+    "facetOccasion": "Occasion",
+    "facetPriceBand": "Price",
+    "allPosts": "All posts",
+    "postSingular": "post",
+    "postPlural": "posts"
   }
 }
