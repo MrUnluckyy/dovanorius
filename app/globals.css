@@ -24,6 +24,20 @@
   --animate-marquee: marquee 40s linear infinite;
   --animate-marquee-safe: marquee 40s linear infinite;
 
+  /* Staggered entrance for blog cards — paired with an inline animation-delay. */
+  --animate-fade-up: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   @keyframes marquee {
     0% {
       transform: translateX(0);

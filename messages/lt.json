@@ -324,5 +324,23 @@
     "stepDraw": "Traukimas",
     "stepGifts": "Dovanos",
     "groupManageInApp": "Šią progą tvarkyk NoriuTo programėlėje."
+  },
+  "Blog": {
+    "metaTitle": "Tinklaraštis — Noriuto.lt",
+    "metaDescription": "Dovanų idėjos, patarimai ir įkvėpimas šventėms.",
+    "title": "Tinklaraštis",
+    "subtitle": "Dovanų idėjos, patarimai ir įkvėpimas.",
+    "empty": "Kol kas įrašų nėra.",
+    "backToList": "Grįžti į tinklaraštį",
+    "viewItem": "Žiūrėti",
+    "browseByFacet": "Naršyti pagal temą",
+    "eyebrow": "Noriuto tinklaraštis",
+    "minutes": "min. skaitymo",
+    "facetRecipient": "Kam",
+    "facetOccasion": "Proga",
+    "facetPriceBand": "Kaina",
+    "allPosts": "Visi įrašai",
+    "postSingular": "įrašas",
+    "postPlural": "įrašai"
   }
 }
