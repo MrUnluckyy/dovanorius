@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import { ItemFormValues, ItemSchema } from "@/schemas/ItemSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useProductImageUpload } from "@/hooks/useImageUpload";
-import imageCompression from "browser-image-compression";
 import { ImageUploadGrid, ImageSlot } from "@/components/ui/ImageUploadGrid";
 
 export function ItemForm({
@@ -95,18 +94,10 @@ export function ItemForm({
 
   const onSubmit = async (data: ItemFormValues) => {
     try {
-      const compressionOptions = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1600,
-        useWebWorker: true,
-      };
-
       let uploadedUrls: string[] = [];
       if (newFiles.length > 0) {
-        const compressed = await Promise.all(
-          newFiles.map((f) => imageCompression(f, compressionOptions))
-        );
-        uploadedUrls = await uploadMultipleProductImages(compressed, item.id);
+        // Files are already HEIC-converted + compressed at pick time (grid).
+        uploadedUrls = await uploadMultipleProductImages(newFiles, item.id);
       }
 
       const finalUrls = [...existingUrls, ...uploadedUrls].slice(0, 5);

@@ -44,7 +44,7 @@ export default function MyEvents({ user }: { user: User }) {
           <EventCard
             key={e.id}
             title={e.event.name}
-            url={`/secret-santa/${e.event.slug}`}
+            url={`/events/${e.event.slug}`}
             type={e.event.type}
             coverImageUrl={e.event.cover_image_url}
           />

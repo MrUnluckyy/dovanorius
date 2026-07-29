@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       disallow: [
         "/dashboard/",
         "/boards/",
-        "/secret-santa/",
+        "/events/",
         "/login/",
         "/register/",
         "/forgot-password/",

@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers/Providers";
-import {
-  Baloo_2,
-  Funnel_Display,
-  Inter,
-  Over_the_Rainbow,
-  Rubik,
-} from "next/font/google";
+import { Baloo_2, Funnel_Display, Over_the_Rainbow } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";
@@ -39,7 +33,7 @@ const body = Baloo_2({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_WEB_URL ?? "https://noriuto.lt"
+    process.env.NEXT_PUBLIC_WEB_URL ?? "https://noriuto.lt",
   ),
   title: "Noriuto.lt - Tavo norų sąrašai vienoje vietoje!",
   description:
@@ -54,7 +48,8 @@ export const metadata: Metadata = {
     apple: "/favicons/apple-touch-icon.png",
   },
   other: {
-    "msapplication-TileColor": "#31473A",
+    "msapplication-TileColor": "#FFD166",
+    "impact-site-verification": "0955783e-a1ff-4edb-84e7-4a433f800da6",
   },
   openGraph: {
     title: "Noriuto - Tavo norų sąrašai vienoje vietoje!",
@@ -90,7 +85,9 @@ export default async function RootLayout({
   const store = await cookies();
   const locale = store.get("locale")?.value || "lt";
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <html lang={locale} data-theme="noriuto" suppressHydrationWarning>
