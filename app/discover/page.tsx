@@ -7,6 +7,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
+    // Hidden while Discover is still being refined: reachable by direct URL
+    // only (no nav link), and kept out of search engines.
+    robots: { index: false, follow: false },
   };
 }
 

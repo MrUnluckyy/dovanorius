@@ -2,11 +2,15 @@
 export type SsStatus = "draft" | "open" | "locked" | "drawn" | "archived";
 export type SsRole = "owner" | "admin" | "member";
 export type SsInviteStatus = "pending" | "accepted" | "declined" | "revoked";
+// Event kinds, shared with the noriuto mobile app. "group" (group gift) exists
+// in the DB but its web UI is deferred — handled read-only for now.
+export type SsEventType = "secret_santa" | "name_draw" | "group";
 
 export interface SsEvent {
   id: string;
   owner_id: string;
   name: string;
+  type: SsEventType;
   budget: number | null;
   currency: string | null;
   event_date: string | null; // ISO date (YYYY-MM-DD)
@@ -14,6 +18,7 @@ export interface SsEvent {
   status: SsStatus;
   slug: string;
   notes: string | null;
+  cover_image_url: string | null;
   created_at: string; // ISO datetime
 }
 

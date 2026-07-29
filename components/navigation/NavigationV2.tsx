@@ -10,7 +10,6 @@ import {
   LuHouse,
   LuGift,
   LuLayoutDashboard,
-  LuSparkles,
 } from "react-icons/lu";
 import { SignOutButton } from "@/app/(auth)/components/SignOutButton";
 import Image from "next/image";
@@ -71,10 +70,6 @@ export function NavigationV2({ user }: { user?: User | null }) {
               </div>
             </div>
             <div className="hidden flex-none lg:flex gap-2">
-              <Link href="/discover" className="btn btn-ghost">
-                <LuSparkles />
-                {t("discover")}
-              </Link>
               {user ? (
                 <>
                   <NotificationsLive />
@@ -116,16 +111,6 @@ export function NavigationV2({ user }: { user?: User | null }) {
             </label>
           </div>
           <div className="flex flex-col gap-4 items-start text-2xl">
-            <Link
-              href="/discover"
-              className={`btn btn-ghost text-2xl ${
-                pathnames.includes("discover") ? "font-bold " : "font-normal"
-              }`}
-              onClick={() => ref.current?.click()}
-            >
-              <LuSparkles />
-              {t("discover")}
-            </Link>
             {user ? (
               <>
                 <Link
