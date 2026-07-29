@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "import:feed": "tsx scripts/import-feed.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -22,6 +23,7 @@
     "@vercel/analytics": "^1.5.0",
     "browser-image-compression": "^2.0.2",
     "cheerio": "^1.1.2",
+    "csv-parse": "^7.0.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.24",
     "heic-to": "^1.5.2",
@@ -53,6 +55,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.5",
     "tailwindcss": "^4",
+    "tsx": "^4.23.1",
     "typescript": "^5"
   },
   "browserslist": "> 1%"
