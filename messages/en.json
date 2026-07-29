@@ -338,5 +338,71 @@
     "allPosts": "All posts",
     "postSingular": "post",
     "postPlural": "posts"
+  },
+  "Discover": {
+    "metaTitle": "Gift Ideas & Inspiration",
+    "metaDescription": "Curated gift inspiration from quality brands — fashion, beauty and shoes.",
+    "title": "Gift Ideas",
+    "subtitle": "Curated inspiration from quality brands — not the usual mass-market clutter.",
+    "allCategories": "All",
+    "browseAll": "Browse all gifts",
+    "shopByCategory": "Shop by category",
+    "moreForYou": "More for you",
+    "audience": {
+      "everyone": "Everyone",
+      "her": "For her",
+      "him": "For him"
+    },
+    "inSeason": "In season",
+    "category": {
+      "beauty": "Beauty",
+      "clothing": "Clothing",
+      "shoes": "Shoes",
+      "bag": "Bags",
+      "accessory": "Accessories"
+    },
+    "price": {
+      "all": "Any price",
+      "under25": "Under €25",
+      "b25to50": "€25–50",
+      "b50to100": "€50–100",
+      "over100": "€100+"
+    },
+    "searchPlaceholder": "Search products…",
+    "viewInStore": "View",
+    "loadMore": "Load more",
+    "empty": "No products match your filters.",
+    "error": "Couldn't load products. Please try again.",
+    "affiliateDisclosure": "Some links are affiliate links — we may earn a small commission at no extra cost to you."
+  },
+  "Inspo": {
+    "metaTitle": "Gift Ideas For You",
+    "metaDescription": "AI-picked gift ideas based on your taste — add the ones you love to a board.",
+    "title": "Ideas for you",
+    "subtitle": "AI-picked gifts based on your taste. Add the ones you love to a board.",
+    "tasteHeading": "Your taste",
+    "occasion": {
+      "any": "Any occasion",
+      "birthday": "Birthday",
+      "christmas": "Christmas",
+      "anniversary": "Anniversary"
+    },
+    "thinking": "Picking gifts for you…",
+    "addToBoard": "Add to board",
+    "added": "Added",
+    "addedToBoard": "Added to {board}",
+    "addError": "Couldn't add to board.",
+    "noBoards": "Create a board first",
+    "like": "Love it",
+    "dislike": "Not for me",
+    "hidden": "Hidden",
+    "undo": "Undo",
+    "viewInStore": "View in store",
+    "empty": "No ideas yet — add a few wishes so we can learn your taste.",
+    "emptyCta": "Go to your boards",
+    "error": "Couldn't load ideas. Please try again.",
+    "signInPrompt": "Sign in to see gift ideas picked for you.",
+    "signInCta": "Sign in",
+    "affiliateDisclosure": "Some links are affiliate links — we may earn a small commission at no extra cost to you."
   }
 }

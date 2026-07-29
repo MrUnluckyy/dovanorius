@@ -342,5 +342,71 @@
     "allPosts": "Visi įrašai",
     "postSingular": "įrašas",
     "postPlural": "įrašai"
+  },
+  "Discover": {
+    "metaTitle": "Dovanų idėjos ir įkvėpimas",
+    "metaDescription": "Atrinktos dovanų idėjos iš kokybiškų prekių ženklų — mada, grožis ir avalynė.",
+    "title": "Dovanų idėjos",
+    "subtitle": "Atrinktas įkvėpimas iš kokybiškų prekių ženklų — jokio pigaus masinio šlamšto.",
+    "allCategories": "Visos",
+    "browseAll": "Visos dovanos",
+    "shopByCategory": "Kategorijos",
+    "moreForYou": "Daugiau tau",
+    "audience": {
+      "everyone": "Visiems",
+      "her": "Jai",
+      "him": "Jam"
+    },
+    "inSeason": "Pagal sezoną",
+    "category": {
+      "beauty": "Grožis",
+      "clothing": "Drabužiai",
+      "shoes": "Avalynė",
+      "bag": "Rankinės",
+      "accessory": "Aksesuarai"
+    },
+    "price": {
+      "all": "Bet kokia kaina",
+      "under25": "Iki 25 €",
+      "b25to50": "25–50 €",
+      "b50to100": "50–100 €",
+      "over100": "100 €+"
+    },
+    "searchPlaceholder": "Ieškoti prekių…",
+    "viewInStore": "Žiūrėti",
+    "loadMore": "Rodyti daugiau",
+    "empty": "Pagal pasirinktus filtrus prekių nerasta.",
+    "error": "Nepavyko įkelti prekių. Bandykite dar kartą.",
+    "affiliateDisclosure": "Kai kurios nuorodos yra partnerių – pirkę galite mums skirti nedidelį komisinį, kaina jums nesikeičia."
+  },
+  "Inspo": {
+    "metaTitle": "Dovanų idėjos tau",
+    "metaDescription": "DI atrinktos dovanų idėjos pagal tavo skonį — patikusias pridėk į norų lentą.",
+    "title": "Idėjos tau",
+    "subtitle": "DI parinktos dovanos pagal tavo skonį. Patikusias pridėk į norų lentą.",
+    "tasteHeading": "Tavo skonis",
+    "occasion": {
+      "any": "Bet kokia proga",
+      "birthday": "Gimtadienis",
+      "christmas": "Kalėdos",
+      "anniversary": "Jubiliejus"
+    },
+    "thinking": "Renkame dovanas tau…",
+    "addToBoard": "Pridėti į lentą",
+    "added": "Pridėta",
+    "addedToBoard": "Pridėta į „{board}“",
+    "addError": "Nepavyko pridėti į lentą.",
+    "noBoards": "Pirma sukurk lentą",
+    "like": "Patinka",
+    "dislike": "Ne man",
+    "hidden": "Paslėpta",
+    "undo": "Grąžinti",
+    "viewInStore": "Žiūrėti parduotuvėje",
+    "empty": "Kol kas idėjų nėra — pridėk kelis norus, kad pažintume tavo skonį.",
+    "emptyCta": "Eiti į norų lentas",
+    "error": "Nepavyko įkelti idėjų. Bandykite dar kartą.",
+    "signInPrompt": "Prisijunk, kad matytum tau parinktas dovanų idėjas.",
+    "signInCta": "Prisijungti",
+    "affiliateDisclosure": "Kai kurios nuorodos yra partnerių – pirkę galite mums skirti nedidelį komisinį, kaina jums nesikeičia."
   }
 }

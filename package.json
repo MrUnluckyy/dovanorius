@@ -10,6 +10,7 @@
     "import:feed": "tsx scripts/import-feed.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.114.0",
     "@hookform/resolvers": "^5.2.2",
     "@marsidev/react-turnstile": "^1.5.2",
     "@microsoft/clarity": "^1.0.2",
