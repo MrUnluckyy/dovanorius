@@ -1,11 +1,12 @@
 // Gift engine tuning + cost table.
 //
-// Model is Opus 4.8 — the ranker has to judge gender-appropriateness from
-// Lithuanian product names and enforce category variety, which the strongest
-// model does noticeably better. Calls are cached per user for a week, so the
-// higher per-call cost is amortized to near-zero. Drop to "claude-sonnet-5"
-// (one line) for ~⅓ the cost if the quality gap isn't worth it.
-export const GIFT_MODEL = "claude-opus-4-8";
+// Default model is Sonnet 5 — near-Opus quality on this ranking task (judging
+// gender-appropriateness from Lithuanian product names + category variety) at
+// roughly a third of Opus 4.8's per-token cost. Override per environment with
+// the GIFT_MODEL env var (e.g. GIFT_MODEL=claude-opus-4-8 for the highest
+// quality, or claude-haiku-4-5 for the cheapest). Any override must be a key in
+// MODEL_PRICES below so the cost readout stays accurate.
+export const GIFT_MODEL = process.env.GIFT_MODEL ?? "claude-sonnet-5";
 
 export const RECENT_ITEMS = 40; // how many of a user's wishes feed the taste model
 export const CANDIDATE_LIMIT = 25; // products handed to the ranker (fewer = cheaper input; 5/category still gives the ranker variety)

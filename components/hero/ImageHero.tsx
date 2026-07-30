@@ -1,40 +1,49 @@
-import { useTranslations } from "next-intl";
 import Link from "next/link";
-import React from "react";
-import { AppStoreBadge } from "@/components/landing/AppStoreBadge";
+import { getTranslations } from "next-intl/server";
+import { AppStoreButton } from "@/components/landing/AppStoreButton";
+import { HeroCollage } from "@/components/hero/HeroCollage";
 
-export function ImageHero() {
-  const t = useTranslations("HomePage");
-
+export async function ImageHero() {
+  const t = await getTranslations("Landing.hero");
   return (
-    <div className="mx-auto py-12 px-4 relative flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 max-w-[1440px] w-full">
-      <div className="flex-1">
-        <h1 className="font-bold font-heading text-5xl md:text-6xl mb-4">
+    <section>
+      {/* headline block */}
+      <div className="mx-auto max-w-[880px] px-[18px] pb-2 pt-10 text-center md:px-12 md:pt-14">
+        <span className="nr-badge nr-badge-outline nr-anim-fadeup mb-5">
+          🎁 {t("badge")}
+        </span>
+        <h1
+          className="nr-display nr-anim-fadeup mb-5 text-[40px] md:text-[68px]"
+          style={{ animationDelay: "0.1s" }}
+        >
           {t("title")}
         </h1>
-        <p className="font-body mt-6 text-lg md:text-xl">{t("description")}</p>
-        <div className="flex flex-col w-full md:w-auto flex-wrap items-center md:items-start gap-4 mt-8">
+        <p
+          className="nr-lead nr-anim-fadeup mx-auto mb-7 max-w-[620px]"
+          style={{ animationDelay: "0.22s" }}
+        >
+          {t("subtitle")}
+        </p>
+        <div
+          className="nr-anim-fadeup flex flex-col items-center justify-center gap-3.5 sm:flex-row"
+          style={{ animationDelay: "0.34s" }}
+        >
           <Link
             href="/dashboard"
-            className="btn btn-primary font-heading btn-lg md:btn-xl w-full md:w-auto"
+            className="nr-btn nr-btn-primary w-full sm:w-auto"
+            style={{ animation: "nrPulse 3.2s ease-out 1.6s infinite" }}
           >
-            {t("ctaTryOut")}
+            {t("ctaCreate")}
           </Link>
-          <AppStoreBadge />
+          <AppStoreButton
+            label={t("appStore")}
+            className="nr-btn nr-btn-dark w-full sm:w-auto"
+          />
         </div>
       </div>
-      <div className="flex-1">
-        <img
-          src="/assets/dovanorius-animated.gif"
-          alt="Moteris kuria norų sąrašą"
-          className="max-w-sm lg:max-w-md mx-auto"
-          fetchPriority="high"
-          decoding="async"
-          width={480}
-          height={480}
-        />
-      </div>
-      <div className="bg-secondary absolute w-full lg:w-[500px] xl:w-[600px] h-[900px] lg:h-[800px] -z-10 lg:-z-10 top-0 right-0 lg:-top-60 lg:right-0 xl:right-16 rounded-b-[80px]" />
-    </div>
+
+      {/* collage */}
+      <HeroCollage chipAdded={t("chipAdded")} chipReserved={t("chipReserved")} />
+    </section>
   );
 }
