@@ -1,45 +1,42 @@
-import { useTranslations } from "next-intl";
-import Image from "next/image";
 import Link from "next/link";
-import React from "react";
-import { AppStoreBadge } from "@/components/landing/AppStoreBadge";
+import { getTranslations } from "next-intl/server";
+import { AppStoreButton } from "@/components/landing/AppStoreButton";
+import { Reveal } from "@/components/ui/Reveal";
 
-export function PreFooterCTA() {
-  const t = useTranslations("HomePage");
+export async function PreFooterCTA() {
+  const t = await getTranslations("Landing.cta");
 
   return (
-    <div className="relative mt-30 flex flex-col gap-4 justify-center items-center text-center max-w-md mx-auto px-4">
-      <div className="bg-linear-to-t from-[#FFE035] to-base-100 to-90% w-[2000px] h-lvh absolute -z-10" />
-      <div>
-        <img src="/assets/doodles/heart-lines.svg" className="w-16" />
-      </div>
-
-      <h2 className="text-4xl md:text-5xl font-heading text-center font-bold max-w-md">
-        {t("preFooterCTATitle")}
-      </h2>
-      <p className="max-w-md text-neutral">{t("preFooterCTADescription")}</p>
-
-      <Link
-        href="/dashboard"
-        className="btn btn-primary font-heading btn-md md:btn-lg"
-      >
-        {t("ctaStartBuilding")}
-      </Link>
-
-      <div className="divider text-neutral text-xs">
-        {t("appDownloadDivider")}
-      </div>
-      <div className="flex flex-col items-center gap-3">
-        <AppStoreBadge />
-        <div className="opacity-35 grayscale">
-          <Image
-            src="/assets/googlePlay.png"
-            alt="Google Play – coming soon"
-            width={135}
-            height={40}
+    <section className="nr-container pb-16 pt-4 md:pb-[70px]">
+      <Reveal>
+        <div className="relative flex flex-col items-start justify-between gap-8 overflow-hidden rounded-[32px] bg-(--nr-yellow) px-8 py-12 md:flex-row md:items-center md:px-[60px] md:py-16">
+          {/* ambient circle */}
+          <div
+            className="pointer-events-none absolute -right-14 -top-14 h-64 w-64 rounded-full bg-white/35"
+            style={{ animation: "nrBobR 9s ease-in-out infinite" }}
           />
+          <div className="relative">
+            <h2 className="nr-display mb-3.5 text-[34px] md:text-[44px]">
+              {t("title")}
+            </h2>
+            <p className="max-w-[460px] text-[17px] leading-snug text-(--nr-on-yellow-muted)">
+              {t("body")}
+            </p>
+          </div>
+          <div className="relative flex w-full flex-none flex-col gap-3.5 sm:flex-row md:w-auto">
+            <Link
+              href="/dashboard"
+              className="nr-btn nr-btn-dark w-full sm:w-auto"
+            >
+              {t("start")}
+            </Link>
+            <AppStoreButton
+              label={t("appStore")}
+              className="nr-btn nr-btn-outline w-full !border-transparent !bg-white hover:!bg-[#fff8ea] sm:w-auto"
+            />
+          </div>
         </div>
-      </div>
-    </div>
+      </Reveal>
+    </section>
   );
 }

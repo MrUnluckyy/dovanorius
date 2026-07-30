@@ -2,14 +2,15 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
-import { NavigationV2 } from "@/components/navigation/NavigationV2";
+import { LandingHeader } from "@/components/landing/LandingHeader";
 import { ImageHero } from "@/components/hero/ImageHero";
 import { Features } from "@/components/landing/Features";
+import { HowItWorks } from "@/components/landing/HowItWorks";
 import { DetailedFeatures } from "@/components/landing/DetailedFeatures";
-import { Testimonials } from "@/components/landing/Testimonials";
+import { Occasions } from "@/components/landing/Occasions";
+import { IdeasStrip } from "@/components/landing/IdeasStrip";
 import Footer from "@/components/footer/Footer";
 import { PreFooterCTA } from "@/components/landing/PreFooterCTA";
-import { Examples } from "@/components/landing/Examples";
 
 export const metadata: Metadata = {
   alternates: {
@@ -29,13 +30,17 @@ export default async function Home() {
 
   return (
     <>
-      <NavigationV2 user={user} />
-      <main className="pb-20 overflow-hidden">
+      <LandingHeader />
+      {/* NOTE: no overflow-hidden here — it would break the sticky scrollytelling
+          in HowItWorks. Sections that need clipping (hero collage, marquee) clip
+          themselves. */}
+      <main>
         <ImageHero />
         <Features />
+        <HowItWorks />
         <DetailedFeatures />
-        <Testimonials />
-        <Examples />
+        <Occasions />
+        <IdeasStrip />
         <PreFooterCTA />
       </main>
       <Footer />

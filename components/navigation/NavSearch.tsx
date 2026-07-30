@@ -9,6 +9,7 @@ import React, {
   KeyboardEvent,
 } from "react";
 import Link from "next/link";
+import { LuSearch } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
 import { SearchInput } from "../search/SearchInput";
 
@@ -67,7 +68,16 @@ function initials(name?: string | null) {
     .join("");
 }
 
-export function NavSearch() {
+export function NavSearch({
+  trigger = "input",
+  triggerLabel,
+  triggerClassName = "btn btn-ghost btn-circle",
+}: {
+  /** "input" renders the inline search field; "icon" renders a button that opens the overlay. */
+  trigger?: "input" | "icon";
+  triggerLabel?: string;
+  triggerClassName?: string;
+} = {}) {
   const supabase = useMemo(() => createClient(), []);
   const [term, setTerm] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -316,9 +326,18 @@ export function NavSearch() {
 
   return (
     <div className="md:relative">
-      {/* ✅ render small input ONLY when overlay is closed */}
-      {!open && (
-        <>
+      {/* ✅ render trigger ONLY when overlay is closed */}
+      {!open &&
+        (trigger === "icon" ? (
+          <button
+            type="button"
+            aria-label={triggerLabel ?? "Search"}
+            className={triggerClassName}
+            onClick={() => setOpen(true)}
+          >
+            <LuSearch className="text-xl" />
+          </button>
+        ) : (
           <SearchInput
             loading={loading}
             term={term}
@@ -329,9 +348,7 @@ export function NavSearch() {
             variant="small"
             inputRef={smallInputRef}
           />
-          {/* optional: desktop dropdown positioning if you ever want it without overlay */}
-        </>
-      )}
+        ))}
 
       {/* Overlay */}
       {open && (

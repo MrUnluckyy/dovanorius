@@ -88,6 +88,10 @@ export async function getGiftIdeas(
   const res = await client.messages.parse({
     model: GIFT_MODEL,
     max_tokens: 1500,
+    // Thinking off: keeps parity with the previous no-thinking behavior and
+    // reserves the whole max_tokens budget for the ranked JSON output (Sonnet 5
+    // would otherwise run adaptive thinking by default and could truncate it).
+    thinking: { type: "disabled" },
     system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
     messages: [
       {

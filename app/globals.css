@@ -108,6 +108,12 @@
   --noise: 0;
 }
 
+/* ====================================================================
+ * NORIUTO — brand theme (2026 landing redesign)
+ * Warm cream page + white cards + one yellow accent, warm-near-black ink.
+ * Mapped onto DaisyUI so every btn / card / badge across the app inherits
+ * the brand look. Raw design tokens live in the :root block further down.
+ * ==================================================================== */
 @plugin "daisyui/theme" {
   name: "noriuto";
   default: true;
@@ -115,58 +121,58 @@
   color-scheme: light;
 
   /* ------------------------------------------------------------------
-   * BASE / BACKGROUND
+   * BASE / BACKGROUND — cream page, white surfaces, hairline borders
    * ------------------------------------------------------------------ */
-  --color-base-100: oklch(100% 0 0); /* #FFFFFF */
-  --color-base-200: oklch(96% 0 0); /* #F6F6F6 */
-  --color-base-300: oklch(91% 0 0); /* #E8E8E8 */
-  --color-base-content: oklch(13% 0 0); /* #111111 */
+  --color-base-100: #faf7f0; /* cream page background */
+  --color-base-200: #f6f1e6; /* raised cream (nav shade, wells) */
+  --color-base-300: #eee5d4; /* hairline borders */
+  --color-base-content: #231f18; /* warm near-black ink */
 
   /* ------------------------------------------------------------------
-   * PRIMARY (black CTA)
+   * PRIMARY — brand yellow (the one accent)
    * ------------------------------------------------------------------ */
-  --color-primary: oklch(13% 0 0); /* #111111 */
-  --color-primary-content: oklch(100% 0 0); /* #FFFFFF */
+  --color-primary: #ffd166;
+  --color-primary-content: #231f18;
 
   /* ------------------------------------------------------------------
-   * SECONDARY (warm yellow)
+   * SECONDARY — soft yellow tile
    * ------------------------------------------------------------------ */
-  --color-secondary: oklch(93% 0.07 95); /* #FFE7A3 */
-  --color-secondary-content: oklch(18% 0 0); /* #1A1A1A */
+  --color-secondary: #fff4d6;
+  --color-secondary-content: #8a6d1f;
 
   /* ------------------------------------------------------------------
-   * ACCENT (friendly green)
+   * ACCENT — dark ink (dark CTAs, App Store button)
    * ------------------------------------------------------------------ */
-  --color-accent: oklch(69% 0.13 160); /* #28B57A */
-  --color-accent-content: oklch(20% 0.05 160); /* #0B2A1C */
+  --color-accent: #231f18;
+  --color-accent-content: #ffffff;
 
   /* ------------------------------------------------------------------
-   * NEUTRAL (UI greys)
+   * NEUTRAL — muted warm grey text
    * ------------------------------------------------------------------ */
-  --color-neutral: oklch(45% 0 0); /* #6B6B6B */
-  --color-neutral-content: oklch(100% 0 0); /* white */
+  --color-neutral: #6b6357;
+  --color-neutral-content: #ffffff;
 
   /* ------------------------------------------------------------------
-   * FEEDBACK STATES
+   * FEEDBACK STATES (warm-tuned)
    * ------------------------------------------------------------------ */
-  --color-info: oklch(88% 0.05 240); /* #BFDDF6 */
-  --color-info-content: oklch(25% 0.03 240);
+  --color-info: #bfddf6;
+  --color-info-content: #1f3b52;
 
-  --color-success: oklch(90% 0.06 160); /* #BFEED6 */
-  --color-success-content: oklch(28% 0.04 160);
+  --color-success: #bfead1;
+  --color-success-content: #1e4632;
 
-  --color-warning: oklch(92% 0.08 90); /* #FFE29A */
-  --color-warning-content: oklch(30% 0.05 90);
+  --color-warning: #ffd166;
+  --color-warning-content: #5c4a1a;
 
-  --color-error: oklch(82% 0.09 25); /* #F3B6B6 */
-  --color-error-content: oklch(30% 0.06 25);
+  --color-error: #f0b4a8;
+  --color-error-content: #5a2318;
 
   /* ------------------------------------------------------------------
-   * SHAPES / SPACING (kept from your theme)
+   * SHAPES — generous, friendly radii
    * ------------------------------------------------------------------ */
-  --radius-selector: 0.75rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0.5rem;
+  --radius-selector: 999px; /* toggles, chips */
+  --radius-field: 0.875rem; /* inputs, buttons */
+  --radius-box: 1.25rem; /* cards, modals */
 
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
@@ -237,5 +243,342 @@
 
   .sticky-mint {
     @apply bg-success/40;
+  }
+}
+
+/* ====================================================================
+ * NORIUTO DESIGN SYSTEM — raw tokens
+ * The single source of truth for the brand look. DaisyUI (above) mirrors
+ * these for its components; use these vars / .nr-* classes anywhere you
+ * need the brand primitives directly. Reuse across the whole app.
+ * ==================================================================== */
+:root {
+  /* palette --------------------------------------------------------- */
+  --nr-cream: #faf7f0; /* page background */
+  --nr-surface: #ffffff; /* cards, inputs */
+  --nr-tile: #fff4d6; /* soft yellow tiles / tints */
+  --nr-tile-2: #ffe3a8; /* deeper tile (media placeholders) */
+  --nr-border: #eee5d4; /* hairlines */
+  --nr-ink: #231f18; /* primary text, dark buttons */
+  --nr-ink-2: #3d372d; /* long-form body on white */
+  --nr-ink-soft: #3a342a; /* dark button hover */
+  --nr-muted: #6b6357; /* secondary text */
+  --nr-faint: #8f8779; /* captions, meta */
+  --nr-yellow: #ffd166; /* brand accent */
+  --nr-yellow-hover: #ffc94d;
+  --nr-yellow-soft: #ffdf99;
+  --nr-yellow-deep: #e0b23f; /* pressed edge / stars */
+  --nr-gold-text: #8a7a52; /* small labels on white */
+  --nr-gold-strong: #8a6d1f; /* labels on --nr-tile */
+  --nr-on-yellow-muted: #5c4a1a;
+
+  /* semantic aliases ------------------------------------------------ */
+  --surface-page: var(--nr-cream);
+  --surface-card: var(--nr-surface);
+  --surface-accent: var(--nr-yellow);
+  --surface-tint: var(--nr-tile);
+  --text-body: var(--nr-ink);
+  --text-secondary: var(--nr-muted);
+  --text-caption: var(--nr-faint);
+  --border-default: var(--nr-border);
+  --focus-ring: rgba(255, 209, 102, 0.45);
+
+  /* radii ----------------------------------------------------------- */
+  --nr-radius-pill: 999px;
+  --nr-radius-card: 24px;
+  --nr-radius-card-mobile: 20px;
+  --nr-radius-img: 18px;
+  --nr-radius-chip: 14px;
+  --nr-radius-input: 14px;
+
+  /* shadows / motion ------------------------------------------------ */
+  --nr-shadow-float: 0 10px 30px rgba(35, 31, 24, 0.14);
+  --nr-shadow-hover: 0 10px 24px rgba(35, 31, 24, 0.07);
+  --nr-shadow-device: 0 30px 70px rgba(35, 31, 24, 0.22);
+  --nr-shadow-btn: 0 2px 0 var(--nr-yellow-deep);
+  --nr-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --nr-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* layout ---------------------------------------------------------- */
+  --nr-content: 1180px;
+}
+
+/* keyframes --------------------------------------------------------- */
+@keyframes nrDrift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+@keyframes nrDriftDn {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(12px);
+  }
+}
+@keyframes nrBobL {
+  0%,
+  100% {
+    transform: rotate(-3deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-2.6deg) translateY(-5px);
+  }
+}
+@keyframes nrBobR {
+  0%,
+  100% {
+    transform: rotate(2.5deg) translateY(0);
+  }
+  50% {
+    transform: rotate(2.9deg) translateY(-6px);
+  }
+}
+@keyframes nrFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes nrMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes nrPulse {
+  0%,
+  100% {
+    box-shadow: 0 2px 0 var(--nr-yellow-deep), 0 0 0 0 rgba(255, 209, 102, 0.3);
+  }
+  70% {
+    box-shadow: 0 2px 0 var(--nr-yellow-deep), 0 0 0 9px rgba(255, 209, 102, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="nr-anim"],
+  .nr-marquee {
+    animation: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * NORIUTO PRIMITIVES — reusable building blocks
+ * ------------------------------------------------------------------ */
+@layer components {
+  /* layout ------------------------------------------------------- */
+  .nr-container {
+    width: 100%;
+    max-width: var(--nr-content);
+    margin-inline: auto;
+    padding-inline: 18px;
+  }
+  @media (min-width: 768px) {
+    .nr-container {
+      padding-inline: 48px;
+    }
+  }
+  .nr-section {
+    padding-block: 48px;
+  }
+  @media (min-width: 768px) {
+    .nr-section {
+      padding-block: 70px;
+    }
+  }
+
+  /* typography --------------------------------------------------- */
+  .nr-display {
+    font-family: var(--font-heading), sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.04;
+    color: var(--nr-ink);
+    text-wrap: balance;
+  }
+  .nr-h2 {
+    font-family: var(--font-heading), sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--nr-ink);
+    text-wrap: balance;
+  }
+  .nr-h3 {
+    font-family: var(--font-heading), sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    color: var(--nr-ink);
+  }
+  .nr-lead {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--nr-muted);
+    text-wrap: pretty;
+  }
+  .nr-overline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* buttons ------------------------------------------------------ */
+  .nr-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--nr-radius-pill);
+    padding: 14px 28px;
+    font-family: var(--font-body), sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    transition:
+      transform 0.25s var(--nr-ease-spring),
+      background 0.2s,
+      border-color 0.2s;
+  }
+  .nr-btn:hover {
+    transform: translateY(-2px);
+  }
+  .nr-btn:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .nr-btn-sm {
+    padding: 10px 18px;
+    font-size: 14px;
+  }
+  .nr-btn-primary {
+    background: var(--nr-yellow);
+    color: var(--nr-ink);
+    box-shadow: var(--nr-shadow-btn);
+  }
+  .nr-btn-primary:hover {
+    background: var(--nr-yellow-hover);
+  }
+  .nr-btn-dark {
+    background: var(--nr-ink);
+    color: #fff;
+    font-weight: 600;
+  }
+  .nr-btn-dark:hover {
+    background: var(--nr-ink-soft);
+  }
+  .nr-btn-outline {
+    background: var(--nr-surface);
+    color: var(--nr-ink);
+    font-weight: 600;
+    border: 1.5px solid var(--nr-border);
+  }
+  .nr-btn-outline:hover {
+    background: #fffaf0;
+  }
+
+  /* surfaces ----------------------------------------------------- */
+  .nr-card {
+    background: var(--nr-surface);
+    border: 1px solid var(--nr-border);
+    border-radius: var(--nr-radius-card);
+    overflow: hidden;
+    transition:
+      transform 0.35s var(--nr-ease-out-expo),
+      box-shadow 0.35s;
+  }
+  .nr-card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--nr-shadow-hover);
+  }
+  .nr-tile {
+    background: var(--nr-tile);
+    border-radius: var(--nr-radius-card);
+    transition: transform 0.35s var(--nr-ease-out-expo);
+  }
+  .nr-tile:hover {
+    transform: translateY(-2px);
+  }
+
+  /* badges ------------------------------------------------------- */
+  .nr-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: var(--nr-radius-pill);
+    padding: 6px 14px;
+    font-family: var(--font-body), sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .nr-badge-solid {
+    background: var(--nr-yellow);
+    color: var(--nr-ink);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  .nr-badge-tint {
+    background: var(--nr-tile);
+    color: var(--nr-gold-strong);
+  }
+  .nr-badge-outline {
+    background: var(--nr-surface);
+    color: var(--nr-gold-text);
+    font-weight: 600;
+    border: 1px solid var(--nr-border);
+  }
+
+  /* animation helpers ------------------------------------------- */
+  .nr-anim-fadeup {
+    animation: nrFadeUp 0.8s var(--nr-ease-out-expo) both;
+  }
+  .nr-marquee {
+    animation: nrMarquee 64s linear infinite;
+  }
+  /* strip the browser's native type=search UI (magnifier + clear ×) */
+  .nr-search-input::-webkit-search-decoration,
+  .nr-search-input::-webkit-search-cancel-button,
+  .nr-search-input::-webkit-search-results-button,
+  .nr-search-input::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+  }
+  .nr-marquee-mask {
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 8%,
+      #000 92%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 8%,
+      #000 92%,
+      transparent
+    );
   }
 }

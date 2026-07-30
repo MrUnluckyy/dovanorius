@@ -55,6 +55,10 @@ export async function getOrInferTasteProfile(
   const res = await client.messages.parse({
     model: GIFT_MODEL,
     max_tokens: 700,
+    // Thinking off: keeps parity with the previous no-thinking behavior and
+    // keeps the whole max_tokens budget for the structured output (Sonnet 5
+    // would otherwise run adaptive thinking by default and could truncate it).
+    thinking: { type: "disabled" },
     system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
     messages: [{ role: "user", content: JSON.stringify(signals) }],
     output_config: { format: zodOutputFormat(TasteProfileSchema) },

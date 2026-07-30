@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers/Providers";
-import { Baloo_2, Funnel_Display, Over_the_Rainbow } from "next/font/google";
+import {
+  Bricolage_Grotesque,
+  Instrument_Sans,
+  Over_the_Rainbow,
+} from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";
@@ -11,9 +15,10 @@ import { GtmPageView } from "@/components/GtmPageView";
 import { PostHogProvider } from "@/components/providers/PostHogProvider";
 import { createClient } from "@/utils/supabase/server";
 
-const headings = Funnel_Display({
+/* Display face — headlines, buttons, numbers (Noriuto design system) */
+const headings = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "600", "700", "800"],
   variable: "--font-heading",
   display: "swap",
 });
@@ -24,9 +29,10 @@ const special = Over_the_Rainbow({
   display: "swap",
   adjustFontFallback: false,
 });
-const body = Baloo_2({
+/* Body / UI face */
+const body = Instrument_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-body",
   display: "swap",
 });
@@ -100,7 +106,7 @@ export default async function RootLayout({
           <Toaster />
           <Providers>
             <PostHogProvider userId={user?.id} userEmail={user?.email} />
-            <div className="bg-gradient-to-b from-secondary/20 via-base-100 to-[#FFE035]">
+            <div className="bg-(--nr-cream) text-(--nr-ink) font-body min-h-screen">
               {children}
             </div>
             <Analytics mode="production" />
