@@ -204,7 +204,7 @@ export function AddItemModal({
             </button>
             <form onSubmit={handleSubmit(onSubmit)}>
               <h3 className="font-bold text-lg">{t("addWish")}</h3>
-              <fieldset className="fieldset w-full">
+              <fieldset className="fieldset w-full min-w-0 grid-cols-[minmax(0,1fr)]">
                 <ProductUrlParser
                   onParse={handleParse}
                   loading={parsing}
@@ -268,7 +268,7 @@ export function AddItemModal({
                     className="toggle toggle-primary mt-1"
                     {...register("is_infinite")}
                   />
-                  <span className="flex flex-col text-left">
+                  <span className="flex min-w-0 flex-col whitespace-normal text-left">
                     <span className="font-semibold">{t("infiniteLabel")}</span>
                     <span className="text-sm opacity-70">
                       {t("infiniteHint")}

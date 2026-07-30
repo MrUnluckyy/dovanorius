@@ -62,7 +62,7 @@ export function LandingHeader() {
 
             <Link
               href="/login"
-              className="hidden rounded-full px-3 py-1.5 text-(--nr-ink) transition-colors hover:text-(--nr-muted) sm:block"
+              className="rounded-full px-2.5 py-1.5 text-(--nr-ink) transition-colors hover:text-(--nr-muted) sm:px-3"
             >
               {t("login")}
             </Link>

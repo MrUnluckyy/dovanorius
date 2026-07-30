@@ -38,7 +38,7 @@ const COLUMNS: Column[] = [
     drift: "up",
     speed: -0.22,
     speedX: 0,
-    className: "",
+    className: "hidden sm:block",
     images: [
       { src: "/assets/images/examples/house1.png", h: 270, price: "129 €" },
       { src: "/assets/images/examples/kids3.png", h: 190 },
@@ -136,9 +136,9 @@ export function HeroCollage({
   }, []);
 
   return (
-    <div className="relative mt-11 h-[420px] overflow-hidden md:h-[560px]">
+    <div className="relative mt-11 h-[460px] overflow-hidden md:h-[560px]">
       <div
-        className="nr-anim-fadeup flex gap-4 px-6 md:px-10"
+        className="nr-anim-fadeup flex gap-3 px-4 sm:gap-4 sm:px-6 md:px-10"
         style={{ animationDelay: "0.45s" }}
       >
         {COLUMNS.map((col, i) => (

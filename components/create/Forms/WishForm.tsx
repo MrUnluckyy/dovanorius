@@ -184,7 +184,7 @@ export function WishForm({ onCancel, onSuccess }: WishFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <fieldset className="fieldset w-full space-y-3">
+      <fieldset className="fieldset w-full min-w-0 grid-cols-[minmax(0,1fr)] space-y-3">
         <ProductUrlParser
           onParse={handleParse}
           loading={parsing}
@@ -297,7 +297,7 @@ export function WishForm({ onCancel, onSuccess }: WishFormProps) {
             className="toggle toggle-primary mt-1"
             {...register("is_infinite")}
           />
-          <span className="flex flex-col text-left">
+          <span className="flex min-w-0 flex-col whitespace-normal text-left">
             <span className="font-semibold">{t("infiniteLabel")}</span>
             <span className="text-sm opacity-70">{t("infiniteHint")}</span>
           </span>

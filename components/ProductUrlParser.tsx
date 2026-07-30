@@ -20,7 +20,7 @@ export default function ProductUrlParser({
     <div>
       <label className="label">Url</label>
       <div className="join w-full">
-        <div className="w-full">
+        <div className="w-full min-w-0">
           <label className="input validator join-item w-full">
             <svg
               className="h-[1em] opacity-50"
