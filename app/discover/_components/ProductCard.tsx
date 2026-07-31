@@ -1,100 +1,75 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import toast from "react-hot-toast";
-import {
-  LuExternalLink,
-  LuPlus,
-  LuCheck,
-  LuHeart,
-  LuX,
-  LuSparkles,
-  LuUndo2,
-} from "react-icons/lu";
-import { useBoards } from "@/hooks/useBoards";
-import { useAddIdeaToBoard } from "@/hooks/useAddIdeaToBoard";
-import type { Signal } from "@/hooks/useProductFeedback";
-import { useState } from "react";
+import { LuHeart, LuSparkles } from "react-icons/lu";
 
 export type CardProduct = {
   id: string;
   title: string;
   brand?: string | null;
   price: number | null;
+  /** Recommended retail price, shown struck-through when discounted. */
+  rrp?: number | null;
+  /** Percent off vs. rrp (0–100). */
+  discountPct?: number | null;
   imageUrl: string | null;
   deepLink: string | null;
   /** Present only for AI picks — the concierge's one-line rationale. */
   reason?: string | null;
+  /** Extra context surfaced in the modal / used for corrections. */
+  productType?: string | null;
+  gender?: string | null;
+  merchant?: string | null;
 };
 
 /** Bump the AWIN image CDN thumbnail for crisper cards. */
 function hiRes(url: string): string {
-  return url.replace(/([?&])w=\d+/, "$1w=400").replace(/([?&])h=\d+/, "$1h=400");
+  return url.replace(/([?&])w=\d+/, "$1w=500").replace(/([?&])h=\d+/, "$1h=500");
 }
 
+/**
+ * Premium, uniform product card (Zalando-style). The whole card is clickable
+ * and opens the detail modal — save / view / report live there.
+ */
 export function ProductCard({
   product,
-  signal,
-  onReact,
+  onOpen,
 }: {
   product: CardProduct;
-  signal?: Signal;
-  /** Provided only for signed-in users; absent hides the reaction controls. */
-  onReact?: (signal: Signal | null) => void;
+  onOpen: () => void;
 }) {
   const t = useTranslations("Inspo");
-  const { data: boards = [], isLoading: boardsLoading } = useBoards();
-  const addToBoard = useAddIdeaToBoard();
-  const [addedBoardId, setAddedBoardId] = useState<string | null>(null);
 
-  const liked = signal === 1;
-  const disliked = signal === -1;
-
-  const handleAdd = (boardId: string, boardName: string) => {
-    addToBoard.mutate(
-      {
-        boardId,
-        title: product.title,
-        url: product.deepLink,
-        imageUrl: product.imageUrl,
-        price: product.price,
-        notes: product.reason ?? null,
-      },
-      {
-        onSuccess: () => {
-          setAddedBoardId(boardId);
-          toast.success(t("addedToBoard", { board: boardName }));
-        },
-        onError: (e) =>
-          toast.error(e instanceof Error ? e.message : t("addError")),
-      }
-    );
-  };
-
-  // Disliked → collapse to a quiet, recoverable "hidden" tile.
-  if (disliked) {
-    return (
-      <div className="flex h-full min-h-[220px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-base-300 bg-base-200/40 p-4 text-center">
-        <span className="text-sm opacity-50">{t("hidden")}</span>
-        <button
-          className="btn btn-ghost btn-xs gap-1"
-          onClick={() => onReact?.(null)}
-        >
-          <LuUndo2 className="w-3.5" />
-          {t("undo")}
-        </button>
-      </div>
-    );
-  }
+  const discount =
+    product.discountPct != null &&
+    product.discountPct >= 5 &&
+    product.discountPct <= 85
+      ? Math.round(product.discountPct)
+      : null;
+  const showRrp =
+    discount != null && product.rrp != null && product.rrp > (product.price ?? 0);
 
   return (
-    <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-base-100 ring-1 ring-base-300/70 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.25)]">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
+      className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl bg-base-100 ring-1 ring-base-300/60 transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_50px_-18px_rgba(0,0,0,0.28)] hover:ring-base-300"
+    >
       {/* Image */}
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-white">
         <img
-          src={product.imageUrl ? hiRes(product.imageUrl) : "/assets/placeholder.jpg"}
+          src={
+            product.imageUrl ? hiRes(product.imageUrl) : "/assets/placeholder.jpg"
+          }
           alt={product.title}
-          className="h-full w-full object-contain p-3 transition duration-300 group-hover:scale-[1.03]"
+          className="h-full w-full object-contain p-3 transition duration-500 group-hover:scale-105"
           loading="lazy"
           decoding="async"
           onError={(e) => {
@@ -102,120 +77,57 @@ export function ProductCard({
           }}
         />
 
-        {/* Reactions (signed-in only) */}
-        {onReact && (
-          <div className="absolute right-2 top-2 flex flex-col gap-1.5 opacity-0 transition group-hover:opacity-100 max-md:opacity-100">
-            <button
-              aria-label={t("like")}
-              onClick={() => onReact(liked ? null : 1)}
-              className={`grid h-8 w-8 place-items-center rounded-full backdrop-blur transition ${
-                liked
-                  ? "bg-primary text-primary-content"
-                  : "bg-base-100/80 text-base-content hover:bg-base-100"
-              }`}
-            >
-              <LuHeart className={`w-4 ${liked ? "fill-current" : ""}`} />
-            </button>
-            <button
-              aria-label={t("dislike")}
-              onClick={() => onReact(-1)}
-              className="grid h-8 w-8 place-items-center rounded-full bg-base-100/80 text-base-content backdrop-blur transition hover:bg-base-100"
-            >
-              <LuX className="w-4" />
-            </button>
-          </div>
+        {discount != null && (
+          <span className="absolute left-2.5 top-2.5 rounded-full bg-error px-2 py-0.5 text-xs font-bold text-error-content shadow-sm">
+            -{discount}%
+          </span>
         )}
 
         {product.reason && (
-          <span className="absolute left-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-primary text-primary-content shadow">
+          <span className="absolute right-2.5 top-2.5 grid h-7 w-7 place-items-center rounded-full bg-primary text-primary-content shadow">
             <LuSparkles className="w-3.5" />
           </span>
+        )}
+
+        {/* Wishlist affordance — opens the modal where boards are chosen. */}
+        {!product.reason && (
+          <button
+            type="button"
+            aria-label={t("addToBoard")}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpen();
+            }}
+            className="absolute right-2.5 top-2.5 grid h-8 w-8 cursor-pointer place-items-center rounded-full bg-base-100/85 text-base-content opacity-0 shadow-sm backdrop-blur transition hover:bg-base-100 group-hover:opacity-100 max-md:opacity-100"
+          >
+            <LuHeart className="w-4" />
+          </button>
         )}
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col gap-1.5 p-3">
+      <div className="flex flex-1 flex-col gap-1 p-3">
         {product.brand && (
-          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] opacity-55 line-clamp-1">
+          <span className="line-clamp-1 text-[10px] font-semibold uppercase tracking-[0.14em] opacity-55">
             {product.brand}
           </span>
         )}
-        <h3 className="text-sm leading-snug line-clamp-2 min-h-[2.5rem]">
+        <h3 className="line-clamp-2 min-h-[2.5rem] text-sm leading-snug">
           {product.title}
         </h3>
 
-        {product.reason && (
-          <p className="text-xs italic leading-snug text-primary/80 line-clamp-2">
-            {product.reason}
-          </p>
-        )}
-
-        <div className="mt-auto pt-1">
-          <span className="text-base font-bold tracking-tight">
+        <div className="mt-auto flex items-baseline gap-1.5 pt-1">
+          <span
+            className={`text-base font-bold tracking-tight ${
+              discount != null ? "text-error" : ""
+            }`}
+          >
             {product.price != null ? `${product.price} €` : "—"}
           </span>
-        </div>
-
-        <div className="mt-1.5 flex items-center gap-1.5">
-          <div className="dropdown dropdown-top flex-1">
-            <div
-              tabIndex={0}
-              role="button"
-              className={`btn btn-sm w-full normal-case ${
-                addedBoardId ? "btn-neutral btn-outline" : "btn-neutral"
-              }`}
-            >
-              {addedBoardId ? (
-                <>
-                  <LuCheck className="w-3.5" />
-                  {t("added")}
-                </>
-              ) : (
-                <>
-                  <LuPlus className="w-3.5" />
-                  {t("addToBoard")}
-                </>
-              )}
-            </div>
-            <ul
-              tabIndex={0}
-              className="dropdown-content menu z-10 max-h-64 w-52 flex-nowrap overflow-y-auto rounded-box bg-base-100 p-2 shadow-lg ring-1 ring-base-300"
-            >
-              {boardsLoading ? (
-                <li className="disabled">
-                  <span className="loading loading-spinner loading-xs" />
-                </li>
-              ) : boards.length === 0 ? (
-                <li className="menu-title text-xs">{t("noBoards")}</li>
-              ) : (
-                boards.map((b) => (
-                  <li key={b.id}>
-                    <button
-                      type="button"
-                      disabled={addToBoard.isPending}
-                      onClick={() => {
-                        (document.activeElement as HTMLElement)?.blur();
-                        handleAdd(b.id, b.name);
-                      }}
-                    >
-                      {b.name}
-                    </button>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-
-          {product.deepLink && (
-            <a
-              href={product.deepLink}
-              target="_blank"
-              rel="noopener noreferrer sponsored"
-              className="btn btn-sm btn-ghost btn-square"
-              aria-label={t("viewInStore")}
-            >
-              <LuExternalLink className="w-4" />
-            </a>
+          {showRrp && (
+            <span className="text-xs line-through opacity-40">
+              {product.rrp} €
+            </span>
           )}
         </div>
       </div>

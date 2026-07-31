@@ -369,6 +369,37 @@
       "over100": "€100+"
     },
     "searchPlaceholder": "Search products…",
+    "onSale": "On sale",
+    "clearAll": "Clear all",
+    "seeAll": "See all",
+    "close": "Close",
+    "collections": {
+      "weSuggest": "We suggest",
+      "forAnyone": "Works for anyone",
+      "onSale": "On sale now",
+      "beauty": "Beauty gifts",
+      "under25": "Gifts under €25",
+      "bags": "Bags & purses"
+    },
+    "report": {
+      "cta": "Report an issue",
+      "prompt": "What's wrong?",
+      "wrong_category": "Wrong category",
+      "wrong_gender": "Wrong gender",
+      "not_a_gift": "Not a gift",
+      "thanks": "Thanks! Noted."
+    },
+    "sort": {
+      "recommended": "Recommended",
+      "price_asc": "Price: low to high",
+      "price_desc": "Price: high to low",
+      "discount": "Biggest discount"
+    },
+    "brand": {
+      "all": "All brands",
+      "search": "Search brand…",
+      "none": "No brands found"
+    },
     "viewInStore": "View",
     "loadMore": "Load more",
     "empty": "No products match your filters.",

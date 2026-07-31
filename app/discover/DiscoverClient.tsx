@@ -1,25 +1,57 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { Fragment, useMemo, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { LuSearch, LuWandSparkles } from "react-icons/lu";
+import {
+  LuSearch,
+  LuArrowUpDown,
+  LuTag,
+  LuX,
+  LuChevronDown,
+  LuShirt,
+  LuFootprints,
+  LuSparkles,
+  LuShoppingBag,
+  LuGem,
+  LuGift,
+  LuWallet,
+} from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
 import { useInspoProducts } from "@/hooks/useInspoProducts";
 import { useGiftIdeas } from "@/hooks/useGiftIdeas";
-import { useProductFeedback, type Signal } from "@/hooks/useProductFeedback";
-import type { Audience, InspoFilters, InspoProduct } from "@/types/inspo";
+import type { Audience, InspoFilters, InspoSort } from "@/types/inspo";
 import { ProductCard, type CardProduct } from "./_components/ProductCard";
-import { CategoryTiles, type Category } from "./_components/CategoryTiles";
+import { BrandFilter } from "./_components/BrandFilter";
+import {
+  CollectionRow,
+  toCardProduct,
+  type CollectionDef,
+} from "./_components/CollectionRow";
+import { ProductStrip } from "./_components/ProductStrip";
+import { ProductModal } from "./_components/ProductModal";
+import { trackInspo } from "@/utils/trackInspo";
 
-const CATEGORIES: Category[] = [
-  { key: "clothing", type: "clothing", emoji: "👕" },
-  { key: "shoes", type: "shoes", emoji: "👟" },
-  { key: "beauty", type: "beauty", emoji: "💄" },
-  { key: "bag", type: "bag", emoji: "👜" },
-  { key: "accessory", type: "accessory", emoji: "🧣" },
+const CATEGORIES = [
+  { key: "clothing", type: "clothing", Icon: LuShirt },
+  { key: "shoes", type: "shoes", Icon: LuFootprints },
+  { key: "beauty", type: "beauty", Icon: LuSparkles },
+  { key: "bag", type: "bag", Icon: LuShoppingBag },
+  { key: "accessory", type: "accessory", Icon: LuGem },
 ];
 
-const OCCASIONS = ["any", "birthday", "christmas", "anniversary"] as const;
+const SORTS: InspoSort[] = ["recommended", "price_asc", "price_desc", "discount"];
+const AUDIENCES: Audience[] = ["everyone", "her", "him"];
+
+// Editorial strips interleaved into the browse feed (Zalando-style). Shown only
+// when no filters are active; one appears after each block of PRODUCTS_PER_BLOCK.
+const PRODUCTS_PER_BLOCK = 10;
+const COLLECTIONS: CollectionDef[] = [
+  { key: "forAnyone", Icon: LuGift, query: { gender: "unisex" } },
+  { key: "onSale", Icon: LuTag, query: { onSale: true, sort: "discount" }, canApply: true },
+  { key: "beauty", Icon: LuSparkles, query: { productType: "beauty" }, canApply: true },
+  { key: "under25", Icon: LuWallet, query: { priceMax: 25 }, canApply: true },
+  { key: "bags", Icon: LuShoppingBag, query: { productType: "bag" }, canApply: true },
+];
 
 const PRICE_BANDS: { key: string; min: number | null; max: number | null }[] = [
   { key: "all", min: null, max: null },
@@ -31,15 +63,17 @@ const PRICE_BANDS: { key: string; min: number | null; max: number | null }[] = [
 
 export function DiscoverClient() {
   const t = useTranslations("Discover");
-  const tInspo = useTranslations("Inspo");
 
   const [userId, setUserId] = useState<string | null>(null);
-  const [occasion, setOccasion] = useState<string>("any");
   const [productType, setProductType] = useState<string | null>(null);
   const [bandKey, setBandKey] = useState<string>("all");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [audience, setAudience] = useState<Audience>("everyone");
+  const [brand, setBrand] = useState<string | null>(null);
+  const [onSaleOnly, setOnSaleOnly] = useState(false);
+  const [sort, setSort] = useState<InspoSort>("recommended");
+  const [selected, setSelected] = useState<CardProduct | null>(null);
 
   const supabase = createClient();
   const band = PRICE_BANDS.find((b) => b.key === bandKey) ?? PRICE_BANDS[0];
@@ -64,38 +98,30 @@ export function DiscoverClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // AI picks (signed-in only), constrained by the global price band.
-  const {
-    data: aiData,
-    isLoading: aiLoading,
-    isError: aiError,
-  } = useGiftIdeas(userId, occasion, band.min, band.max);
-  const ideas = aiData?.ideas ?? [];
-
-  // Gender is known from the taste profile → filter the feed automatically,
-  // no redundant audience toggle.
-  useEffect(() => {
-    const g = aiData?.profile?.gender;
-    if (g === "male") setAudience("him");
-    else if (g === "female") setAudience("her");
-  }, [aiData?.profile?.gender]);
-
-  // Relevance feedback (heart / ✕).
-  const { feedback, setFeedback } = useProductFeedback(!!userId);
-  const react = (id: string) =>
-    userId ? (signal: Signal | null) => setFeedback(id, signal) : undefined;
+  // Active filters, for the chip row + to decide whether strips show.
+  const hasFilters =
+    !!productType ||
+    !!brand ||
+    bandKey !== "all" ||
+    onSaleOnly ||
+    audience !== "everyone" ||
+    !!search;
+  const showCollections = !hasFilters;
 
   const filters: InspoFilters = useMemo(
     () => ({
       merchant: null,
       productType,
+      brand,
       priceMin: band.min,
       priceMax: band.max,
       search,
       audience,
       inSeason: true,
+      onSaleOnly,
+      sort,
     }),
-    [productType, band.min, band.max, search, audience]
+    [productType, brand, band.min, band.max, search, audience, onSaleOnly, sort]
   );
 
   const {
@@ -107,128 +133,80 @@ export function DiscoverClient() {
     isFetchingNextPage,
   } = useInspoProducts(filters);
 
-  const products = data?.pages.flat() ?? [];
+  // AI "we suggest" strip — only fetched (LLM cost) in the default browse state.
+  const { data: aiData, isLoading: aiLoading } = useGiftIdeas(
+    showCollections ? userId : null,
+    "any",
+    band.min,
+    band.max
+  );
+  const aiIdeas: CardProduct[] = (aiData?.ideas ?? []).map((i) => ({
+    id: i.product_id,
+    title: i.title,
+    price: i.price,
+    imageUrl: i.image_url,
+    deepLink: i.deep_link,
+    reason: i.reason,
+  }));
 
-  const toCard = (p: InspoProduct): CardProduct => ({
-    id: p.id,
-    title: p.product_name,
-    brand: p.brand_name,
-    price: p.price,
-    imageUrl: p.image_url,
-    deepLink: p.deep_link,
-  });
+  const products = useMemo(() => data?.pages.flat() ?? [], [data]);
+  const productBlocks = useMemo(() => {
+    const blocks = [];
+    for (let i = 0; i < products.length; i += PRODUCTS_PER_BLOCK) {
+      blocks.push(products.slice(i, i + PRODUCTS_PER_BLOCK));
+    }
+    return blocks;
+  }, [products]);
+
+  const openProduct = (p: CardProduct) => {
+    setSelected(p);
+    trackInspo("open", p.id);
+  };
+
+  const clearAll = () => {
+    setProductType(null);
+    setBrand(null);
+    setBandKey("all");
+    setOnSaleOnly(false);
+    setAudience("everyone");
+    setSearchInput("");
+    setSearch("");
+  };
+
+  // "See all" on a strip → apply its preset to the main filter bar.
+  const applyCollection = (c: CollectionDef) => {
+    switch (c.key) {
+      case "onSale":
+        setOnSaleOnly(true);
+        setSort("discount");
+        break;
+      case "beauty":
+        setProductType("beauty");
+        break;
+      case "bags":
+        setProductType("bag");
+        break;
+      case "under25":
+        setBandKey("under25");
+        break;
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
-    <div className="mx-auto max-w-[1440px] px-4 pt-10 sm:px-6">
-      {/* Editorial header + global price */}
-      <header className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="font-heading text-4xl font-bold tracking-tight sm:text-5xl">
-            {t("title")}
-          </h1>
-          <p className="mt-2 max-w-xl opacity-60">{t("subtitle")}</p>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {PRICE_BANDS.map((b) => (
-            <button
-              key={b.key}
-              onClick={() => setBandKey(b.key)}
-              className={`rounded-full px-3.5 py-1.5 text-sm transition ${
-                bandKey === b.key
-                  ? "bg-neutral text-neutral-content"
-                  : "bg-base-200 hover:bg-base-300"
-              }`}
-            >
-              {t(`price.${b.key}`)}
-            </button>
-          ))}
-        </div>
+    <div className="mx-auto max-w-[1440px] px-4 pt-8 sm:px-6">
+      <header className="mb-4">
+        <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+          {t("title")}
+        </h1>
+        <p className="mt-1 max-w-xl text-sm opacity-60">{t("subtitle")}</p>
       </header>
 
-      {/* ===== AI picks ===== */}
-      {userId && (
-        <section className="mb-12">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="flex items-center gap-2 font-heading text-2xl font-bold tracking-tight">
-              <LuWandSparkles className="text-primary" />
-              {tInspo("title")}
-            </h2>
-            <div className="flex flex-wrap gap-1">
-              {OCCASIONS.map((o) => (
-                <button
-                  key={o}
-                  onClick={() => setOccasion(o)}
-                  className={`rounded-full px-3 py-1 text-xs transition ${
-                    occasion === o
-                      ? "bg-primary text-primary-content"
-                      : "opacity-60 hover:opacity-100"
-                  }`}
-                >
-                  {tInspo(`occasion.${o}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {aiData?.profile?.summary && (
-            <p className="mb-5 max-w-2xl text-sm italic opacity-65">
-              “{aiData.profile.summary}”
-            </p>
-          )}
-
-          {aiError ? (
-            <div className="alert alert-warning text-sm">{tInspo("error")}</div>
-          ) : aiLoading ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="skeleton h-96 w-full rounded-2xl" />
-              ))}
-            </div>
-          ) : ideas.length > 0 ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {ideas.map((idea) => (
-                <ProductCard
-                  key={idea.product_id}
-                  product={{
-                    id: idea.product_id,
-                    title: idea.title,
-                    price: idea.price,
-                    imageUrl: idea.image_url,
-                    deepLink: idea.deep_link,
-                    reason: idea.reason,
-                  }}
-                  signal={feedback[idea.product_id]}
-                  onReact={react(idea.product_id)}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm opacity-60">{tInspo("empty")}</p>
-          )}
-        </section>
-      )}
-
-      {/* ===== Category tiles ===== */}
-      <section className="mb-10">
-        <h2 className="mb-4 font-heading text-2xl font-bold tracking-tight">
-          {t("shopByCategory")}
-        </h2>
-        <CategoryTiles
-          categories={CATEGORIES}
-          active={productType}
-          onSelect={setProductType}
-        />
-      </section>
-
-      {/* ===== Feed ===== */}
-      <section>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-heading text-2xl font-bold tracking-tight">
-            {productType
-              ? t(`category.${CATEGORIES.find((c) => c.type === productType)?.key}`)
-              : t("moreForYou")}
-          </h2>
-          <label className="input input-sm flex w-full items-center gap-2 rounded-full sm:w-72">
+      {/* ===== Sticky filter bar ===== */}
+      <div className="sticky top-0 z-30 -mx-4 mb-5 border-b border-base-200 bg-base-100/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
+        {/* Row 1: search + audience · sort */}
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="input input-sm flex grow items-center gap-2 rounded-full sm:max-w-md">
             <LuSearch className="w-4 opacity-50" />
             <input
               type="text"
@@ -238,8 +216,120 @@ export function DiscoverClient() {
               onChange={(e) => setSearchInput(e.target.value)}
             />
           </label>
+          <div className="ml-auto flex items-center gap-2">
+            <SelectMenu
+              value={audience}
+              onChange={setAudience}
+              alignEnd
+              options={AUDIENCES.map((a) => ({
+                key: a,
+                label: t(`audience.${a}`),
+              }))}
+            />
+            <SelectMenu
+              value={sort}
+              onChange={setSort}
+              alignEnd
+              icon={<LuArrowUpDown className="w-3.5 opacity-70" />}
+              options={SORTS.map((s) => ({ key: s, label: t(`sort.${s}`) }))}
+            />
+          </div>
         </div>
 
+        {/* Row 2: category pills | brand · price · sale */}
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          {CATEGORIES.map((c) => {
+            const isActive = productType === c.type;
+            return (
+              <button
+                key={c.type}
+                onClick={() => setProductType(isActive ? null : c.type)}
+                aria-pressed={isActive}
+                className={`flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition ${
+                  isActive
+                    ? "bg-neutral text-neutral-content"
+                    : "bg-base-200 hover:bg-base-300"
+                }`}
+              >
+                <c.Icon className="w-4 shrink-0" aria-hidden />
+                {t(`category.${c.key}`)}
+              </button>
+            );
+          })}
+
+          <span className="mx-1 hidden h-5 w-px bg-base-300 sm:block" />
+
+          <BrandFilter value={brand} onSelect={setBrand} />
+
+          <SelectMenu
+            value={bandKey}
+            onChange={setBandKey}
+            options={PRICE_BANDS.map((b) => ({
+              key: b.key,
+              label: t(`price.${b.key}`),
+            }))}
+          />
+
+          <button
+            onClick={() => setOnSaleOnly((v) => !v)}
+            aria-pressed={onSaleOnly}
+            className={`btn btn-sm cursor-pointer gap-1.5 rounded-full normal-case ${
+              onSaleOnly ? "btn-error" : "btn-ghost bg-base-200"
+            }`}
+          >
+            <LuTag className="w-3.5" />
+            {t("onSale")}
+          </button>
+        </div>
+      </div>
+
+      {/* Active filter chips */}
+      {hasFilters && (
+        <div className="mb-5 flex flex-wrap items-center gap-1.5">
+          {audience !== "everyone" && (
+            <FilterChip
+              label={t(`audience.${audience}`)}
+              onClear={() => setAudience("everyone")}
+            />
+          )}
+          {productType && (
+            <FilterChip
+              label={t(
+                `category.${CATEGORIES.find((c) => c.type === productType)?.key}`
+              )}
+              onClear={() => setProductType(null)}
+            />
+          )}
+          {brand && <FilterChip label={brand} onClear={() => setBrand(null)} />}
+          {bandKey !== "all" && (
+            <FilterChip
+              label={t(`price.${bandKey}`)}
+              onClear={() => setBandKey("all")}
+            />
+          )}
+          {onSaleOnly && (
+            <FilterChip label={t("onSale")} onClear={() => setOnSaleOnly(false)} />
+          )}
+          {search && (
+            <FilterChip
+              label={`“${search}”`}
+              onClear={() => {
+                setSearchInput("");
+                setSearch("");
+              }}
+            />
+          )}
+          <button
+            onClick={clearAll}
+            className="ml-1 cursor-pointer text-xs font-medium underline underline-offset-2 opacity-60 hover:opacity-100"
+          >
+            {t("clearAll")}
+          </button>
+        </div>
+      )}
+
+      {/* ===== Feed ===== */}
+      <section>
         {isError ? (
           <div className="alert alert-error">{t("error")}</div>
         ) : isLoading ? (
@@ -252,21 +342,49 @@ export function DiscoverClient() {
           <div className="py-20 text-center opacity-60">{t("empty")}</div>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {products.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  product={toCard(p)}
-                  signal={feedback[p.id]}
-                  onReact={react(p.id)}
-                />
+            <div className="space-y-6">
+              {/* AI suggestions lead the browse feed (signed-in only). */}
+              {showCollections &&
+                userId &&
+                (aiLoading || aiIdeas.length > 0) && (
+                  <ProductStrip
+                    title={t("collections.weSuggest")}
+                    Icon={LuSparkles}
+                    items={aiIdeas}
+                    isLoading={aiLoading}
+                    onOpen={openProduct}
+                  />
+                )}
+
+              {productBlocks.map((block, bi) => (
+                <Fragment key={bi}>
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    {block.map((p) => {
+                      const card = toCardProduct(p);
+                      return (
+                        <ProductCard
+                          key={p.id}
+                          product={card}
+                          onOpen={() => openProduct(card)}
+                        />
+                      );
+                    })}
+                  </div>
+                  {showCollections && COLLECTIONS[bi] && (
+                    <CollectionRow
+                      collection={COLLECTIONS[bi]}
+                      onOpen={openProduct}
+                      onApply={applyCollection}
+                    />
+                  )}
+                </Fragment>
               ))}
             </div>
 
             {hasNextPage && (
               <div className="mt-10 flex justify-center">
                 <button
-                  className="btn btn-neutral btn-wide rounded-full"
+                  className="btn btn-neutral btn-wide cursor-pointer rounded-full"
                   onClick={() => fetchNextPage()}
                   disabled={isFetchingNextPage}
                 >
@@ -284,6 +402,81 @@ export function DiscoverClient() {
       <p className="mt-14 text-center text-xs opacity-50">
         {t("affiliateDisclosure")}
       </p>
+
+      <ProductModal
+        product={selected}
+        userId={userId}
+        onClose={() => setSelected(null)}
+      />
     </div>
+  );
+}
+
+/** Compact DaisyUI dropdown used for the sort / price / audience selectors. */
+function SelectMenu<T extends string>({
+  value,
+  options,
+  onChange,
+  icon,
+  alignEnd,
+}: {
+  value: T;
+  options: { key: T; label: string }[];
+  onChange: (v: T) => void;
+  icon?: React.ReactNode;
+  alignEnd?: boolean;
+}) {
+  const current = options.find((o) => o.key === value) ?? options[0];
+  return (
+    <div className={`dropdown ${alignEnd ? "dropdown-end" : ""}`}>
+      <div
+        tabIndex={0}
+        role="button"
+        className="btn btn-sm cursor-pointer gap-1.5 rounded-full bg-base-200 normal-case"
+      >
+        {icon}
+        {current.label}
+        <LuChevronDown className="w-3.5 opacity-70" />
+      </div>
+      <ul
+        tabIndex={0}
+        className="dropdown-content menu z-40 mt-1 w-48 rounded-box bg-base-100 p-2 shadow-lg ring-1 ring-base-300"
+      >
+        {options.map((o) => (
+          <li key={o.key}>
+            <button
+              onClick={() => {
+                onChange(o.key);
+                (document.activeElement as HTMLElement)?.blur();
+              }}
+              className={value === o.key ? "active" : ""}
+            >
+              {o.label}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function FilterChip({
+  label,
+  onClear,
+}: {
+  label: string;
+  onClear: () => void;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-neutral py-1 pl-3 pr-1.5 text-xs text-neutral-content">
+      <span className="max-w-[160px] truncate">{label}</span>
+      <button
+        onClick={onClear}
+        className="grid h-4 w-4 cursor-pointer place-items-center rounded-full transition hover:bg-neutral-content/20"
+        aria-label={`Remove ${label}`}
+      >
+        <LuX className="w-3" />
+      </button>
+    </span>
   );
 }
