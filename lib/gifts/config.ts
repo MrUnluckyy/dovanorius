@@ -1,12 +1,13 @@
 // Gift engine tuning + cost table.
 //
-// Default model is Sonnet 5 — near-Opus quality on this ranking task (judging
-// gender-appropriateness from Lithuanian product names + category variety) at
-// roughly a third of Opus 4.8's per-token cost. Override per environment with
-// the GIFT_MODEL env var (e.g. GIFT_MODEL=claude-opus-4-8 for the highest
-// quality, or claude-haiku-4-5 for the cheapest). Any override must be a key in
-// MODEL_PRICES below so the cost readout stays accurate.
-export const GIFT_MODEL = process.env.GIFT_MODEL ?? "claude-sonnet-5";
+// Default model is Opus 4.8 — Anthropic's most capable Opus-tier model, for the
+// best gift-ranking quality (judging gender-appropriateness from Lithuanian
+// product names + category variety). Trade-off: ~3× Sonnet 5's per-token cost
+// and higher latency. Override per environment with the GIFT_MODEL env var
+// (e.g. GIFT_MODEL=claude-sonnet-5 for cheaper/faster, or claude-haiku-4-5 for
+// the cheapest). Any override must be a key in MODEL_PRICES below so the cost
+// readout stays accurate.
+export const GIFT_MODEL = process.env.GIFT_MODEL ?? "claude-opus-4-8";
 
 export const RECENT_ITEMS = 40; // how many of a user's wishes feed the taste model
 export const CANDIDATE_LIMIT = 25; // products handed to the ranker (fewer = cheaper input; 5/category still gives the ranker variety)

@@ -373,6 +373,37 @@
       "over100": "100 €+"
     },
     "searchPlaceholder": "Ieškoti prekių…",
+    "onSale": "Su nuolaida",
+    "clearAll": "Išvalyti viską",
+    "seeAll": "Rodyti visus",
+    "close": "Uždaryti",
+    "collections": {
+      "weSuggest": "Mes siūlome",
+      "forAnyone": "Tinka visiems",
+      "onSale": "Šiuo metu su nuolaida",
+      "beauty": "Grožio dovanos",
+      "under25": "Dovanos iki 25 €",
+      "bags": "Rankinės ir krepšiai"
+    },
+    "report": {
+      "cta": "Pranešti apie klaidą",
+      "prompt": "Kas negerai?",
+      "wrong_category": "Netinkama kategorija",
+      "wrong_gender": "Netinkama lytis",
+      "not_a_gift": "Netinka dovanai",
+      "thanks": "Ačiū! Pasižymėjome."
+    },
+    "sort": {
+      "recommended": "Rekomenduojama",
+      "price_asc": "Kaina: nuo mažiausios",
+      "price_desc": "Kaina: nuo didžiausios",
+      "discount": "Didžiausia nuolaida"
+    },
+    "brand": {
+      "all": "Visi prekių ženklai",
+      "search": "Ieškoti prekės ženklo…",
+      "none": "Prekių ženklų nerasta"
+    },
     "viewInStore": "Žiūrėti",
     "loadMore": "Rodyti daugiau",
     "empty": "Pagal pasirinktus filtrus prekių nerasta.",

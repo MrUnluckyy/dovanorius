@@ -40,7 +40,10 @@ export function classifyProductType(
   const hay = `${categoryName ?? ""} ${productName}`.toLowerCase();
   if (
     (merchantName ?? "").toLowerCase().includes("douglas") ||
-    /(kvepal|lūp|akių|veido|plaukų|krem|parfum|makiaž|\btuš|pudr|dažai|beauty|cosmetic|fragrance|perfume)/.test(hay)
+    // NB: `krem(as|ai|ą|u|el)` matches the cosmetic (kremas/kremai/kremelis) but
+    // NOT the colour "kreminė" (cream-coloured) — that false match was tagging
+    // cream-coloured clothing/shoes as beauty.
+    /(kvepal|lūp|akių|veido|plaukų|krem(as|ai|ą|u|el)|parfum|makiaž|\btuš|pudr|dažai|beauty|cosmetic|fragrance|perfume)/.test(hay)
   )
     return "beauty";
   if (/(bat[aųiø]|sneaker|krosov|aulini|sandal|šlepet|loafer|mokasin|shoe|boot)/.test(hay))

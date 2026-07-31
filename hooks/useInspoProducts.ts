@@ -36,14 +36,41 @@ export function useInspoProducts(filters: InspoFilters) {
         .eq("in_stock", true)
         .not("image_url", "is", null)
         .not("deep_link", "is", null)
-        .gte("price", Math.max(PRICE_FLOOR, filters.priceMin ?? 0))
-        .order("sort_key", { ascending: true })
-        .range(from, to);
+        .gte("price", Math.max(PRICE_FLOOR, filters.priceMin ?? 0));
+
+      // Ordering. A stable secondary key (id) keeps pagination deterministic
+      // when the primary key ties (e.g. many items at the same price).
+      switch (filters.sort) {
+        case "price_asc":
+          query = query.order("price", { ascending: true }).order("id");
+          break;
+        case "price_desc":
+          query = query.order("price", { ascending: false }).order("id");
+          break;
+        case "discount":
+          // Cap at 85%: legit retail discounts rarely exceed it, and it
+          // structurally excludes the known feed-parsing glitches where rrp is
+          // 10×/100× the price (→ 90%/99% "off"). No nulls-ordering: the
+          // `discount_pct > 0` filter already excludes nulls, and plain DESC
+          // lets Postgres use the (discount_pct DESC, id) index over a sort.
+          query = query
+            .gt("discount_pct", 0)
+            .lte("discount_pct", 85)
+            .order("discount_pct", { ascending: false })
+            .order("id");
+          break;
+        default:
+          query = query.order("sort_key", { ascending: true }).order("id");
+      }
+
+      query = query.range(from, to);
 
       if (filters.merchant) query = query.eq("merchant_name", filters.merchant);
+      if (filters.brand) query = query.eq("brand_name", filters.brand);
       if (filters.productType)
         query = query.eq("product_type", filters.productType);
       if (filters.priceMax != null) query = query.lte("price", filters.priceMax);
+      if (filters.onSaleOnly) query = query.gt("discount_pct", 0);
       if (filters.search.trim())
         query = query.ilike("product_name", `%${filters.search.trim()}%`);
 

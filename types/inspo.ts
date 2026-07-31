@@ -18,20 +18,32 @@ export type InspoProduct = {
   gender: "female" | "male" | "unisex" | null;
   season: "winter" | "summer" | "all" | null;
   product_type: string | null;
+  /** Recommended retail price, when the merchant supplies one. */
+  rrp: number | null;
+  /** Percent off vs. rrp (0–100), when discounted. */
+  discount_pct: number | null;
 };
 
 /** Who the feed is being tailored for. */
 export type Audience = "her" | "him" | "everyone";
+
+/** How the discover feed is ordered. */
+export type InspoSort = "recommended" | "price_asc" | "price_desc" | "discount";
 
 /** Filters the discover feed understands. */
 export type InspoFilters = {
   merchant: string | null;
   /** product_type bucket: beauty | shoes | clothing | bag | accessory. */
   productType: string | null;
+  /** Exact brand_name to narrow to, or null for all brands. */
+  brand: string | null;
   priceMin: number | null;
   priceMax: number | null;
   search: string;
   audience: Audience;
   /** When true, hide products for the opposite season to now. */
   inSeason: boolean;
+  /** When true, only show discounted products. */
+  onSaleOnly: boolean;
+  sort: InspoSort;
 };
