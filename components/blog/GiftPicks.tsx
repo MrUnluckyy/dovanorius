@@ -34,7 +34,9 @@ export default function GiftPicks({
     ? "sponsored nofollow noopener noreferrer"
     : "noopener noreferrer";
 
-  const numbered = stegaClean(value.display) === "numbered";
+  const display = stegaClean(value.display);
+  const numbered = display === "numbered";
+  const feature = display === "feature";
 
   return (
     <section className="my-10 sm:-mx-12 lg:-mx-24">
@@ -42,7 +44,62 @@ export default function GiftPicks({
         <h2 className="mb-4 text-2xl font-bold">{value.heading}</h2>
       )}
 
-      {numbered ? (
+      {feature ? (
+        // Editorial layout: each pick is a full section — cover, title, a
+        // longer blurb and a single link — with the image alternating sides so
+        // it reads like an article, not an ad grid.
+        <div className="space-y-14 sm:space-y-20">
+          {items.map((item, index) => (
+            <article
+              key={item._key}
+              className="grid items-center gap-6 sm:grid-cols-2 sm:gap-10"
+            >
+              {item.image?.asset && (
+                <figure
+                  className={`overflow-hidden rounded-2xl ${
+                    index % 2 === 1 ? "sm:order-2" : ""
+                  }`}
+                >
+                  <SanityImage
+                    value={item.image}
+                    width={800}
+                    height={600}
+                    sizes="(max-width: 640px) 100vw, 50vw"
+                    className="aspect-[4/3] h-full w-full object-cover"
+                  />
+                </figure>
+              )}
+              <div className={index % 2 === 1 ? "sm:order-1" : ""}>
+                <h3 className="text-2xl font-bold text-balance sm:text-[1.75rem]">
+                  {item.title}
+                </h3>
+                {item.description && (
+                  <p className="mt-3 leading-relaxed opacity-80">
+                    {item.description}
+                  </p>
+                )}
+                <div className="mt-6 flex items-center gap-4">
+                  {item.url && (
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel={rel}
+                      className="btn btn-primary"
+                    >
+                      {item.ctaLabel || defaultCtaLabel}
+                    </a>
+                  )}
+                  {item.price && (
+                    <span className="text-base-content/60 text-sm">
+                      {item.price}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : numbered ? (
         <ol className="space-y-6">
           {items.map((item, index) => (
             <li

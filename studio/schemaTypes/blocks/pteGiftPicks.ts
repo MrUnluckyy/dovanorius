@@ -20,10 +20,12 @@ export const pteGiftPicksType = defineType({
         list: [
           { title: "Cards — grid", value: "cards" },
           { title: "Numbered — ranked list", value: "numbered" },
+          { title: "Feature — image, title, text, button", value: "feature" },
         ],
         layout: "radio",
       },
-      description: 'Use "numbered" for listicles like "5 gift ideas for…"',
+      description:
+        'Use "numbered" for ranked listicles, "feature" for an editorial article-style layout with more text per item',
       initialValue: "cards",
       validation: (rule) => rule.required(),
     }),

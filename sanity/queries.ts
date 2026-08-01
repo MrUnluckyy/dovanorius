@@ -1,12 +1,13 @@
 import { defineQuery } from "next-sanity";
 
 /**
- * Posts use field-level localisation via `sanity-plugin-internationalized-array`,
- * so every translatable field is an array of `{ _key: <locale>, value }`.
+ * Posts use field-level localisation via `sanity-plugin-internationalized-array`.
+ * v5 stores the locale on a `language` field; older (v4) items kept it in `_key`.
+ * Every read matches both so the data migration can happen independently.
  * `localized()` picks the requested locale and falls back to Lithuanian.
  */
 const localized = (field: string) =>
-  `coalesce(${field}[_key == $locale][0].value, ${field}[_key == "lt"][0].value)`;
+  `coalesce(${field}[language == $locale || _key == $locale][0].value, ${field}[language == "lt" || _key == "lt"][0].value)`;
 
 const imageFragment = /* groq */ `
   "alt": alt,
@@ -41,8 +42,8 @@ const bodyProjection = /* groq */ `[]{
 
 /** A localised rich-text field, with nested block assets expanded in both branches. */
 const localizedBody = (field: string) => /* groq */ `coalesce(
-  ${field}[_key == $locale][0].value${bodyProjection},
-  ${field}[_key == "lt"][0].value${bodyProjection}
+  ${field}[language == $locale || _key == $locale][0].value${bodyProjection},
+  ${field}[language == "lt" || _key == "lt"][0].value${bodyProjection}
 )`;
 
 /**
@@ -50,7 +51,7 @@ const localizedBody = (field: string) => /* groq */ `coalesce(
  * `pt::text()` flattens Portable Text to a plain string inside GROQ.
  */
 const readingTime = (field: string) => /* groq */ `round(
-  length(pt::text(coalesce(${field}[_key == $locale][0].value, ${field}[_key == "lt"][0].value))) / 5 / 200
+  length(pt::text(coalesce(${field}[language == $locale || _key == $locale][0].value, ${field}[language == "lt" || _key == "lt"][0].value))) / 5 / 200
 )`;
 
 export const POSTS_QUERY = defineQuery(/* groq */ `
