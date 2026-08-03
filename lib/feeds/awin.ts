@@ -128,16 +128,20 @@ export const awinAdapter: FeedAdapter = {
   },
 
   async *parse(body: Readable): AsyncIterable<NormalizedProduct> {
-    const parser = body.pipe(
-      parse({
-        columns: true,
-        delimiter: ",",
-        relax_quotes: true,
-        relax_column_count: true,
-        skip_records_with_error: true,
-        trim: true,
-      })
-    );
+    const parser = parse({
+      columns: true,
+      delimiter: ",",
+      relax_quotes: true,
+      relax_column_count: true,
+      skip_records_with_error: true,
+      trim: true,
+    });
+    // .pipe() does not forward source errors, so a mid-download reset on `body`
+    // would otherwise surface as an unhandled 'error' event and crash the
+    // process. Forward it so the `for await` below rejects and the caller can
+    // retry the feed.
+    body.on("error", (err) => parser.destroy(err));
+    body.pipe(parser);
     for await (const row of parser) {
       const product = mapRow(row as Record<string, string>);
       if (product) yield product;

@@ -83,8 +83,12 @@ async function downloadFeed(url: string): Promise<Readable> {
     throw new Error(`feed download failed: ${res.status} ${res.statusText}`);
   }
   const node = Readable.fromWeb(res.body as Parameters<typeof Readable.fromWeb>[0]);
-  // AWIN Create-a-Feed with compression/gzip serves a gzip stream.
-  return node.pipe(createGunzip());
+  // AWIN Create-a-Feed with compression/gzip serves a gzip stream. .pipe() does
+  // not forward source errors, so forward a mid-download reset onto the gunzip
+  // stream — otherwise it lands as an unhandled 'error' event and crashes.
+  const gunzip = createGunzip();
+  node.on("error", (err) => gunzip.destroy(err));
+  return node.pipe(gunzip);
 }
 
 export async function runImport(
@@ -110,14 +114,36 @@ export async function runImport(
     staged += rows.length;
   };
 
-  for (const feed of feeds) {
-    log(`↓ ${feed.label}`);
+  // Download + parse + stage one feed. Retried as a unit: a network reset can
+  // interrupt a multi-minute streamed download, and there's no way to resume
+  // mid-stream, so we re-pull the whole feed. Rows already staged from a failed
+  // attempt stay put — the merge dedupes staging by id, so re-staging is safe.
+  const stageFeed = async (feed: (typeof feeds)[number]) => {
     const body = await downloadFeed(feed.url);
     for await (const product of adapter.parse(body)) {
       batch.push(stagingRow(product));
       if (batch.length >= STAGE_CHUNK) await flush();
     }
     await flush();
+  };
+
+  for (const feed of feeds) {
+    log(`↓ ${feed.label}`);
+    let lastErr: unknown;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        batch = []; // drop any partial batch from a failed attempt
+        await stageFeed(feed);
+        lastErr = undefined;
+        break;
+      } catch (e) {
+        lastErr = e;
+        const msg = e instanceof Error ? e.message : String(e);
+        log(`  ${feed.label} attempt ${attempt}/3 failed: ${msg}`);
+        if (attempt < 3) await new Promise((r) => setTimeout(r, 2000 * attempt));
+      }
+    }
+    if (lastErr) throw lastErr;
     log(`  staged: ${staged}`);
   }
 
