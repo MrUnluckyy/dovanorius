@@ -55,7 +55,7 @@ async function main() {
         console.log(`[${network}] ${m}`)
       );
       console.log(
-        `✓ ${network}: ${r.upserted} changed, ` +
+        `✓ ${network}: ${r.staged} staged → ${r.changed} changed, ` +
           `${r.skippedUnchanged} unchanged, ` +
           `${r.markedOutOfStock} marked out-of-stock, ` +
           `${r.feedsProcessed} feed(s) in ${Math.round((Date.now() - started) / 1000)}s`

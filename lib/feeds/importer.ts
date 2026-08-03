@@ -1,44 +1,35 @@
 /**
- * Feed importer core: fetch → gunzip → parse → delta-upsert → sweep stale rows.
+ * Feed importer core: fetch → gunzip → parse → stage → server-side merge.
  *
  * Network-agnostic. Takes a Supabase service-role client (injected so this file
  * stays free of Next path aliases and runs under plain `tsx`) and a FeedAdapter.
  *
- * Delta strategy: a full feed is ~all-unchanged night to night, and writing
- * 600k rows into a heavily-indexed table (GIN trigram on product_name) is the
- * bottleneck. So we load the current DB state for the network up front, hash
- * each row's content, and only upsert products whose content actually changed
- * (or are new / were previously out of stock). Unchanged rows are never
- * written.
+ * Delta strategy: a full feed is ~all-unchanged night to night, and re-writing
+ * 600k rows into a heavily-indexed table (GIN trigram on product_name) every
+ * run is the bottleneck. So we bulk-load the whole feed into an unindexed
+ * staging table (plain heap inserts — cheap), then a single server-side
+ * `merge_feed_staging` RPC diffs staging against the live table and writes only
+ * the rows that actually changed, plus marks disappeared rows out of stock. No
+ * 600k-row read back to the client, no per-row upsert.
  */
-import { createHash } from "node:crypto";
 import { Readable } from "node:stream";
 import { createGunzip } from "node:zlib";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FeedAdapter, FeedNetwork, NormalizedProduct } from "./types";
 
-const UPSERT_CHUNK = 1000; // rows per write request
-const READ_PAGE = 1000; // rows per keyset-paginated read request
-const SWEEP_CHUNK = 1000; // ids per out-of-stock update request
-
-// Columns needed to recompute an existing row's content hash. Kept in sync with
-// the field list in `contentHash` below. (A stored `content_hash` column would
-// let us select just id/hash/in_stock/merchant_id and shrink these reads ~5x —
-// a worthwhile future optimization once this settles.)
-const HASH_COLUMNS =
-  "id, in_stock, merchant_id, product_name, image_url, deep_link, price, rrp, " +
-  "currency, brand_name, category_name, merchant_name, gender, season, product_type";
+const STAGE_CHUNK = 1000; // rows per staging insert request
 
 export type ImportResult = {
   network: FeedNetwork;
   feedsProcessed: number;
-  upserted: number;
+  staged: number;
+  changed: number;
   skippedUnchanged: number;
   markedOutOfStock: number;
 };
 
-/** Shape written to public.inspo_products. */
-function toRow(p: NormalizedProduct, syncedAt: string) {
+/** Row shape for public.inspo_products_staging (content columns only). */
+function stagingRow(p: NormalizedProduct) {
   return {
     id: p.id,
     network: p.network,
@@ -56,96 +47,34 @@ function toRow(p: NormalizedProduct, syncedAt: string) {
     gender: p.gender,
     season: p.season,
     product_type: p.productType,
-    synced_at: syncedAt,
-    // sort_key intentionally omitted: DB default random() on insert, preserved
-    // on update so the discover shuffle stays stable across imports.
   };
 }
 
 /**
- * Stable fingerprint of the content columns that decide whether a row needs
- * rewriting. Works on both a `toRow` object and a DB row selected via
- * HASH_COLUMNS — both expose the same column names. `id`, `network`, `synced_at`
- * and `sort_key` are deliberately excluded (identity / bookkeeping, not
- * content). Numbers are canonicalized so DB numerics ("10.00") and feed floats
- * (10) don't read as a spurious change.
+ * Retry a Supabase call that can fail transiently. Covers both thrown network
+ * errors (`fetch failed`) and returned `{ error }` payloads. Exponential
+ * backoff; re-throws after `attempts` tries. A full import makes hundreds of
+ * sequential requests, so any single blip must not abort the whole run.
  */
-type HashableRow = {
-  in_stock: boolean;
-  merchant_id: string | null;
-  product_name: string | null;
-  image_url: string | null;
-  deep_link: string | null;
-  price: number | string | null;
-  rrp: number | string | null;
-  currency: string | null;
-  brand_name: string | null;
-  category_name: string | null;
-  merchant_name: string | null;
-  gender: string | null;
-  season: string | null;
-  product_type: string | null;
-};
-
-const num = (v: number | string | null) => (v == null ? "" : Number(v).toString());
-const str = (v: string | null) => v ?? "";
-
-function contentHash(r: HashableRow): string {
-  const key = [
-    str(r.product_name),
-    str(r.image_url),
-    str(r.deep_link),
-    num(r.price),
-    num(r.rrp),
-    str(r.currency),
-    str(r.brand_name),
-    str(r.category_name),
-    str(r.merchant_name),
-    str(r.merchant_id),
-    r.in_stock ? "1" : "0",
-    str(r.gender),
-    str(r.season),
-    str(r.product_type),
-  ].join("");
-  return createHash("sha1").update(key).digest("base64");
-}
-
-type ExistingRow = { inStock: boolean; merchantId: string | null; hash: string };
-
-/**
- * Load current DB state for a network into an id → {inStock, merchantId, hash}
- * map. Keyset-paginated on the `id` PK (cheap, and immune to any PostgREST
- * max-rows cap). Content columns are hashed and discarded as we page, so only
- * the compact per-row summary is retained.
- */
-async function loadExisting(
-  supabase: SupabaseClient,
-  network: FeedNetwork
-): Promise<Map<string, ExistingRow>> {
-  const map = new Map<string, ExistingRow>();
-  let lastId = "";
-  for (;;) {
-    const { data, error } = await supabase
-      .from("inspo_products")
-      .select(HASH_COLUMNS)
-      .eq("network", network)
-      .gt("id", lastId)
-      .order("id", { ascending: true })
-      .limit(READ_PAGE);
-    if (error) throw new Error(`load existing failed: ${error.message}`);
-    if (!data || data.length === 0) break;
-    const rows = data as unknown as (HashableRow & { id: string })[];
-    for (const row of rows) {
-      map.set(row.id, {
-        inStock: row.in_stock,
-        merchantId: row.merchant_id,
-        hash: contentHash(row),
-      });
+async function withRetry<T>(
+  label: string,
+  fn: () => PromiseLike<{ data: T; error: { message: string } | null }>,
+  attempts = 5
+): Promise<T> {
+  let lastErr = "";
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const { data, error } = await fn();
+      if (!error) return data;
+      lastErr = error.message;
+    } catch (e) {
+      lastErr = e instanceof Error ? e.message : String(e);
     }
-    lastId = rows[rows.length - 1].id;
-    if (data.length < READ_PAGE) break;
+    if (i < attempts - 1) {
+      await new Promise((r) => setTimeout(r, 500 * 2 ** i)); // 0.5s,1s,2s,4s
+    }
   }
-  return map;
+  throw new Error(`${label} failed after ${attempts} attempts: ${lastErr}`);
 }
 
 async function downloadFeed(url: string): Promise<Readable> {
@@ -163,84 +92,54 @@ export async function runImport(
   adapter: FeedAdapter,
   log: (msg: string) => void = console.log
 ): Promise<ImportResult> {
-  const runStartedAt = new Date().toISOString();
   const feeds = adapter.listFeeds();
 
-  log(`loading current state for ${adapter.network}…`);
-  const existing = await loadExisting(supabase, adapter.network);
-  log(`  ${existing.size} existing rows loaded`);
+  // Clear any rows a previous (crashed) run may have left behind.
+  await withRetry("reset staging", () => supabase.rpc("reset_feed_staging"));
 
-  const seenIds = new Set<string>();
-  const seenMerchantIds = new Set<string>();
-  let upserted = 0;
-  let skippedUnchanged = 0;
-
-  let batch: ReturnType<typeof toRow>[] = [];
+  let staged = 0;
+  let batch: ReturnType<typeof stagingRow>[] = [];
 
   const flush = async () => {
     if (!batch.length) return;
-    const { error } = await supabase
-      .from("inspo_products")
-      .upsert(batch, { onConflict: "id" });
-    if (error) throw new Error(`upsert failed: ${error.message}`);
-    upserted += batch.length;
+    const rows = batch;
     batch = [];
+    await withRetry("stage insert", () =>
+      supabase.from("inspo_products_staging").insert(rows)
+    );
+    staged += rows.length;
   };
 
   for (const feed of feeds) {
     log(`↓ ${feed.label}`);
     const body = await downloadFeed(feed.url);
     for await (const product of adapter.parse(body)) {
-      if (product.merchantId) seenMerchantIds.add(product.merchantId);
-      const row = toRow(product, runStartedAt);
-      seenIds.add(row.id);
-
-      // Skip rows that are already present, in stock, and content-identical.
-      const prev = existing.get(row.id);
-      if (prev && prev.inStock && prev.hash === contentHash(row)) {
-        skippedUnchanged += 1;
-        continue;
-      }
-      batch.push(row);
-      if (batch.length >= UPSERT_CHUNK) await flush();
+      batch.push(stagingRow(product));
+      if (batch.length >= STAGE_CHUNK) await flush();
     }
     await flush();
-    log(`  changed: ${upserted}, unchanged: ${skippedUnchanged}`);
+    log(`  staged: ${staged}`);
   }
 
-  // Stale sweep: any row we had in stock, for a merchant we saw this run, that
-  // did NOT appear in the feed → it's gone → mark out of stock. Scoped to seen
-  // merchants so a skipped/failed feed never hides a whole merchant's
-  // catalogue. Runs only after every feed parsed cleanly (a parse error throws
-  // above, before we get here).
-  const disappeared: string[] = [];
-  for (const [id, info] of existing) {
-    if (
-      info.inStock &&
-      info.merchantId &&
-      seenMerchantIds.has(info.merchantId) &&
-      !seenIds.has(id)
-    ) {
-      disappeared.push(id);
-    }
-  }
+  // Single server-side diff-merge: writes only changed rows, sweeps stale ones.
+  log(`merging ${staged} staged rows…`);
+  const merged = await withRetry("merge", () =>
+    supabase.rpc("merge_feed_staging", { p_network: adapter.network })
+  );
+  const row = (merged as { changed: number; marked_out_of_stock: number }[])?.[0];
+  const changed = row?.changed ?? 0;
+  const markedOutOfStock = row?.marked_out_of_stock ?? 0;
 
-  let markedOutOfStock = 0;
-  for (let i = 0; i < disappeared.length; i += SWEEP_CHUNK) {
-    const chunk = disappeared.slice(i, i + SWEEP_CHUNK);
-    const { error } = await supabase
-      .from("inspo_products")
-      .update({ in_stock: false, synced_at: runStartedAt })
-      .in("id", chunk);
-    if (error) throw new Error(`stale sweep failed: ${error.message}`);
-    markedOutOfStock += chunk.length;
-  }
+  // Free the staging rows now rather than leaving 600k rows parked until the
+  // next run's reset.
+  await withRetry("reset staging", () => supabase.rpc("reset_feed_staging"));
 
   return {
     network: adapter.network,
     feedsProcessed: feeds.length,
-    upserted,
-    skippedUnchanged,
+    staged,
+    changed,
+    skippedUnchanged: staged - changed,
     markedOutOfStock,
   };
 }
