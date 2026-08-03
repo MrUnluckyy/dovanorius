@@ -18,6 +18,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FeedAdapter, FeedNetwork, NormalizedProduct } from "./types";
 
 const STAGE_CHUNK = 1000; // rows per staging insert request
+const MERGE_BATCH = 5000; // staging rows merged per server-side statement
 
 export type ImportResult = {
   network: FeedNetwork;
@@ -70,6 +71,9 @@ async function withRetry<T>(
     } catch (e) {
       lastErr = e instanceof Error ? e.message : String(e);
     }
+    // Statement timeouts are deterministic — retrying just burns the timeout
+    // again. Fail fast so a too-large statement surfaces immediately.
+    if (/statement timeout/i.test(lastErr)) break;
     if (i < attempts - 1) {
       await new Promise((r) => setTimeout(r, 500 * 2 ** i)); // 0.5s,1s,2s,4s
     }
@@ -147,14 +151,31 @@ export async function runImport(
     log(`  staged: ${staged}`);
   }
 
-  // Single server-side diff-merge: writes only changed rows, sweeps stale ones.
+  // Server-side diff-merge, driven in id-range batches so each statement stays
+  // well under the DB statement timeout. Writes only rows whose content changed.
   log(`merging ${staged} staged rows…`);
-  const merged = await withRetry("merge", () =>
-    supabase.rpc("merge_feed_staging", { p_network: adapter.network })
-  );
-  const row = (merged as { changed: number; marked_out_of_stock: number }[])?.[0];
-  const changed = row?.changed ?? 0;
-  const markedOutOfStock = row?.marked_out_of_stock ?? 0;
+  let changed = 0;
+  let after = "";
+  for (;;) {
+    const rows = await withRetry("merge batch", () =>
+      supabase.rpc("merge_feed_staging_range", {
+        p_network: adapter.network,
+        p_after: after,
+        p_batch: MERGE_BATCH,
+      })
+    );
+    const r = (rows as { last_id: string | null; processed: number; changed: number }[])?.[0];
+    if (!r || r.processed === 0 || r.last_id == null) break;
+    changed += r.changed;
+    after = r.last_id;
+    log(`  merged up to ${after}: ${changed} changed`);
+  }
+
+  // Sweep disappeared rows once, after the whole feed is merged.
+  const markedOutOfStock =
+    (await withRetry("sweep", () =>
+      supabase.rpc("sweep_feed_staging", { p_network: adapter.network })
+    )) ?? 0;
 
   // Free the staging rows now rather than leaving 600k rows parked until the
   // next run's reset.
