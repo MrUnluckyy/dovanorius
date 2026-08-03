@@ -9,7 +9,7 @@ import { createGunzip } from "node:zlib";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FeedAdapter, FeedNetwork, NormalizedProduct } from "./types";
 
-const UPSERT_CHUNK = 200;
+const UPSERT_CHUNK = 1000;
 
 export type ImportResult = {
   network: FeedNetwork;
