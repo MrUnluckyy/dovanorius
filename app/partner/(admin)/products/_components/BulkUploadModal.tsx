@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
 import type { PartnerProduct } from "@/types/partner";
 import { LuUpload, LuCheck, LuCircleAlert } from "react-icons/lu";
 import toast from "react-hot-toast";
+import { bulkCreatePartnerProducts } from "../actions";
 
 type ParsedRow = {
   title: string;
@@ -238,11 +238,9 @@ function parseCSVLine(line: string): string[] {
 }
 
 export function BulkUploadModal({
-  partnerId,
   onClose,
   onImported,
 }: {
-  partnerId: string;
   onClose: () => void;
   onImported: (products: PartnerProduct[]) => void;
 }) {
@@ -252,7 +250,6 @@ export function BulkUploadModal({
   const [fileName, setFileName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
-  const supabase = createClient();
 
   useEffect(() => {
     dialogRef.current?.showModal();
@@ -295,20 +292,21 @@ export function BulkUploadModal({
     if (!parsed || parsed.length === 0) return;
     setImporting(true);
 
-    const payload = parsed.map((r) => ({ ...r, partner_id: partnerId }));
-
-    const { data, error } = await supabase
-      .from("partner_products")
-      .insert(payload)
-      .select();
+    // The server action validates every row, drops invalid/over-cap ones, and
+    // inserts as status = 'pending'.
+    const res = await bulkCreatePartnerProducts(parsed);
 
     setImporting(false);
-    if (error) {
-      toast.error("Importas nepavyko.");
+    if (!res.ok) {
+      toast.error(res.error);
       return;
     }
-    toast.success(`Importuota ${data.length} produktų.`);
-    onImported(data as PartnerProduct[]);
+    toast.success(
+      res.skipped > 0
+        ? `Importuota ${res.inserted.length} produktų (${res.skipped} praleista).`
+        : `Importuota ${res.inserted.length} produktų.`
+    );
+    onImported(res.inserted);
     dialogRef.current?.close();
     onClose();
   }

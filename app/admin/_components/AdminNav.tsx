@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LuChartNoAxesColumn, LuBuilding2 } from "react-icons/lu";
+import { LuChartNoAxesColumn, LuBuilding2, LuShieldCheck } from "react-icons/lu";
 
 const items = [
   { href: "/admin", label: "Analitika", icon: LuChartNoAxesColumn, exact: true },
-  { href: "/admin/partners", label: "Partneriai", icon: LuBuilding2 },
+  { href: "/admin/partners", label: "Partneriai", icon: LuBuilding2, exact: true },
+  { href: "/admin/partners/queue", label: "Moderavimas", icon: LuShieldCheck },
 ];
 
 export function AdminNav() {

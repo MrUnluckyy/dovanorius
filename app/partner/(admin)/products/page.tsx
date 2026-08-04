@@ -22,10 +22,5 @@ export default async function ProductsPage() {
     .eq("partner_id", partnerId)
     .order("created_at", { ascending: false });
 
-  return (
-    <ProductsClient
-      products={(products ?? []) as PartnerProduct[]}
-      partnerId={partnerId}
-    />
-  );
+  return <ProductsClient products={(products ?? []) as PartnerProduct[]} />;
 }

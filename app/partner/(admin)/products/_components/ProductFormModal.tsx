@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
 import type { PartnerProduct } from "@/types/partner";
 import toast from "react-hot-toast";
+import { createPartnerProduct, updatePartnerProduct } from "../actions";
 
 type FormData = {
   title: string;
@@ -35,12 +35,10 @@ const empty: FormData = {
 };
 
 export function ProductFormModal({
-  partnerId,
   product,
   onClose,
   onSaved,
 }: {
-  partnerId: string;
   product: PartnerProduct | null;
   onClose: () => void;
   onSaved: (p: PartnerProduct, isNew: boolean) => void;
@@ -65,7 +63,6 @@ export function ProductFormModal({
       : empty
   );
   const [saving, setSaving] = useState(false);
-  const supabase = createClient();
 
   useEffect(() => {
     dialogRef.current?.showModal();
@@ -80,44 +77,35 @@ export function ProductFormModal({
     if (!form.title.trim()) return;
     setSaving(true);
 
-    const payload = {
-      partner_id: partnerId,
-      title: form.title.trim(),
-      description: form.description.trim() || null,
-      price: form.price ? parseFloat(form.price) : null,
+    // Raw form values; the server action validates, normalises, derives the
+    // partner from membership, and forces status = 'pending'.
+    const input = {
+      title: form.title,
+      description: form.description,
+      price: form.price,
       currency: form.currency,
-      image_url: form.image_url.trim() || null,
-      product_url: form.product_url.trim() || null,
-      sku: form.sku.trim() || null,
+      image_url: form.image_url,
+      product_url: form.product_url,
+      sku: form.sku,
       is_active: form.is_active,
-      min_age: form.min_age ? parseInt(form.min_age) : null,
-      max_age: form.max_age ? parseInt(form.max_age) : null,
+      min_age: form.min_age,
+      max_age: form.max_age,
       gender: form.gender || null,
       categories: form.categories
         ? form.categories.split(",").map((c) => c.trim()).filter(Boolean)
         : [],
     };
 
-    if (product) {
-      const { data, error } = await supabase
-        .from("partner_products")
-        .update(payload)
-        .eq("id", product.id)
-        .select()
-        .single();
-      setSaving(false);
-      if (error) { toast.error("Nepavyko išsaugoti."); return; }
-      onSaved(data as PartnerProduct, false);
-    } else {
-      const { data, error } = await supabase
-        .from("partner_products")
-        .insert(payload)
-        .select()
-        .single();
-      setSaving(false);
-      if (error) { toast.error("Nepavyko sukurti."); return; }
-      onSaved(data as PartnerProduct, true);
+    const res = product
+      ? await updatePartnerProduct(product.id, input)
+      : await createPartnerProduct(input);
+    setSaving(false);
+
+    if (!res.ok) {
+      toast.error(res.error);
+      return;
     }
+    onSaved(res.product, !product);
 
     dialogRef.current?.close();
     onClose();
@@ -126,9 +114,14 @@ export function ProductFormModal({
   return (
     <dialog ref={dialogRef} className="modal" onClose={onClose}>
       <div className="modal-box max-w-lg">
-        <h3 className="font-heading font-bold text-lg mb-4">
+        <h3 className="font-heading font-bold text-lg mb-1">
           {product ? "Redaguoti produktą" : "Naujas produktas"}
         </h3>
+        <p className="text-xs text-base-content/50 mb-4">
+          {product
+            ? "Pakeitus produktą jis bus iš naujo peržiūrimas prieš rodant sraute."
+            : "Naujas produktas bus peržiūrimas prieš rodant Discover sraute."}
+        </p>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
             <label className="label label-text text-xs">Pavadinimas *</label>
