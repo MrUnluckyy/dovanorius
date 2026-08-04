@@ -1,8 +1,12 @@
 /**
  * Product-feed import entry point.
  *
- *   pnpm import:feed            # all configured networks
- *   pnpm import:feed awin       # a single network
+ *   pnpm import:feed                  # all networks, legacy (no curation)
+ *   pnpm import:feed awin             # a single network, legacy
+ *   pnpm import:feed awin --curate    # curated: collapse variants + hard filter,
+ *                                     # then prune the table to the curated set
+ *   pnpm import:feed awin --curate --no-prune   # curate but keep disappeared
+ *                                     # rows (mark out of stock instead of delete)
  *
  * Run locally with the feed + service-role env vars set, or nightly via the
  * GitHub Action in .github/workflows/import-feed.yml.
@@ -15,6 +19,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { awinAdapter } from "../lib/feeds/awin";
 import { runImport } from "../lib/feeds/importer";
+import { defaultCuration } from "../lib/feeds/curate";
 import type { FeedAdapter, FeedNetwork } from "../lib/feeds/types";
 
 const ADAPTERS: Partial<Record<FeedNetwork, FeedAdapter>> = {
@@ -34,10 +39,15 @@ function makeClient() {
 }
 
 async function main() {
-  const requested = process.argv.slice(2) as FeedNetwork[];
+  const args = process.argv.slice(2);
+  const flags = new Set(args.filter((a) => a.startsWith("--")));
+  const requested = args.filter((a) => !a.startsWith("--")) as FeedNetwork[];
   const networks = requested.length
     ? requested
     : (Object.keys(ADAPTERS) as FeedNetwork[]);
+
+  const curate = flags.has("--curate") ? defaultCuration : null;
+  const prune = curate != null && !flags.has("--no-prune");
 
   const supabase = makeClient();
   let failed = false;
@@ -51,13 +61,20 @@ async function main() {
     }
     const started = Date.now();
     try {
-      const r = await runImport(supabase, adapter, (m) =>
-        console.log(`[${network}] ${m}`)
-      );
+      const r = await runImport(supabase, adapter, {
+        log: (m) => console.log(`[${network}] ${m}`),
+        curate,
+        prune,
+      });
+      const curatedNote = curate
+        ? `${r.kept}/${r.considered} kept, `
+        : "";
+      const reconciled = prune
+        ? `${r.pruned} pruned, `
+        : `${r.markedOutOfStock} marked out-of-stock, `;
       console.log(
-        `✓ ${network}: ${r.staged} staged → ${r.changed} changed, ` +
-          `${r.skippedUnchanged} unchanged, ` +
-          `${r.markedOutOfStock} marked out-of-stock, ` +
+        `✓ ${network}: ${curatedNote}${r.staged} staged → ${r.changed} changed, ` +
+          `${r.skippedUnchanged} unchanged, ${reconciled}` +
           `${r.feedsProcessed} feed(s) in ${Math.round((Date.now() - started) / 1000)}s`
       );
     } catch (err) {
