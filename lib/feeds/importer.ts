@@ -16,17 +16,38 @@ import { Readable } from "node:stream";
 import { createGunzip } from "node:zlib";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FeedAdapter, FeedNetwork, NormalizedProduct } from "./types";
+import { createCurator, type CurationConfig, type CurationStats } from "./curate";
 
 const STAGE_CHUNK = 1000; // rows per staging insert request
 const MERGE_BATCH = 5000; // staging rows merged per server-side statement
 
+export type RunOptions = {
+  log?: (msg: string) => void;
+  /**
+   * Curate the feed before staging (P2). null/undefined stages every parsed row
+   * unchanged (legacy behaviour). A config collapses size/colour variants and
+   * drops non-giftable rows.
+   */
+  curate?: CurationConfig | null;
+  /**
+   * Rebuild mode: after merging, DELETE affiliate rows for the feed's merchants
+   * that are no longer in the (curated) staging set, so the served table shrinks
+   * to exactly the curated set. When false, disappeared rows are only marked out
+   * of stock (the legacy sweep).
+   */
+  prune?: boolean;
+};
+
 export type ImportResult = {
   network: FeedNetwork;
   feedsProcessed: number;
+  considered: number;
+  kept: number;
   staged: number;
   changed: number;
   skippedUnchanged: number;
   markedOutOfStock: number;
+  pruned: number;
 };
 
 /** Row shape for public.inspo_products_staging (content columns only). */
@@ -98,14 +119,17 @@ async function downloadFeed(url: string): Promise<Readable> {
 export async function runImport(
   supabase: SupabaseClient,
   adapter: FeedAdapter,
-  log: (msg: string) => void = console.log
+  options: RunOptions = {}
 ): Promise<ImportResult> {
+  const { log = console.log, curate = null, prune = false } = options;
   const feeds = adapter.listFeeds();
 
   // Clear any rows a previous (crashed) run may have left behind.
   await withRetry("reset staging", () => supabase.rpc("reset_feed_staging"));
 
   let staged = 0;
+  let considered = 0;
+  let kept = 0;
   let batch: ReturnType<typeof stagingRow>[] = [];
 
   const flush = async () => {
@@ -118,26 +142,32 @@ export async function runImport(
     staged += rows.length;
   };
 
-  // Download + parse + stage one feed. Retried as a unit: a network reset can
-  // interrupt a multi-minute streamed download, and there's no way to resume
-  // mid-stream, so we re-pull the whole feed. Rows already staged from a failed
-  // attempt stay put — the merge dedupes staging by id, so re-staging is safe.
-  const stageFeed = async (feed: (typeof feeds)[number]) => {
+  // Download + parse + (curate) + stage one feed. Retried as a unit: a network
+  // reset can interrupt a multi-minute streamed download, and there's no way to
+  // resume mid-stream, so we re-pull the whole feed. A fresh curator per attempt
+  // keeps variant collapse correct on retry; the merge dedupes staging by id, so
+  // re-staging is safe.
+  const stageFeed = async (feed: (typeof feeds)[number]): Promise<CurationStats | null> => {
+    const curator = curate ? createCurator(curate) : null;
     const body = await downloadFeed(feed.url);
     for await (const product of adapter.parse(body)) {
-      batch.push(stagingRow(product));
+      const row = curator ? curator.consider(product) : product;
+      if (!row) continue; // curated out
+      batch.push(stagingRow(row));
       if (batch.length >= STAGE_CHUNK) await flush();
     }
     await flush();
+    return curator?.stats ?? null;
   };
 
   for (const feed of feeds) {
     log(`↓ ${feed.label}`);
     let lastErr: unknown;
+    let stats: CurationStats | null = null;
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         batch = []; // drop any partial batch from a failed attempt
-        await stageFeed(feed);
+        stats = await stageFeed(feed);
         lastErr = undefined;
         break;
       } catch (e) {
@@ -148,6 +178,15 @@ export async function runImport(
       }
     }
     if (lastErr) throw lastErr;
+    if (stats) {
+      considered += stats.considered;
+      kept += stats.kept;
+      log(
+        `  curated: kept ${stats.kept}/${stats.considered} ` +
+          `(variants ${stats.skipped.duplicate_variant}, price ${stats.skipped.price}, ` +
+          `stock ${stats.skipped.stock}, junk ${stats.skipped.junk})`
+      );
+    }
     log(`  staged: ${staged}`);
   }
 
@@ -171,22 +210,50 @@ export async function runImport(
     log(`  merged up to ${after}: ${changed} changed`);
   }
 
-  // Sweep disappeared rows once, after the whole feed is merged.
-  const markedOutOfStock =
-    (await withRetry("sweep", () =>
-      supabase.rpc("sweep_feed_staging", { p_network: adapter.network })
-    )) ?? 0;
+  // Reconcile rows that disappeared from the feed. Both paths are scoped to the
+  // merchants present in staging, so a missing/failed feed never wipes a whole
+  // merchant's catalogue.
+  //   prune  → DELETE them (curated rebuild: table becomes exactly the staged set)
+  //   sweep  → mark them out of stock (legacy delta: keep the row, hide it)
+  let markedOutOfStock = 0;
+  let pruned = 0;
+  if (prune) {
+    log("pruning rows no longer in the staged set…");
+    let after = "";
+    for (;;) {
+      const rows = await withRetry("prune batch", () =>
+        supabase.rpc("prune_feed_staging_range", {
+          p_network: adapter.network,
+          p_after: after,
+          p_batch: MERGE_BATCH,
+        })
+      );
+      const r = (rows as { last_id: string | null; scanned: number; deleted: number }[])?.[0];
+      if (!r || r.scanned === 0 || r.last_id == null) break;
+      pruned += r.deleted;
+      after = r.last_id;
+      log(`  pruned up to ${after}: ${pruned} deleted`);
+    }
+  } else {
+    markedOutOfStock =
+      (await withRetry("sweep", () =>
+        supabase.rpc("sweep_feed_staging", { p_network: adapter.network })
+      )) ?? 0;
+  }
 
-  // Free the staging rows now rather than leaving 600k rows parked until the
-  // next run's reset.
+  // Free the staging rows now rather than leaving them parked until the next
+  // run's reset.
   await withRetry("reset staging", () => supabase.rpc("reset_feed_staging"));
 
   return {
     network: adapter.network,
     feedsProcessed: feeds.length,
+    considered,
+    kept,
     staged,
     changed,
     skippedUnchanged: staged - changed,
     markedOutOfStock,
+    pruned,
   };
 }
