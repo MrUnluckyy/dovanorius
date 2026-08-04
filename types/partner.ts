@@ -27,6 +27,8 @@ export type PartnerInvite = {
   created_at: string;
 };
 
+export type PartnerProductStatus = "pending" | "approved" | "rejected";
+
 export type PartnerProduct = {
   id: string;
   partner_id: string;
@@ -42,6 +44,12 @@ export type PartnerProduct = {
   max_age: number | null;
   gender: "male" | "female" | null;
   categories: string[];
+  /** Moderation state. Partners may only create/edit 'pending' rows (RLS); an admin sets 'approved'/'rejected'. */
+  status: PartnerProductStatus;
+  reviewed_at: string | null;
+  /** profiles.id of the admin who reviewed. */
+  reviewed_by: string | null;
+  rejection_reason: string | null;
   created_at: string;
   updated_at: string;
 };

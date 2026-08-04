@@ -8,10 +8,8 @@ import { LuPlus, LuUpload } from "react-icons/lu";
 
 export function ProductsClient({
   products: initial,
-  partnerId,
 }: {
   products: PartnerProduct[];
-  partnerId: string;
 }) {
   const [products, setProducts] = useState(initial);
   const [showUpload, setShowUpload] = useState(false);
@@ -75,7 +73,6 @@ export function ProductsClient({
 
       {showForm && (
         <ProductFormModal
-          partnerId={partnerId}
           product={editing}
           onClose={() => setShowForm(false)}
           onSaved={onSaved}
@@ -84,7 +81,6 @@ export function ProductsClient({
 
       {showUpload && (
         <BulkUploadModal
-          partnerId={partnerId}
           onClose={() => setShowUpload(false)}
           onImported={onBulkImported}
         />

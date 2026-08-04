@@ -22,6 +22,10 @@ export type InspoProduct = {
   rrp: number | null;
   /** Percent off vs. rrp (0–100), when discounted. */
   discount_pct: number | null;
+  /** Which pipeline produced this served row. */
+  source: "affiliate" | "partner";
+  /** Set only for source='partner' rows — the partner whose approved product this is. */
+  partner_id: string | null;
 };
 
 /** Who the feed is being tailored for. */

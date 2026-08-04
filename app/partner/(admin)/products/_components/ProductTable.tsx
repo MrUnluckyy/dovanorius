@@ -1,9 +1,21 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import type { PartnerProduct } from "@/types/partner";
+import type { PartnerProduct, PartnerProductStatus } from "@/types/partner";
 import { LuPencil, LuTrash2, LuExternalLink } from "react-icons/lu";
 import toast from "react-hot-toast";
+
+const STATUS_LABEL: Record<PartnerProductStatus, string> = {
+  pending: "Laukiama peržiūros",
+  approved: "Patvirtinta",
+  rejected: "Atmesta",
+};
+
+const STATUS_BADGE: Record<PartnerProductStatus, string> = {
+  pending: "badge-warning",
+  approved: "badge-success",
+  rejected: "badge-error",
+};
 
 export function ProductTable({
   products,
@@ -91,13 +103,22 @@ export function ProductTable({
                   : "—"}
               </td>
               <td>
-                <span
-                  className={`badge badge-sm ${
-                    p.is_active ? "badge-success" : "badge-ghost"
-                  }`}
-                >
-                  {p.is_active ? "Aktyvus" : "Neaktyvus"}
-                </span>
+                <div className="flex flex-col gap-0.5">
+                  <span className={`badge badge-sm ${STATUS_BADGE[p.status]}`}>
+                    {STATUS_LABEL[p.status]}
+                  </span>
+                  {p.status === "rejected" && p.rejection_reason && (
+                    <span
+                      className="text-xs text-error/80 line-clamp-1 max-w-40"
+                      title={p.rejection_reason}
+                    >
+                      {p.rejection_reason}
+                    </span>
+                  )}
+                  {!p.is_active && (
+                    <span className="text-xs text-base-content/40">Neaktyvus</span>
+                  )}
+                </div>
               </td>
               <td>
                 <div className="flex gap-1 justify-end">

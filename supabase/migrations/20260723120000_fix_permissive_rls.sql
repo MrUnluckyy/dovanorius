@@ -1,6 +1,12 @@
--- Fixes three RLS problems found while adding public blog pages.
+-- ⚠️ SUPERSEDED — DO NOT APPLY. Never ran against production.
+--   * boards/items parts (1 & 2) were applied 2026-08-04 via
+--     20260804130000_fix_permissive_rls_boards_items.sql.
+--   * part 3 (public read on active partners / partner_products) is intentionally
+--     dropped: no public consumer, and with product moderation now live an
+--     is_active-only public policy would expose unreviewed 'pending' rows.
+-- Kept for history only.
 --
--- NOT YET APPLIED. Review, then run against production.
+-- Fixes three RLS problems found while adding public blog pages.
 --
 -- 1. `boards` and `items` each carry a blanket `USING (true)` SELECT policy for
 --    role `public`, sitting next to a correctly scoped one. Postgres ORs
