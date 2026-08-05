@@ -43,6 +43,7 @@ export async function getUserSignals(userId: string): Promise<UserSignals> {
       .from("items")
       .select("title, price, board_id")
       .in("board_id", boardIds)
+      .is("archived_at", null)
       .order("created_at", { ascending: false })
       .limit(RECENT_ITEMS);
     items = data ?? [];

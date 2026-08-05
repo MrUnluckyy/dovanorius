@@ -42,6 +42,7 @@ export function ReservedItems({ user }: { user: User }) {
         )
         .eq("reserved_by", user.id)
         .neq("status", "purchased")
+        .is("archived_at", null)
         .order("reserved_at", { ascending: false });
       if (error) throw error;
 
