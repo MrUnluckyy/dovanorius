@@ -13,7 +13,7 @@ export function Navigation({ user }: { user: User | null }) {
       <div className="max-w-[1440px] w-full mx-auto px-4">
         <div className="navbar-start">
           <Link href="/" className="text-xl font-bold">
-            <Image src="/assets/logo.png" alt="Logo" width={32} height={32} />
+            <Image src="/assets/logo.png" alt="Noriuto" width={32} height={32} />
             Dovanorius
           </Link>
         </div>

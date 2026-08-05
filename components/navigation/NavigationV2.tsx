@@ -46,7 +46,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 >
                   <Image
                     src="/assets/logo.png"
-                    alt="Logo"
+                    alt="Noriuto"
                     width={40}
                     height={40}
                     className="shrink-0"

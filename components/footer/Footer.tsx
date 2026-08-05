@@ -16,6 +16,12 @@ export default function Footer() {
         </div>
         <nav className="flex flex-wrap justify-center gap-x-5 gap-y-2">
           <Link
+            href="/blog"
+            className="transition-colors hover:text-(--nr-ink)"
+          >
+            {t("blog")}
+          </Link>
+          <Link
             href="/partneriams"
             className="font-semibold text-(--nr-gold-strong) transition-colors hover:text-(--nr-ink)"
           >

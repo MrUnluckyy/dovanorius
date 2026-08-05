@@ -37,69 +37,82 @@ export default function GiftPicks({
   const display = stegaClean(value.display);
   const numbered = display === "numbered";
   const feature = display === "feature";
+  // Horizontal ("list") and numbered share the same image-beside-text row; the
+  // only difference is the rank badge, so they render from one branch.
+  const rows = display === "list" || numbered;
 
   return (
-    <section className="my-10 sm:-mx-12 lg:-mx-24">
+    <section className="my-10">
       {value.heading && (
         <h2 className="mb-4 text-2xl font-bold">{value.heading}</h2>
       )}
 
       {feature ? (
         // Editorial layout: each pick is a full section — cover, title, a
-        // longer blurb and a single link — with the image alternating sides so
-        // it reads like an article, not an ad grid.
+        // longer blurb and a single link. With an image it becomes a two-column
+        // block that alternates sides; without one it stays a single full-width
+        // column so there is no empty half beside the text.
         <div className="space-y-14 sm:space-y-20">
-          {items.map((item, index) => (
-            <article
-              key={item._key}
-              className="grid items-center gap-6 sm:grid-cols-2 sm:gap-10"
-            >
-              {item.image?.asset && (
-                <figure
-                  className={`overflow-hidden rounded-2xl ${
-                    index % 2 === 1 ? "sm:order-2" : ""
-                  }`}
-                >
-                  <SanityImage
-                    value={item.image}
-                    width={800}
-                    height={600}
-                    sizes="(max-width: 640px) 100vw, 50vw"
-                    className="aspect-[4/3] h-full w-full object-cover"
-                  />
-                </figure>
-              )}
-              <div className={index % 2 === 1 ? "sm:order-1" : ""}>
-                <h3 className="text-2xl font-bold text-balance sm:text-[1.75rem]">
-                  {item.title}
-                </h3>
-                {item.description && (
-                  <p className="mt-3 leading-relaxed opacity-80">
-                    {item.description}
-                  </p>
+          {items.map((item, index) => {
+            const hasImage = Boolean(item.image?.asset);
+            return (
+              <article
+                key={item._key}
+                className={
+                  hasImage
+                    ? "grid items-center gap-6 sm:grid-cols-2 sm:gap-10"
+                    : "max-w-2xl"
+                }
+              >
+                {hasImage && (
+                  <figure
+                    className={`overflow-hidden rounded-2xl ${
+                      index % 2 === 1 ? "sm:order-2" : ""
+                    }`}
+                  >
+                    <SanityImage
+                      value={item.image}
+                      width={800}
+                      height={600}
+                      sizes="(max-width: 640px) 100vw, 50vw"
+                      className="aspect-[4/3] h-full w-full object-cover"
+                    />
+                  </figure>
                 )}
-                <div className="mt-6 flex items-center gap-4">
-                  {item.url && (
-                    <a
-                      href={item.url}
-                      target="_blank"
-                      rel={rel}
-                      className="btn btn-primary"
-                    >
-                      {item.ctaLabel || defaultCtaLabel}
-                    </a>
+                <div className={hasImage && index % 2 === 1 ? "sm:order-1" : ""}>
+                  <h3 className="text-2xl font-bold text-balance sm:text-[1.75rem]">
+                    {item.title}
+                  </h3>
+                  {item.description && (
+                    <p className="mt-3 leading-relaxed opacity-80">
+                      {item.description}
+                    </p>
                   )}
-                  {item.price && (
-                    <span className="text-base-content/60 text-sm">
-                      {item.price}
-                    </span>
-                  )}
+                  <div className="mt-6 flex items-center gap-4">
+                    {item.url && (
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel={rel}
+                        className="btn btn-primary"
+                      >
+                        {item.ctaLabel || defaultCtaLabel}
+                      </a>
+                    )}
+                    {item.price && (
+                      <span className="text-base-content/60 text-sm">
+                        {item.price}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
-      ) : numbered ? (
+      ) : rows ? (
+        // Horizontal rows: image beside text (card-side). The figure is skipped
+        // when an item has no image, so the card-body simply fills the row.
         <ol className="space-y-6">
           {items.map((item, index) => (
             <li
@@ -119,12 +132,14 @@ export default function GiftPicks({
               )}
               <div className="card-body gap-2">
                 <h3 className="card-title items-start text-lg">
-                  <span
-                    className="badge badge-primary badge-lg shrink-0"
-                    aria-hidden
-                  >
-                    {index + 1}
-                  </span>
+                  {numbered && (
+                    <span
+                      className="badge badge-primary badge-lg shrink-0"
+                      aria-hidden
+                    >
+                      {index + 1}
+                    </span>
+                  )}
                   <span>{item.title}</span>
                 </h3>
                 {item.description && (
