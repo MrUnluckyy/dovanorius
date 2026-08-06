@@ -1,0 +1,39 @@
+name: Sync partner feeds
+
+# Nightly at 03:47 UTC — after the affiliate importer (03:17) so the two are
+# never writing at once, plus a manual trigger for on-demand runs.
+on:
+  schedule:
+    - cron: "47 3 * * *"
+  workflow_dispatch:
+    inputs:
+      partner:
+        description: "Partner slug to sync (blank = all enabled)"
+        required: false
+        default: ""
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Sync partner catalogues
+        # Exits non-zero if ANY partner feed failed, so a broken store turns the
+        # run red and GitHub notifies — but every other partner is still synced
+        # first. Per-partner detail lands in partners.feed_last_error and the
+        # run summary.
+        run: pnpm sync:partners ${{ inputs.partner }}
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}

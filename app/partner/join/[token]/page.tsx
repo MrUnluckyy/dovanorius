@@ -22,7 +22,12 @@ export default async function JoinPartnerPage({
     p_token: token,
   });
 
-  const res = result as { ok?: boolean; error?: string; partner_id?: string };
+  const res = result as {
+    ok?: boolean;
+    error?: string;
+    partner_id?: string;
+    invited_email?: string;
+  };
 
   if (res?.ok) {
     redirect("/partner");
@@ -31,6 +36,11 @@ export default async function JoinPartnerPage({
   const errorMessages: Record<string, string> = {
     not_authenticated: "Turite prisijungti.",
     invalid_or_expired: "Kvietimas nebegalioja arba jau buvo panaudotas.",
+    // The invite is bound to the address it was issued to, so a forwarded link
+    // cannot claim the account.
+    email_mismatch: res?.invited_email
+      ? `Šis kvietimas skirtas ${res.invited_email}. Prisijunkite tuo el. paštu.`
+      : "Kvietimas skirtas kitam el. paštui.",
   };
 
   const message = errorMessages[res?.error ?? ""] ?? "Klaida priimant kvietimą.";

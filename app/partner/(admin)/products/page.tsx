@@ -1,20 +1,14 @@
-import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+import { getPartnerContext } from "@/lib/partner/context";
 import { ProductsClient } from "./_components/ProductsClient";
 import type { PartnerProduct } from "@/types/partner";
 
 export default async function ProductsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const ctx = await getPartnerContext();
+  if (!ctx) redirect("/dashboard");
 
-  const { data: partnerUser } = await supabase
-    .from("partner_users")
-    .select("partner_id")
-    .eq("user_id", user!.id)
-    .single();
-
-  const partnerId = partnerUser!.partner_id;
+  const { supabase } = ctx;
+  const partnerId = ctx.active.partnerId;
 
   const { data: products } = await supabase
     .from("partner_products")
