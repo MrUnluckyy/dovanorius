@@ -95,11 +95,39 @@ export default async function RootLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Site-wide structured data so search engines resolve the name, logo and key
+  // sections (rather than inventing a "Logo" entry from the header image).
+  const siteUrl = process.env.NEXT_PUBLIC_WEB_URL ?? "https://www.noriuto.lt";
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        name: "Noriuto",
+        url: siteUrl,
+        logo: `${siteUrl}/favicons/android-chrome-512x512.png`,
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        name: "Noriuto.lt",
+        url: siteUrl,
+        inLanguage: locale,
+        publisher: { "@id": `${siteUrl}/#organization` },
+      },
+    ],
+  };
+
   return (
     <html lang={locale} data-theme="noriuto" suppressHydrationWarning>
       <body
         className={`${headings.variable} ${body.variable} ${special.variable} antialiased relative`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         <NextIntlClientProvider>
           <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID!} />
           <GtmPageView />

@@ -333,6 +333,9 @@
     "empty": "Kol kas įrašų nėra.",
     "backToList": "Grįžti į tinklaraštį",
     "viewItem": "Žiūrėti",
+    "share": "Dalintis",
+    "copyLink": "Kopijuoti nuorodą",
+    "copied": "Nukopijuota!",
     "browseByFacet": "Naršyti pagal temą",
     "eyebrow": "Noriuto tinklaraštis",
     "minutes": "min. skaitymo",
@@ -451,7 +454,9 @@
       "testimonials": "Atsiliepimai",
       "login": "Prisijungti",
       "register": "Registruotis",
-      "search": "Ieškoti vartotojų"
+      "search": "Ieškoti vartotojų",
+      "openMenu": "Atidaryti meniu",
+      "closeMenu": "Uždaryti meniu"
     },
     "hero": {
       "badge": "Nemokama — internete ir App Store",
@@ -551,6 +556,7 @@
     },
     "footer": {
       "copyright": "© {year} Noriuto.lt",
+      "blog": "Tinklaraštis",
       "privacy": "Privatumo politika",
       "cookies": "Slapukų politika",
       "terms": "Naudojimo politika",

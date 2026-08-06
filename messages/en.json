@@ -329,6 +329,9 @@
     "empty": "No posts yet.",
     "backToList": "Back to the blog",
     "viewItem": "View",
+    "share": "Share",
+    "copyLink": "Copy link",
+    "copied": "Copied!",
     "browseByFacet": "Browse by topic",
     "eyebrow": "The Noriuto blog",
     "minutes": "min read",
@@ -447,7 +450,9 @@
       "testimonials": "Testimonials",
       "login": "Log in",
       "register": "Sign up",
-      "search": "Search users"
+      "search": "Search users",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
     },
     "hero": {
       "badge": "Free — on the web and App Store",
@@ -547,6 +552,7 @@
     },
     "footer": {
       "copyright": "© {year} Noriuto.lt",
+      "blog": "Blog",
       "privacy": "Privacy policy",
       "cookies": "Cookie policy",
       "terms": "Terms of use",

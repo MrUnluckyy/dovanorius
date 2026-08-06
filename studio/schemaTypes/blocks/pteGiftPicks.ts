@@ -18,14 +18,15 @@ export const pteGiftPicksType = defineType({
       type: "string",
       options: {
         list: [
-          { title: "Cards — grid", value: "cards" },
-          { title: "Numbered — ranked list", value: "numbered" },
-          { title: "Feature — image, title, text, button", value: "feature" },
+          { title: "Vertical — image on top, card grid", value: "cards" },
+          { title: "Horizontal — image beside text, stacked rows", value: "list" },
+          { title: "Numbered — ranked rows", value: "numbered" },
+          { title: "Feature — large editorial blocks", value: "feature" },
         ],
         layout: "radio",
       },
       description:
-        'Use "numbered" for ranked listicles, "feature" for an editorial article-style layout with more text per item',
+        'Vertical vs horizontal control where the image sits per item. Images are optional — every layout adapts to text-only picks. Use "numbered" for ranked listicles and "feature" for an editorial article-style layout with more text per item.',
       initialValue: "cards",
       validation: (rule) => rule.required(),
     }),

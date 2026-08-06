@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import ShareBar from "@/components/blog/ShareBar";
 import SanityImage from "@/components/SanityImage";
 import { buildArticleJsonLd, buildItemListJsonLd } from "@/sanity/jsonld";
 import { sanityFetch } from "@/sanity/live";
@@ -55,21 +56,33 @@ export async function generateMetadata({
 
   const title = post.seo?.metaTitle ?? post.title ?? undefined;
   const description = post.seo?.metaDescription ?? post.excerpt ?? undefined;
+  const canonical = `/blog/${post.slug}`;
+
+  // Fall back to the site-wide social card when a post has no cover image, so
+  // shares are never left without a preview image.
+  const shareImage = post.coverImage?.asset?.url ?? "/assets/meta/noriuto-meta.jpg";
 
   return {
     title,
     description,
-    alternates: { canonical: `/blog/${post.slug}` },
+    alternates: { canonical },
     robots: post.seo?.noIndex ? { index: false, follow: false } : undefined,
     openGraph: {
       type: "article",
       title,
       description,
+      url: canonical,
+      siteName: "Noriuto",
+      locale: await getLocale(),
       publishedTime: post.publishedAt,
       modifiedTime: post._updatedAt,
-      images: post.coverImage?.asset?.url
-        ? [{ url: post.coverImage.asset.url }]
-        : undefined,
+      images: [{ url: shareImage }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [shareImage],
     },
   };
 }
@@ -208,6 +221,16 @@ export default async function BlogPostPage({
             />
           </div>
         )}
+
+        <ShareBar
+          url={pageUrl}
+          title={post.title ?? ""}
+          labels={{
+            share: t("share"),
+            copyLink: t("copyLink"),
+            copied: t("copied"),
+          }}
+        />
 
         {post.author?.bio && (
           <footer className="border-base-300/60 bg-base-200/40 mt-14 flex gap-4 rounded-2xl border p-6">
