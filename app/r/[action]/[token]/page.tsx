@@ -28,6 +28,7 @@ export default async function ReservationActionPage({
       .from("items")
       .select("title")
       .eq("id", verified.itemId)
+      .is("archived_at", null)
       .maybeSingle();
     if (data?.title) itemTitle = data.title;
   }

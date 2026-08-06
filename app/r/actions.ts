@@ -32,6 +32,7 @@ export async function resolveReservation(
       })
       .eq("id", itemId)
       .eq("status", "reserved")
+      .is("archived_at", null)
       .select("id");
 
     if (error) throw error;
@@ -51,6 +52,7 @@ export async function resolveReservation(
     })
     .eq("id", itemId)
     .eq("status", "reserved")
+    .is("archived_at", null)
     .select("id");
 
   if (error) throw error;

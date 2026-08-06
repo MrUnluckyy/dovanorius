@@ -30,6 +30,7 @@ export async function GET(request: Request) {
     .from("items")
     .select("id, title, reminder_email, reserve_expires_at, boards(name)")
     .eq("status", "reserved")
+    .is("archived_at", null)
     .not("reminder_email", "is", null)
     .is("reminder_sent_at", null)
     .gt("reserve_expires_at", now.toISOString())
