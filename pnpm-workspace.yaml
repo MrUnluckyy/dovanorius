@@ -1,3 +1,11 @@
+# studio/ is a second project in this repo with its own package.json. It was
+# already an importer in pnpm-lock.yaml but was never declared here, so any
+# `pnpm install` that regenerated the lockfile silently dropped it — taking
+# sanity, styled-components and their transitive deps with it (~3k lines, 29
+# packages). Declaring it keeps regeneration faithful to the committed lockfile.
+packages:
+  - studio
+
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - esbuild
