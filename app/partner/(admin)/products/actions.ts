@@ -1,7 +1,7 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { getPartnerContext } from "@/lib/partner/context";
 import type { PartnerProduct } from "@/types/partner";
 import {
   validateProductInput,
@@ -15,26 +15,16 @@ import {
 export type ActionResult<T> = ({ ok: true } & T) | { ok: false; error: string };
 
 /**
- * Resolve the caller's partner from their membership — never from a client-sent
- * id. Uses the user-scoped client so RLS (is_partner_member + pending-only) stays
- * a second gate. Returns null when the caller isn't a partner member.
+ * Resolve the partner to write to — never from a client-sent id. This is the
+ * *active* membership (see lib/partner/context), not an arbitrary one: picking
+ * `.limit(1)` here used to mean a user belonging to two partners could silently
+ * write a product to the wrong account. Uses the user-scoped client so RLS
+ * (is_partner_member + pending-only) stays a second gate.
  */
 async function resolvePartner() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const { data: membership } = await supabase
-    .from("partner_users")
-    .select("partner_id")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
-
-  if (!membership?.partner_id) return null;
-  return { supabase, partnerId: membership.partner_id as string };
+  const ctx = await getPartnerContext();
+  if (!ctx) return null;
+  return { supabase: ctx.supabase, partnerId: ctx.active.partnerId };
 }
 
 export async function createPartnerProduct(

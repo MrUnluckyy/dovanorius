@@ -1,18 +1,12 @@
-import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+import { getPartnerContext } from "@/lib/partner/context";
 
 export default async function PartnerDashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const ctx = await getPartnerContext();
+  if (!ctx) redirect("/dashboard");
 
-  const { data: partnerUser } = await supabase
-    .from("partner_users")
-    .select("partner_id")
-    .eq("user_id", user!.id)
-    .single();
-
-  const partnerId = partnerUser!.partner_id;
+  const { supabase } = ctx;
+  const partnerId = ctx.active.partnerId;
 
   const [{ count: productCount }, { count: memberCount }] = await Promise.all([
     supabase

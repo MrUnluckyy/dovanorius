@@ -1,118 +1,93 @@
+import { createClient } from "@/utils/supabase/server";
 import { supabaseAdmin } from "@/utils/supabase/admin";
+import {
+  PartnersClient,
+  type AdminPartnerRow,
+  type AdminInvite,
+} from "./_components/PartnersClient";
 
 export const dynamic = "force-dynamic";
 
-type Partner = {
+type PartnerRow = {
   id: string;
   name: string;
   slug: string | null;
   website_url: string | null;
   is_active: boolean;
   created_at: string;
+  shopify_domain: string | null;
+  feed_auto_approve: boolean;
 };
 
 export default async function AdminPartnersPage() {
-  const [partners, users, products] = await Promise.all([
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [partners, users, products, invites] = await Promise.all([
     supabaseAdmin
       .from("partners")
-      .select("id, name, slug, website_url, is_active, created_at")
+      .select(
+        "id, name, slug, website_url, is_active, created_at, shopify_domain, feed_auto_approve"
+      )
       .order("created_at", { ascending: false }),
-    supabaseAdmin.from("partner_users").select("partner_id"),
+    supabaseAdmin.from("partner_users").select("partner_id, user_id"),
     supabaseAdmin.from("partner_products").select("partner_id, is_active"),
+    supabaseAdmin
+      .from("partner_invites")
+      .select("id, partner_id, email, role, token, expires_at")
+      .is("accepted_at", null)
+      .gt("expires_at", new Date().toISOString())
+      .order("created_at", { ascending: false }),
   ]);
 
-  const partnerRows = (partners.data ?? []) as Partner[];
+  const partnerRows = (partners.data ?? []) as PartnerRow[];
+
   const members = new Map<string, number>();
+  const staffOf = new Set<string>();
   for (const u of users.data ?? []) {
     members.set(u.partner_id, (members.get(u.partner_id) ?? 0) + 1);
+    if (u.user_id === user?.id) staffOf.add(u.partner_id);
   }
+
   const productCounts = new Map<string, number>();
   for (const p of products.data ?? []) {
     if (p.is_active === false) continue;
     productCounts.set(p.partner_id, (productCounts.get(p.partner_id) ?? 0) + 1);
   }
 
+  const invitesByPartner = new Map<string, AdminInvite[]>();
+  for (const i of invites.data ?? []) {
+    const list = invitesByPartner.get(i.partner_id) ?? [];
+    list.push({
+      id: i.id,
+      email: i.email,
+      role: i.role,
+      token: i.token,
+      expires_at: i.expires_at,
+    });
+    invitesByPartner.set(i.partner_id, list);
+  }
+
+  const rows: AdminPartnerRow[] = partnerRows.map((p) => ({
+    ...p,
+    productCount: productCounts.get(p.id) ?? 0,
+    memberCount: members.get(p.id) ?? 0,
+    isStaff: staffOf.has(p.id),
+    invites: invitesByPartner.get(p.id) ?? [],
+    shopifyDomain: p.shopify_domain,
+    feedAutoApprove: p.feed_auto_approve,
+  }));
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl font-bold">
-          Partneriai{" "}
-          <span className="text-lg font-normal text-base-content/40">
-            ({partnerRows.length})
-          </span>
-        </h1>
-        <p className="mt-1 text-sm text-base-content/60">
-          Partnerių portalo paskyros (savo produktus įkeliantys partneriai).
-        </p>
-      </div>
+      <PartnersClient partners={rows} />
 
       <div className="alert alert-warning text-sm">
         Portalo partnerių produktai kol kas nerodomi Discover sraute ir nėra
         stebimi — įtraukimo analitika bus prieinama, kai jie bus įtraukti į
         srautą.
-      </div>
-
-      <div className="card bg-base-100 card-border">
-        <div className="card-body">
-          <div className="overflow-x-auto">
-            <table className="table table-sm">
-              <thead>
-                <tr>
-                  <th>Partneris</th>
-                  <th>Būsena</th>
-                  <th className="text-right">Produktai</th>
-                  <th className="text-right">Nariai</th>
-                  <th>Sukurta</th>
-                </tr>
-              </thead>
-              <tbody>
-                {partnerRows.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="text-center text-base-content/40">
-                      Kol kas nėra partnerių.
-                    </td>
-                  </tr>
-                ) : (
-                  partnerRows.map((p) => (
-                    <tr key={p.id}>
-                      <td>
-                        <div className="font-medium">{p.name}</div>
-                        {p.website_url && (
-                          <a
-                            href={p.website_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-base-content/50 hover:underline"
-                          >
-                            {p.website_url.replace(/^https?:\/\//, "")}
-                          </a>
-                        )}
-                      </td>
-                      <td>
-                        <span
-                          className={`badge badge-sm ${
-                            p.is_active ? "badge-success" : "badge-ghost"
-                          }`}
-                        >
-                          {p.is_active ? "Aktyvus" : "Neaktyvus"}
-                        </span>
-                      </td>
-                      <td className="text-right tabular-nums">
-                        {productCounts.get(p.id) ?? 0}
-                      </td>
-                      <td className="text-right tabular-nums">
-                        {members.get(p.id) ?? 0}
-                      </td>
-                      <td className="text-sm text-base-content/60">
-                        {new Date(p.created_at).toLocaleDateString("lt-LT")}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
       </div>
     </div>
   );
