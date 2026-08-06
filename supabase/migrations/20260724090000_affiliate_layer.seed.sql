@@ -24,6 +24,8 @@ values (
 );
 
 -- TradeDoubler advertiser (replace 67890 with the real program id `p`).
+-- NOTE: TD uses parenthesis syntax, not &key=value. `url` must be lowercase
+-- and must come last — its parser is case- and order-sensitive.
 insert into public.affiliate_merchants
   (name, domains, network, network_advertiser_id, deeplink_template,
    is_allowlisted, quality_tier)
@@ -32,7 +34,7 @@ values (
   array['example-td.lt', 'www.example-td.lt'],
   'tradedoubler',
   '67890',
-  'https://clk.tradedoubler.com/click?p={ADVERTISER_ID}&a={PUBLISHER_ID}&epi={SUB_ID}&url={URL}',
+  'https://clk.tradedoubler.com/click?p({ADVERTISER_ID})a({PUBLISHER_ID})epi({SUB_ID})url({URL})',
   true,
   2
 );

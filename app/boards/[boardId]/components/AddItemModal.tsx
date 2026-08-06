@@ -106,6 +106,12 @@ export function AddItemModal({
       }
       const data = await res.json();
 
+      // Shorteners and share wrappers (share.google, etc.) resolve server-side
+      // via redirect: "follow". Store the RESOLVED url, not the wrapper — /out
+      // matches merchants by hostname, so a share.google link would resolve to
+      // no merchant and silently lose affiliate attribution.
+      if (data?.url && data.url !== getValues("url")) setValue("url", data.url);
+
       if (data?.title) setValue("title", data.title);
       if (data?.description) setValue("notes", stripHtml(data.description));
       if (data?.images && data.images.length > 0) {

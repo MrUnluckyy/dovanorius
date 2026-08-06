@@ -326,9 +326,9 @@ export function ViewItemModal({
                         <p className="text-end">{t("notProvided")}</p>
                       ) : (
                         <a
-                          href={url || ""}
+                          href={`/out?u=${encodeURIComponent(url)}&item=${id}`}
                           target="_blank"
-                          rel="noopener noreferrer"
+                          rel="noopener noreferrer sponsored"
                           className="text-end flex gap-1 items-center link"
                           data-clarity-mask="true"
                         >
@@ -337,6 +337,16 @@ export function ViewItemModal({
                         </a>
                       )}
                     </div>
+                    {/* Shown next to the link, not only in the legal pages:
+                        commercial intent has to be disclosed at the point of
+                        click. /out falls back to the raw URL for merchants we
+                        have no programme with, so the wording stays hedged
+                        ("some links"). */}
+                    {url && (
+                      <p className="text-xs opacity-60 text-end">
+                        {t("affiliateDisclosure")}
+                      </p>
+                    )}
                   </div>
                 </div>
                 {/* Subtle fade hinting there's more to scroll to. */}
