@@ -138,9 +138,28 @@ export async function GET(req: Request) {
   }
   clearTimeout(timeout);
 
+  // A dead product page still returns a full themed body (Shopify 404s run to
+  // hundreds of KB), and its og: tags describe the STORE, not the product — so
+  // parsing on regardless yields an item titled after the shop with the shop
+  // logo as its image. Trust the status code instead.
+  if (httpStatus >= 400) {
+    console.warn(`[parser] UPSTREAM ${httpStatus} — refusing to parse error page`);
+    return NextResponse.json(
+      {
+        error: "PAGE_NOT_AVAILABLE",
+        message:
+          "That page is no longer available. Check the link, or enter the product details manually.",
+      },
+      { status: 422 }
+    );
+  }
+
   const $ = cheerio.load(html);
 
-  const titleTag = $("title").first().text().trim();
+  // Scope to the document head: inline SVG icons (Shopify's payment badges,
+  // for one) also carry <title> elements, and a bare $("title") can pick up
+  // "American Express" instead of the page title.
+  const titleTag = $("head > title").first().text().trim();
   console.log(`[parser] <title> = "${titleTag}"`);
 
   const titleLower = titleTag.toLowerCase();
