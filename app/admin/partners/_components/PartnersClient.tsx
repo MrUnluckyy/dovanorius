@@ -9,6 +9,8 @@ import {
   LuTrash2,
   LuMailPlus,
   LuStore,
+  LuTriangleAlert,
+  LuClock,
 } from "react-icons/lu";
 import toast from "react-hot-toast";
 import {
@@ -42,6 +44,10 @@ export type AdminPartnerRow = {
   isStaff: boolean;
   shopifyDomain: string | null;
   feedAutoApprove: boolean;
+  feedLastSyncedAt: string | null;
+  feedLastStatus: string | null;
+  feedLastError: string | null;
+  feedLastCount: number | null;
   invites: AdminInvite[];
 };
 
@@ -243,6 +249,39 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
                                 ? "auto-tvirtinama"
                                 : "moderuojama"}
                             </button>
+                          </div>
+                        )}
+                        {p.shopifyDomain && (
+                          <div className="mt-1 text-xs">
+                            {p.feedLastStatus === "error" ? (
+                              <div className="flex items-start gap-1 text-error">
+                                <LuTriangleAlert
+                                  size={12}
+                                  className="mt-0.5 shrink-0"
+                                />
+                                <span>
+                                  Sinchronizavimas nepavyko
+                                  {p.feedLastSyncedAt &&
+                                    ` (${new Date(
+                                      p.feedLastSyncedAt
+                                    ).toLocaleString("lt-LT")})`}
+                                  : {p.feedLastError}
+                                </span>
+                              </div>
+                            ) : p.feedLastSyncedAt ? (
+                              <span className="flex items-center gap-1 text-base-content/50">
+                                <LuClock size={11} />
+                                {new Date(p.feedLastSyncedAt).toLocaleString(
+                                  "lt-LT"
+                                )}
+                                {p.feedLastCount != null &&
+                                  ` · ${p.feedLastCount} vnt.`}
+                              </span>
+                            ) : (
+                              <span className="text-warning">
+                                Dar nesinchronizuota
+                              </span>
+                            )}
                           </div>
                         )}
                         {p.invites.length > 0 && (

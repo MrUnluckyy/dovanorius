@@ -17,6 +17,10 @@ type PartnerRow = {
   created_at: string;
   shopify_domain: string | null;
   feed_auto_approve: boolean;
+  feed_last_synced_at: string | null;
+  feed_last_status: string | null;
+  feed_last_error: string | null;
+  feed_last_count: number | null;
 };
 
 export default async function AdminPartnersPage() {
@@ -29,7 +33,7 @@ export default async function AdminPartnersPage() {
     supabaseAdmin
       .from("partners")
       .select(
-        "id, name, slug, website_url, is_active, created_at, shopify_domain, feed_auto_approve"
+        "id, name, slug, website_url, is_active, created_at, shopify_domain, feed_auto_approve, feed_last_synced_at, feed_last_status, feed_last_error, feed_last_count"
       )
       .order("created_at", { ascending: false }),
     supabaseAdmin.from("partner_users").select("partner_id, user_id"),
@@ -78,6 +82,10 @@ export default async function AdminPartnersPage() {
     invites: invitesByPartner.get(p.id) ?? [],
     shopifyDomain: p.shopify_domain,
     feedAutoApprove: p.feed_auto_approve,
+    feedLastSyncedAt: p.feed_last_synced_at,
+    feedLastStatus: p.feed_last_status,
+    feedLastError: p.feed_last_error,
+    feedLastCount: p.feed_last_count,
   }));
 
   return (

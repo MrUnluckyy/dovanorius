@@ -7,7 +7,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "import:feed": "tsx scripts/import-feed.ts"
+    "import:feed": "tsx scripts/import-feed.ts",
+    "sync:partners": "tsx scripts/sync-partner-feeds.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.114.0",
