@@ -15,7 +15,7 @@
 import { Readable } from "node:stream";
 import { createGunzip } from "node:zlib";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { FeedAdapter, FeedNetwork, NormalizedProduct } from "./types";
+import type { FeedAdapter, FeedNetwork, FeedSource, NormalizedProduct } from "./types";
 import { createCurator, type CurationConfig, type CurationStats } from "./curate";
 
 const STAGE_CHUNK = 1000; // rows per staging insert request
@@ -102,12 +102,25 @@ async function withRetry<T>(
   throw new Error(`${label} failed after ${attempts} attempts: ${lastErr}`);
 }
 
-async function downloadFeed(url: string): Promise<Readable> {
-  const res = await fetch(url);
-  if (!res.ok || !res.body) {
-    throw new Error(`feed download failed: ${res.status} ${res.statusText}`);
+async function downloadFeed(
+  feed: FeedSource,
+  log: (msg: string) => void
+): Promise<Readable> {
+  // An adapter may own its download when a plain fetch is not enough (TD's bulk
+  // export has to be polled while the file is generated).
+  let node: Readable;
+  if (feed.download) {
+    node = await feed.download(log);
+  } else {
+    const res = await fetch(feed.url);
+    if (!res.ok || !res.body) {
+      throw new Error(`feed download failed: ${res.status} ${res.statusText}`);
+    }
+    node = Readable.fromWeb(res.body as Parameters<typeof Readable.fromWeb>[0]);
   }
-  const node = Readable.fromWeb(res.body as Parameters<typeof Readable.fromWeb>[0]);
+
+  if (feed.compression === "none") return node;
+
   // AWIN Create-a-Feed with compression/gzip serves a gzip stream. .pipe() does
   // not forward source errors, so forward a mid-download reset onto the gunzip
   // stream — otherwise it lands as an unhandled 'error' event and crashes.
@@ -148,9 +161,12 @@ export async function runImport(
   // keeps variant collapse correct on retry; the merge dedupes staging by id, so
   // re-staging is safe.
   const stageFeed = async (feed: (typeof feeds)[number]): Promise<CurationStats | null> => {
-    const curator = curate ? createCurator(curate) : null;
-    const body = await downloadFeed(feed.url);
-    for await (const product of adapter.parse(body)) {
+    // Feed-level overrides win over the run's config: within one network the
+    // feeds can disagree on which fields they even publish.
+    const curator = curate ? createCurator({ ...curate, ...feed.curate }) : null;
+    const body = await downloadFeed(feed, log);
+    const rows = feed.parse ? feed.parse(body) : adapter.parse(body);
+    for await (const product of rows) {
       const row = curator ? curator.consider(product) : product;
       if (!row) continue; // curated out
       batch.push(stagingRow(row));
