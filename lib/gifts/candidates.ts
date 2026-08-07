@@ -18,8 +18,20 @@ const SELECT =
 
 // Categories to spread candidates across, so a sporty man doesn't get only
 // shoes. Retrieval pulls a bucket per type and round-robins them together.
-const TYPES = ["clothing", "shoes", "beauty", "bag", "accessory"] as const;
+const TYPES = ["clothing", "shoes", "beauty", "bag", "accessory", "other"] as const;
 const PER_TYPE = 12;
+
+/**
+ * Types that may only contribute INTEREST-MATCHED rows, never a generic sample.
+ *
+ * "other" is the catalogue's largest bucket (~91k: tools, toys, electronics,
+ * furniture, car parts) and the only home for non-fashion gifts — a hobbyist's
+ * LEGO, 3D-printer parts or fishing gear are all here, so excluding it starved
+ * exactly the profiles it should serve best. But it is a junk drawer: sampled
+ * blind it yields car mats and sofas, so it earns its place only when a term
+ * from the person's interests or brands actually matches.
+ */
+const INTEREST_MATCHED_ONLY = new Set<string>(["other"]);
 
 export type RetrieveOpts = {
   /** Disliked product ids to hard-exclude. */
@@ -115,6 +127,7 @@ export async function retrieveCandidates(
           .limit(PER_TYPE);
         if (data && data.length) return shuffle(data as Candidate[]);
       }
+      if (INTEREST_MATCHED_ONLY.has(type)) return [];
       // …else a quality in-budget sample of the category.
       const { data } = await baseQuery(profile, opts)
         .eq("product_type", type)
