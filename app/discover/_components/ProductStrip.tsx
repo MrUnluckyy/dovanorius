@@ -8,6 +8,7 @@ import { ProductCard, type CardProduct } from "./ProductCard";
 /** Shared horizontal editorial strip used by collections and AI suggestions. */
 export function ProductStrip({
   title,
+  subtitle,
   Icon,
   items,
   isLoading,
@@ -15,6 +16,8 @@ export function ProductStrip({
   onSeeAll,
 }: {
   title: string;
+  /** The editorial line — why this shelf exists. What turns a grid into a page. */
+  subtitle?: string;
   Icon?: IconType;
   items: CardProduct[];
   isLoading: boolean;
@@ -28,10 +31,15 @@ export function ProductStrip({
   return (
     <section className="rounded-3xl bg-base-200/50 p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h3 className="flex items-center gap-2 font-heading text-lg font-bold tracking-tight sm:text-xl">
-          {Icon && <Icon className="w-5 shrink-0 text-primary" aria-hidden />}
-          {title}
-        </h3>
+        <div className="min-w-0">
+          <h3 className="flex items-center gap-2 font-heading text-lg font-bold tracking-tight sm:text-xl">
+            {Icon && <Icon className="w-5 shrink-0 text-primary" aria-hidden />}
+            {title}
+          </h3>
+          {subtitle && (
+            <p className="mt-0.5 text-sm opacity-60">{subtitle}</p>
+          )}
+        </div>
         {onSeeAll && (
           <button
             onClick={onSeeAll}

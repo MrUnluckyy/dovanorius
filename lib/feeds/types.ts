@@ -6,6 +6,9 @@
  * adding a network is a new adapter file — nothing downstream changes.
  */
 import type { Readable } from "node:stream";
+// Type-only cycle (curate.ts imports NormalizedProduct from here); erased at
+// compile time, so it costs nothing at runtime.
+import type { CurationConfig } from "./curate";
 
 export type FeedNetwork = "awin" | "tradedoubler";
 
@@ -36,14 +39,42 @@ export type NormalizedProduct = {
   gender: "female" | "male" | "unisex" | null;
   season: "winter" | "summer" | "all";
   productType: string;
+  /**
+   * Optional override for the curator's variant-collapse key, for feeds where
+   * brand+name does not identify one product (e.g. About You bakes the colour
+   * into the title, so only the deeplink's product id groups the variants).
+   * Null/absent = collapse on brand+name as usual.
+   */
+  conceptKey?: string | null;
 };
 
-/** A single downloadable feed (one AWIN "Create-a-Feed" fid). */
+/** A single downloadable feed (one AWIN "Create-a-Feed" fid, one TD fid). */
 export type FeedSource = {
   /** Human label for logs. */
   label: string;
   /** Fully-formed download URL (gzipped CSV for AWIN). */
   url: string;
+  /**
+   * Body encoding. Defaults to "gzip" — AWIN's Create-a-Feed always serves a
+   * gzip stream, while TradeDoubler serves plain JSON.
+   */
+  compression?: "gzip" | "none";
+  /**
+   * Per-feed curation overrides, merged over the run's config. Networks whose
+   * feeds disagree on which fields exist (TradeDoubler) need this: requiring a
+   * brand is right for one feed and empties another.
+   */
+  curate?: Partial<CurationConfig>;
+  /**
+   * Adapter-owned download, when a plain fetch is not enough — TradeDoubler's
+   * bulk export is generated asynchronously and has to be polled for.
+   */
+  download?: (log: (msg: string) => void) => Promise<Readable>;
+  /**
+   * Per-feed parser, for networks where mapping depends on which feed the row
+   * came from. Falls back to the adapter's `parse` when absent.
+   */
+  parse?: (body: Readable) => AsyncIterable<NormalizedProduct>;
 };
 
 export interface FeedAdapter {

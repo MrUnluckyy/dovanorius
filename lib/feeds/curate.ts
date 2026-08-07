@@ -97,12 +97,25 @@ function norm(s: string | null | undefined): string {
   return (s ?? "").toLowerCase().replace(/\s+/g, " ").trim();
 }
 
+/**
+ * Prefix per network. AWIN's stays "awc-" because those ids are already the
+ * primary key of ~149k live rows — changing it would orphan every one of them.
+ */
+const ID_PREFIX: Record<NormalizedProduct["network"], string> = {
+  awin: "awc-",
+  tradedoubler: "tdc-",
+};
+
 /** Stable id for a product concept — order-independent across feed runs. */
 export function conceptId(p: NormalizedProduct): string {
-  const key = `${p.network}|${norm(p.merchantId ?? p.merchantName)}|${norm(
-    p.brandName
-  )}|${norm(p.productName)}`;
-  return "awc-" + createHash("sha1").update(key).digest("hex").slice(0, 16);
+  // A feed-supplied conceptKey wins: some feeds identify the product concept
+  // themselves (a product id behind the variants) more reliably than the title
+  // does. Otherwise collapse on brand+name.
+  const identity = p.conceptKey
+    ? norm(p.conceptKey)
+    : `${norm(p.brandName)}|${norm(p.productName)}`;
+  const key = `${p.network}|${norm(p.merchantId ?? p.merchantName)}|${identity}`;
+  return ID_PREFIX[p.network] + createHash("sha1").update(key).digest("hex").slice(0, 16);
 }
 
 export type Curator = {

@@ -21,6 +21,7 @@ export function ProfileEditForm({
       display_name: profile?.display_name || "NOT SET",
       about: profile?.about || "",
       public: profile?.public || false,
+      gender: profile?.gender ?? null,
     },
   });
 
@@ -31,6 +32,8 @@ export function ProfileEditForm({
         display_name: data.display_name,
         about: data.about,
         public: data.public,
+        // "" from the empty <option> means "not set" — store null, not "".
+        gender: data.gender || null,
       });
       toast.success(t("toastProfileUpdated"));
     } catch (error) {
@@ -102,6 +105,15 @@ export function ProfileEditForm({
             placeholder="Display name"
             {...register("display_name")}
           />
+
+          <label className="label text-sm font-medium">{t("gender")}</label>
+          <select className="select w-full" {...register("gender")}>
+            <option value="">{t("genderUnset")}</option>
+            <option value="female">{t("genderFemale")}</option>
+            <option value="male">{t("genderMale")}</option>
+            <option value="other">{t("genderOther")}</option>
+          </select>
+          <p className="text-xs opacity-60">{t("genderHelp")}</p>
 
           <label className="label text-sm font-medium">{t("description")}</label>
           <textarea

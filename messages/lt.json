@@ -222,7 +222,13 @@
     "toastProfileUpdated": "Profilis sėkmingai atnaujintas!",
     "deleteAccount": "Ištrinti paskyrą",
     "confirmDeleteAccountTitle": "Ar tikrai ištrinti paskyrą?",
-    "confirmDeleteAccountMessage": "Šis veiksmas yra negrįžtamas. <format>Visi jūsų duomenys bus prarasti.</format>"
+    "confirmDeleteAccountMessage": "Šis veiksmas yra negrįžtamas. <format>Visi jūsų duomenys bus prarasti.</format>",
+    "gender": "Lytis",
+    "genderUnset": "Nenurodyta",
+    "genderFemale": "Moteris",
+    "genderMale": "Vyras",
+    "genderOther": "Kita",
+    "genderHelp": "Naudojame tik tam, kad dovanų idėjos būtų tinkamesnės. Galite nenurodyti."
   },
   "DeleteAccount": {
     "warningTitle": "Šio veiksmo negalima atšaukti",
@@ -353,7 +359,7 @@
     "title": "Dovanų idėjos",
     "subtitle": "Atrinktas įkvėpimas iš kokybiškų prekių ženklų.",
     "allCategories": "Visos",
-    "browseAll": "Visos dovanos",
+    "browseAll": "Naršyti visas prekes",
     "shopByCategory": "Kategorijos",
     "moreForYou": "Daugiau tau",
     "audience": {
@@ -367,7 +373,15 @@
       "clothing": "Drabužiai",
       "shoes": "Avalynė",
       "bag": "Rankinės",
-      "accessory": "Aksesuarai"
+      "accessory": "Aksesuarai",
+      "home": "Namams",
+      "tech": "Technika",
+      "toys": "Žaislai",
+      "tools": "Įrankiai",
+      "sport": "Sportas",
+      "kitchen": "Virtuvė",
+      "garden": "Sodas",
+      "pets": "Augintiniams"
     },
     "price": {
       "all": "Bet kokia kaina",
@@ -387,7 +401,8 @@
       "onSale": "Šiuo metu su nuolaida",
       "beauty": "Grožio dovanos",
       "under25": "Dovanos iki 25 €",
-      "bags": "Rankinės ir krepšiai"
+      "bags": "Rankinės ir krepšiai",
+      "weSuggestSubtitle": "Parinkta pagal tavo pomėgius"
     },
     "report": {
       "cta": "Pranešti apie klaidą",
@@ -412,7 +427,61 @@
     "loadMore": "Rodyti daugiau",
     "empty": "Pagal pasirinktus filtrus prekių nerasta.",
     "error": "Nepavyko įkelti prekių. Bandykite dar kartą.",
-    "affiliateDisclosure": "Kai kurios nuorodos yra partnerių – pirkę galite mums skirti nedidelį komisinį, kaina jums nesikeičia."
+    "affiliateDisclosure": "Kai kurios nuorodos yra partnerių – pirkę galite mums skirti nedidelį komisinį, kaina jums nesikeičia.",
+    "audiencePrompt": "Kam ieškote dovanos?",
+    "browseAllHint": "Visas katalogas su filtrais ir paieška",
+    "backToIdeas": "Grįžti į idėjas",
+    "browseTitle": "Visos prekės",
+    "shelves": {
+      "under25": {
+        "title": "Iki 25 € – ir vis tiek įsimena",
+        "subtitle": "Nedidelė dovana, kuri neatrodo pigiai"
+      },
+      "home": {
+        "title": "Namų jaukumui",
+        "subtitle": "Žvakės, pledai ir smulkmenos, kurios šildo"
+      },
+      "beauty": {
+        "title": "Grožio dovanos",
+        "subtitle": "Kvapai ir priežiūra, kuriuos malonu gauti"
+      },
+      "tech": {
+        "title": "Technikos mėgėjui",
+        "subtitle": "Ausinės, išmanieji daiktai ir kiti žaisliukai"
+      },
+      "toys": {
+        "title": "Vaikams ir žaidimams",
+        "subtitle": "LEGO, dėlionės ir stalo žaidimai visai šeimai"
+      },
+      "tools": {
+        "title": "Meistrui",
+        "subtitle": "Įrankiai tam, kuris viską mėgsta pasidaryti pats"
+      },
+      "sport": {
+        "title": "Sportui ir laisvalaikiui",
+        "subtitle": "Dviračiai, žygiai ir viskas judesiui"
+      },
+      "kitchen": {
+        "title": "Virtuvės malonumai",
+        "subtitle": "Kavai, arbatai ir gaminimui su nuotaika"
+      },
+      "accessories": {
+        "title": "Smulkmenos su charakteriu",
+        "subtitle": "Rankinės, papuošalai ir aksesuarai"
+      },
+      "garden": {
+        "title": "Sodui ir lauko malonumams",
+        "subtitle": "Augalams, grilio vakarams ir kiemui"
+      },
+      "pets": {
+        "title": "Augintiniams",
+        "subtitle": "Dovana, kurią įvertins ir keturkojis"
+      },
+      "onSale": {
+        "title": "Šiuo metu su nuolaida",
+        "subtitle": "Geros dovanos, kurių kaina dabar krito"
+      }
+    }
   },
   "Inspo": {
     "metaTitle": "Dovanų idėjos tau",

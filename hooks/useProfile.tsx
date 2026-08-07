@@ -11,6 +11,10 @@ export type Profile = {
   about: string | null;
   public: boolean;
   created_at: string;
+  /** Optional, self-declared. Seeds the discover audience; never required. */
+  gender: "female" | "male" | "other" | null;
+  /** Last audience the user chose on discover ("her" | "him" | "everyone"). */
+  discover_audience: string | null;
 };
 
 // if publicUserId is provided, fetch that user's profile; otherwise, fetch the current user's profile

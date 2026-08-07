@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import {
   LuSearch,
@@ -13,45 +13,45 @@ import {
   LuSparkles,
   LuShoppingBag,
   LuGem,
-  LuGift,
-  LuWallet,
+  LuHouse,
+  LuCpu,
+  LuBlocks,
+  LuWrench,
+  LuBike,
+  LuCookingPot,
 } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
 import { useInspoProducts } from "@/hooks/useInspoProducts";
 import { useGiftIdeas } from "@/hooks/useGiftIdeas";
+import { useDiscoverAudience } from "@/hooks/useDiscoverAudience";
 import type { Audience, InspoFilters, InspoSort } from "@/types/inspo";
 import { ProductCard, type CardProduct } from "./_components/ProductCard";
 import { BrandFilter } from "./_components/BrandFilter";
-import {
-  CollectionRow,
-  toCardProduct,
-  type CollectionDef,
-} from "./_components/CollectionRow";
+import { toCardProduct } from "./_components/CollectionRow";
+import { Shelf } from "./_components/Shelf";
+import { SHELVES, shelfToFilters, type ShelfDef } from "./_components/shelves";
 import { ProductStrip } from "./_components/ProductStrip";
 import { ProductModal } from "./_components/ProductModal";
 import { trackInspo } from "@/utils/trackInspo";
 
+// Mirrors the widened product_type taxonomy — the non-fashion buckets were
+// unreachable before, which left a third of the catalogue unbrowsable.
 const CATEGORIES = [
+  { key: "home", type: "home", Icon: LuHouse },
+  { key: "beauty", type: "beauty", Icon: LuSparkles },
+  { key: "tech", type: "tech", Icon: LuCpu },
+  { key: "toys", type: "toys", Icon: LuBlocks },
+  { key: "tools", type: "tools", Icon: LuWrench },
+  { key: "sport", type: "sport", Icon: LuBike },
+  { key: "kitchen", type: "kitchen", Icon: LuCookingPot },
   { key: "clothing", type: "clothing", Icon: LuShirt },
   { key: "shoes", type: "shoes", Icon: LuFootprints },
-  { key: "beauty", type: "beauty", Icon: LuSparkles },
   { key: "bag", type: "bag", Icon: LuShoppingBag },
   { key: "accessory", type: "accessory", Icon: LuGem },
 ];
 
 const SORTS: InspoSort[] = ["recommended", "price_asc", "price_desc", "discount"];
 const AUDIENCES: Audience[] = ["everyone", "her", "him"];
-
-// Editorial strips interleaved into the browse feed (Zalando-style). Shown only
-// when no filters are active; one appears after each block of PRODUCTS_PER_BLOCK.
-const PRODUCTS_PER_BLOCK = 10;
-const COLLECTIONS: CollectionDef[] = [
-  { key: "forAnyone", Icon: LuGift, query: { gender: "unisex" } },
-  { key: "onSale", Icon: LuTag, query: { onSale: true, sort: "discount" }, canApply: true },
-  { key: "beauty", Icon: LuSparkles, query: { productType: "beauty" }, canApply: true },
-  { key: "under25", Icon: LuWallet, query: { priceMax: 25 }, canApply: true },
-  { key: "bags", Icon: LuShoppingBag, query: { productType: "bag" }, canApply: true },
-];
 
 const PRICE_BANDS: { key: string; min: number | null; max: number | null }[] = [
   { key: "all", min: null, max: null },
@@ -69,11 +69,20 @@ export function DiscoverClient() {
   const [bandKey, setBandKey] = useState<string>("all");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
-  const [audience, setAudience] = useState<Audience>("everyone");
   const [brand, setBrand] = useState<string | null>(null);
   const [onSaleOnly, setOnSaleOnly] = useState(false);
   const [sort, setSort] = useState<InspoSort>("recommended");
   const [selected, setSelected] = useState<CardProduct | null>(null);
+  /**
+   * "inspire" is the page; "browse" is the old filter-bar + infinite grid, now
+   * reached deliberately. Browsing 328k products was never the inspiring part.
+   */
+  const [mode, setMode] = useState<"inspire" | "browse">("inspire");
+
+  // Audience comes from the profile now (self-declared gender, or the last
+  // choice made here) instead of resetting to "everyone" on every visit.
+  const { audience, setAudience, resolved: audienceResolved } =
+    useDiscoverAudience(userId);
 
   const supabase = createClient();
   const band = PRICE_BANDS.find((b) => b.key === bandKey) ?? PRICE_BANDS[0];
@@ -98,15 +107,10 @@ export function DiscoverClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Active filters, for the chip row + to decide whether strips show.
+  // Active filters, for the chip row. Audience is excluded on purpose: it is now
+  // a persistent profile setting, not a filter the user just applied.
   const hasFilters =
-    !!productType ||
-    !!brand ||
-    bandKey !== "all" ||
-    onSaleOnly ||
-    audience !== "everyone" ||
-    !!search;
-  const showCollections = !hasFilters;
+    !!productType || !!brand || bandKey !== "all" || onSaleOnly || !!search;
 
   const filters: InspoFilters = useMemo(
     () => ({
@@ -133,9 +137,9 @@ export function DiscoverClient() {
     isFetchingNextPage,
   } = useInspoProducts(filters);
 
-  // AI "we suggest" strip — only fetched (LLM cost) in the default browse state.
+  // AI "we suggest" strip — only fetched (LLM cost) on the inspire page.
   const { data: aiData, isLoading: aiLoading } = useGiftIdeas(
-    showCollections ? userId : null,
+    mode === "inspire" ? userId : null,
     "any",
     band.min,
     band.max
@@ -150,13 +154,6 @@ export function DiscoverClient() {
   }));
 
   const products = useMemo(() => data?.pages.flat() ?? [], [data]);
-  const productBlocks = useMemo(() => {
-    const blocks = [];
-    for (let i = 0; i < products.length; i += PRODUCTS_PER_BLOCK) {
-      blocks.push(products.slice(i, i + PRODUCTS_PER_BLOCK));
-    }
-    return blocks;
-  }, [products]);
 
   const openProduct = (p: CardProduct) => {
     setSelected(p);
@@ -173,33 +170,122 @@ export function DiscoverClient() {
     setSearch("");
   };
 
-  // "See all" on a strip → apply its preset to the main filter bar.
-  const applyCollection = (c: CollectionDef) => {
-    switch (c.key) {
-      case "onSale":
-        setOnSaleOnly(true);
-        setSort("discount");
-        break;
-      case "beauty":
-        setProductType("beauty");
-        break;
-      case "bags":
-        setProductType("bag");
-        break;
-      case "under25":
-        setBandKey("under25");
-        break;
-    }
+  /** "See all" on a shelf hands its theme to browse mode. */
+  const openShelfInBrowse = (shelf: ShelfDef) => {
+    const f = shelfToFilters(shelf);
+    clearAll();
+    setProductType(f.productType);
+    setOnSaleOnly(f.onSaleOnly);
+    if (f.priceMax === 25) setBandKey("under25");
+    if (f.onSaleOnly) setSort("discount");
+    setMode("browse");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // ===== Inspire: the page. Shelves with a reason, not a wall of products. =====
+  if (mode === "inspire") {
+    return (
+      <div className="mx-auto max-w-[1440px] px-4 pt-8 sm:px-6">
+        <header className="mb-6">
+          <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+            {t("title")}
+          </h1>
+          <p className="mt-1 max-w-xl text-sm opacity-60">{t("subtitle")}</p>
+        </header>
+
+        {/* Audience — the one control worth showing up front, because it
+            changes every shelf below it. Seeded from the profile. */}
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          <span className="text-sm font-medium opacity-70">
+            {t("audiencePrompt")}
+          </span>
+          {AUDIENCES.map((a) => (
+            <button
+              key={a}
+              onClick={() => setAudience(a)}
+              aria-pressed={audience === a}
+              className={`cursor-pointer rounded-full px-4 py-1.5 text-sm transition ${
+                audience === a
+                  ? "bg-neutral text-neutral-content"
+                  : "bg-base-200 hover:bg-base-300"
+              }`}
+            >
+              {t(`audience.${a}`)}
+            </button>
+          ))}
+        </div>
+
+        {/* Wait for the profile before rendering shelves, otherwise every shelf
+            loads for "everyone" and then visibly swaps. */}
+        {!audienceResolved ? (
+          <div className="space-y-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="skeleton h-72 w-full rounded-3xl" />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {userId && (aiLoading || aiIdeas.length > 0) && (
+              <ProductStrip
+                title={t("collections.weSuggest")}
+                subtitle={t("collections.weSuggestSubtitle")}
+                Icon={LuSparkles}
+                items={aiIdeas}
+                isLoading={aiLoading}
+                onOpen={openProduct}
+              />
+            )}
+
+            {SHELVES.filter(
+              (s) => !s.audiences || s.audiences.includes(audience)
+            ).map((shelf) => (
+              <Shelf
+                key={shelf.key}
+                shelf={shelf}
+                audience={audience}
+                onOpen={openProduct}
+                onSeeAll={openShelfInBrowse}
+              />
+            ))}
+          </div>
+        )}
+
+        <div className="mt-10 flex flex-col items-center gap-2">
+          <button
+            onClick={() => setMode("browse")}
+            className="btn btn-neutral btn-wide cursor-pointer rounded-full"
+          >
+            {t("browseAll")}
+          </button>
+          <p className="text-xs opacity-50">{t("browseAllHint")}</p>
+        </div>
+
+        <p className="mt-14 text-center text-xs opacity-50">
+          {t("affiliateDisclosure")}
+        </p>
+
+        <ProductModal
+          product={selected}
+          userId={userId}
+          onClose={() => setSelected(null)}
+        />
+      </div>
+    );
+  }
+
+  // ===== Browse: the catalogue, reached on purpose. =====
   return (
     <div className="mx-auto max-w-[1440px] px-4 pt-8 sm:px-6">
       <header className="mb-4">
+        <button
+          onClick={() => setMode("inspire")}
+          className="mb-2 cursor-pointer text-sm opacity-60 hover:opacity-100"
+        >
+          ← {t("backToIdeas")}
+        </button>
         <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-          {t("title")}
+          {t("browseTitle")}
         </h1>
-        <p className="mt-1 max-w-xl text-sm opacity-60">{t("subtitle")}</p>
       </header>
 
       {/* ===== Sticky filter bar ===== */}
@@ -342,43 +428,17 @@ export function DiscoverClient() {
           <div className="py-20 text-center opacity-60">{t("empty")}</div>
         ) : (
           <>
-            <div className="space-y-6">
-              {/* AI suggestions lead the browse feed (signed-in only). */}
-              {showCollections &&
-                userId &&
-                (aiLoading || aiIdeas.length > 0) && (
-                  <ProductStrip
-                    title={t("collections.weSuggest")}
-                    Icon={LuSparkles}
-                    items={aiIdeas}
-                    isLoading={aiLoading}
-                    onOpen={openProduct}
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {products.map((p) => {
+                const card = toCardProduct(p);
+                return (
+                  <ProductCard
+                    key={p.id}
+                    product={card}
+                    onOpen={() => openProduct(card)}
                   />
-                )}
-
-              {productBlocks.map((block, bi) => (
-                <Fragment key={bi}>
-                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                    {block.map((p) => {
-                      const card = toCardProduct(p);
-                      return (
-                        <ProductCard
-                          key={p.id}
-                          product={card}
-                          onOpen={() => openProduct(card)}
-                        />
-                      );
-                    })}
-                  </div>
-                  {showCollections && COLLECTIONS[bi] && (
-                    <CollectionRow
-                      collection={COLLECTIONS[bi]}
-                      onOpen={openProduct}
-                      onApply={applyCollection}
-                    />
-                  )}
-                </Fragment>
-              ))}
+                );
+              })}
             </div>
 
             {hasNextPage && (
