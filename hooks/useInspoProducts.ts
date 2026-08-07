@@ -34,6 +34,9 @@ export function useInspoProducts(filters: InspoFilters) {
         .from("inspo_products")
         .select("*")
         .eq("in_stock", true)
+        // Excludes tyres, furniture, bedding, renovation, cleaning and
+        // underwear — the rows that made browse feel like a liquidation sale.
+        .eq("giftable", true)
         .not("image_url", "is", null)
         .not("deep_link", "is", null)
         .gte("price", Math.max(PRICE_FLOOR, filters.priceMin ?? 0));
@@ -60,7 +63,14 @@ export function useInspoProducts(filters: InspoFilters) {
             .order("id");
           break;
         default:
-          query = query.order("sort_key", { ascending: true }).order("id");
+          // "Recommended" used to be sort_key, whose column default is
+          // random() — a uniform draw over 328k rows. gift_score leads now;
+          // sort_key survives only to break the (many) ties, so equally good
+          // items still rotate between visits.
+          query = query
+            .order("gift_score", { ascending: false })
+            .order("sort_key", { ascending: true })
+            .order("id");
       }
 
       query = query.range(from, to);

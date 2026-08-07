@@ -219,7 +219,13 @@
     "toastProfileUpdated": "Profile updated successfully!",
     "deleteAccount": "Delete Account",
     "confirmDeleteAccountTitle": "Are you sure you want to delete your account?",
-    "confirmDeleteAccountMessage": "This action is irreversible. <format>All your data will be permanently deleted</format>."
+    "confirmDeleteAccountMessage": "This action is irreversible. <format>All your data will be permanently deleted</format>.",
+    "gender": "Gender",
+    "genderUnset": "Not set",
+    "genderFemale": "Female",
+    "genderMale": "Male",
+    "genderOther": "Other",
+    "genderHelp": "Only used to make gift ideas more relevant. You can leave it blank."
   },
   "DeleteAccount": {
     "warningTitle": "This action cannot be undone",
@@ -349,7 +355,7 @@
     "title": "Gift Ideas",
     "subtitle": "Curated inspiration from quality brands — not the usual mass-market clutter.",
     "allCategories": "All",
-    "browseAll": "Browse all gifts",
+    "browseAll": "Browse everything",
     "shopByCategory": "Shop by category",
     "moreForYou": "More for you",
     "audience": {
@@ -363,7 +369,15 @@
       "clothing": "Clothing",
       "shoes": "Shoes",
       "bag": "Bags",
-      "accessory": "Accessories"
+      "accessory": "Accessories",
+      "home": "Home",
+      "tech": "Tech",
+      "toys": "Toys",
+      "tools": "Tools",
+      "sport": "Sport",
+      "kitchen": "Kitchen",
+      "garden": "Garden",
+      "pets": "Pets"
     },
     "price": {
       "all": "Any price",
@@ -383,7 +397,8 @@
       "onSale": "On sale now",
       "beauty": "Beauty gifts",
       "under25": "Gifts under €25",
-      "bags": "Bags & purses"
+      "bags": "Bags & purses",
+      "weSuggestSubtitle": "Picked from your interests"
     },
     "report": {
       "cta": "Report an issue",
@@ -408,7 +423,61 @@
     "loadMore": "Load more",
     "empty": "No products match your filters.",
     "error": "Couldn't load products. Please try again.",
-    "affiliateDisclosure": "Some links are affiliate links — we may earn a small commission at no extra cost to you."
+    "affiliateDisclosure": "Some links are affiliate links — we may earn a small commission at no extra cost to you.",
+    "audiencePrompt": "Who are you shopping for?",
+    "browseAllHint": "The full catalogue, with filters and search",
+    "backToIdeas": "Back to ideas",
+    "browseTitle": "All products",
+    "shelves": {
+      "under25": {
+        "title": "Under €25 – still memorable",
+        "subtitle": "Small gifts that don't look cheap"
+      },
+      "home": {
+        "title": "For a cosy home",
+        "subtitle": "Candles, throws and the small things that warm a room"
+      },
+      "beauty": {
+        "title": "Beauty gifts",
+        "subtitle": "Scents and care that are a pleasure to receive"
+      },
+      "tech": {
+        "title": "For the tech lover",
+        "subtitle": "Headphones, smart things and other toys"
+      },
+      "toys": {
+        "title": "Kids and games",
+        "subtitle": "LEGO, puzzles and board games for the whole family"
+      },
+      "tools": {
+        "title": "For the maker",
+        "subtitle": "Tools for someone who'd rather build it themselves"
+      },
+      "sport": {
+        "title": "Sport and the outdoors",
+        "subtitle": "Bikes, hikes and everything that moves"
+      },
+      "kitchen": {
+        "title": "Kitchen pleasures",
+        "subtitle": "For coffee, tea and cooking with a bit of joy"
+      },
+      "accessories": {
+        "title": "Small things with character",
+        "subtitle": "Bags, jewellery and accessories"
+      },
+      "garden": {
+        "title": "Garden and outdoors",
+        "subtitle": "For plants, grill nights and the backyard"
+      },
+      "pets": {
+        "title": "For pets",
+        "subtitle": "A gift the four-legged one will appreciate too"
+      },
+      "onSale": {
+        "title": "On sale right now",
+        "subtitle": "Good gifts that just dropped in price"
+      }
+    }
   },
   "Inspo": {
     "metaTitle": "Gift Ideas For You",
