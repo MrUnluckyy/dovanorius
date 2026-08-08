@@ -186,9 +186,19 @@ export async function refreshPersona(
     output_config: { format: zodOutputFormat(PicksSchema) },
   });
 
+  // Dedupe by product_id before slicing: the model occasionally returns the
+  // same product twice (usually with two different reasons), which collides on
+  // persona_products' (persona_id, product_id) primary key and fails the whole
+  // insert — leaving that persona with an empty shelf, since the delete has
+  // already run. First mention wins, as it carries the model's own ranking.
   const byId = new Set(candidates.map((c) => c.id));
+  const seen = new Set<string>();
   const picks = (res.parsed_output?.picks ?? [])
-    .filter((p) => byId.has(p.product_id))
+    .filter((p) => {
+      if (!byId.has(p.product_id) || seen.has(p.product_id)) return false;
+      seen.add(p.product_id);
+      return true;
+    })
     .slice(0, KEEP_PER_PERSONA);
 
   // Replace wholesale: a stale pick whose product has since gone out of stock
