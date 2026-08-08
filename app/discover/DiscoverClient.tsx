@@ -193,6 +193,34 @@ export function DiscoverClient() {
           <p className="mt-1 max-w-xl text-sm opacity-60">{t("subtitle")}</p>
         </header>
 
+        {/* Search stays reachable from the inspire page: someone who arrives
+            already knowing what they want should not have to find "browse all"
+            first. Submitting carries the query straight into browse, which is
+            the only mode with a result grid. */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const q = searchInput.trim();
+            if (!q) return;
+            setSearch(q);
+            setMode("browse");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          className="mb-5"
+        >
+          <label className="input flex w-full items-center gap-2 rounded-full sm:max-w-md">
+            <LuSearch className="w-4 opacity-50" aria-hidden />
+            <input
+              type="search"
+              className="grow"
+              placeholder={t("searchPlaceholder")}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              aria-label={t("searchPlaceholder")}
+            />
+          </label>
+        </form>
+
         {/* Audience — the one control worth showing up front, because it
             changes every shelf below it. Seeded from the profile. */}
         <div className="mb-6 flex flex-wrap items-center gap-2">

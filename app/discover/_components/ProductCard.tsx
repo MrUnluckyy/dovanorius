@@ -22,9 +22,35 @@ export type CardProduct = {
   merchant?: string | null;
 };
 
-/** Bump the AWIN image CDN thumbnail for crisper cards. */
-function hiRes(url: string): string {
-  return url.replace(/([?&])w=\d+/, "$1w=500").replace(/([?&])h=\d+/, "$1h=500");
+/** Longest edge we ever need for a card, which is ~250px at 2x. */
+const CARD_PX = 600;
+
+/**
+ * Ask each merchant CDN for a card-sized image.
+ *
+ * This started life as "bump the AWIN thumbnail" and only rewrote `w=`/`h=`.
+ * The TradeDoubler merchants use different parameters, so their originals came
+ * through untouched — About You's URLs literally request width=2000&height=2000
+ * (370 KB each) and 4F serves 318 KB. Two dozen of those is ~8 MB of images for
+ * one screen, which is why cards sat blank for seconds even though every URL
+ * returns 200.
+ *
+ * Each rewrite is a no-op on CDNs that do not use that parameter, so unknown
+ * hosts (Modivo, 4F) simply fall through at full size rather than breaking.
+ */
+function cardImage(url: string): string {
+  return url
+    .replace(/([?&])w=\d+/, `$1w=${CARD_PX}`)
+    .replace(/([?&])h=\d+/, `$1h=${CARD_PX}`)
+    // About You
+    .replace(/([?&])width=\d+/, `$1width=${CARD_PX}`)
+    .replace(/([?&])height=\d+/, `$1height=${CARD_PX}`)
+    // Douglas
+    .replace(/([?&])imwidth=\d+/, `$1imwidth=${CARD_PX}`);
+  // NB no rewrite for Eavalyne/eobuwie (`eob_product_1800w_1800h`): that CDN
+  // serves ONLY the exact preset baked into the feed URL and answers every other
+  // value with a 14-byte error, so "resizing" it silently breaks 51k images.
+  // Modivo is left alone for the same reason — its URLs carry no size token.
 }
 
 /**
@@ -66,7 +92,9 @@ export function ProductCard({
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-white">
         <img
           src={
-            product.imageUrl ? hiRes(product.imageUrl) : "/assets/placeholder.jpg"
+            product.imageUrl
+              ? cardImage(product.imageUrl)
+              : "/assets/placeholder.jpg"
           }
           alt={product.title}
           className="h-full w-full object-contain p-3 transition duration-500 group-hover:scale-105"
