@@ -21,8 +21,16 @@ import { usdCost } from "../gifts/cost";
 
 /** More than a shelf shows, so the page can rotate daily for free. */
 const KEEP_PER_PERSONA = 40;
-/** Candidates handed to the model. Cost scales with this; quality plateaus. */
-const CANDIDATE_LIMIT = 150;
+/**
+ * Candidates handed to the model. Cost scales with this.
+ *
+ * 150 produced shelves of 9-22 picks against a target of 40 — thin enough that
+ * daily rotation would visibly repeat within a week. The model is not being too
+ * strict (rejecting ~90% of a pool is the behaviour we want; that is what keeps
+ * filler out), it simply had too little to choose from. Doubling the pool is the
+ * lever, at roughly $0.20 per persona per weekly run.
+ */
+const CANDIDATE_LIMIT = 300;
 
 export type Persona = {
   id: string;
