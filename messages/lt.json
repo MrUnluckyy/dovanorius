@@ -481,7 +481,10 @@
         "title": "Šiuo metu su nuolaida",
         "subtitle": "Geros dovanos, kurių kaina dabar krito"
       }
-    }
+    },
+    "personaPrompt": "Arba pasirinkite gavėją:",
+    "personaShelfTitle": "Dovanos: {persona}",
+    "personaShelfSubtitle": "Atrinkta būtent tokiam žmogui"
   },
   "Inspo": {
     "metaTitle": "Dovanų idėjos tau",

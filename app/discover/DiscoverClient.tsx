@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   LuSearch,
   LuArrowUpDown,
@@ -29,6 +29,8 @@ import { ProductCard, type CardProduct } from "./_components/ProductCard";
 import { BrandFilter } from "./_components/BrandFilter";
 import { toCardProduct } from "./_components/CollectionRow";
 import { Shelf } from "./_components/Shelf";
+import { PersonaShelf } from "./_components/PersonaShelf";
+import { usePersonas } from "@/hooks/usePersonas";
 import { SHELVES, shelfToFilters, type ShelfDef } from "./_components/shelves";
 import { ProductStrip } from "./_components/ProductStrip";
 import { ProductModal } from "./_components/ProductModal";
@@ -63,6 +65,8 @@ const PRICE_BANDS: { key: string; min: number | null; max: number | null }[] = [
 
 export function DiscoverClient() {
   const t = useTranslations("Discover");
+  // Persona labels are DB rows, not i18n keys, so the locale is picked here.
+  const locale = useLocale();
 
   const [userId, setUserId] = useState<string | null>(null);
   const [productType, setProductType] = useState<string | null>(null);
@@ -78,6 +82,11 @@ export function DiscoverClient() {
    * reached deliberately. Browsing 328k products was never the inspiring part.
    */
   const [mode, setMode] = useState<"inspire" | "browse">("inspire");
+  /** Which recipient the shopper is buying for; null = no persona chosen. */
+  const [personaId, setPersonaId] = useState<string | null>(null);
+
+  const { data: personas } = usePersonas();
+  const activePersona = personas?.find((p) => p.id === personaId) ?? null;
 
   // Audience comes from the profile now (self-declared gender, or the last
   // choice made here) instead of resetting to "everyone" on every visit.
@@ -243,6 +252,41 @@ export function DiscoverClient() {
           ))}
         </div>
 
+        {/* Recipient personas. Distinct from the audience chips above: audience
+            is a broad her/him/everyone lens over every shelf, a persona is a
+            specific person ("Paaugliui") with a hand-curated shelf behind it.
+            Selecting one also sets the audience, so the themed shelves below
+            follow along rather than contradicting the choice. */}
+        {!!personas?.length && (
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium opacity-70">
+              {t("personaPrompt")}
+            </span>
+            {personas.map((p) => {
+              const active = personaId === p.id;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => {
+                    setPersonaId(active ? null : p.id);
+                    if (!active && p.gender) {
+                      setAudience(p.gender === "female" ? "her" : "him");
+                    }
+                  }}
+                  aria-pressed={active}
+                  className={`cursor-pointer rounded-full px-4 py-1.5 text-sm transition ${
+                    active
+                      ? "bg-primary text-primary-content"
+                      : "bg-base-200 hover:bg-base-300"
+                  }`}
+                >
+                  {locale === "en" ? p.label_en : p.label_lt}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Wait for the profile before rendering shelves, otherwise every shelf
             loads for "everyone" and then visibly swaps. */}
         {!audienceResolved ? (
@@ -253,6 +297,13 @@ export function DiscoverClient() {
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Leads the page when chosen: the shopper just told us exactly who
+                this is for, so it outranks both the generic shelves and the
+                personal strip (which models the SHOPPER, not the recipient). */}
+            {activePersona && (
+              <PersonaShelf persona={activePersona} onOpen={openProduct} />
+            )}
+
             {userId && (aiLoading || aiIdeas.length > 0) && (
               <ProductStrip
                 title={t("collections.weSuggest")}
