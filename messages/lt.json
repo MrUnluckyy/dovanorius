@@ -486,7 +486,10 @@
     "personaShelfTitle": "Dovanos: {persona}",
     "personaShelfSubtitle": "Atrinkta būtent tokiam žmogui",
     "themeShelfSubtitle": "Kruopščiai atrinkta rankomis",
-    "priceDropped": "kaina krito {percent}%"
+    "priceDropped": "kaina krito {percent}%",
+    "collapse": "Suskleisti",
+    "moreFromCategory": "Daugiau iš šios srities",
+    "moreFromCategoryNote": "Nebe atrinkta rankomis – rūšiuota pagal tinkamumą dovanai"
   },
   "Inspo": {
     "metaTitle": "Dovanų idėjos tau",

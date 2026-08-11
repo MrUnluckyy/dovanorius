@@ -482,7 +482,10 @@
     "personaShelfTitle": "Gifts for {persona}",
     "personaShelfSubtitle": "Hand-picked for exactly this person",
     "themeShelfSubtitle": "Carefully hand-picked",
-    "priceDropped": "{percent}% off"
+    "priceDropped": "{percent}% off",
+    "collapse": "Collapse",
+    "moreFromCategory": "More from this area",
+    "moreFromCategoryNote": "No longer hand-picked – ranked by gift suitability"
   },
   "Inspo": {
     "metaTitle": "Gift Ideas For You",

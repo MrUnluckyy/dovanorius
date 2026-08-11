@@ -1,19 +1,32 @@
 "use client";
 
+import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { LuSparkles, LuUserRound } from "react-icons/lu";
-import { usePersonaPicks, type GiftPersona } from "@/hooks/usePersonas";
+import { LuSparkles, LuUserRound, LuChevronUp } from "react-icons/lu";
+import {
+  usePersonaPicks,
+  useShelfContinuation,
+  SHELF_SIZE,
+  type GiftPersona,
+} from "@/hooks/usePersonas";
 import { toCardProduct } from "./CollectionRow";
-import type { CardProduct } from "./ProductCard";
+import { ProductCard, type CardProduct } from "./ProductCard";
 import { ProductStrip } from "./ProductStrip";
 
 /**
- * The shelf for whichever recipient the shopper picked.
+ * A curated shelf, with "view more" expanding in two tiers.
  *
- * Its picks carry a per-product reason written by the curator, so they render
- * with the same "why this" treatment as the personal AI strip — the difference
- * is this one needs no account.
+ * Tier 1 is the rest of the curated picks. Tier 2 is everything else in the
+ * categories this shelf actually produced — deliberately separated by a heading
+ * that says it is no longer hand-picked.
+ *
+ * That honesty is the design. Feedback asked for more items, but a curated shelf
+ * only holds 7-29: the extra depth has to come from somewhere less curated, and
+ * silently appending weaker items to the same row is exactly what made the old
+ * page feel random. Naming the boundary keeps the curated part trustworthy.
  */
+const MIN_ITEMS = 4;
+
 export function PersonaShelf({
   persona,
   onOpen,
@@ -23,37 +36,108 @@ export function PersonaShelf({
 }) {
   const t = useTranslations("Discover");
   const locale = useLocale();
+  const [expanded, setExpanded] = useState(false);
+
   const { data, isLoading } = usePersonaPicks(persona.id);
+  const picks = data ?? [];
+
+  // Only the types the curator actually chose — see useShelfContinuation.
+  const types = Array.from(
+    new Set(picks.map((p) => p.product_type).filter(Boolean) as string[])
+  );
+  const { data: more = [] } = useShelfContinuation(
+    types,
+    picks.map((p) => p.id),
+    // The shelf's own exclude list guards the second tier too. Without it the
+    // tech continuation came back as laptop bags — precisely what the curator
+    // had just rejected — because `tech` still holds 790 of them and they
+    // outrank real gadgets on brand and price.
+    persona.exclude_keywords ?? [],
+    expanded
+  );
 
   const label = locale === "en" ? persona.label_en : persona.label_lt;
-
-  // Persona labels live in the database so they can be edited without a deploy,
-  // which is why they are not i18n keys.
-  const items: CardProduct[] = (data ?? []).map((p) => ({
+  const isTheme = persona.kind === "theme";
+  const items: CardProduct[] = picks.map((p) => ({
     ...toCardProduct(p),
     reason: p.reason,
   }));
 
-  if (!isLoading && items.length === 0) return null;
+  if (!isLoading && items.length < MIN_ITEMS) return null;
+
+  if (!expanded) {
+    return (
+      <ProductStrip
+        title={isTheme ? label : t("personaShelfTitle", { persona: label })}
+        subtitle={isTheme ? t("themeShelfSubtitle") : t("personaShelfSubtitle")}
+        Icon={isTheme ? LuSparkles : LuUserRound}
+        items={items.slice(0, SHELF_SIZE)}
+        isLoading={isLoading}
+        onOpen={onOpen}
+        // Offering "view more" when there is nothing more to show, and no
+        // second tier either, would be a dead end.
+        onSeeAll={
+          items.length > SHELF_SIZE || types.length
+            ? () => setExpanded(true)
+            : undefined
+        }
+      />
+    );
+  }
 
   return (
-    <ProductStrip
-      // A theme shelf is its own headline ("Namų jaukumui"); only a recipient
-      // shelf reads as "Gifts for <someone>".
-      title={
-        persona.kind === "theme"
-          ? label
-          : t("personaShelfTitle", { persona: label })
-      }
-      subtitle={
-        persona.kind === "theme"
-          ? t("themeShelfSubtitle")
-          : t("personaShelfSubtitle")
-      }
-      Icon={persona.kind === "theme" ? LuSparkles : LuUserRound}
-      items={items}
-      isLoading={isLoading}
-      onOpen={onOpen}
-    />
+    <section className="rounded-3xl bg-base-200/50 p-4 sm:p-5">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="flex items-center gap-2 font-heading text-lg font-bold tracking-tight sm:text-xl">
+            {isTheme ? (
+              <LuSparkles className="w-5 shrink-0 text-primary" aria-hidden />
+            ) : (
+              <LuUserRound className="w-5 shrink-0 text-primary" aria-hidden />
+            )}
+            {isTheme ? label : t("personaShelfTitle", { persona: label })}
+          </h3>
+          <p className="mt-0.5 text-sm opacity-60">
+            {isTheme ? t("themeShelfSubtitle") : t("personaShelfSubtitle")}
+          </p>
+        </div>
+        <button
+          onClick={() => setExpanded(false)}
+          className="btn btn-ghost btn-sm cursor-pointer gap-1 rounded-full"
+        >
+          {t("collapse")}
+          <LuChevronUp className="w-4" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        {items.map((p) => (
+          <ProductCard key={p.id} product={p} onOpen={() => onOpen(p)} />
+        ))}
+      </div>
+
+      {more.length > 0 && (
+        <>
+          <div className="mb-4 mt-8 border-t border-base-300 pt-4">
+            <h4 className="font-heading text-base font-bold tracking-tight">
+              {t("moreFromCategory")}
+            </h4>
+            <p className="mt-0.5 text-sm opacity-55">{t("moreFromCategoryNote")}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+            {more.map((p) => {
+              const card = toCardProduct(p);
+              return (
+                <ProductCard
+                  key={p.id}
+                  product={card}
+                  onOpen={() => onOpen(card)}
+                />
+              );
+            })}
+          </div>
+        </>
+      )}
+    </section>
   );
 }
