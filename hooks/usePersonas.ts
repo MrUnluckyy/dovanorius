@@ -18,6 +18,11 @@ export type GiftPersona = {
   label_lt: string;
   label_en: string;
   gender: "female" | "male" | null;
+  /**
+   * recipient = offered in the picker, shown when chosen.
+   * theme = an editorial shelf rendered inline, replacing the old keyword ones.
+   */
+  kind: "recipient" | "theme";
 };
 
 export type PersonaPick = InspoProduct & { reason: string | null };
@@ -32,7 +37,7 @@ export function usePersonas() {
     queryFn: async (): Promise<GiftPersona[]> => {
       const { data, error } = await supabase
         .from("gift_personas")
-        .select("id, slug, label_lt, label_en, gender")
+        .select("id, slug, label_lt, label_en, gender, kind")
         .eq("is_active", true)
         .order("sort_order");
       if (error) throw error;

@@ -69,7 +69,7 @@ Rules:
 - AGE SAFETY is absolute: never pick anything unsuitable for the persona's age. No alcohol, no adult items, nothing with small parts for a baby or toddler.
 - Match the SPIRIT of the examples, not their literal words — they show the taste level expected, not a shopping list.
 - Reject filler. A shelf of 20 excellent gifts beats 40 padded ones, so return fewer picks rather than weak ones.
-- VARIETY: no more than a third of the picks from any one product category, and avoid near-duplicates (same product in another colour).
+- VARIETY is a hard requirement, judged on what the object actually IS, not on the category label we send you: at most 2 picks of the same kind of thing (e.g. at most 2 scented candles, 2 mugs, 2 backpacks). A shelf of eight candles is a failure even if every candle is excellent. Also avoid the same product in another colour or size.
 - For each pick write "reason" in Lithuanian: one short, concrete sentence saying why it fits THIS person ("Puikiai tinka pradedančiam bėgikui"), never generic praise ("graži dovana").`;
 
 /** Cheap, index-backed candidate pool from the persona's own rules. */
@@ -142,9 +142,23 @@ export async function retrievePersonaCandidates(
     r,
     hits: include.filter((k) => k && (r.product_name ?? "").toLowerCase().includes(k)).length,
   }));
-  scored.sort((a, b) => b.hits - a.hits);
+  // Keyword matches get HALF the pool, no more.
+  //
+  // Sorting the whole pool by hit count let one keyword monopolise it: the
+  // cosy-home shelf listed `žvakė` among its terms and came back as eight
+  // candles out of eight — from a pool that holds only 38 candles against 2,604
+  // other items. The terms are a nudge toward the theme, not a definition of it,
+  // so the rest of the pool stays open for things nobody thought to name.
+  const matched = scored.filter((s) => s.hits > 0).sort((a, b) => b.hits - a.hits);
+  const rest = scored.filter((s) => s.hits === 0);
 
-  return scored.slice(0, CANDIDATE_LIMIT).map((s) => s.r);
+  const half = Math.floor(CANDIDATE_LIMIT / 2);
+  const pool = [
+    ...matched.slice(0, half),
+    ...rest.slice(0, CANDIDATE_LIMIT - Math.min(matched.length, half)),
+  ];
+
+  return pool.slice(0, CANDIDATE_LIMIT).map((s) => s.r);
 }
 
 export type RefreshResult = {
