@@ -480,7 +480,8 @@
     },
     "personaPrompt": "Or pick a recipient:",
     "personaShelfTitle": "Gifts for {persona}",
-    "personaShelfSubtitle": "Hand-picked for exactly this person"
+    "personaShelfSubtitle": "Hand-picked for exactly this person",
+    "priceDropped": "{percent}% off"
   },
   "Inspo": {
     "metaTitle": "Gift Ideas For You",

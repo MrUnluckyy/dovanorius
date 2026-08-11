@@ -484,7 +484,8 @@
     },
     "personaPrompt": "Arba pasirinkite gavėją:",
     "personaShelfTitle": "Dovanos: {persona}",
-    "personaShelfSubtitle": "Atrinkta būtent tokiam žmogui"
+    "personaShelfSubtitle": "Atrinkta būtent tokiam žmogui",
+    "priceDropped": "kaina krito {percent}%"
   },
   "Inspo": {
     "metaTitle": "Dovanų idėjos tau",
