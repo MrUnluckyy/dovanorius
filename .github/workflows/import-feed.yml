@@ -2,6 +2,13 @@ name: Import product feeds
 
 # Nightly at 03:17 UTC (odd minute to avoid the top-of-hour cron pileup),
 # plus a manual trigger for on-demand runs.
+#
+# Required repository secrets:
+#   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SECRET_KEY
+#   AWIN_DATAFEED_KEY, AWIN_FEED_IDS
+#   TRADEDOUBLER_PRODUCTS_TOKEN   (also drives the bulk export; no separate token)
+#   TRADEDOUBLER_FEED_IDS         (optional — the adapter defaults to the four
+#                                  profiled feeds when unset)
 on:
   schedule:
     - cron: "17 3 * * *"
@@ -12,10 +19,18 @@ on:
         required: false
         default: ""
 
+# A second run overlapping the first would corrupt both: every run calls
+# reset_feed_staging on the shared staging table.
+concurrency:
+  group: import-feed
+  cancel-in-progress: false
+
 jobs:
   import:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # AWIN plus TradeDoubler runs well past the old 60: Pigu took 9 min and
+    # About You 39 min on their first full import.
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
 
@@ -28,13 +43,29 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Run importer
+      # The networks run as separate SEQUENTIAL steps rather than a matrix:
+      # they share one staging table, so running them in parallel would have
+      # each reset the other's rows mid-merge.
+      - name: Import AWIN
+        if: ${{ github.event.inputs.network == '' || github.event.inputs.network == 'awin' }}
         # --curate: collapse size/colour variants + hard-filter to the giftable
         # set, then prune the table to that set (see lib/feeds/curate.ts). Without
         # it the importer re-stages every raw variant row and re-bloats the table.
-        run: pnpm import:feed ${{ inputs.network }} --curate
+        run: pnpm import:feed awin --curate
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           AWIN_DATAFEED_KEY: ${{ secrets.AWIN_DATAFEED_KEY }}
           AWIN_FEED_IDS: ${{ secrets.AWIN_FEED_IDS }}
+
+      # !cancelled() rather than success(): a failed AWIN pull should not cost us
+      # the TradeDoubler refresh too. Safe because the importer resets staging at
+      # the start of every run.
+      - name: Import TradeDoubler
+        if: ${{ !cancelled() && (github.event.inputs.network == '' || github.event.inputs.network == 'tradedoubler') }}
+        run: pnpm import:feed tradedoubler --curate
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          TRADEDOUBLER_PRODUCTS_TOKEN: ${{ secrets.TRADEDOUBLER_PRODUCTS_TOKEN }}
+          TRADEDOUBLER_FEED_IDS: ${{ secrets.TRADEDOUBLER_FEED_IDS }}

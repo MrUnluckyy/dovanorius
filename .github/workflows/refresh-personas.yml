@@ -1,0 +1,52 @@
+name: Refresh persona shelves
+
+# Weekly, Mondays at 06:30 UTC — deliberately hours after the nightly feed
+# import (03:17, up to ~3h) so the curator picks from a freshly synced
+# catalogue rather than racing it.
+#
+# Weekly is enough: a persona shelf is identical for every visitor, and the page
+# rotates its window daily from the stored picks without calling the model again.
+# The whole run is roughly $1.
+#
+# Required repository secrets:
+#   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SECRET_KEY, ANTHROPIC_API_KEY
+on:
+  schedule:
+    - cron: "30 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      slugs:
+        description: "Space-separated persona slugs (blank = all active)"
+        required: false
+        default: ""
+
+# refreshPersona() deletes a persona's picks before inserting the new set, so an
+# overlapping run could leave a shelf empty.
+concurrency:
+  group: refresh-personas
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    # Normally ~4 minutes for six personas, but two calls in one run took 16
+    # minutes each (API-side retries), so the ceiling is deliberately generous.
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Curate persona shelves
+        run: pnpm tsx scripts/refresh-personas.ts ${{ github.event.inputs.slugs }}
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
