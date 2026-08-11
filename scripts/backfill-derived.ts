@@ -41,16 +41,31 @@ async function main() {
 
   // Both re-derivation modes work by clearing gift_score for the rows in scope,
   // which puts them back in the RPC's queue (and in its partial index).
+  //
+  // The reset is batched for the same reason the backfill is: clearing the
+  // column across 326k rows in one statement blows the statement timeout on a
+  // table carrying a GIN trigram index, and `--all` then never reached the
+  // backfill loop at all.
   if (all || where) {
     const scope = where ?? "true";
-    const { error } = await supabase.rpc("reset_inspo_derived", { p_where: scope });
-    if (error) {
-      console.error(
-        `Could not reset scope — is reset_inspo_derived() deployed? ${error.message}`
-      );
-      process.exit(1);
+    let queued = 0;
+    for (;;) {
+      const { data, error } = await supabase.rpc("reset_inspo_derived", {
+        p_where: scope,
+        p_batch: 5000,
+      });
+      if (error) {
+        console.error(
+          `Could not reset scope — is reset_inspo_derived() deployed? ${error.message}`
+        );
+        process.exit(1);
+      }
+      const n = Number(data ?? 0);
+      if (!n) break;
+      queued += n;
+      if (queued % 50_000 === 0) console.log(`  queued ${queued}…`);
     }
-    console.log(`queued for re-derivation: ${scope}`);
+    console.log(`queued for re-derivation: ${queued} rows matching ${scope}`);
   }
 
   const started = Date.now();
