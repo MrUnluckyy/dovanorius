@@ -1,0 +1,82 @@
+-- The remaining themed shelves, converted from keyword queries to curation.
+--
+-- Every pool includes 'other' alongside its natural type. product_type is the
+-- very thing that broke these shelves — laptop BAGS in tech (790 of 7,184 rows),
+-- LEGO t-shirts in toys, NAPAPIJRI "M-Ya-SUNI" trousers in pets — and 'other' is
+-- where most real non-fashion inventory sits anyway (114k rows of Pigu). Adding
+-- it is what actually fixed tech: every pick in that shelf came from 'other',
+-- invisible to the old query.
+--
+-- Each description carries an explicit NOT clause. On the cosy-home trial that
+-- did more work than the positive examples did.
+insert into public.gift_personas
+  (slug, kind, label_lt, label_en, description, gender, age_min, age_max,
+   product_types, include_keywords, exclude_keywords, price_min, price_max, examples, sort_order)
+values
+ ('under-25', 'theme', 'Iki 25 € – ir vis tiek įsimena', 'Under €25 and still memorable',
+  'Small gifts that feel considered rather than cheap. A thing someone keeps and uses, not filler or a novelty. Must not look like a last-minute purchase. NOT socks, NOT keyrings, NOT generic mugs with slogans.',
+  null, null, null, '{home,kitchen,toys,beauty,accessory,tech,other}',
+  '{žvakė,puodelis,dėlionė,stalo žaidim,kojinės,pirštinės,užrašinė,termosas,prieskoni}',
+  '{pakabukas raktams,suvenyras}', 10, 25,
+  '{"a small-batch scented candle","a good enamel camping mug","a pocket notebook with a cloth cover","a compact travel game","a jar of single-origin coffee"}', 10),
+ ('tech-lover', 'theme', 'Technikos mėgėjui', 'For the tech lover',
+  'Actual electronics and gadgets someone would enjoy receiving: headphones, speakers, smart devices, cameras, chargers with some design to them. CRITICALLY: a laptop BAG, a phone CASE or a watch STRAP is an accessory, not tech — never pick those. NOT bags, NOT cases, NOT cables.',
+  null, null, null, '{tech,other}',
+  '{ausinės,kolonėlė,išmanus,belaid,pelė,klaviatūra,projektorius,fotoaparat,dronas,elektronin}',
+  '{krepšys,dėklas,rankinė,kuprinė,laidas}', 20, 250,
+  '{"over-ear bluetooth headphones","a portable bluetooth speaker","a smart LED light strip","an instant camera","a wireless charging stand"}', 20),
+ ('for-kids', 'theme', 'Vaikams ir žaidimams', 'For kids and games',
+  'Toys and games children actually play with: building sets, board games, puzzles, ride-ons, creative kits. CRITICALLY: LEGO-branded CLOTHING (t-shirts, beanies, mittens) is apparel, not a toy — never pick those, no matter the brand. NOT clothing, NOT footwear.',
+  null, 3, 12, '{toys,other}',
+  '{lego,konstruktor,dėlionė,stalo žaidim,paspirtukas,pliušin,eksperiment,piešimo rinkinys}',
+  '{marškinėl,kepurė,pirštinės,kelnės,džemperis,batai}', 10, 120,
+  '{"a LEGO Technic set","a wooden marble run","a family board game","a science experiment kit","a big floor puzzle"}', 30),
+ ('beauty-gifts', 'theme', 'Grožio dovanos', 'Beauty gifts',
+  'Fragrance, skincare and grooming that feels like a treat — gift sets, well-designed bottles, things above everyday drugstore level. NOT refills, NOT single cotton pads or basics, NOT hair dye.',
+  null, null, null, '{beauty,other}',
+  '{kvepalai,rinkinys,kremas,serumas,aliejus,vonios,skutimosi,plaukų priežiūr}',
+  '{papildym,vatos,dažai plauk}', 20, 150,
+  '{"a designer eau de parfum","a bath and body gift set","a premium face serum","a beard grooming kit","a luxury hand cream duo"}', 40),
+ ('kitchen-joy', 'theme', 'Virtuvės malonumai', 'Kitchen pleasures',
+  'Things that make cooking and drinking at home more pleasurable: coffee and tea gear, good knives, cast iron, serving pieces. NOT bulk cookware sets, NOT plastic storage, NOT cleaning items.',
+  null, null, null, '{kitchen,other}',
+  '{kavinukas,kavos,arbat,keptuvė,peilis,prieskoni,taurės,grill,ketaus}',
+  '{valymo,šiukšl,laikymo}', 20, 150,
+  '{"a Bialetti moka pot","a hand coffee grinder","a cast-iron skillet","a chef knife with a wooden handle","a set of tasting glasses"}', 50),
+ ('for-makers', 'theme', 'Meistrui', 'For the maker',
+  'Tools and workshop things for someone who likes making and fixing: quality hand tools, precision kits, measuring gear, headlamps. NOT consumables, NOT screws or fixings, NOT building materials.',
+  null, null, null, '{tools,other}',
+  '{įrankių rinkinys,atsuktuv,gręžtuv,replės,matavimo,lygiuoklis,prožektor,dirbtuv}',
+  '{varžt,vinys,dažai,silikonas}', 20, 200,
+  '{"a precision screwdriver set","a cordless drill","a digital caliper","a laser measure","a rechargeable head torch"}', 60),
+ ('sport-outdoors', 'theme', 'Sportui ir laisvalaikiui', 'Sport and the outdoors',
+  'Gear for movement and time outside: running, cycling, hiking, camping, water sports, fitness. Equipment and accessories rather than plain sportswear. NOT everyday t-shirts, NOT plain leggings.',
+  null, null, null, '{sport,other}',
+  '{dviratis,žygio,turistin,palapinė,miegmaišis,termosas,bėgimo,joga,kuprinė,žvejyb,plaukimo}',
+  '{marškinėliai,tamprės}', 20, 200,
+  '{"a hiking daypack","an insulated trail flask","a yoga mat with a carry strap","bike lights","a camping headlamp"}', 70),
+ ('small-things', 'theme', 'Smulkmenos su charakteriu', 'Small things with character',
+  'Accessories with personality: jewellery, watches, leather goods, scarves, sunglasses. Must feel chosen, not generic. NOT plain black belts, NOT logo caps, NOT phone cases.',
+  null, null, null, '{accessory,bag,other}',
+  '{apyrankė,grandinėlė,auskarai,laikrodis,šalikas,piniginė,akiniai nuo saulės,odinė}',
+  '{dėklas telefonui}', 20, 200,
+  '{"a slim leather card holder","a minimalist wristwatch","a lambswool scarf","a pair of gold-plated hoop earrings","polarised sunglasses"}', 80),
+ ('garden-outdoor', 'theme', 'Sodui ir lauko malonumams', 'Garden and outdoors',
+  'For the garden, balcony and outdoor evenings: planters, grill gear, garden tools, outdoor lighting, bird feeders. NOT bulk soil, NOT fencing, NOT irrigation parts.',
+  null, null, null, '{garden,other}',
+  '{vazon,sodinim,grill,kepsnin,lauko žibint,sėklos,laistymo,paukšč}',
+  '{trąšos,gruntas,tvora}', 15, 150,
+  '{"a set of terracotta planters","a grill tool set with a wooden case","solar garden lanterns","a bird feeder","secateurs with leather grips"}', 90),
+ ('for-pets', 'theme', 'Augintiniams', 'For pets',
+  'Gifts for a dog or cat and the people who love them: beds, toys, treats, smart feeders, stylish bowls. CRITICALLY: this shelf is ONLY for animal products — never pick human clothing, however the product name reads. NOT human apparel, NOT sunglasses.',
+  null, null, null, '{pets,other}',
+  '{šunims,katėms,augintini,guolis,pavadėlis,antkaklis,skanėst,žaislas šuniui}',
+  '{kelnės,marškinėl,akiniai}', 15, 150,
+  '{"a raised ceramic dog bowl","a durable rope tug toy","a soft cat cave bed","a smart treat dispenser","a padded walking harness"}', 100)
+on conflict (slug) do update
+  set kind = excluded.kind, description = excluded.description,
+      product_types = excluded.product_types,
+      include_keywords = excluded.include_keywords,
+      exclude_keywords = excluded.exclude_keywords,
+      price_min = excluded.price_min, price_max = excluded.price_max,
+      examples = excluded.examples, sort_order = excluded.sort_order;

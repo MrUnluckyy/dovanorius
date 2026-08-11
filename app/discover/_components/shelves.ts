@@ -1,17 +1,4 @@
-import {
-  LuGift,
-  LuHouse,
-  LuWrench,
-  LuCpu,
-  LuSparkles,
-  LuBlocks,
-  LuBike,
-  LuCookingPot,
-  LuTag,
-  LuGem,
-  LuFlower2,
-  LuPawPrint,
-} from "react-icons/lu";
+import { LuTag } from "react-icons/lu";
 import type { IconType } from "react-icons";
 import type { Audience } from "@/types/inspo";
 import type { ShelfQuery } from "@/hooks/useInspoShelf";
@@ -37,62 +24,22 @@ export type ShelfDef = {
   audiences?: Audience[];
 };
 
+/**
+ * ONE live shelf remains.
+ *
+ * Every themed shelf here was a keyword query over product_type, and that label
+ * cannot say what a thing IS: `kompiuter` filled the tech shelf with laptop
+ * BAGS (790 of 7,184 rows), `lego` filled toys with LEGO t-shirts and beanies,
+ * `suni` put NAPAPIJRI "M-Ya-SUNI" trousers among the pet gifts. They now live
+ * in `gift_personas` with kind='theme', curated weekly — see
+ * scripts/refresh-personas.ts.
+ *
+ * "On sale" stays live on purpose: a discount is a time-sensitive property
+ * rather than a theme, and a weekly-curated sale shelf would advertise prices
+ * that expired days ago. It inherits the giftable + gift_score gates, so it is
+ * the one place a keyword-free filter is still the right tool.
+ */
 export const SHELVES: ShelfDef[] = [
-  {
-    key: "under25",
-    Icon: LuGift,
-    query: { priceMax: 25, minScore: 55, limit: 12 },
-  },
-  {
-    key: "home",
-    Icon: LuHouse,
-    query: { productType: "home", minScore: 50, limit: 12 },
-  },
-  {
-    key: "beauty",
-    Icon: LuSparkles,
-    query: { productType: "beauty", minScore: 50, limit: 12 },
-  },
-  {
-    key: "tech",
-    Icon: LuCpu,
-    query: { productType: "tech", minScore: 45, limit: 12 },
-  },
-  {
-    key: "toys",
-    Icon: LuBlocks,
-    query: { productType: "toys", minScore: 45, limit: 12 },
-  },
-  {
-    key: "tools",
-    Icon: LuWrench,
-    query: { productType: "tools", minScore: 45, limit: 12 },
-  },
-  {
-    key: "sport",
-    Icon: LuBike,
-    query: { productType: "sport", minScore: 45, limit: 12 },
-  },
-  {
-    key: "kitchen",
-    Icon: LuCookingPot,
-    query: { productType: "kitchen", minScore: 45, limit: 12 },
-  },
-  {
-    key: "accessories",
-    Icon: LuGem,
-    query: { productTypes: ["accessory", "bag"], minScore: 50, limit: 12 },
-  },
-  {
-    key: "garden",
-    Icon: LuFlower2,
-    query: { productType: "garden", minScore: 40, limit: 12 },
-  },
-  {
-    key: "pets",
-    Icon: LuPawPrint,
-    query: { productType: "pets", minScore: 40, limit: 12 },
-  },
   {
     key: "onSale",
     Icon: LuTag,
