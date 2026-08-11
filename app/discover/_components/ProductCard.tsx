@@ -8,9 +8,9 @@ export type CardProduct = {
   title: string;
   brand?: string | null;
   price: number | null;
-  /** Recommended retail price, shown struck-through when discounted. */
+  /** Recommended retail price. Carried for the modal; the card never shows it. */
   rrp?: number | null;
-  /** Percent off vs. rrp (0–100). */
+  /** Percent off vs. rrp (0–100). Surfaced only in the modal. */
   discountPct?: number | null;
   imageUrl: string | null;
   deepLink: string | null;
@@ -66,14 +66,11 @@ export function ProductCard({
 }) {
   const t = useTranslations("Inspo");
 
-  const discount =
-    product.discountPct != null &&
-    product.discountPct >= 5 &&
-    product.discountPct <= 85
-      ? Math.round(product.discountPct)
-      : null;
-  const showRrp =
-    discount != null && product.rrp != null && product.rrp > (product.price ?? 0);
+  // No discount treatment on the card — no badge, no red price, no struck-through
+  // rrp. This is a gift-inspiration surface, not a shop: a wall of "-40%" reads
+  // as a bargain bin and cheapens the thing being suggested. The saving still
+  // matters, just later — ProductModal shows it at the point someone is actually
+  // deciding to buy.
 
   return (
     <div
@@ -104,12 +101,6 @@ export function ProductCard({
             e.currentTarget.src = "/assets/placeholder.jpg";
           }}
         />
-
-        {discount != null && (
-          <span className="absolute left-2.5 top-2.5 rounded-full bg-error px-2 py-0.5 text-xs font-bold text-error-content shadow-sm">
-            -{discount}%
-          </span>
-        )}
 
         {product.reason && (
           <span className="absolute right-2.5 top-2.5 grid h-7 w-7 place-items-center rounded-full bg-primary text-primary-content shadow">
@@ -145,18 +136,9 @@ export function ProductCard({
         </h3>
 
         <div className="mt-auto flex items-baseline gap-1.5 pt-1">
-          <span
-            className={`text-base font-bold tracking-tight ${
-              discount != null ? "text-error" : ""
-            }`}
-          >
+          <span className="text-base font-bold tracking-tight">
             {product.price != null ? `${product.price} €` : "—"}
           </span>
-          {showRrp && (
-            <span className="text-xs line-through opacity-40">
-              {product.rrp} €
-            </span>
-          )}
         </div>
       </div>
     </div>

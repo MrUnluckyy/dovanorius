@@ -125,11 +125,6 @@ export function ProductModal({
               e.currentTarget.src = "/assets/placeholder.jpg";
             }}
           />
-          {discount != null && (
-            <span className="absolute left-4 top-4 rounded-full bg-error px-2.5 py-1 text-sm font-bold text-error-content shadow-sm">
-              -{discount}%
-            </span>
-          )}
         </div>
 
         {/* Details */}
@@ -145,18 +140,23 @@ export function ProductModal({
             </h2>
           </div>
 
-          <div className="flex items-baseline gap-2">
-            <span
-              className={`text-2xl font-bold tracking-tight ${
-                discount != null ? "text-error" : ""
-              }`}
-            >
+          {/* The one place a saving is worth stating: this is where someone
+              decides to buy. Phrased as information ("was X, now Y") rather than
+              a shouted badge — the point is a useful fact at the right moment,
+              not urgency. */}
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <span className="text-2xl font-bold tracking-tight">
               {product.price != null ? `${product.price} €` : "—"}
             </span>
             {showRrp && (
-              <span className="text-sm line-through opacity-40">
-                {product.rrp} €
-              </span>
+              <>
+                <span className="text-sm line-through opacity-40">
+                  {product.rrp} €
+                </span>
+                <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-semibold text-success">
+                  {t("priceDropped", { percent: discount ?? 0 })}
+                </span>
+              </>
             )}
           </div>
 
