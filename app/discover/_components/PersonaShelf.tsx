@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { LuUserRound } from "react-icons/lu";
+import { LuSparkles, LuUserRound } from "react-icons/lu";
 import { usePersonaPicks, type GiftPersona } from "@/hooks/usePersonas";
 import { toCardProduct } from "./CollectionRow";
 import type { CardProduct } from "./ProductCard";
@@ -38,9 +38,19 @@ export function PersonaShelf({
 
   return (
     <ProductStrip
-      title={t("personaShelfTitle", { persona: label })}
-      subtitle={t("personaShelfSubtitle")}
-      Icon={LuUserRound}
+      // A theme shelf is its own headline ("Namų jaukumui"); only a recipient
+      // shelf reads as "Gifts for <someone>".
+      title={
+        persona.kind === "theme"
+          ? label
+          : t("personaShelfTitle", { persona: label })
+      }
+      subtitle={
+        persona.kind === "theme"
+          ? t("themeShelfSubtitle")
+          : t("personaShelfSubtitle")
+      }
+      Icon={persona.kind === "theme" ? LuSparkles : LuUserRound}
       items={items}
       isLoading={isLoading}
       onOpen={onOpen}

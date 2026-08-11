@@ -86,7 +86,11 @@ export function DiscoverClient() {
   const [personaId, setPersonaId] = useState<string | null>(null);
 
   const { data: personas } = usePersonas();
-  const activePersona = personas?.find((p) => p.id === personaId) ?? null;
+  // Recipients are offered in the picker; themes are editorial shelves that
+  // render inline, and are gradually replacing the keyword-driven SHELVES.
+  const recipients = personas?.filter((p) => p.kind === "recipient") ?? [];
+  const themes = personas?.filter((p) => p.kind === "theme") ?? [];
+  const activePersona = recipients.find((p) => p.id === personaId) ?? null;
 
   // Audience comes from the profile now (self-declared gender, or the last
   // choice made here) instead of resetting to "everyone" on every visit.
@@ -257,12 +261,12 @@ export function DiscoverClient() {
             specific person ("Paaugliui") with a hand-curated shelf behind it.
             Selecting one also sets the audience, so the themed shelves below
             follow along rather than contradicting the choice. */}
-        {!!personas?.length && (
+        {!!recipients.length && (
           <div className="mb-6 flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium opacity-70">
               {t("personaPrompt")}
             </span>
-            {personas.map((p) => {
+            {recipients.map((p) => {
               const active = personaId === p.id;
               return (
                 <button
@@ -314,6 +318,12 @@ export function DiscoverClient() {
                 onOpen={openProduct}
               />
             )}
+
+            {/* Curated theme shelves. These replace the keyword shelves one at
+                a time — both render for now so the two can be compared. */}
+            {themes.map((theme) => (
+              <PersonaShelf key={theme.id} persona={theme} onOpen={openProduct} />
+            ))}
 
             {SHELVES.filter(
               (s) => !s.audiences || s.audiences.includes(audience)
