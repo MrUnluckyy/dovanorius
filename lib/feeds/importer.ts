@@ -20,6 +20,7 @@ import { createCurator, type CurationConfig, type CurationStats } from "./curate
 
 const STAGE_CHUNK = 1000; // rows per staging insert request
 const MERGE_BATCH = 5000; // staging rows merged per server-side statement
+const MIN_MERGE_BATCH = 250; // floor for the adaptive shrink in walkRanges
 
 export type RunOptions = {
   log?: (msg: string) => void;
@@ -100,6 +101,73 @@ async function withRetry<T>(
     }
   }
   throw new Error(`${label} failed after ${attempts} attempts: ${lastErr}`);
+}
+
+/**
+ * Walk a keyset-batched RPC, halving the batch whenever the DB times out.
+ *
+ * `service_role` runs with statement_timeout=120s, and 5000-row merges were
+ * taking 40-92s: enough headroom to pass most nights, none to absorb a dense
+ * range. It stopped passing on 2026-08-09 and then failed four nights running,
+ * always around 70k rows in — AWIN finished, TradeDoubler never did.
+ *
+ * Simply lowering MERGE_BATCH would move the cliff rather than remove it. How
+ * long a batch takes is not a function of row count: rows vary in width by
+ * feed, and the derive trigger reclassifies and rescores every row it changes,
+ * so cost tracks how many rows actually differ from what is stored. A nightly
+ * run where little moved is cheap; the first run after a merchant restates its
+ * catalogue is not.
+ *
+ * So let the walk find its own size. On timeout the batch halves and retries
+ * the same key — a different statement, so it is not the doomed retry that
+ * `withRetry` rightly refuses. Past the dense patch the batch doubles back
+ * toward MERGE_BATCH, so one slow range does not hold the rest of the walk at
+ * a crawl.
+ */
+async function walkRanges<T extends { last_id: string | null }>(
+  label: string,
+  call: (
+    after: string,
+    batch: number
+  ) => PromiseLike<{ data: unknown; error: { message: string } | null }>,
+  /** Return false to stop the walk (empty range). */
+  onRow: (row: T) => boolean,
+  log: (msg: string) => void
+): Promise<void> {
+  let after = "";
+  let batch = MERGE_BATCH;
+
+  for (;;) {
+    let row: T | undefined;
+
+    for (let attempt = 1; ; attempt++) {
+      const { data, error } = await call(after, batch);
+
+      if (!error) {
+        row = ((data ?? []) as T[])[0];
+        if (batch < MERGE_BATCH) batch = Math.min(MERGE_BATCH, batch * 2);
+        break;
+      }
+
+      // 57014 is the SQLSTATE; PostgREST surfaces the text, pg the code.
+      const timedOut = /statement timeout|57014/i.test(error.message);
+
+      if (timedOut && batch > MIN_MERGE_BATCH) {
+        batch = Math.max(MIN_MERGE_BATCH, Math.floor(batch / 2));
+        log(`  ${label}: timeout, retrying with batch ${batch}`);
+        continue; // no backoff — the statement itself changed
+      }
+      if (timedOut || attempt >= 5) {
+        throw new Error(
+          `${label} failed at ${after || "start"} (batch ${batch}): ${error.message}`
+        );
+      }
+      await new Promise((r) => setTimeout(r, 500 * 2 ** attempt));
+    }
+
+    if (!row || row.last_id == null || !onRow(row)) break;
+    after = row.last_id;
+  }
 }
 
 async function downloadFeed(
@@ -210,21 +278,22 @@ export async function runImport(
   // well under the DB statement timeout. Writes only rows whose content changed.
   log(`merging ${staged} staged rows…`);
   let changed = 0;
-  let after = "";
-  for (;;) {
-    const rows = await withRetry("merge batch", () =>
+  await walkRanges<{ last_id: string | null; processed: number; changed: number }>(
+    "merge batch",
+    (after, batch) =>
       supabase.rpc("merge_feed_staging_range", {
         p_network: adapter.network,
         p_after: after,
-        p_batch: MERGE_BATCH,
-      })
-    );
-    const r = (rows as { last_id: string | null; processed: number; changed: number }[])?.[0];
-    if (!r || r.processed === 0 || r.last_id == null) break;
-    changed += r.changed;
-    after = r.last_id;
-    log(`  merged up to ${after}: ${changed} changed`);
-  }
+        p_batch: batch,
+      }),
+    (r) => {
+      if (r.processed === 0) return false;
+      changed += r.changed;
+      log(`  merged up to ${r.last_id}: ${changed} changed`);
+      return true;
+    },
+    log
+  );
 
   // Reconcile rows that disappeared from the feed. Both paths are scoped to the
   // merchants present in staging, so a missing/failed feed never wipes a whole
@@ -235,21 +304,22 @@ export async function runImport(
   let pruned = 0;
   if (prune) {
     log("pruning rows no longer in the staged set…");
-    let after = "";
-    for (;;) {
-      const rows = await withRetry("prune batch", () =>
+    await walkRanges<{ last_id: string | null; scanned: number; deleted: number }>(
+      "prune batch",
+      (after, batch) =>
         supabase.rpc("prune_feed_staging_range", {
           p_network: adapter.network,
           p_after: after,
-          p_batch: MERGE_BATCH,
-        })
-      );
-      const r = (rows as { last_id: string | null; scanned: number; deleted: number }[])?.[0];
-      if (!r || r.scanned === 0 || r.last_id == null) break;
-      pruned += r.deleted;
-      after = r.last_id;
-      log(`  pruned up to ${after}: ${pruned} deleted`);
-    }
+          p_batch: batch,
+        }),
+      (r) => {
+        if (r.scanned === 0) return false;
+        pruned += r.deleted;
+        log(`  pruned up to ${r.last_id}: ${pruned} deleted`);
+        return true;
+      },
+      log
+    );
   } else {
     markedOutOfStock =
       (await withRetry("sweep", () =>
