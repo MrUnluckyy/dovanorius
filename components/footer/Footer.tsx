@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { LocaleSwitcherMini } from "@/components/landing/LocaleSwitcherMini";
+import { LocaleToggle } from "@/components/LocaleToggle";
 
 export default function Footer() {
   const t = useTranslations("Landing.footer");
@@ -52,7 +52,7 @@ export default function Footer() {
             {t("disclaimer")}
           </Link>
         </nav>
-        <LocaleSwitcherMini placement="up" />
+        <LocaleToggle />
       </div>
     </footer>
   );
