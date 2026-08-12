@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { LocaleSwitcher } from "../LocaleSwitcher";
+import { LocaleToggle } from "../LocaleToggle";
 import { useTranslations } from "next-intl";
 import { User } from "@supabase/supabase-js";
 import { Logo } from "../Logo";
@@ -115,8 +115,9 @@ export function NavigationV2({ user }: { user?: User | null }) {
                           {t("dashboard")}
                         </Link>
                       </li>
-                      <li className="menu-title px-3 pt-2">
-                        <LocaleSwitcher />
+                      <li className="flex flex-row items-center justify-between px-3 py-2">
+                        <span className="text-sm opacity-70">{t("language")}</span>
+                        <LocaleToggle />
                       </li>
                       <li>
                         <SignOutButton className="btn btn-ghost justify-start" />
@@ -134,7 +135,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   </Link>
                 </>
               )}
-              {!user && <LocaleSwitcher />}
+              {!user && <LocaleToggle />}
             </div>
           </div>
         </div>
@@ -179,8 +180,9 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 </Link>
 
                 <div className="divider my-2" />
-                <div className="px-2">
-                  <LocaleSwitcher />
+                <div className="flex items-center justify-between px-4 py-2">
+                  <span className="text-base opacity-70">{t("language")}</span>
+                  <LocaleToggle />
                 </div>
                 <SignOutButton className="btn btn-ghost w-full justify-start gap-3 text-xl font-normal" />
               </>
@@ -201,12 +203,13 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 >
                   {t("register")}
                 </Link>
-                <div className="mt-2 px-2">
-                  <LocaleSwitcher />
+                <div className="mt-2 flex items-center justify-between px-4 py-2">
+                  <span className="text-base opacity-70">{t("language")}</span>
+                  <LocaleToggle />
                 </div>
               </>
             )}
-            {/* <LocaleSwitcher /> */}
+            
           </div>
         </div>
       </div>
