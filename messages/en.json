@@ -368,7 +368,7 @@
       "beauty": "Beauty",
       "clothing": "Clothing",
       "shoes": "Shoes",
-      "bag": "Bags",
+      "bag": "Bags & backpacks",
       "accessory": "Accessories",
       "home": "Home",
       "tech": "Tech",
@@ -384,7 +384,8 @@
       "under25": "Under €25",
       "b25to50": "€25–50",
       "b50to100": "€50–100",
-      "over100": "€100+"
+      "over100": "€100+",
+      "label": "Price"
     },
     "searchPlaceholder": "Search products…",
     "onSale": "On sale",
@@ -417,7 +418,8 @@
     "brand": {
       "all": "All brands",
       "search": "Search brand…",
-      "none": "No brands found"
+      "none": "No brands found",
+      "label": "Brand"
     },
     "viewInStore": "View",
     "loadMore": "Load more",
@@ -485,7 +487,8 @@
     "priceDropped": "{percent}% off",
     "collapse": "Collapse",
     "moreFromCategory": "More from this area",
-    "moreFromCategoryNote": "No longer hand-picked – ranked by gift suitability"
+    "moreFromCategoryNote": "No longer hand-picked – ranked by gift suitability",
+    "filters": "Filters"
   },
   "Inspo": {
     "metaTitle": "Gift Ideas For You",
