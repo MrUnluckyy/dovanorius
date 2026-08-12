@@ -4,10 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   LuSearch,
-  LuArrowUpDown,
-  LuTag,
   LuX,
-  LuChevronDown,
   LuShirt,
   LuFootprints,
   LuSparkles,
@@ -26,7 +23,7 @@ import { useGiftIdeas } from "@/hooks/useGiftIdeas";
 import { useDiscoverAudience } from "@/hooks/useDiscoverAudience";
 import type { Audience, InspoFilters, InspoSort } from "@/types/inspo";
 import { ProductCard, type CardProduct } from "./_components/ProductCard";
-import { BrandFilter } from "./_components/BrandFilter";
+import { BrowseFilters } from "./_components/BrowseFilters";
 import { toCardProduct } from "./_components/CollectionRow";
 import { Shelf } from "./_components/Shelf";
 import { PersonaShelf } from "./_components/PersonaShelf";
@@ -377,86 +374,25 @@ export function DiscoverClient() {
         </h1>
       </header>
 
-      {/* ===== Sticky filter bar ===== */}
-      <div className="sticky top-0 z-30 -mx-4 mb-5 border-b border-base-200 bg-base-100/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
-        {/* Row 1: search + audience · sort */}
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="input input-sm flex grow items-center gap-2 rounded-full sm:max-w-md">
-            <LuSearch className="w-4 opacity-50" />
-            <input
-              type="text"
-              className="grow"
-              placeholder={t("searchPlaceholder")}
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-            />
-          </label>
-          <div className="ml-auto flex items-center gap-2">
-            <SelectMenu
-              value={audience}
-              onChange={setAudience}
-              alignEnd
-              options={AUDIENCES.map((a) => ({
-                key: a,
-                label: t(`audience.${a}`),
-              }))}
-            />
-            <SelectMenu
-              value={sort}
-              onChange={setSort}
-              alignEnd
-              icon={<LuArrowUpDown className="w-3.5 opacity-70" />}
-              options={SORTS.map((s) => ({ key: s, label: t(`sort.${s}`) }))}
-            />
-          </div>
-        </div>
-
-        {/* Row 2: category pills | brand · price · sale */}
-        <div className="mt-2 flex flex-wrap items-center gap-1.5">
-          {CATEGORIES.map((c) => {
-            const isActive = productType === c.type;
-            return (
-              <button
-                key={c.type}
-                onClick={() => setProductType(isActive ? null : c.type)}
-                aria-pressed={isActive}
-                className={`flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition ${
-                  isActive
-                    ? "bg-neutral text-neutral-content"
-                    : "bg-base-200 hover:bg-base-300"
-                }`}
-              >
-                <c.Icon className="w-4 shrink-0" aria-hidden />
-                {t(`category.${c.key}`)}
-              </button>
-            );
-          })}
-
-          <span className="mx-1 hidden h-5 w-px bg-base-300 sm:block" />
-
-          <BrandFilter value={brand} onSelect={setBrand} />
-
-          <SelectMenu
-            value={bandKey}
-            onChange={setBandKey}
-            options={PRICE_BANDS.map((b) => ({
-              key: b.key,
-              label: t(`price.${b.key}`),
-            }))}
-          />
-
-          <button
-            onClick={() => setOnSaleOnly((v) => !v)}
-            aria-pressed={onSaleOnly}
-            className={`btn btn-sm cursor-pointer gap-1.5 rounded-full normal-case ${
-              onSaleOnly ? "btn-error" : "btn-ghost bg-base-200"
-            }`}
-          >
-            <LuTag className="w-3.5" />
-            {t("onSale")}
-          </button>
-        </div>
-      </div>
+      <BrowseFilters
+        categories={CATEGORIES}
+        productType={productType}
+        onProductType={setProductType}
+        bands={PRICE_BANDS}
+        bandKey={bandKey}
+        onBandKey={setBandKey}
+        brand={brand}
+        onBrand={setBrand}
+        onSaleOnly={onSaleOnly}
+        audiences={AUDIENCES}
+        audience={audience}
+        onAudience={setAudience}
+        sorts={SORTS}
+        sort={sort}
+        onSort={setSort}
+        searchInput={searchInput}
+        onSearchInput={setSearchInput}
+      />
 
       {/* Active filter chips */}
       {hasFilters && (
@@ -557,54 +493,6 @@ export function DiscoverClient() {
         userId={userId}
         onClose={() => setSelected(null)}
       />
-    </div>
-  );
-}
-
-/** Compact DaisyUI dropdown used for the sort / price / audience selectors. */
-function SelectMenu<T extends string>({
-  value,
-  options,
-  onChange,
-  icon,
-  alignEnd,
-}: {
-  value: T;
-  options: { key: T; label: string }[];
-  onChange: (v: T) => void;
-  icon?: React.ReactNode;
-  alignEnd?: boolean;
-}) {
-  const current = options.find((o) => o.key === value) ?? options[0];
-  return (
-    <div className={`dropdown ${alignEnd ? "dropdown-end" : ""}`}>
-      <div
-        tabIndex={0}
-        role="button"
-        className="btn btn-sm cursor-pointer gap-1.5 rounded-full bg-base-200 normal-case"
-      >
-        {icon}
-        {current.label}
-        <LuChevronDown className="w-3.5 opacity-70" />
-      </div>
-      <ul
-        tabIndex={0}
-        className="dropdown-content menu z-40 mt-1 w-48 rounded-box bg-base-100 p-2 shadow-lg ring-1 ring-base-300"
-      >
-        {options.map((o) => (
-          <li key={o.key}>
-            <button
-              onClick={() => {
-                onChange(o.key);
-                (document.activeElement as HTMLElement)?.blur();
-              }}
-              className={value === o.key ? "active" : ""}
-            >
-              {o.label}
-            </button>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }

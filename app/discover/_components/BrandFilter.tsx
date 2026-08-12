@@ -8,12 +8,15 @@ import { useInspoBrands } from "@/hooks/useInspoBrands";
 export function BrandFilter({
   value,
   onSelect,
+  productType,
 }: {
   value: string | null;
   onSelect: (brand: string | null) => void;
+  /** Scopes the list; without it every brand in the catalogue is offered. */
+  productType?: string | null;
 }) {
   const t = useTranslations("Discover");
-  const { data: brands = [], isLoading } = useInspoBrands();
+  const { data: brands = [], isLoading } = useInspoBrands(productType);
   const [q, setQ] = useState("");
   const ref = useRef<HTMLDivElement>(null);
 

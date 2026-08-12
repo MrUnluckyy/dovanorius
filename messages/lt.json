@@ -372,7 +372,7 @@
       "beauty": "Grožis",
       "clothing": "Drabužiai",
       "shoes": "Avalynė",
-      "bag": "Rankinės",
+      "bag": "Rankinės ir kuprinės",
       "accessory": "Aksesuarai",
       "home": "Namams",
       "tech": "Technika",
@@ -388,7 +388,8 @@
       "under25": "Iki 25 €",
       "b25to50": "25–50 €",
       "b50to100": "50–100 €",
-      "over100": "100 €+"
+      "over100": "100 €+",
+      "label": "Kaina"
     },
     "searchPlaceholder": "Ieškoti prekių…",
     "onSale": "Su nuolaida",
@@ -421,7 +422,8 @@
     "brand": {
       "all": "Visi prekių ženklai",
       "search": "Ieškoti prekės ženklo…",
-      "none": "Prekių ženklų nerasta"
+      "none": "Prekių ženklų nerasta",
+      "label": "Prekės ženklas"
     },
     "viewInStore": "Žiūrėti",
     "loadMore": "Rodyti daugiau",
@@ -489,7 +491,8 @@
     "priceDropped": "kaina krito {percent}%",
     "collapse": "Suskleisti",
     "moreFromCategory": "Daugiau iš šios srities",
-    "moreFromCategoryNote": "Nebe atrinkta rankomis – rūšiuota pagal tinkamumą dovanai"
+    "moreFromCategoryNote": "Nebe atrinkta rankomis – rūšiuota pagal tinkamumą dovanai",
+    "filters": "Filtrai"
   },
   "Inspo": {
     "metaTitle": "Dovanų idėjos tau",
