@@ -331,6 +331,29 @@ export async function runImport(
   // run's reset.
   await withRetry("reset staging", () => supabase.rpc("reset_feed_staging"));
 
+  // Rebuild the brand filter's backing view.
+  //
+  // This lives in the importer rather than in the workflow because refreshing
+  // it was previously a documented manual step, and the predictable happened:
+  // it went unrun long enough that the filter held 424 brands while 829
+  // qualified -- the entire TradeDoubler catalogue was missing from it. A step
+  // in CI would have fixed the nightly path and still left a local
+  // `pnpm import:feed` silently desynchronising the two. Here, whoever imports
+  // gets a correct filter.
+  //
+  // Non-fatal on purpose: a stale brand list is a much smaller problem than
+  // discarding an otherwise successful import.
+  if (changed > 0 || pruned > 0) {
+    try {
+      const brands = await withRetry("refresh brands", () =>
+        supabase.rpc("refresh_inspo_brands")
+      );
+      log(`brand filter refreshed: ${brands} brands`);
+    } catch (e) {
+      log(`⚠ brand filter refresh failed: ${e instanceof Error ? e.message : e}`);
+    }
+  }
+
   return {
     network: adapter.network,
     feedsProcessed: feeds.length,
