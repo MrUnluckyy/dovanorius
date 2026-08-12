@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { isRecipientSide } from "@/utils/boards/viewerSide";
 import { BoardBar } from "@/app/boards/[boardId]/components/BoardBar";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 
@@ -77,6 +78,16 @@ export default async function SharedBoardView({
     notFound();
   }
 
+  // A collaborator opening a board they co-own is NOT a gift-giver, however
+  // they navigated here. Gating on the route alone showed them Reserve on their
+  // own wishlist.
+  const recipientSide = await isRecipientSide(
+    supabase,
+    board.id,
+    board.owner_id,
+    user?.id
+  );
+
   return (
     <>
       <NavigationV2 user={user} />
@@ -95,7 +106,7 @@ export default async function SharedBoardView({
           <div className="py-8 mb-10">
             <BoardBar userId={user?.id} boardId={board.id} inPublicView />
           </div>
-          <WishList boardId={board.id} user={user} isPublic />
+          <WishList boardId={board.id} user={user} isPublic={!recipientSide} />
         </div>
       </main>
       <Footer />
