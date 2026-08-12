@@ -494,7 +494,9 @@
     "collapse": "Suskleisti",
     "moreFromCategory": "Daugiau iš šios srities",
     "moreFromCategoryNote": "Nebe atrinkta rankomis – rūšiuota pagal tinkamumą dovanai",
-    "filters": "Filtrai"
+    "filters": "Filtrai",
+    "browseMetaTitle": "Visos dovanų prekės – Noriuto.lt",
+    "browseMetaDescription": "Naršykite tūkstančius dovanų idėjų pagal kategoriją, kainą ir prekės ženklą."
   },
   "Inspo": {
     "metaTitle": "Dovanų idėjos tau",
