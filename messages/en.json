@@ -87,7 +87,9 @@
     "user": "User",
     "userBoards": "User's Boards",
     "createEvent": "Create Event",
-    "myBoard": "My Board"
+    "myBoard": "My Board",
+    "discover": "Gift ideas",
+    "account": "Account"
   },
   "Boards": {
     "public": "Public",
@@ -542,7 +544,8 @@
       "ctaCreate": "Create for free",
       "appStore": "App Store",
       "chipAdded": "Added to “For baby” board",
-      "chipReserved": "Austėja reserved a gift"
+      "chipReserved": "Austėja reserved a gift",
+      "ctaDiscover": "Browse gift ideas"
     },
     "features": {
       "title": "Everything your wishes need",

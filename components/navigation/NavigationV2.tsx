@@ -8,12 +8,14 @@ import {
   LuX,
   LuMenu,
   LuHouse,
-  LuGift,
-  LuLayoutDashboard,
+  LuCircleUser,
+  LuSparkles,
 } from "react-icons/lu";
 import { SignOutButton } from "@/app/(auth)/components/SignOutButton";
 import Image from "next/image";
-import NotificationsBell from "../notification/NotificationBell";
+// Bell hidden until notifications are tested — re-enable by restoring this
+// import and the <NotificationsBell /> in the navbar.
+// import NotificationsBell from "../notification/NotificationBell";
 import NotificationsLive from "../notification/NotificationLive";
 import { NavSearch } from "./NavSearch";
 import { usePathname } from "next/navigation";
@@ -40,8 +42,12 @@ export function NavigationV2({ user }: { user?: User | null }) {
           <div className="flex w-full max-w-[1440px] px-4 mx-auto items-center">
             <div className="mx-2 flex-1 font-bold justify-between flex lg:block">
               <div className="flex gap-4 md:gap-8">
+                {/* Signed in, the logo goes to the dashboard: sending an existing
+                    user to the marketing landing page pitches them a product
+                    they already use. This is also what makes the separate
+                    "Pagrindinis" link redundant, so it is gone. */}
                 <Link
-                  href="/"
+                  href={user ? "/dashboard" : "/"}
                   className="text-xl font-bold flex gap-2 items-center"
                 >
                   <Image
@@ -56,10 +62,11 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 <NavSearch />
               </div>
 
-              <div className="flex-none lg:hidden">
+              <div className="flex flex-none items-center gap-1 lg:hidden">
                 <CreateTriggerButton />
+                {/* Notifications hidden until the feature is tested. The live
+                    listener stays mounted so nothing is lost meanwhile. */}
                 <NotificationsLive />
-                <NotificationsBell />
                 <label
                   htmlFor="my-drawer-2"
                   aria-label="open sidebar"
@@ -70,17 +77,52 @@ export function NavigationV2({ user }: { user?: User | null }) {
               </div>
             </div>
             <div className="hidden flex-none lg:flex gap-2">
+              {/* Discover is useful signed-out — it needs no account and is the
+                  main reason to visit without one — so it sits outside the
+                  auth branch rather than beside Dashboard. */}
+              <Link
+                href="/discover"
+                className={`btn btn-ghost ${
+                  pathnames.includes("discover") ? "font-bold" : "font-normal"
+                }`}
+              >
+                <LuSparkles />
+                {t("discover")}
+              </Link>
               {user ? (
                 <>
                   <NotificationsLive />
-                  <NotificationsBell />
-
                   <CreateTriggerButton />
-                  <Link href="/dashboard" className="btn btn-ghost">
-                    <LuHouse />
-                    {t("dashboard")}
-                  </Link>
-                  <SignOutButton className="btn btn-ghost" />
+                  {/* Sign-out and locale move into a menu: they are the least
+                      used controls here and were competing with the primary
+                      action at the same visual weight. */}
+                  <div className="dropdown dropdown-end">
+                    <div
+                      tabIndex={0}
+                      role="button"
+                      aria-label={t("account")}
+                      className="btn btn-ghost btn-circle"
+                    >
+                      <LuCircleUser className="text-xl" />
+                    </div>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content menu z-50 mt-2 w-56 rounded-box bg-base-100 p-2 shadow-lg ring-1 ring-base-300"
+                    >
+                      <li>
+                        <Link href="/dashboard">
+                          <LuHouse />
+                          {t("dashboard")}
+                        </Link>
+                      </li>
+                      <li className="menu-title px-3 pt-2">
+                        <LocaleSwitcher />
+                      </li>
+                      <li>
+                        <SignOutButton className="btn btn-ghost justify-start" />
+                      </li>
+                    </ul>
+                  </div>
                 </>
               ) : (
                 <>
@@ -92,7 +134,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   </Link>
                 </>
               )}
-              <LocaleSwitcher />
+              {!user && <LocaleSwitcher />}
             </div>
           </div>
         </div>
@@ -110,15 +152,25 @@ export function NavigationV2({ user }: { user?: User | null }) {
               <LuX />
             </label>
           </div>
-          <div className="flex flex-col gap-4 items-start text-2xl">
+          {/* Full-width rows rather than shrink-to-fit buttons: on a phone the
+              whole row should be tappable, not just the text. */}
+          <div className="flex w-full flex-col gap-1 text-xl">
+            <Link
+              href="/discover"
+              className={`btn btn-ghost w-full justify-start gap-3 text-xl ${
+                pathnames.includes("discover") ? "font-bold" : "font-normal"
+              }`}
+              onClick={() => ref.current?.click()}
+            >
+              <LuSparkles />
+              {t("discover")}
+            </Link>
             {user ? (
               <>
                 <Link
                   href="/dashboard"
-                  className={`btn btn-ghost text-2xl ${
-                    pathnames.includes("dashboard")
-                      ? "font-bold "
-                      : "font-normal"
+                  className={`btn btn-ghost w-full justify-start gap-3 text-xl ${
+                    pathnames.includes("dashboard") ? "font-bold" : "font-normal"
                   }`}
                   onClick={() => ref.current?.click()}
                 >
@@ -126,17 +178,32 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   {t("dashboard")}
                 </Link>
 
-                <div className="divider" />
-                <SignOutButton className="btn btn-ghost text-2xl font-normal" />
+                <div className="divider my-2" />
+                <div className="px-2">
+                  <LocaleSwitcher />
+                </div>
+                <SignOutButton className="btn btn-ghost w-full justify-start gap-3 text-xl font-normal" />
               </>
             ) : (
               <>
-                <Link href="/login" className="btn btn-ghost text-2xl">
+                <div className="divider my-2" />
+                <Link
+                  href="/login"
+                  className="btn btn-ghost w-full justify-start text-xl"
+                  onClick={() => ref.current?.click()}
+                >
                   {t("login")}
                 </Link>
-                <Link href="/register" className="btn btn-ghost text-2xl">
+                <Link
+                  href="/register"
+                  className="btn btn-primary w-full justify-start text-xl"
+                  onClick={() => ref.current?.click()}
+                >
                   {t("register")}
                 </Link>
+                <div className="mt-2 px-2">
+                  <LocaleSwitcher />
+                </div>
               </>
             )}
             {/* <LocaleSwitcher /> */}
