@@ -89,7 +89,9 @@
     "user": "Vartotojas",
     "userBoards": "Vartotojo lentos",
     "createEvent": "Sukurti renginį",
-    "myBoard": "Mano lenta"
+    "myBoard": "Mano lenta",
+    "discover": "Dovanų idėjos",
+    "account": "Paskyra"
   },
   "Boards": {
     "public": "Vieša",
@@ -546,7 +548,8 @@
       "ctaCreate": "Susikurk nemokamai",
       "appStore": "App Store",
       "chipAdded": "Pridėta į lentą „Vaikeliui“",
-      "chipReserved": "Austėja rezervavo dovaną"
+      "chipReserved": "Austėja rezervavo dovaną",
+      "ctaDiscover": "Naršyti dovanų idėjas"
     },
     "features": {
       "title": "Viskas, ko reikia tavo norams",

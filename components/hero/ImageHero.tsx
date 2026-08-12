@@ -35,6 +35,17 @@ export async function ImageHero() {
           >
             {t("ctaCreate")}
           </Link>
+          {/* Third CTA, deliberately the quiet one: creating a list is still
+              the primary action, but "browse ideas" is the only entry that asks
+              nothing of a first-time visitor — no account, no list, no thinking
+              about who it is for. Outline weight so it reads as an alternative
+              rather than competing with the primary. */}
+          <Link
+            href="/discover"
+            className="nr-btn nr-btn-outline w-full sm:w-auto"
+          >
+            {t("ctaDiscover")}
+          </Link>
           <AppStoreButton
             label={t("appStore")}
             className="nr-btn nr-btn-dark w-full sm:w-auto"
