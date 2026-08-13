@@ -1,6 +1,6 @@
 import {
   LuShirt, LuFootprints, LuSparkles, LuShoppingBag, LuGem, LuHouse,
-  LuCpu, LuBlocks, LuWrench, LuBike, LuCookingPot,
+  LuCpu, LuBlocks, LuWrench, LuBike, LuCookingPot, LuSprout, LuPawPrint,
 } from "react-icons/lu";
 import type { Audience, InspoSort } from "@/types/inspo";
 
@@ -23,6 +23,12 @@ export const CATEGORIES = [
   { key: "tools", type: "tools", Icon: LuWrench },
   { key: "sport", type: "sport", Icon: LuBike },
   { key: "kitchen", type: "kitchen", Icon: LuCookingPot },
+  // garden and pets were omitted while the catalogue held none of either. The
+  // 2026-08-13 Pigu feed switch brought in 920 and 623, which were unreachable
+  // until these existed -- the classifier can produce a product_type that no
+  // filter offers, and nothing surfaces the mismatch.
+  { key: "garden", type: "garden", Icon: LuSprout },
+  { key: "pets", type: "pets", Icon: LuPawPrint },
   { key: "clothing", type: "clothing", Icon: LuShirt },
   { key: "shoes", type: "shoes", Icon: LuFootprints },
   { key: "bag", type: "bag", Icon: LuShoppingBag },
