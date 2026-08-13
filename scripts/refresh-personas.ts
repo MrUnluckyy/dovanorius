@@ -79,11 +79,37 @@ async function main() {
     .from("gift_personas")
     .select("*")
     .eq("is_active", true)
+    // Editorial shelves are hand-picked in /admin. refreshPersona is
+    // delete-then-insert on persona_products, so including them here would hand
+    // the curator's work to the model every Monday and log a tidy ✓ for it.
+    // refreshPersona refuses them as well; this is the layer that means the cron
+    // never gets that far.
+    .neq("kind", "editorial")
     .order("sort_order");
   if (only.length) query = query.in("slug", only);
 
   const { data, error } = await query;
   if (error) throw new Error(error.message);
+
+  // Naming an editorial slug explicitly deserves an error, not a shrug: the
+  // filter above would otherwise drop it and report "no active personas
+  // matched", which reads like a typo in the slug rather than a refusal.
+  if (only.length) {
+    const { data: editorial } = await supabase
+      .from("gift_personas")
+      .select("slug")
+      .in("slug", only)
+      .eq("kind", "editorial");
+    if (editorial?.length) {
+      throw new Error(
+        `refusing to re-curate editorial shelf(s): ${editorial
+          .map((p) => p.slug)
+          .join(", ")}\n` +
+          `Their picks are hand-made in /admin/editorial and this script would ` +
+          `replace them with LLM output.`
+      );
+    }
+  }
 
   let personas = (data ?? []) as Persona[];
   if (!personas.length) {

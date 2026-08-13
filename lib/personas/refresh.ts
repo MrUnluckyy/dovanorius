@@ -36,6 +36,8 @@ export type Persona = {
   id: string;
   slug: string;
   label_lt: string;
+  /** 'editorial' shelves are hand-picked and must never reach this module. */
+  kind: "recipient" | "theme" | "editorial";
   description: string;
   gender: "female" | "male" | null;
   age_min: number | null;
@@ -172,6 +174,18 @@ export async function refreshPersona(
   supabase: SupabaseClient,
   persona: Persona
 ): Promise<RefreshResult> {
+  // The inner half of the editorial guard. The caller already filters these out,
+  // but this function's contract is delete-then-insert on persona_products —
+  // running it against a hand-picked shelf destroys the curator's work and
+  // reports success. The script accepts slugs on the command line, so "the
+  // caller filters" is one typo away from being false. Refuse here too.
+  if (persona.kind === "editorial") {
+    throw new Error(
+      `${persona.slug} is an editorial shelf — its picks are hand-made in /admin ` +
+        `and must not be regenerated. Refusing.`
+    );
+  }
+
   const candidates = await retrievePersonaCandidates(supabase, persona);
   if (!candidates.length) {
     return { slug: persona.slug, candidates: 0, kept: 0, costUsd: 0 };

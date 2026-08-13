@@ -26,9 +26,10 @@ export type GiftPersona = {
   exclude_keywords: string[];
   /**
    * recipient = offered in the picker, shown when chosen.
-   * theme = an editorial shelf rendered inline, replacing the old keyword ones.
+   * theme = a themed shelf rendered inline, still LLM-curated.
+   * editorial = hand-picked in /admin, scheduled, never touched by the curator.
    */
-  kind: "recipient" | "theme";
+  kind: "recipient" | "theme" | "editorial";
 };
 
 export type PersonaPick = InspoProduct & { reason: string | null };
@@ -80,12 +81,22 @@ export const SHELF_SIZE = 12;
  * Returns the full set rather than the visible window: "view more" expands in
  * place, so the extra picks must already be here — a second fetch on click would
  * make the reveal feel like a page load.
+ *
+ * `rotate: false` for hand-picked editorial shelves. Rotation exists because the
+ * LLM stores ~40 picks for a 12-slot shelf and daily movement is free variety;
+ * on a shelf someone ordered by hand it is not variety, it is overriding the
+ * curator — the item they deliberately put first would lead the shelf on only
+ * one day in twelve.
  */
-export function usePersonaPicks(personaId: string | null) {
+export function usePersonaPicks(
+  personaId: string | null,
+  opts?: { rotate?: boolean }
+) {
   const supabase = createClient();
+  const rotate = opts?.rotate ?? true;
 
   return useQuery({
-    queryKey: ["persona-picks", personaId],
+    queryKey: ["persona-picks", personaId, rotate],
     enabled: !!personaId,
     staleTime: 1000 * 60 * 30,
     queryFn: async (): Promise<PersonaPick[]> => {
@@ -107,7 +118,7 @@ export function usePersonaPicks(personaId: string | null) {
         .filter((r) => r.inspo_products?.in_stock)
         .map((r) => ({ ...r.inspo_products, reason: r.reason }));
 
-      return rotateByDay(picks);
+      return rotate ? rotateByDay(picks) : picks;
     },
   });
 }
