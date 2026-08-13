@@ -11,8 +11,16 @@
  * named "Monitor" as a gadget). The merchant already knows; this records the
  * answer once so the trigger can just look it up.
  *
- * One pass over ~2,250 strings costs a few cents. Rows are editable afterwards:
- * fix a mapping in the table and re-derive, no deploy and no model involved.
+ * COST: about $1.40 per 1,000 categories on Opus — 1,531 new strings came to
+ * $2.15 on 2026-08-13. An earlier version of this comment said "a few cents",
+ * which was wrong by two orders of magnitude and got budgeted against; the
+ * figure above is measured, not estimated. Only unmapped categories are sent,
+ * so the cost lands when a feed is switched or a merchant is added, not on
+ * routine runs.
+ *
+ * Rows are editable afterwards: fix a mapping in the table and re-derive, no
+ * deploy and no model involved. Set GIFT_MODEL=claude-sonnet-5 to trade some
+ * accuracy for roughly 40% of the cost on a large re-map.
  *
  * Required env: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SECRET_KEY, ANTHROPIC_API_KEY
  */
