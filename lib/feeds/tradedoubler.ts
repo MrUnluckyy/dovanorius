@@ -43,6 +43,9 @@ type TdOffer = {
   sourceProductId?: string;
   programName?: string;
   priceHistory?: { date?: number; price?: { value?: string; currency?: string } }[];
+  /** Some feeds publish stock on the offer instead of in `fields[]`. */
+  availability?: string;
+  inStock?: number;
 };
 type TdProduct = {
   name?: string;
@@ -86,6 +89,16 @@ type FeedProfile = {
   salePriceField?: string;
   /** `fields[]` entry holding stock state, if the feed publishes one. */
   stockField?: string;
+  /**
+   * Read stock from the OFFER rather than `fields[]`.
+   *
+   * Pigu's two exports disagree about where availability lives: the furniture
+   * feed puts it in `fields[]`, the general-merchandise one puts
+   * `availability: "in_stock"` on the offer. Reading the wrong place fails
+   * silently -- `fields[missing]` is undefined and the default is "assume in
+   * stock", so every sold-out row would import as buyable.
+   */
+  stockFromOffer?: boolean;
   /**
    * Where the category comes from. The bulk export ships an EMPTY `categories`
    * array on every feed (the search service populates it, the export does not —
@@ -150,6 +163,34 @@ export const TD_FEED_PROFILES: Record<string, FeedProfile> = {
     // away the furniture/home/toys inventory that makes it worth importing.
     curate: { requireBrand: false },
   },
+  "258113": {
+    fid: "258113",
+    label: "Pigu.lt",
+    merchantId: "380227",
+    merchantName: "Pigu.lt",
+    // Pigu publishes the same programme through several exports, and they are
+    // NOT the same catalogue. fid 118239 (which this replaced) is furniture and
+    // car parts: 5,667 rows under `baldai ir namu interjeras`, 3,978 under the
+    // auto buckets, and essentially no toys, tools, kitchen, garden or pets.
+    // This one is the general-merchandise catalogue -- 36,245 rows spanning
+    // kitchen (2,019), kids (2,617), tech (~6,370), tools (~1,770), garden
+    // (~1,469) and pets (1,020) -- which is what the themed shelves need.
+    //
+    // TradeDoubler lists it as English and publishes an identical twin as
+    // Latvian (fid 258478). Both serve Lithuanian product names; the language
+    // labels are merchant-set and simply wrong. Verified by sampling, not by
+    // trusting the UI.
+    brand: { from: "description" }, // `brand` is absent; description is "<brand> <name>"
+    // NOT price_without_discount -- this export names the was-price `priceOld`.
+    // The two feeds share a merchant and disagree on field names.
+    rrpField: "priceOld",
+    // Availability is on the offer here, not in fields[].
+    stockFromOffer: true,
+    categoryFrom: "url-path",
+    // A quarter of extracted brands are the placeholder "Nenurodyta"; requiring
+    // a brand would discard most of the non-fashion stock this feed exists for.
+    curate: { requireBrand: false },
+  },
   "259263": {
     fid: "259263",
     label: "About You LT",
@@ -171,7 +212,9 @@ export const TD_FEED_PROFILES: Record<string, FeedProfile> = {
   },
 };
 
-const DEFAULT_FIDS = ["109344", "256919", "118239", "259263"];
+// 258113 replaces 118239 for Pigu — same programme, different export: general
+// merchandise instead of furniture and car parts. See its profile above.
+const DEFAULT_FIDS = ["109344", "256919", "258113", "259263"];
 
 /** Latest price from the offer's price history (feeds may carry several). */
 function latestPrice(offer: TdOffer): { value: number; currency: string } | null {
@@ -289,7 +332,11 @@ function mapProduct(p: TdProduct, profile: FeedProfile): NormalizedProduct | nul
 
   // Only Pigu publishes stock. Elsewhere absence means "in the feed, so live" —
   // the profile turns off requireInStock so this default is never load-bearing.
-  const stock = profile.stockField ? fields[profile.stockField] : undefined;
+  const stock = profile.stockFromOffer
+    ? offer.availability
+    : profile.stockField
+      ? fields[profile.stockField]
+      : undefined;
   const inStock = stock == null ? true : /^(in_?stock|available|1|true|yes)$/i.test(stock);
 
   const feedCategory =
