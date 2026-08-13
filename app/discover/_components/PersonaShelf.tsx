@@ -9,6 +9,7 @@ import {
   SHELF_SIZE,
   type GiftPersona,
 } from "@/hooks/usePersonas";
+import { MIN_ITEMS } from "@/lib/discover/shelf-rules";
 import { toCardProduct } from "./CollectionRow";
 import { ProductCard, type CardProduct } from "./ProductCard";
 import { ProductStrip } from "./ProductStrip";
@@ -24,8 +25,10 @@ import { ProductStrip } from "./ProductStrip";
  * only holds 7-29: the extra depth has to come from somewhere less curated, and
  * silently appending weaker items to the same row is exactly what made the old
  * page feel random. Naming the boundary keeps the curated part trustworthy.
+ *
+ * Editorial shelves opt out of tier 2 altogether — a statement shelf someone
+ * assembled by hand is diluted, not deepened, by bulk category filler.
  */
-const MIN_ITEMS = 4;
 
 export function PersonaShelf({
   persona,
@@ -38,7 +41,10 @@ export function PersonaShelf({
   const locale = useLocale();
   const [expanded, setExpanded] = useState(false);
 
-  const { data, isLoading } = usePersonaPicks(persona.id);
+  const isEditorial = persona.kind === "editorial";
+
+  // Hand-picked shelves keep the curator's ranking; see usePersonaPicks.
+  const { data, isLoading } = usePersonaPicks(persona.id, { rotate: !isEditorial });
   const picks = data ?? [];
 
   // Only the types the curator actually chose — see useShelfContinuation.
@@ -53,11 +59,13 @@ export function PersonaShelf({
     // had just rejected — because `tech` still holds 790 of them and they
     // outrank real gadgets on brand and price.
     persona.exclude_keywords ?? [],
-    expanded
+    expanded && !isEditorial
   );
 
   const label = locale === "en" ? persona.label_en : persona.label_lt;
-  const isTheme = persona.kind === "theme";
+  // Editorial shelves render exactly like themes — inline, sparkle icon, own
+  // title. The difference is where the picks come from, not how they look.
+  const isTheme = persona.kind === "theme" || isEditorial;
   const items: CardProduct[] = picks.map((p) => ({
     ...toCardProduct(p),
     reason: p.reason,
@@ -75,9 +83,11 @@ export function PersonaShelf({
         isLoading={isLoading}
         onOpen={onOpen}
         // Offering "view more" when there is nothing more to show, and no
-        // second tier either, would be a dead end.
+        // second tier either, would be a dead end. An editorial shelf has no
+        // second tier at all, so for it the only reason to expand is having
+        // more picks than fit.
         onSeeAll={
-          items.length > SHELF_SIZE || types.length
+          items.length > SHELF_SIZE || (types.length > 0 && !isEditorial)
             ? () => setExpanded(true)
             : undefined
         }

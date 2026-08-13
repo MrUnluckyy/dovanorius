@@ -32,10 +32,17 @@ export function DiscoverClient() {
   const [personaId, setPersonaId] = useState<string | null>(null);
 
   const { data: personas } = usePersonas();
-  // Recipients are offered in the picker; themes are editorial shelves that
-  // render inline, and are gradually replacing the keyword-driven SHELVES.
+  // Recipients are offered in the picker; themes render inline and are
+  // gradually replacing the keyword-driven SHELVES.
+  //
+  // Editorial shelves sit in the same inline row: same renderer, same
+  // sort_order, only the source of their picks differs (hand-made in /admin
+  // rather than LLM-curated). They arrive already filtered by their schedule —
+  // the gift_personas SELECT policy drops any shelf outside its window, so an
+  // unpublished one is not in `personas` at all.
   const recipients = personas?.filter((p) => p.kind === "recipient") ?? [];
-  const themes = personas?.filter((p) => p.kind === "theme") ?? [];
+  const themes =
+    personas?.filter((p) => p.kind === "theme" || p.kind === "editorial") ?? [];
   const activePersona = recipients.find((p) => p.id === personaId) ?? null;
 
   // Audience comes from the profile now (self-declared gender, or the last
