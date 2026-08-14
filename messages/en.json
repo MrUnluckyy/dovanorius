@@ -202,6 +202,17 @@
     "infiniteHint": "Friends won't be able to reserve this wish — it can be given multiple times.",
     "infiniteShort": "Infinite",
     "infiniteBadge": "This wish cannot be reserved",
+    "tabWishes": "Wishes",
+    "tabArchive": "Archive",
+    "archiveHint": "Received wishes are kept here for 14 days, then they're gone.",
+    "archiveEmptyTitle": "Nothing in the archive",
+    "archiveEmptyHint": "Wishes you mark as received show up here.",
+    "errorArchiveLoad": "Couldn't load the archive",
+    "receivedOn": "Received {date}",
+    "ctaRestore": "Restore",
+    "ctaUndo": "Undo",
+    "successRestore": "↩️ Wish is back on the list",
+    "errorRestore": "😵 Couldn't restore the wish. Please try again later.",
     "copyFailed": "Couldn't copy the link"
   },
   "Profile": {
