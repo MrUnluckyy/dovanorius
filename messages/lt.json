@@ -205,8 +205,6 @@
     "infiniteHint": "Draugai negalės rezervuoti šio noro — jis tinka kelis kartus.",
     "infiniteShort": "Begalinis",
     "infiniteBadge": "Šis noras nerezervuojamas",
-    "tabWishes": "Norai",
-    "tabArchive": "Archyvas",
     "archiveHint": "Gauti norai čia saugomi 14 dienų, vėliau jie dingsta.",
     "archiveEmptyTitle": "Archyvas tuščias",
     "archiveEmptyHint": "Norai, kuriuos pažymėsi kaip gautus, atsiras čia.",
@@ -285,6 +283,7 @@
     "tabWishes": "Norai",
     "tabEvents": "Šventės",
     "tabFriends": "Draugai",
+    "tabArchive": "Archyvas",
     "openButton": "Atidaryti"
   },
   "Events": {

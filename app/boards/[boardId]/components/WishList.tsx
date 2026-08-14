@@ -6,11 +6,9 @@ import { User } from "@supabase/supabase-js";
 import { useTranslations } from "next-intl";
 import { BoardsLoadingSkeleton } from "@/components/loaders/BoardsLoadingSkeleton";
 import { WishListItem } from "./WishListItem";
-import { ArchiveList } from "./ArchiveList";
 import { LuPlus } from "react-icons/lu";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { useBoardArchive } from "@/hooks/useBoardArchive";
 
 export type Item = {
   id: string;
@@ -53,13 +51,6 @@ export function WishList({
   );
   const resetCaptcha = useCallback(() => turnstileRef.current?.reset(), []);
 
-  // Received wishes leave the grid entirely (get_board_items filters them out),
-  // so the archive tab is the only place they can be found — and undone. It is
-  // recipient-side data, so it never appears on the public/guest view.
-  const showArchive = !isPublic;
-  const [tab, setTab] = useState<"wishes" | "archive">("wishes");
-  const { data: archived = [] } = useBoardArchive(boardId, showArchive);
-
   const {
     data: items = [],
     isLoading,
@@ -79,37 +70,7 @@ export function WishList({
 
   return (
     <div className="">
-      {showArchive && (
-        <div role="tablist" className="tabs tabs-border mb-4">
-          <button
-            role="tab"
-            className={`tab text-base font-semibold${
-              tab === "wishes" ? " tab-active" : ""
-            }`}
-            onClick={() => setTab("wishes")}
-          >
-            {t("tabWishes")}
-          </button>
-          <button
-            role="tab"
-            className={`tab text-base font-semibold${
-              tab === "archive" ? " tab-active" : ""
-            }`}
-            onClick={() => setTab("archive")}
-          >
-            {t("tabArchive")}
-            {archived.length > 0 && (
-              <span className="badge badge-sm badge-neutral ml-2">
-                {archived.length}
-              </span>
-            )}
-          </button>
-        </div>
-      )}
-
-      {tab === "archive" ? (
-        <ArchiveList boardId={boardId} />
-      ) : isLoading ? (
+      {isLoading ? (
         <BoardsLoadingSkeleton />
       ) : error ? (
         <p className="text-error">😵 failed to load items 😵</p>

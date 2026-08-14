@@ -13,7 +13,7 @@ import { ItemForm } from "./ItemForm";
 import toast from "react-hot-toast";
 import { useConfirm } from "@/components/ConfirmDialogProvider";
 import { useReserveItem } from "@/hooks/useReserveItem";
-import { archiveKey, useRevertPurchase } from "@/hooks/useBoardArchive";
+import { ARCHIVE_KEY, useRevertPurchase } from "@/hooks/useArchive";
 
 export function ViewItemModal({
   item,
@@ -206,8 +206,8 @@ export function ViewItemModal({
       if (error) throw error;
 
       // The wish leaves the grid the moment it's marked received, so the toast
-      // carries the undo — the archive tab is the slower way back. Longer than
-      // the default 3s: an undo you can't reach in time isn't an undo.
+      // carries the undo — the dashboard archive is the slower way back. Longer
+      // than the default 3s: an undo you can't reach in time isn't an undo.
       toast.success(
         (activeToast) => (
           <span className="flex items-center gap-3">
@@ -229,9 +229,7 @@ export function ViewItemModal({
       await queryClient.invalidateQueries({
         queryKey: ["items", data.board_id],
       });
-      await queryClient.invalidateQueries({
-        queryKey: archiveKey(data.board_id),
-      });
+      await queryClient.invalidateQueries({ queryKey: ARCHIVE_KEY });
 
       closeModal();
     } catch (err) {
