@@ -71,9 +71,45 @@ export function EditBoard({ userId, board }: { userId: string; board: Board }) {
   });
 
   const handleDelete = async () => {
+    // items.board_id cascades on delete, so the wishes go with the board —
+    // including received ones, which are only visible in the archive by then.
+    // Counted rather than assumed, because "and everything on it" reads very
+    // differently at 0 wishes and at 40.
+    //
+    // Both counts are RLS-scoped, so they exclude rows already past the 14-day
+    // window (the read policy hides archived_at). That is the right number to
+    // show: it matches what the user can actually see.
+    const base = () =>
+      supabase
+        .from("items")
+        .select("id", { count: "exact", head: true })
+        .eq("board_id", board.id);
+
+    const [wishes, received] = await Promise.all([
+      base(),
+      base().eq("status", "purchased"),
+    ]);
+
+    const wishCount = wishes.error ? null : wishes.count;
+    const receivedCount = received.error ? null : received.count;
+
     const ok = await confirm({
       title: t("confirmDeleteTitle"),
-      message: t("confirmDeleteMessage", { title: board?.name || "" }),
+      message: (
+        <>
+          <p>{t("confirmDeleteMessage", { title: board?.name || "" })}</p>
+          {!!wishCount && (
+            <p className="mt-2">
+              {t("confirmDeleteWishes", { count: wishCount })}
+            </p>
+          )}
+          {!!receivedCount && (
+            <p className="mt-2">
+              {t("confirmDeleteArchiveNote", { received: receivedCount })}
+            </p>
+          )}
+        </>
+      ),
       confirmText: t("confirmDeleteButton"),
     });
 
