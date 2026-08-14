@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 type Props = {
   url: string;
@@ -9,6 +10,7 @@ type Props = {
     share: string;
     copyLink: string;
     copied: string;
+    copyFailed: string;
   };
 };
 
@@ -18,7 +20,6 @@ type Props = {
  * checked after mount so it never mismatches the server-rendered markup.
  */
 export default function ShareBar({ url, title, labels }: Props) {
-  const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
 
   useEffect(() => {
@@ -28,10 +29,10 @@ export default function ShareBar({ url, title, labels }: Props) {
   async function copyLink() {
     try {
       await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      toast.success(labels.copied);
     } catch {
-      // Clipboard can be blocked (permissions, insecure context); fail quietly.
+      // Clipboard can be blocked (permissions, insecure context).
+      toast.error(labels.copyFailed);
     }
   }
 
@@ -56,35 +57,18 @@ export default function ShareBar({ url, title, labels }: Props) {
         type="button"
         onClick={copyLink}
         className="btn btn-sm btn-outline gap-2"
-        aria-live="polite"
       >
-        {copied ? (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="size-4"
-            aria-hidden
-          >
-            <path
-              fillRule="evenodd"
-              d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
-              clipRule="evenodd"
-            />
-          </svg>
-        ) : (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="size-4"
-            aria-hidden
-          >
-            <path d="M8.75 4.5a2.75 2.75 0 0 0-2.75 2.75v6.5A2.75 2.75 0 0 0 8.75 16.5h4.5A2.75 2.75 0 0 0 16 13.75v-6.5A2.75 2.75 0 0 0 13.25 4.5h-4.5Z" />
-            <path d="M4.5 6.75A2.75 2.75 0 0 1 6.75 4.06V3.75A1.75 1.75 0 0 0 5 5.5v6.5a1.75 1.75 0 0 0 1.75 1.75h.19A2.75 2.75 0 0 1 4.5 11.25v-4.5Z" />
-          </svg>
-        )}
-        {copied ? labels.copied : labels.copyLink}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className="size-4"
+          aria-hidden
+        >
+          <path d="M8.75 4.5a2.75 2.75 0 0 0-2.75 2.75v6.5A2.75 2.75 0 0 0 8.75 16.5h4.5A2.75 2.75 0 0 0 16 13.75v-6.5A2.75 2.75 0 0 0 13.25 4.5h-4.5Z" />
+          <path d="M4.5 6.75A2.75 2.75 0 0 1 6.75 4.06V3.75A1.75 1.75 0 0 0 5 5.5v6.5a1.75 1.75 0 0 0 1.75 1.75h.19A2.75 2.75 0 0 1 4.5 11.25v-4.5Z" />
+        </svg>
+        {labels.copyLink}
       </button>
 
       {canShare && (

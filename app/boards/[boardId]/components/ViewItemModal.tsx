@@ -13,6 +13,7 @@ import { ItemForm } from "./ItemForm";
 import toast from "react-hot-toast";
 import { useConfirm } from "@/components/ConfirmDialogProvider";
 import { useReserveItem } from "@/hooks/useReserveItem";
+import { archiveKey, useRevertPurchase } from "@/hooks/useBoardArchive";
 
 export function ViewItemModal({
   item,
@@ -82,6 +83,8 @@ export function ViewItemModal({
     getCaptchaToken,
     resetCaptcha,
   });
+
+  const revertPurchase = useRevertPurchase(item.board_id);
 
   const isMyReservation =
     item.status === "reserved" && item.reserved_by === user?.id;
@@ -202,10 +205,32 @@ export function ViewItemModal({
 
       if (error) throw error;
 
-      toast.success(t("successMarkAsBought"));
+      // The wish leaves the grid the moment it's marked received, so the toast
+      // carries the undo — the archive tab is the slower way back. Longer than
+      // the default 3s: an undo you can't reach in time isn't an undo.
+      toast.success(
+        (activeToast) => (
+          <span className="flex items-center gap-3">
+            {t("successMarkAsBought")}
+            <button
+              className="btn btn-xs btn-ghost"
+              onClick={() => {
+                toast.dismiss(activeToast.id);
+                revertPurchase.mutate(id);
+              }}
+            >
+              {t("ctaUndo")}
+            </button>
+          </span>
+        ),
+        { duration: 8000 }
+      );
 
       await queryClient.invalidateQueries({
         queryKey: ["items", data.board_id],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: archiveKey(data.board_id),
       });
 
       closeModal();

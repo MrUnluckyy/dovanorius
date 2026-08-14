@@ -1,9 +1,10 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { LuShare, LuGlobe, LuLock, LuCopy, LuCheck, LuX } from "react-icons/lu";
+import { LuShare, LuGlobe, LuLock, LuCopy, LuX } from "react-icons/lu";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { useTranslations } from "next-intl";
+import toast from "react-hot-toast";
 import { useConfirm } from "@/components/ConfirmDialogProvider";
 import { Board } from "./BoardBar";
 
@@ -13,8 +14,6 @@ type Props = {
 
 export function ShareModal({ board }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const [publicCopied, setPublicCopied] = useState(false);
-  const [privateCopied, setPrivateCopied] = useState(false);
   const [origin, setOrigin] = useState("");
   const modalRef = useRef<HTMLDialogElement | null>(null);
   const t = useTranslations("Boards");
@@ -60,22 +59,27 @@ export function ShareModal({ board }: Props) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["board", board.id] }),
   });
 
-  const copyPublic = async () => {
-    if (!board.slug) return;
-    await navigator.clipboard.writeText(`${origin}/b/${board.slug}`);
-    setPublicCopied(true);
-    setTimeout(() => setPublicCopied(false), 2000);
+  const copyLink = async (build: () => Promise<string> | string) => {
+    try {
+      await navigator.clipboard.writeText(await build());
+      toast.success(t("copied"));
+    } catch (err) {
+      toast.error(t("copyFailed"));
+      console.error("Failed to copy:", err);
+    }
   };
 
-  const copyPrivate = async () => {
-    let token = board.share_token;
-    if (!token) {
-      token = await generateTokenMutation.mutateAsync();
-    }
-    await navigator.clipboard.writeText(`${origin}/b/s/${token}`);
-    setPrivateCopied(true);
-    setTimeout(() => setPrivateCopied(false), 2000);
+  const copyPublic = async () => {
+    if (!board.slug) return;
+    await copyLink(() => `${origin}/b/${board.slug}`);
   };
+
+  const copyPrivate = async () =>
+    copyLink(async () => {
+      const token =
+        board.share_token ?? (await generateTokenMutation.mutateAsync());
+      return `${origin}/b/s/${token}`;
+    });
 
   const handleRevoke = async () => {
     const ok = await confirm({
@@ -119,10 +123,11 @@ export function ShareModal({ board }: Props) {
                     value={`${origin}/b/${board.slug}`}
                   />
                   <button
-                    className={`btn btn-sm transition-all ${publicCopied ? "btn-success" : "btn-primary"}`}
+                    className="btn btn-sm btn-primary"
                     onClick={copyPublic}
+                    aria-label={t("copyInviteLink")}
                   >
-                    {publicCopied ? <LuCheck size={15} /> : <LuCopy size={15} />}
+                    <LuCopy size={15} />
                   </button>
                 </div>
               </div>
@@ -144,11 +149,12 @@ export function ShareModal({ board }: Props) {
                       value={`${origin}/b/s/${board.share_token}`}
                     />
                     <button
-                      className={`btn btn-sm transition-all ${privateCopied ? "btn-success" : "btn-primary"}`}
+                      className="btn btn-sm btn-primary"
                       onClick={copyPrivate}
                       disabled={generateTokenMutation.isPending}
+                      aria-label={t("copyInviteLink")}
                     >
-                      {privateCopied ? <LuCheck size={15} /> : <LuCopy size={15} />}
+                      <LuCopy size={15} />
                     </button>
                   </div>
                   <button

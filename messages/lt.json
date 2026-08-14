@@ -204,7 +204,19 @@
     "infiniteLabel": "Begalinis noras",
     "infiniteHint": "Draugai negalės rezervuoti šio noro — jis tinka kelis kartus.",
     "infiniteShort": "Begalinis",
-    "infiniteBadge": "Šis noras nerezervuojamas"
+    "infiniteBadge": "Šis noras nerezervuojamas",
+    "tabWishes": "Norai",
+    "tabArchive": "Archyvas",
+    "archiveHint": "Gauti norai čia saugomi 14 dienų, vėliau jie dingsta.",
+    "archiveEmptyTitle": "Archyvas tuščias",
+    "archiveEmptyHint": "Norai, kuriuos pažymėsi kaip gautus, atsiras čia.",
+    "errorArchiveLoad": "Nepavyko įkelti archyvo",
+    "receivedOn": "Gauta {date}",
+    "ctaRestore": "Grąžinti",
+    "ctaUndo": "Atšaukti",
+    "successRestore": "↩️ Noras grąžintas į sąrašą",
+    "errorRestore": "😵 Nepavyko grąžinti noro. Bandykite dar kartą vėliau.",
+    "copyFailed": "Nepavyko nukopijuoti nuorodos"
   },
   "Profile": {
     "displayName": "Slapyvardis",
@@ -354,7 +366,8 @@
     "facetPriceBand": "Kaina",
     "allPosts": "Visi įrašai",
     "postSingular": "įrašas",
-    "postPlural": "įrašai"
+    "postPlural": "įrašai",
+    "copyFailed": "Nepavyko nukopijuoti nuorodos"
   },
   "Discover": {
     "metaTitle": "Dovanų idėjos ir įkvėpimas",

@@ -5,7 +5,7 @@ import { UserAvatar } from "@/app/dashboard/components/user/UserAvatar";
 import { useFollow } from "@/hooks/useFollow";
 import { LuShare, LuUserMinus, LuUserPlus } from "react-icons/lu";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import toast from "react-hot-toast";
 import { UserLoadingSkeleton } from "@/components/loaders/UserLoadingSkeleton";
 
 export function ProfileBar({
@@ -17,7 +17,6 @@ export function ProfileBar({
 }) {
   const { isLoading, profile } = useProfile(userId);
   const { isFollowing, follow, unfollow } = useFollow(authUserId, userId);
-  const [copied, setCopied] = useState(false);
   const t = useTranslations("Boards");
 
   const handleCopy = async () => {
@@ -26,9 +25,9 @@ export function ProfileBar({
 
     try {
       await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // reset after 2 seconds
+      toast.success(t("copied"));
     } catch (err) {
+      toast.error(t("copyFailed"));
       console.error("Failed to copy:", err);
     }
   };
@@ -75,12 +74,9 @@ export function ProfileBar({
               {isFollowing ? t("unfollow") : t("follow")}
             </button>
           )}
-          <button
-            className={`btn ${copied ? "btn-success" : ""}`}
-            onClick={handleCopy}
-          >
+          <button className="btn" onClick={handleCopy}>
             <LuShare />
-            {copied ? t("copied") : t("shareUser")}
+            {t("shareUser")}
           </button>
         </div>
       </div>
