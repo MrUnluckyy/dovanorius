@@ -415,7 +415,6 @@
     "collections": {
       "weSuggest": "Mes siūlome",
       "forAnyone": "Tinka visiems",
-      "onSale": "Šiuo metu su nuolaida",
       "beauty": "Grožio dovanos",
       "under25": "Dovanos iki 25 €",
       "bags": "Rankinės ir krepšiai",
@@ -452,7 +451,7 @@
     "browseTitle": "Visos prekės",
     "shelves": {
       "under25": {
-        "title": "Iki 25 € – ir vis tiek įsimena",
+        "title": "Iki 25 €",
         "subtitle": "Nedidelė dovana, kuri neatrodo pigiai"
       },
       "home": {
@@ -494,22 +493,18 @@
       "pets": {
         "title": "Augintiniams",
         "subtitle": "Dovana, kurią įvertins ir keturkojis"
-      },
-      "onSale": {
-        "title": "Šiuo metu su nuolaida",
-        "subtitle": "Geros dovanos, kurių kaina dabar krito"
       }
     },
     "personaPrompt": "Arba pasirinkite gavėją:",
     "personaShelfTitle": "Dovanos: {persona}",
     "personaShelfSubtitle": "Atrinkta būtent tokiam žmogui",
-    "themeShelfSubtitle": "Kruopščiai atrinkta rankomis",
+    "themeShelfSubtitle": "Mūsų išrinktos dovanos",
     "priceDropped": "kaina krito {percent}%",
     "collapse": "Suskleisti",
     "moreFromCategory": "Daugiau iš šios srities",
-    "moreFromCategoryNote": "Nebe atrinkta rankomis – rūšiuota pagal tinkamumą dovanai",
+    "moreFromCategoryNote": "Nebe atrinkta rankomis - rūšiuota pagal tinkamumą dovanai",
     "filters": "Filtrai",
-    "browseMetaTitle": "Visos dovanų prekės – Noriuto.lt",
+    "browseMetaTitle": "Visos dovanų prekės - Noriuto.lt",
     "browseMetaDescription": "Naršykite tūkstančius dovanų idėjų pagal kategoriją, kainą ir prekės ženklą."
   },
   "Inspo": {
