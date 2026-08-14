@@ -398,7 +398,6 @@
     "collections": {
       "weSuggest": "We suggest",
       "forAnyone": "Works for anyone",
-      "onSale": "On sale now",
       "beauty": "Beauty gifts",
       "under25": "Gifts under €25",
       "bags": "Bags & purses",
@@ -477,10 +476,6 @@
       "pets": {
         "title": "For pets",
         "subtitle": "A gift the four-legged one will appreciate too"
-      },
-      "onSale": {
-        "title": "On sale right now",
-        "subtitle": "Good gifts that just dropped in price"
       }
     },
     "personaPrompt": "Or pick a recipient:",

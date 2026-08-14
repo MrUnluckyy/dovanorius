@@ -11,10 +11,8 @@ import { useDiscoverAudience } from "@/hooks/useDiscoverAudience";
 import { type CardProduct } from "./_components/ProductCard";
 import { CATEGORIES, AUDIENCES, browseHref } from "./_components/filters";
 import Link from "next/link";
-import { Shelf } from "./_components/Shelf";
 import { PersonaShelf } from "./_components/PersonaShelf";
 import { usePersonas } from "@/hooks/usePersonas";
-import { SHELVES, shelfToFilters, type ShelfDef } from "./_components/shelves";
 import { ProductStrip } from "./_components/ProductStrip";
 import { ProductModal } from "./_components/ProductModal";
 import { trackInspo } from "@/utils/trackInspo";
@@ -32,8 +30,7 @@ export function DiscoverClient() {
   const [personaId, setPersonaId] = useState<string | null>(null);
 
   const { data: personas } = usePersonas();
-  // Recipients are offered in the picker; themes render inline and are
-  // gradually replacing the keyword-driven SHELVES.
+  // Recipients are offered in the picker; themes render inline.
   //
   // Editorial shelves sit in the same inline row: same renderer, same
   // sort_order, only the source of their picks differs (hand-made in /admin
@@ -93,19 +90,6 @@ export function DiscoverClient() {
     trackInspo("open", p.id);
   };
 
-
-  /** "See all" on a shelf becomes a browse URL carrying its theme. */
-  const openShelfInBrowse = (shelf: ShelfDef) => {
-    const f = shelfToFilters(shelf);
-    router.push(
-      browseHref({
-        type: f.productType,
-        price: f.priceMax === 25 ? "under25" : null,
-        sale: f.onSaleOnly,
-        sort: f.onSaleOnly ? "discount" : null,
-      })
-    );
-  };
 
   // ===== Inspire: the page. Shelves with a reason, not a wall of products. =====
     return (
@@ -250,22 +234,11 @@ export function DiscoverClient() {
               />
             )}
 
-            {/* Curated theme shelves. These replace the keyword shelves one at
-                a time — both render for now so the two can be compared. */}
+            {/* Curated shelves — every themed shelf on the page is now a
+                gift_personas row, LLM-curated or hand-picked. The keyword-query
+                shelves they replaced are gone. */}
             {themes.map((theme) => (
               <PersonaShelf key={theme.id} persona={theme} onOpen={openProduct} />
-            ))}
-
-            {SHELVES.filter(
-              (s) => !s.audiences || s.audiences.includes(audience)
-            ).map((shelf) => (
-              <Shelf
-                key={shelf.key}
-                shelf={shelf}
-                audience={audience}
-                onOpen={openProduct}
-                onSeeAll={openShelfInBrowse}
-              />
             ))}
           </div>
         )}
