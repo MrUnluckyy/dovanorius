@@ -5,86 +5,18 @@
  * /meta.json without authentication. We only ever take a bare domain from the
  * partner and build these URLs ourselves — see the migration for why.
  */
+import { FeedError, type FeedAdapter, type NormalizedProduct, type StoreCatalog } from "./types";
+import { getJson, stripHtml } from "./http";
 
 const PAGE_SIZE = 250;
 /** Safety valve: 40 pages = 10k products. Guards against a pathological store. */
 const MAX_PAGES = 40;
-const FETCH_TIMEOUT_MS = 20_000;
-
-export type NormalizedProduct = {
-  externalId: string;
-  title: string;
-  description: string | null;
-  price: number | null;
-  imageUrl: string | null;
-  productUrl: string;
-  sku: string | null;
-  inStock: boolean;
-  /** Shopify tags + product_type, lightly cleaned. Gift metadata stays partner-owned. */
-  categories: string[];
-};
-
-export type ShopifyCatalog = {
-  currency: string;
-  products: NormalizedProduct[];
-};
-
-export class ShopifyFeedError extends Error {}
-
-/**
- * Accepts what a partner is likely to paste ("https://shop.com/", "shop.com",
- * "www.shop.com") and returns a bare lowercase host. Rejects anything that
- * isn't a plain public hostname.
- */
-export function normalizeShopDomain(input: string): string {
-  const raw = (input ?? "").trim().toLowerCase();
-  if (!raw) throw new ShopifyFeedError("Nenurodytas parduotuvės adresas.");
-
-  const host = raw
-    .replace(/^[a-z][a-z0-9+.-]*:\/\//, "")
-    .replace(/^[^/@]*@/, "")
-    .replace(/[/?#].*$/, "")
-    .replace(/:\d+$/, "");
-
-  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(host)) {
-    throw new ShopifyFeedError(`Netinkamas domenas: „${input}".`);
-  }
-  // No internal targets — this host is fetched server-side on a schedule.
-  if (
-    host === "localhost" ||
-    host.endsWith(".localhost") ||
-    host.endsWith(".internal") ||
-    /^\d+\.\d+\.\d+\.\d+$/.test(host)
-  ) {
-    throw new ShopifyFeedError("Neleistinas domenas.");
-  }
-  return host;
-}
-
-async function getJson(url: string): Promise<unknown> {
-  const res = await fetch(url, {
-    headers: { accept: "application/json", "user-agent": "NoriutoBot/1.0" },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-    redirect: "follow",
-  });
-  if (!res.ok) {
-    throw new ShopifyFeedError(`${url} grąžino ${res.status}.`);
-  }
-  const type = res.headers.get("content-type") ?? "";
-  if (!type.includes("json")) {
-    throw new ShopifyFeedError(
-      `${url} grąžino ne JSON (${type || "nenurodyta"}). Ar tai Shopify parduotuvė?`
-    );
-  }
-  return res.json();
-}
 
 /** Store currency lives in /meta.json; products.json has no currency at all. */
 async function fetchCurrency(domain: string): Promise<string> {
   try {
-    const meta = (await getJson(`https://${domain}/meta.json`)) as {
-      currency?: string;
-    };
+    const { body } = await getJson(`https://${domain}/meta.json`);
+    const meta = body as { currency?: string };
     return meta?.currency?.toUpperCase() || "EUR";
   } catch {
     return "EUR";
@@ -107,26 +39,12 @@ type ShopifyProduct = {
   images?: { src?: string }[];
 };
 
-function stripHtml(html: string | null | undefined): string | null {
-  if (!html) return null;
-  const text = html
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/\s+/g, " ")
-    .trim();
-  return text ? text.slice(0, 2000) : null;
-}
-
 function toCategories(p: ShopifyProduct): string[] {
   const tags = Array.isArray(p.tags)
     ? p.tags
     : typeof p.tags === "string"
-    ? p.tags.split(",")
-    : [];
+      ? p.tags.split(",")
+      : [];
   const all = [p.product_type ?? "", ...tags]
     .map((t) => t.trim())
     .filter(Boolean)
@@ -160,23 +78,21 @@ function normalize(p: ShopifyProduct, domain: string): NormalizedProduct | null 
   };
 }
 
-export async function fetchShopifyCatalog(
-  rawDomain: string
-): Promise<ShopifyCatalog> {
-  const domain = normalizeShopDomain(rawDomain);
+export async function fetchShopifyCatalog(domain: string): Promise<StoreCatalog> {
   const currency = await fetchCurrency(domain);
 
   const products: NormalizedProduct[] = [];
   const seen = new Set<string>();
 
   for (let page = 1; page <= MAX_PAGES; page++) {
-    const data = (await getJson(
+    const { body } = await getJson(
       `https://${domain}/products.json?limit=${PAGE_SIZE}&page=${page}`
-    )) as { products?: ShopifyProduct[] };
+    );
+    const data = body as { products?: ShopifyProduct[] };
 
     const batch = data?.products;
     if (!Array.isArray(batch)) {
-      throw new ShopifyFeedError(
+      throw new FeedError(
         "Atsakyme nerasta „products“ lauko. Ar tai Shopify parduotuvė?"
       );
     }
@@ -195,8 +111,22 @@ export async function fetchShopifyCatalog(
   }
 
   if (products.length === 0) {
-    throw new ShopifyFeedError("Parduotuvėje nerasta produktų.");
+    throw new FeedError("Parduotuvėje nerasta produktų.");
   }
 
   return { currency, products };
 }
+
+export const shopifyAdapter: FeedAdapter = {
+  platform: "shopify",
+  label: "Shopify",
+  fetchCatalog: fetchShopifyCatalog,
+  async probe(domain) {
+    try {
+      const { body } = await getJson(`https://${domain}/products.json?limit=1`);
+      return Array.isArray((body as { products?: unknown[] })?.products);
+    } catch {
+      return false;
+    }
+  },
+};

@@ -3,10 +3,13 @@
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
 import { LuRefreshCw, LuSave, LuCircleCheck, LuCircleAlert } from "react-icons/lu";
-import { saveShopifyDomain, syncNow } from "../actions";
+import { saveStoreDomain, syncNow } from "../actions";
 
 export type StoreState = {
   domain: string | null;
+  /** Detected when the domain was saved, not chosen by the partner. */
+  platform: string | null;
+  platformLabel: string | null;
   autoApprove: boolean;
   lastSyncedAt: string | null;
   lastStatus: string | null;
@@ -21,13 +24,17 @@ export function StoreClient({ state }: { state: StoreState }) {
 
   function handleSave() {
     startTransition(async () => {
-      const res = await saveShopifyDomain(domain);
+      const res = await saveStoreDomain(domain);
       if (!res.ok) {
         toast.error(res.error);
         return;
       }
       toast.success(
-        res.domain ? `Parduotuvė prijungta: ${res.domain}` : "Parduotuvė atjungta."
+        res.domain
+          ? `Parduotuvė prijungta: ${res.domain}${
+              res.platformLabel ? ` (${res.platformLabel})` : ""
+            }`
+          : "Parduotuvė atjungta."
       );
     });
   }
@@ -51,15 +58,16 @@ export function StoreClient({ state }: { state: StoreState }) {
       <div>
         <h1 className="font-heading text-2xl font-bold">Parduotuvė</h1>
         <p className="mt-1 text-sm text-base-content/60">
-          Prijunkite savo Shopify parduotuvę — produktai bus atnaujinami
-          kasdien: kainos, nuotraukos ir prekių likutis.
+          Prijunkite savo internetinę parduotuvę — produktai bus atnaujinami
+          kasdien: kainos, nuotraukos ir prekių likutis. Palaikomos Shopify ir
+          WooCommerce parduotuvės.
         </p>
       </div>
 
       <div className="card bg-base-100 card-border">
         <div className="card-body">
           <label className="form-control w-full">
-            <span className="label-text text-sm">Shopify parduotuvės adresas</span>
+            <span className="label-text text-sm">Parduotuvės adresas</span>
             <div className="flex gap-2">
               <input
                 className="input input-bordered flex-1"
@@ -77,13 +85,18 @@ export function StoreClient({ state }: { state: StoreState }) {
               </button>
             </div>
             <span className="label-text-alt mt-1 text-base-content/50">
-              Įveskite tik domeną. Naudojame viešą Shopify produktų sąrašą —
-              slaptažodžių ar API raktų nereikia.
+              Įveskite tik domeną — platformą atpažinsime patys. Naudojame viešą
+              produktų sąrašą, slaptažodžių ar API raktų nereikia.
             </span>
           </label>
 
           {state.domain && (
             <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-base-300 pt-4">
+              {state.platformLabel && (
+                <span className="badge badge-ghost badge-sm">
+                  {state.platformLabel}
+                </span>
+              )}
               <button
                 className="btn btn-outline btn-sm gap-1"
                 onClick={handleSync}

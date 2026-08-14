@@ -3,8 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import { getPartnerContext } from "@/lib/partner/context";
-import { normalizeShopDomain, ShopifyFeedError } from "@/lib/partner-feeds/shopify";
-import { syncPartnerShopifyFeed, type SyncResult } from "@/lib/partner-feeds/sync";
+import {
+  normalizeShopDomain,
+  detectPlatform,
+  getAdapter,
+  FeedError,
+  type FeedPlatform,
+} from "@/lib/partner-feeds";
+import { syncPartnerFeed, type SyncResult } from "@/lib/partner-feeds/sync";
 
 export type ActionResult<T> = ({ ok: true } & T) | { ok: false; error: string };
 
@@ -14,9 +20,9 @@ export type ActionResult<T> = ({ ok: true } & T) | { ok: false; error: string };
  * getPartnerContext has already validated. A client-sent partner id is never
  * trusted.
  */
-export async function saveShopifyDomain(
+export async function saveStoreDomain(
   rawDomain: string
-): Promise<ActionResult<{ domain: string | null }>> {
+): Promise<ActionResult<{ domain: string | null; platform: FeedPlatform | null; platformLabel: string | null }>> {
   const ctx = await getPartnerContext();
   if (!ctx) return { ok: false, error: "Neautorizuota." };
 
@@ -26,32 +32,40 @@ export async function saveShopifyDomain(
   if (!trimmed) {
     const { error } = await supabaseAdmin
       .from("partners")
-      .update({ shopify_domain: null, feed_enabled: false })
+      .update({ store_domain: null, feed_enabled: false })
       .eq("id", ctx.active.partnerId);
     if (error) return { ok: false, error: "Nepavyko išsaugoti." };
     revalidatePath("/partner/store");
-    return { ok: true, domain: null };
+    return { ok: true, domain: null, platform: null, platformLabel: null };
   }
 
   let domain: string;
+  let platform: FeedPlatform;
   try {
     domain = normalizeShopDomain(trimmed);
+    // Asked of the shop rather than of the partner — see detectPlatform.
+    platform = await detectPlatform(domain);
   } catch (err) {
     return {
       ok: false,
-      error: err instanceof ShopifyFeedError ? err.message : "Netinkamas adresas.",
+      error: err instanceof FeedError ? err.message : "Netinkamas adresas.",
     };
   }
 
   const { error } = await supabaseAdmin
     .from("partners")
-    .update({ shopify_domain: domain, feed_enabled: true })
+    .update({ store_domain: domain, feed_platform: platform, feed_enabled: true })
     .eq("id", ctx.active.partnerId);
 
   if (error) return { ok: false, error: "Nepavyko išsaugoti." };
 
   revalidatePath("/partner/store");
-  return { ok: true, domain };
+  return {
+    ok: true,
+    domain,
+    platform,
+    platformLabel: getAdapter(platform).label,
+  };
 }
 
 /** Run the import immediately. Same code path the daily job uses. */
@@ -60,10 +74,7 @@ export async function syncNow(): Promise<ActionResult<{ result: SyncResult }>> {
   if (!ctx) return { ok: false, error: "Neautorizuota." };
 
   try {
-    const result = await syncPartnerShopifyFeed(
-      supabaseAdmin,
-      ctx.active.partnerId
-    );
+    const result = await syncPartnerFeed(supabaseAdmin, ctx.active.partnerId);
     revalidatePath("/partner/store");
     revalidatePath("/partner/products");
     revalidatePath("/partner");

@@ -19,7 +19,7 @@
  *                              status='approved' for auto-approved feeds)
  */
 import { createClient } from "@supabase/supabase-js";
-import { syncPartnerShopifyFeed } from "../lib/partner-feeds/sync";
+import { syncPartnerFeed } from "../lib/partner-feeds/sync";
 
 function makeClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
@@ -50,10 +50,10 @@ async function main() {
 
   let query = supabase
     .from("partners")
-    .select("id, name, slug, shopify_domain")
+    .select("id, name, slug, store_domain, feed_platform")
     .eq("feed_enabled", true)
     .eq("is_active", true)
-    .not("shopify_domain", "is", null);
+    .not("store_domain", "is", null);
 
   if (slug) query = query.eq("slug", slug);
 
@@ -71,9 +71,9 @@ async function main() {
   const failures: { name: string; message: string }[] = [];
 
   for (const p of partners) {
-    const label = `${p.name} (${p.shopify_domain})`;
+    const label = `${p.name} (${p.store_domain}, ${p.feed_platform})`;
     try {
-      const r = await syncPartnerShopifyFeed(supabase, p.id);
+      const r = await syncPartnerFeed(supabase, p.id);
       console.log(
         `  ok    ${label}: fetched ${r.fetched}, imported ${r.written}, ` +
           `skipped sold-out ${r.skippedSoldOut}, deactivated ${r.deactivated}` +
