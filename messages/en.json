@@ -201,7 +201,8 @@
     "infiniteLabel": "Infinite wish",
     "infiniteHint": "Friends won't be able to reserve this wish — it can be given multiple times.",
     "infiniteShort": "Infinite",
-    "infiniteBadge": "This wish cannot be reserved"
+    "infiniteBadge": "This wish cannot be reserved",
+    "copyFailed": "Couldn't copy the link"
   },
   "Profile": {
     "displayName": "Display Name",
@@ -350,7 +351,8 @@
     "facetPriceBand": "Price",
     "allPosts": "All posts",
     "postSingular": "post",
-    "postPlural": "posts"
+    "postPlural": "posts",
+    "copyFailed": "Couldn't copy the link"
   },
   "Discover": {
     "metaTitle": "Gift Ideas & Inspiration",

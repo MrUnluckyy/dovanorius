@@ -4,13 +4,12 @@ import { isWithinInterval, subWeeks } from "date-fns";
 import { UserAvatar } from "@/app/dashboard/components/user/UserAvatar";
 import { UserLoadingSkeleton } from "@/components/loaders/UserLoadingSkeleton";
 import { LuShare } from "react-icons/lu";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
+import toast from "react-hot-toast";
 import { UserEditModal } from "@/app/dashboard/components/user/UserEditModal";
 
 export function DashboardUser() {
   const { isLoading, profile } = useProfile();
-  const [copied, setCopied] = useState(false);
   const t = useTranslations("Boards");
 
   const handleCopy = async () => {
@@ -19,9 +18,9 @@ export function DashboardUser() {
 
     try {
       await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // reset after 2 seconds
+      toast.success(t("copied"));
     } catch (err) {
+      toast.error(t("copyFailed"));
       console.error("Failed to copy:", err);
     }
   };
@@ -54,12 +53,9 @@ export function DashboardUser() {
             <p className="text-sm font-body">{profile?.about}</p>
           </div>
           <div className="flex flex-col gap-2">
-            <button
-              className={`btn ${copied ? "btn-success" : "btn-outline"}`}
-              onClick={handleCopy}
-            >
+            <button className="btn btn-outline" onClick={handleCopy}>
               <LuShare />
-              {copied ? t("copied") : t("shareUser")}
+              {t("shareUser")}
             </button>
             <UserEditModal />
           </div>

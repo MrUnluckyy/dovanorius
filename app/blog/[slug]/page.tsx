@@ -229,6 +229,7 @@ export default async function BlogPostPage({
             share: t("share"),
             copyLink: t("copyLink"),
             copied: t("copied"),
+            copyFailed: t("copyFailed"),
           }}
         />
 

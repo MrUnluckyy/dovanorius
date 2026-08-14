@@ -204,7 +204,8 @@
     "infiniteLabel": "Begalinis noras",
     "infiniteHint": "Draugai negalės rezervuoti šio noro — jis tinka kelis kartus.",
     "infiniteShort": "Begalinis",
-    "infiniteBadge": "Šis noras nerezervuojamas"
+    "infiniteBadge": "Šis noras nerezervuojamas",
+    "copyFailed": "Nepavyko nukopijuoti nuorodos"
   },
   "Profile": {
     "displayName": "Slapyvardis",
@@ -354,7 +355,8 @@
     "facetPriceBand": "Kaina",
     "allPosts": "Visi įrašai",
     "postSingular": "įrašas",
-    "postPlural": "įrašai"
+    "postPlural": "įrašai",
+    "copyFailed": "Nepavyko nukopijuoti nuorodos"
   },
   "Discover": {
     "metaTitle": "Dovanų idėjos ir įkvėpimas",
