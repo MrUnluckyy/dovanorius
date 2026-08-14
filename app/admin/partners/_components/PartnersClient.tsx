@@ -42,7 +42,8 @@ export type AdminPartnerRow = {
   memberCount: number;
   /** Is the signed-in admin currently a member of this partner? */
   isStaff: boolean;
-  shopifyDomain: string | null;
+  storeDomain: string | null;
+  feedPlatform: string | null;
   feedAutoApprove: boolean;
   feedLastSyncedAt: string | null;
   feedLastStatus: string | null;
@@ -232,11 +233,16 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
                             {p.website_url.replace(/^https?:\/\//, "")}
                           </a>
                         )}
-                        {p.shopifyDomain && (
+                        {p.storeDomain && (
                           <div className="mt-1 flex items-center gap-2 text-xs">
                             <span className="flex items-center gap-1 text-base-content/50">
-                              <LuStore size={11} /> {p.shopifyDomain}
+                              <LuStore size={11} /> {p.storeDomain}
                             </span>
+                            {p.feedPlatform && (
+                              <span className="badge badge-ghost badge-xs">
+                                {p.feedPlatform}
+                              </span>
+                            )}
                             <button
                               className={`badge badge-xs ${
                                 p.feedAutoApprove ? "badge-success" : "badge-ghost"
@@ -251,7 +257,7 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
                             </button>
                           </div>
                         )}
-                        {p.shopifyDomain && (
+                        {p.storeDomain && (
                           <div className="mt-1 text-xs">
                             {p.feedLastStatus === "error" ? (
                               <div className="flex items-start gap-1 text-error">
