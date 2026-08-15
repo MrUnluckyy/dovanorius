@@ -543,6 +543,14 @@
     "loadingStep3": "Renkame geriausiai tinkančias",
     "loadingHint": "Dirbtinis intelektas parenka dovanas pagal tavo norus — tai gali užtrukti kelias sekundes."
   },
+  "BoardPicker": {
+    "title": "Į kurią lentą?",
+    "searchPlaceholder": "Ieškoti lentos",
+    "empty": "Lentų dar neturi. Sukurk pirmą — čia pat ir išsaugosim.",
+    "noMatches": "Tokios lentos nėra",
+    "newBoard": "Sukurti naują lentą",
+    "create": "Sukurti"
+  },
   "Landing": {
     "nav": {
       "howItWorks": "Kaip veikia",
