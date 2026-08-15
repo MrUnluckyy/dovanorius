@@ -152,3 +152,32 @@ export const FACET_POSTS_COUNT_QUERY = defineQuery(/* groq */ `
 export const FACET_SLUGS_QUERY = defineQuery(/* groq */ `
   *[_type == "giftFacet" && defined(slug.current)].slug.current
 `);
+
+/** Sitemap: published posts, newest first, with a date for `lastModified`. */
+export const SITEMAP_POSTS_QUERY = defineQuery(/* groq */ `
+  *[_type == "post" && defined(slug.current) && publishedAt <= now()]
+    | order(publishedAt desc){
+      "slug": slug.current,
+      publishedAt,
+      _updatedAt
+    }
+`);
+
+/**
+ * Sitemap: only facets that actually have a post behind them.
+ *
+ * `FACET_SLUGS_QUERY` returns every facet, and most of them currently list
+ * nothing — submitting empty listing pages just spends crawl budget on pages
+ * Google will decline to index. They come back into the sitemap on their own as
+ * soon as a post is tagged with them.
+ */
+export const SITEMAP_FACETS_QUERY = defineQuery(/* groq */ `
+  *[_type == "giftFacet" && defined(slug.current)
+    && count(*[_type == "post" && defined(slug.current) && publishedAt <= now()
+      && ^._id in facets[]._ref]) > 0]{
+      "slug": slug.current,
+      "lastModified": *[_type == "post" && defined(slug.current)
+        && publishedAt <= now() && ^._id in facets[]._ref]
+        | order(_updatedAt desc)[0]._updatedAt
+    }
+`);

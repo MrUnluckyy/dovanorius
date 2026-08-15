@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 
 import ShareBar from "@/components/blog/ShareBar";
 import SanityImage from "@/components/SanityImage";
+import { absoluteUrl } from "@/lib/siteUrl";
 import { buildArticleJsonLd, buildItemListJsonLd } from "@/sanity/jsonld";
 import { sanityFetch } from "@/sanity/live";
 import { getPortableTextComponents } from "@/sanity/portable-text";
@@ -101,8 +102,7 @@ export default async function BlogPostPage({
 
   if (!post) notFound();
 
-  const siteUrl = process.env.NEXT_PUBLIC_WEB_URL ?? "https://noriuto.lt";
-  const pageUrl = `${siteUrl}/blog/${post.slug}`;
+  const pageUrl = absoluteUrl(`/blog/${post.slug}`);
 
   const articleJsonLd = buildArticleJsonLd({
     title: post.title ?? "",
