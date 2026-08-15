@@ -163,6 +163,8 @@
     "toastBoardCreateError": "😵 Oops! Something went wrong while creating the board. Please try again later.",
     "confirmDeleteTitle": "Delete?",
     "confirmDeleteMessage": "Are you sure you want to delete {title}? This action cannot be undone.",
+    "confirmDeleteWishes": "Every wish on this list goes with it ({count} in total).",
+    "confirmDeleteArchiveNote": "That includes {received, plural, one {# received gift} other {# received gifts}}, which will also disappear from the archive.",
     "confirmDeleteButton": "Yes, delete it",
     "ctaCreateBoard": "Create New Board",
     "ctaEditBoard": "Edit Board",

@@ -165,6 +165,8 @@
     "toastBoardCreateError": "😵 Upps. Kažkas ne taip. Pamėgink šiek tiek veliau.",
     "confirmDeleteTitle": "Ištrinti?",
     "confirmDeleteMessage": "Ar tikrai norite ištrinti {title}? Šis veiksmas yra negrįžtamas.",
+    "confirmDeleteWishes": "Kartu bus ištrinti ir visi šio sąrašo norai (iš viso: {count}).",
+    "confirmDeleteArchiveNote": "Tarp jų — gautų dovanų istorija ({received}), kuri dings ir iš archyvo.",
     "confirmDeleteButton": "Taip, ištrinti",
     "ctaView": "Atidaryti",
     "ctaCreateBoard": "Sukurti naują lentą",
