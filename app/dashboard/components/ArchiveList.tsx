@@ -3,25 +3,27 @@
 import { format } from "date-fns";
 import { enUS, lt } from "date-fns/locale";
 import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
 import { LuUndo2 } from "react-icons/lu";
+import { User } from "@supabase/supabase-js";
 
 import { FillImage } from "@/components/ui/FillImage";
 import { BoardsLoadingSkeleton } from "@/components/loaders/BoardsLoadingSkeleton";
-import { useBoardArchive, useRevertPurchase } from "@/hooks/useBoardArchive";
+import { useMyArchive, useRevertPurchase } from "@/hooks/useArchive";
 
 const PLACEHOLDER = "/assets/placeholder.jpg";
 
 /**
- * Wishes marked as received, with a way back. Rows rather than the wish grid's
- * cards — these are history, not something you act on beyond restoring, and the
- * date + restore button read better on a line. Mirrors ArchivedItemRow in the
- * mobile app.
+ * Wishes marked as received across every board, with a way back. Rows rather
+ * than the wish grid's cards — these are history, not something you act on
+ * beyond restoring, and the date + restore button read better on a line.
+ * Mirrors ArchivedItemRow in the mobile app.
  */
-export function ArchiveList({ boardId }: { boardId: string }) {
+export function ArchiveList({ user }: { user: User }) {
   const t = useTranslations("Boards");
   const locale = useLocale();
-  const { data: items = [], isLoading, error } = useBoardArchive(boardId);
-  const revert = useRevertPurchase(boardId);
+  const { data: items = [], isLoading, error } = useMyArchive(user.id);
+  const revert = useRevertPurchase();
 
   if (isLoading) return <BoardsLoadingSkeleton />;
 
@@ -60,15 +62,26 @@ export function ArchiveList({ boardId }: { boardId: string }) {
                 <p className="truncate font-medium" data-clarity-mask="true">
                   {item.title}
                 </p>
-                {item.purchased_at && (
-                  <p className="text-sm opacity-60">
-                    {t("receivedOn", {
+                <p className="truncate text-sm opacity-60">
+                  {item.purchased_at &&
+                    t("receivedOn", {
                       date: format(new Date(item.purchased_at), "PPP", {
                         locale: locale === "lt" ? lt : enUS,
                       }),
                     })}
-                  </p>
-                )}
+                  {/* Which list it came from, now that boards are mixed. */}
+                  {item.board_name && (
+                    <>
+                      {item.purchased_at && " · "}
+                      <Link
+                        href={`/boards/${item.board_id}`}
+                        className="hover:underline"
+                      >
+                        {item.board_name}
+                      </Link>
+                    </>
+                  )}
+                </p>
               </div>
 
               <button

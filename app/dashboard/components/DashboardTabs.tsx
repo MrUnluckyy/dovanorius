@@ -6,8 +6,9 @@ import { BoardsList } from "@/app/boards/components/BoardsList";
 import { ReservedItems } from "./ReservedItems";
 import { FollowingList } from "./FollowingList";
 import MyEvents from "./MyEvents";
+import { ArchiveList } from "./ArchiveList";
 
-type Tab = "wishes" | "events" | "friends";
+type Tab = "wishes" | "events" | "friends" | "archive";
 
 export function DashboardTabs({ user }: { user: User }) {
   const t = useTranslations("Dashboard");
@@ -17,6 +18,7 @@ export function DashboardTabs({ user }: { user: User }) {
     { key: "wishes", label: t("tabWishes") },
     { key: "events", label: t("tabEvents") },
     { key: "friends", label: t("tabFriends") },
+    { key: "archive", label: t("tabArchive") },
   ];
 
   return (
@@ -42,6 +44,7 @@ export function DashboardTabs({ user }: { user: User }) {
       )}
       {active === "events" && <MyEvents user={user} />}
       {active === "friends" && <FollowingList userId={user.id} />}
+      {active === "archive" && <ArchiveList user={user} />}
     </div>
   );
 }
