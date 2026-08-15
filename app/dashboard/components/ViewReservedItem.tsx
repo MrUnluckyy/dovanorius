@@ -106,18 +106,23 @@ export function ViewReservedItem({
             </button>
             <>
               <div className="flex flex-col max-h-[60vh] overflow-auto">
+                {/* Height is capped as well as width: a portrait photo with only
+                    a max-width filled the whole modal and pushed the title,
+                    price and buttons below the fold. Same cap as ViewItemModal,
+                    which shows the same item to its owner. */}
                 <figure className="w-full mb-6 shrink-0">
                   {item.image_url ? (
                     <img
                       src={item.image_url}
                       alt={title}
-                      className="max-w-[300px]"
+                      className="max-w-[300px] max-h-[42vh] w-full rounded-md object-contain"
                       data-clarity-mask="true"
                     />
                   ) : (
                     <img
                       src="/assets/placeholder.jpg"
                       alt="Gift illustration"
+                      className="max-w-[300px] max-h-[42vh] w-full rounded-md object-contain"
                     />
                   )}
                 </figure>
