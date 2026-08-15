@@ -1,5 +1,9 @@
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import { QueueActions } from "./_components/QueueActions";
+import {
+  QueueBulkActions,
+  type PendingPartner,
+} from "./_components/QueueBulkActions";
 
 export const dynamic = "force-dynamic";
 
@@ -37,19 +41,31 @@ export default async function PartnerModerationPage() {
     for (const p of partners ?? []) names.set(p.id, p.name);
   }
 
+  // Pending counts per partner, so the bulk action can be scoped to one of them.
+  const pendingPartners: PendingPartner[] = partnerIds
+    .map((id) => ({
+      id,
+      name: names.get(id) ?? "—",
+      count: rows.filter((r) => r.partner_id === id).length,
+    }))
+    .sort((a, b) => b.count - a.count);
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl font-bold">
-          Moderavimas{" "}
-          <span className="text-lg font-normal text-base-content/40">
-            ({rows.length})
-          </span>
-        </h1>
-        <p className="mt-1 text-sm text-base-content/60">
-          Partnerių įkelti produktai, laukiantys peržiūros. Patvirtinti produktai
-          iškart įtraukiami į Discover srautą.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-heading text-2xl font-bold">
+            Moderavimas{" "}
+            <span className="text-lg font-normal text-base-content/40">
+              ({rows.length})
+            </span>
+          </h1>
+          <p className="mt-1 text-sm text-base-content/60">
+            Partnerių įkelti produktai, laukiantys peržiūros. Patvirtinti
+            produktai iškart įtraukiami į Discover srautą.
+          </p>
+        </div>
+        <QueueBulkActions partners={pendingPartners} total={rows.length} />
       </div>
 
       {rows.length === 0 ? (

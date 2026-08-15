@@ -38,6 +38,37 @@ export async function approveProduct(id: string) {
   revalidatePath("/admin/partners/queue");
 }
 
+/**
+ * Approve every pending product at once, optionally scoped to one partner.
+ * Returns how many rows were approved so the caller can report it.
+ */
+export async function approveAllPending(partnerId?: string) {
+  const adminId = await requireAdminId();
+
+  let query = supabaseAdmin
+    .from("partner_products")
+    .update(
+      {
+        status: "approved",
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: adminId,
+        rejection_reason: null,
+      },
+      // `count` must be requested here — on a mutation, `.select()` takes only
+      // a column list and silently ignores an options argument.
+      { count: "exact" }
+    )
+    .eq("status", "pending");
+
+  if (partnerId) query = query.eq("partner_id", partnerId);
+
+  const { count, error } = await query;
+  if (error) throw error;
+
+  revalidatePath("/admin/partners/queue");
+  return count ?? 0;
+}
+
 /** Reject a pending product with a reason shown back to the partner. */
 export async function rejectProduct(id: string, reason: string) {
   const adminId = await requireAdminId();
