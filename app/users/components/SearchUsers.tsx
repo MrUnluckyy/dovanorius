@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { foldForSearch } from "@/utils/helpers/search";
 import Link from "next/link";
 
 // Table shape (Supabase `profiles`)
@@ -74,12 +75,14 @@ export function SearchUsers() {
       setLoading(true);
       setError(null);
 
-      const like = `%${q}%`;
+      // Search the folded copy of the name with an equally folded term, so
+      // "Zyg" finds "Žygimantas".
+      const like = `%${foldForSearch(q)}%`;
       const { data, error } = await supabase
         .from("profiles")
         .select("id, display_name, about, avatar_url, public")
         .eq("public", true)
-        .ilike("display_name", like)
+        .ilike("display_name_norm", like)
         .order("display_name", { ascending: true })
         .limit(24);
 
