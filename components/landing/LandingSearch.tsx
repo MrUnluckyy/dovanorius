@@ -11,6 +11,7 @@ import Link from "next/link";
 import { LuSearch, LuArrowRight, LuX } from "react-icons/lu";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/utils/supabase/client";
+import { foldForSearch } from "@/utils/helpers/search";
 
 interface Profile {
   id: string;
@@ -131,7 +132,8 @@ export function LandingSearch() {
       .from("profiles")
       .select("id, display_name, about, avatar_url")
       .eq("public", true)
-      .ilike("display_name", `%${q}%`)
+      // Folded column + folded term, so "Zyg" finds "Žygimantas".
+      .ilike("display_name_norm", `%${foldForSearch(q)}%`)
       .order("display_name", { ascending: true })
       .limit(8)
       .then(({ data }) => {

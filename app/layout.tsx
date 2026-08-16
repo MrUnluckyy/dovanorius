@@ -14,6 +14,7 @@ import { GoogleTagManager } from "@next/third-parties/google";
 import { GtmPageView } from "@/components/GtmPageView";
 import { PostHogProvider } from "@/components/providers/PostHogProvider";
 import { createClient } from "@/utils/supabase/server";
+import { SITE_URL } from "@/lib/siteUrl";
 
 /* Display face — headlines, buttons, numbers (Noriuto design system) */
 const headings = Bricolage_Grotesque({
@@ -38,9 +39,10 @@ const body = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_WEB_URL ?? "https://noriuto.lt",
-  ),
+  // Every relative canonical in the app resolves against this. It used to fall
+  // back to the apex, which 307s to www — so posts declared a canonical URL
+  // that redirects. SITE_URL always names the host we actually serve from.
+  metadataBase: new URL(SITE_URL),
   title: "Noriuto.lt - Tavo norų sąrašai vienoje vietoje!",
   description:
     "Svajok kartu su Noriuto.lt - kurk norų / dovanų sąrašus ir dalinkis jais su draugais bei šeima. 🎁",
@@ -61,7 +63,7 @@ export const metadata: Metadata = {
     title: "Noriuto - Tavo norų sąrašai vienoje vietoje!",
     description:
       "Svajok kartu su Noriuto.lt - kurk norų / dovanų sąrašus ir dalinkis jais su draugais bei šeima. 🎁",
-    url: "https://www.noriuto.lt",
+    url: SITE_URL,
     siteName: "Noriuto",
     images: [
       {
@@ -97,7 +99,7 @@ export default async function RootLayout({
 
   // Site-wide structured data so search engines resolve the name, logo and key
   // sections (rather than inventing a "Logo" entry from the header image).
-  const siteUrl = process.env.NEXT_PUBLIC_WEB_URL ?? "https://www.noriuto.lt";
+  const siteUrl = SITE_URL;
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [

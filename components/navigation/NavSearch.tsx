@@ -11,6 +11,7 @@ import React, {
 import Link from "next/link";
 import { LuSearch } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
+import { foldForSearch } from "@/utils/helpers/search";
 import { SearchInput } from "../search/SearchInput";
 
 // Table shape (Supabase `profiles`)
@@ -128,14 +129,16 @@ export function NavSearch({
       setError(null);
 
       try {
-        const like = `%${q}%`;
+        // Search the folded copy of the name with an equally folded term, so
+        // "Zyg" finds "Žygimantas".
+        const like = `%${foldForSearch(q)}%`;
 
         // 1) Profiles
         const { data: profiles, error: profileError } = await supabase
           .from("profiles")
           .select("id, display_name, about, avatar_url, public")
           .eq("public", true)
-          .ilike("display_name", like)
+          .ilike("display_name_norm", like)
           .order("display_name", { ascending: true })
           .limit(10);
 

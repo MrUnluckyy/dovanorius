@@ -539,6 +539,14 @@
     "loadingStep3": "Picking the best matches",
     "loadingHint": "AI is choosing gifts based on your wishes — this can take a few seconds."
   },
+  "BoardPicker": {
+    "title": "Save to board",
+    "searchPlaceholder": "Search boards",
+    "empty": "No boards yet. Create your first one — we'll save this to it.",
+    "noMatches": "No boards match",
+    "newBoard": "Create a new board",
+    "create": "Create"
+  },
   "Landing": {
     "nav": {
       "howItWorks": "How it works",
