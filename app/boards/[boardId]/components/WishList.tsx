@@ -31,10 +31,20 @@ export function WishList({
   boardId,
   isPublic,
   user,
+  boardName,
+  shareToken,
 }: {
   boardId: string;
   isPublic?: boolean;
   user?: User | null;
+  /** Shown in the reserve dialog so a giver knows whose list they're on. */
+  boardName?: string | null;
+  /**
+   * Set when the visitor arrived via /b/s/<token>. Holding the token is what
+   * authorises reading and reserving on a board that is shared but not public,
+   * so it has to travel with the queries, not just the page.
+   */
+  shareToken?: string | null;
 }) {
   const supabase = createClient();
   const t = useTranslations("Boards");
@@ -60,9 +70,16 @@ export function WishList({
     queryFn: async () => {
       // Reservation visibility is enforced server-side: recipient-side viewers
       // (board owner + collaborators) never receive others' reserved_by/status.
-      const { data, error } = await supabase.rpc("get_board_items", {
-        p_board_id: boardId,
-      });
+      //
+      // Magic-link visitors go through the token-aware variant. The plain RPC
+      // authorises on `is_public` alone, so a board shared by link but never
+      // published returned an empty list to exactly the people it was sent to.
+      const { data, error } = shareToken
+        ? await supabase.rpc("get_board_items_shared", {
+            p_board_id: boardId,
+            p_share_token: shareToken,
+          })
+        : await supabase.rpc("get_board_items", { p_board_id: boardId });
       if (error) throw error;
       return (data ?? []) as Item[];
     },
@@ -106,6 +123,8 @@ export function WishList({
                 item={item}
                 inPublicBoard={isPublic}
                 user={user}
+                boardName={boardName}
+                shareToken={shareToken}
                 getCaptchaToken={getCaptchaToken}
                 resetCaptcha={resetCaptcha}
               />

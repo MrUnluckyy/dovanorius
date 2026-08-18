@@ -24,7 +24,10 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user) {
+  // Anonymous sessions (a guest who reserved a gift) are not accounts — they
+  // have no dashboard worth showing. Sending them there meant reserving one
+  // gift permanently replaced the landing page for that visitor.
+  if (user && !user.is_anonymous) {
     redirect("/dashboard");
   }
 

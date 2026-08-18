@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { HOLD_DAYS_MAX } from "./reservationWindow";
 
 // Signed capability token for one-click "keep / release" reservation links
 // sent by email. The token grants the holder the ability to keep or release a
@@ -11,7 +12,10 @@ function hmac(data: string): string {
   return crypto.createHmac("sha256", SECRET).update(data).digest("base64url");
 }
 
-export function signReservationToken(itemId: string, ttlDays = 35): string {
+export function signReservationToken(
+  itemId: string,
+  ttlDays = HOLD_DAYS_MAX
+): string {
   const payload = {
     i: itemId,
     e: Math.floor(Date.now() / 1000) + ttlDays * 86400,
