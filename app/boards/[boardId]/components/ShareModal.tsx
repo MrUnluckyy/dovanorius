@@ -35,15 +35,24 @@ export function ShareModal({ board }: Props) {
     modalRef.current?.close();
   };
 
+  // `.select().single()` is load-bearing on both mutations, not decoration: an
+  // UPDATE whose row is filtered out by RLS comes back as success with zero
+  // rows and a null error. Without it, generate hands out a link whose token
+  // was never stored (404 from birth) and revoke reports success while the
+  // board stays reachable — the owner believing they cut access when they
+  // haven't. `.single()` turns zero rows into a thrown PGRST116 instead.
   const generateTokenMutation = useMutation({
     mutationFn: async () => {
       const token = crypto.randomUUID();
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("boards")
         .update({ share_token: token })
-        .eq("id", board.id);
+        .eq("id", board.id)
+        .select("share_token")
+        .single();
       if (error) throw error;
-      return token;
+      // Return what the database holds, not what we hoped it would hold.
+      return data.share_token as string;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["board", board.id] }),
   });
@@ -53,10 +62,16 @@ export function ShareModal({ board }: Props) {
       const { error } = await supabase
         .from("boards")
         .update({ share_token: null })
-        .eq("id", board.id);
+        .eq("id", board.id)
+        .select("id")
+        .single();
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["board", board.id] }),
+    onError: (err) => {
+      toast.error(t("revokeMagicLinkError"));
+      console.error("Failed to revoke share token:", err);
+    },
   });
 
   const copyLink = async (build: () => Promise<string> | string) => {
@@ -82,11 +97,17 @@ export function ShareModal({ board }: Props) {
     });
 
   const handleRevoke = async () => {
+    // Without confirmText the shared dialog labels its confirm button "Ištrinti"
+    // (Delete), and its cancel button "Atšaukti" — which is also the verb this
+    // feature used to use for revoking, so cancel read like the action itself.
     const ok = await confirm({
       title: t("revokeMagicLinkTitle"),
       message: t("revokeMagicLinkDesc"),
+      confirmText: t("revokeMagicLinkConfirm"),
     });
-    if (ok) await revokeTokenMutation.mutateAsync();
+    // mutateAsync rejects on failure; onError already toasts, so swallow the
+    // rejection rather than leaving it unhandled in a click handler.
+    if (ok) await revokeTokenMutation.mutateAsync().catch(() => {});
   };
 
   return (
