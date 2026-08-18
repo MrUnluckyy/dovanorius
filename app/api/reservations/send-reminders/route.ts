@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import { signReservationToken } from "@/lib/reservationToken";
+import { REMIND_WITHIN_DAYS } from "@/lib/reservationWindow";
 import { ReservationReminderEmail } from "@/emails/ReservationReminderEmail";
 
 // Runs daily (Vercel Cron). Sends a reminder for reservations that are close to
@@ -9,7 +10,6 @@ import { ReservationReminderEmail } from "@/emails/ReservationReminderEmail";
 
 export const dynamic = "force-dynamic";
 
-const REMIND_WITHIN_DAYS = 5;
 const BATCH_LIMIT = 100;
 const FROM = process.env.RESEND_FROM ?? "Noriuto <noreply@noriuto.lt>";
 

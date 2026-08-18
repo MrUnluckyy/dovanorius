@@ -13,12 +13,16 @@ import { ItemForm } from "./ItemForm";
 import toast from "react-hot-toast";
 import { useConfirm } from "@/components/ConfirmDialogProvider";
 import { useReserveItem } from "@/hooks/useReserveItem";
+import { ReserveForm } from "./ReserveForm";
 import { ARCHIVE_KEY, useRevertPurchase } from "@/hooks/useArchive";
+import { HOLD_MONTHS } from "@/lib/reservationWindow";
 
 export function ViewItemModal({
   item,
   inPublicBoard,
   user,
+  boardName,
+  shareToken,
   getCaptchaToken,
   resetCaptcha,
   triggerClassName = "btn btn-sm btn-primary",
@@ -29,6 +33,8 @@ export function ViewItemModal({
   item: Item;
   inPublicBoard?: boolean;
   user?: User | null;
+  boardName?: string | null;
+  shareToken?: string | null;
   getCaptchaToken?: () => Promise<string | undefined>;
   resetCaptcha?: () => void;
   triggerClassName?: string;
@@ -48,9 +54,7 @@ export function ViewItemModal({
   };
   const [isEditing, setIsEditing] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [reminderStep, setReminderStep] = useState(false);
-  const [reminderEmail, setReminderEmail] = useState("");
-  const [savingReminder, setSavingReminder] = useState(false);
+  const [reserveOpen, setReserveOpen] = useState(false);
 
   // Tall images can hide the details below the fold with no cue to scroll.
   // Show a subtle bottom fade whenever the content area is scrollable.
@@ -76,12 +80,13 @@ export function ViewItemModal({
   const supabase = createClient();
   const queryClient = useQueryClient();
 
-  const { reserve, unreserve } = useReserveItem({
+  const { reserve, unreserve, isPending, needsEmail } = useReserveItem({
     itemId: id,
     boardId: item.board_id,
     user,
     getCaptchaToken,
     resetCaptcha,
+    shareToken,
   });
 
   const revertPurchase = useRevertPurchase(item.board_id);
@@ -123,13 +128,12 @@ export function ViewItemModal({
     const raf = requestAnimationFrame(updateScrollCue);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, activeIndex, isEditing, reminderStep, notes]);
+  }, [isOpen, activeIndex, isEditing, notes]);
 
   const closeModal = () => {
     setIsOpen(false);
     setIsEditing(false);
-    setReminderStep(false);
-    setReminderEmail("");
+    setReserveOpen(false);
   };
 
   const deleteItem = useMutation({
@@ -158,36 +162,22 @@ export function ViewItemModal({
     }
   };
 
-  const handleReserve = async () => {
-    const ok = await reserve();
-    // Offer an optional reminder email instead of closing right away.
-    if (ok) setReminderStep(true);
-  };
-
-  const saveReminder = async () => {
-    setSavingReminder(true);
-    const { error } = await supabase.rpc("set_reservation_reminder", {
-      p_item_id: id,
-      p_email: reminderEmail,
-    });
-    setSavingReminder(false);
-    if (error) {
-      toast.error(t("reminderError"));
-      console.error(
-        "Error saving reminder:",
-        error.message,
-        "| code:",
-        error.code,
-        "| details:",
-        error.details,
-        "| hint:",
-        error.hint
-      );
+  // Guests confirm through the reserve dialog, which is where the required
+  // email is collected; signed-in givers reserve in one tap. Either way the
+  // modal stays open afterwards so they land on the "held until <date>" state.
+  const handleReserve = () => {
+    if (needsEmail) {
+      setReserveOpen(true);
       return;
     }
-    toast.success(t("reminderSaved"));
-    closeModal();
+    // A signed-in account with no address on file still has to give one.
+    void reserve().then(({ error }) => {
+      if (error === "email_required") setReserveOpen(true);
+    });
   };
+
+  const confirmReserve = (email: string, password?: string) =>
+    reserve(email, password);
 
   const handleUnReserve = async () => {
     const ok = await unreserve();
@@ -381,57 +371,51 @@ export function ViewItemModal({
                 />
               </div>
 
-                {reminderStep ? (
-                  <div className="mt-8 border-t border-base-300 pt-6">
-                    <p className="font-semibold">{t("reminderPrompt")}</p>
-                    <p className="text-sm opacity-70">{t("reminderHint")}</p>
-                    <p className="text-sm font-medium text-success mb-3">
-                      {expiryLabel
-                        ? t("reservedUntil", { date: expiryLabel })
-                        : t("reminderValidity")}
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <input
-                        type="email"
-                        className="input input-bordered flex-1"
-                        placeholder={t("reminderPlaceholder")}
-                        value={reminderEmail}
-                        onChange={(e) => setReminderEmail(e.target.value)}
-                      />
-                      <button
-                        className="btn btn-primary"
-                        onClick={saveReminder}
-                        disabled={savingReminder || !reminderEmail}
-                      >
-                        {savingReminder ? t("ctaSaving") : t("reminderSave")}
-                      </button>
-                    </div>
-                    <button
-                      className="btn btn-ghost btn-sm mt-2"
-                      onClick={closeModal}
-                    >
-                      {t("reminderSkip")}
-                    </button>
-                  </div>
+                {reserveOpen ? (
+                  <ReserveForm
+                    item={item}
+                    boardName={boardName}
+                    variant="inline"
+                    isPending={isPending}
+                    onConfirm={confirmReserve}
+                    onDone={() => setReserveOpen(false)}
+                  />
                 ) : (
                   <>
-                    {inPublicBoard && isInfinite && (
-                      <div className="alert mt-8 justify-start">
-                        <span aria-hidden className="text-xl">
-                          ∞
-                        </span>
-                        <span>{t("infiniteBadge")}</span>
-                      </div>
-                    )}
+                {inPublicBoard && isInfinite && (
+                  <div className="alert mt-8 justify-start">
+                    <span aria-hidden className="text-xl">
+                      ∞
+                    </span>
+                    <span>{t("infiniteBadge")}</span>
+                  </div>
+                )}
 
-                    <div className="modal-action flex-col-reverse md:flex-row mt-8">
+                {/* The hold window, stated before the giver commits — not as a
+                    consolation after the fact. */}
+                {inPublicBoard &&
+                  !isInfinite &&
+                  item.status === "wanted" &&
+                  !isPending && (
+                    <p className="text-sm text-base-content/60 mt-8 -mb-4 text-center md:text-left">
+                      {t("reserveHoldPreview", { months: HOLD_MONTHS })}
+                    </p>
+                  )}
+
+                <div className="modal-action flex-col-reverse md:flex-row mt-8">
                   {inPublicBoard && !isInfinite && item.status === "wanted" && (
                     <>
                       <button
-                        disabled={inPublicBoard && item.reserved_by === user?.id}
+                        disabled={
+                          isPending ||
+                          (inPublicBoard && item.reserved_by === user?.id)
+                        }
                         className="btn btn-primary"
                         onClick={handleReserve}
                       >
+                        {isPending && (
+                          <span className="loading loading-spinner loading-xs" />
+                        )}
                         {t("ctaReserve")}
                       </button>
                     </>
@@ -480,7 +464,7 @@ export function ViewItemModal({
                       </button>
                     </div>
                   )}
-                    </div>
+                </div>
                   </>
                 )}
               </>

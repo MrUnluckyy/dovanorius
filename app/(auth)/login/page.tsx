@@ -16,7 +16,10 @@ export default async function Login() {
     data: { user },
   } = await client.auth.getUser();
 
-  if (user) {
+  // A guest who has reserved something carries an anonymous session, which is
+  // not "logged in" in any sense they'd recognise. Bouncing them to /dashboard
+  // meant that once you had reserved a gift you could never reach this page.
+  if (user && !user.is_anonymous) {
     redirect("/dashboard");
   }
 

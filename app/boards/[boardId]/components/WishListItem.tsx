@@ -6,6 +6,7 @@ import { ViewItemModal } from "./ViewItemModal";
 import PriceCategoryBadge from "./PriceCategoryBadge";
 import { useTranslations } from "next-intl";
 import { useReserveItem } from "@/hooks/useReserveItem";
+import { ReserveDialog } from "./ReserveDialog";
 import { FillImage } from "@/components/ui/FillImage";
 
 const PLACEHOLDER = "/assets/placeholder.jpg";
@@ -15,6 +16,8 @@ type Props = {
   boardId: string;
   inPublicBoard?: boolean;
   user?: User | null;
+  boardName?: string | null;
+  shareToken?: string | null;
   getCaptchaToken?: () => Promise<string | undefined>;
   resetCaptcha?: () => void;
 };
@@ -23,12 +26,15 @@ export function WishListItem({
   item,
   inPublicBoard,
   user,
+  boardName,
+  shareToken,
   getCaptchaToken,
   resetCaptcha,
 }: Props) {
   const { title, price, status, reserved_by } = item;
   const t = useTranslations("Boards");
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [reserveOpen, setReserveOpen] = useState(false);
   const imgSrc = item?.image_urls?.[0] ?? item?.image_url ?? PLACEHOLDER;
 
   const isMine = reserved_by === user?.id;
@@ -38,13 +44,31 @@ export function WishListItem({
   const isBlocked =
     !!inPublicBoard && status === "reserved" && !!reserved_by && !isMine;
 
-  const { reserve, unreserve, isPending } = useReserveItem({
+  const { reserve, unreserve, isPending, needsEmail } = useReserveItem({
     itemId: item.id,
     boardId: item.board_id,
     user,
     getCaptchaToken,
     resetCaptcha,
+    shareToken,
   });
+
+  // Reserving from the card is one tap for signed-in givers, whose address we
+  // already hold. Guests get the same dialog the detail view uses — the button
+  // being on a card is no reason to take a hold we can never remind them about.
+  const startReserve = () => {
+    if (needsEmail) {
+      setReserveOpen(true);
+      return;
+    }
+    // A signed-in account with no address on file still has to give one.
+    void reserve().then(({ error }) => {
+      if (error === "email_required") setReserveOpen(true);
+    });
+  };
+
+  const confirmReserve = (email: string, password?: string) =>
+    reserve(email, password);
 
   // One-click reserve/unreserve straight from the card (no modal), for
   // reservable wishes on a public board. Reserving as a guest silently creates
@@ -149,7 +173,7 @@ export function WishListItem({
             <button
               className="btn btn-sm btn-primary w-full"
               disabled={isPending}
-              onClick={() => reserve()}
+              onClick={startReserve}
             >
               {isPending && <span className="loading loading-spinner loading-xs" />}
               {t("ctaReserve")}
@@ -194,11 +218,22 @@ export function WishListItem({
         item={item}
         inPublicBoard={inPublicBoard}
         user={user}
+        boardName={boardName}
+        shareToken={shareToken}
         getCaptchaToken={getCaptchaToken}
         resetCaptcha={resetCaptcha}
         hideTrigger
         open={detailsOpen}
         onOpenChange={setDetailsOpen}
+      />
+
+      <ReserveDialog
+        item={item}
+        boardName={boardName}
+        open={reserveOpen}
+        isPending={isPending}
+        onClose={() => setReserveOpen(false)}
+        onConfirm={confirmReserve}
       />
     </div>
   );

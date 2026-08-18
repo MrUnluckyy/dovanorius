@@ -2,6 +2,7 @@
 
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import { verifyReservationToken } from "@/lib/reservationToken";
+import { holdExpiryFrom } from "@/lib/reservationWindow";
 
 export type ReservationAction = "keep" | "release";
 
@@ -10,8 +11,6 @@ export type ResolveResult =
   | { status: "released" }
   | { status: "invalid" } // bad/expired token
   | { status: "gone" }; // reservation no longer active
-
-const RENEW_DAYS = 30;
 
 export async function resolveReservation(
   token: string,
@@ -23,7 +22,7 @@ export async function resolveReservation(
   const { itemId } = verified;
 
   if (action === "keep") {
-    const expires = new Date(Date.now() + RENEW_DAYS * 86400 * 1000);
+    const expires = holdExpiryFrom();
     const { data, error } = await supabaseAdmin
       .from("items")
       .update({

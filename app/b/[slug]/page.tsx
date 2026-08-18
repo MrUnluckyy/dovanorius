@@ -106,7 +106,12 @@ export default async function SharedBoardView({
           <div className="py-8 mb-10">
             <BoardBar userId={user?.id} boardId={board.id} inPublicView />
           </div>
-          <WishList boardId={board.id} user={user} isPublic={!recipientSide} />
+          <WishList
+            boardId={board.id}
+            user={user}
+            isPublic={!recipientSide}
+            boardName={board.name}
+          />
         </div>
       </main>
       <Footer />

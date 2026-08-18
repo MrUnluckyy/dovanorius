@@ -8,6 +8,26 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+/** Where we remember a guest's address so their second reserve is one tap. */
+export const GUEST_EMAIL_KEY = "noriuto_guest_email";
+
+export function readRememberedGuestEmail(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    return window.localStorage.getItem(GUEST_EMAIL_KEY) ?? "";
+  } catch {
+    return ""; // private mode / storage disabled
+  }
+}
+
+function rememberGuestEmail(email: string) {
+  try {
+    window.localStorage.setItem(GUEST_EMAIL_KEY, email);
+  } catch {
+    // Not being able to remember is not worth failing a reservation over.
+  }
+}
+
 type UseReserveItemArgs = {
   itemId: string;
   boardId: string;
@@ -21,11 +41,32 @@ type UseReserveItemArgs = {
   getCaptchaToken?: () => Promise<string | undefined>;
   /** Reset the captcha after a failed guest sign-in so it can be retried. */
   resetCaptcha?: () => void;
+  /**
+   * Magic-link token, when the giver arrived via /b/s/<token>. It is what
+   * authorises them on a board that is shared but not public.
+   */
+  shareToken?: string | null;
+};
+
+export type ReserveResult = {
+  ok: boolean;
+  expiresAt?: string | null;
+  /** Set on failure, so callers can react (e.g. open the email dialog). */
+  error?: string;
+  /** The guest also asked for an account and it was created. */
+  accountCreated?: boolean;
+  /** The account could not be made. The reservation itself still stands. */
+  accountError?: "email_taken" | "failed";
 };
 
 /**
  * Shared reserve/unreserve logic used by both the one-click card button and the
  * item detail modal, so the guest-session + captcha flow stays in one place.
+ *
+ * Reserving now always carries an email address: guests type one, signed-in
+ * givers have theirs read from their account server-side. Without it we have no
+ * way to tell someone their hold is about to lapse, which is precisely how
+ * people lost gifts they thought were theirs.
  */
 export function useReserveItem({
   itemId,
@@ -33,6 +74,7 @@ export function useReserveItem({
   user,
   getCaptchaToken,
   resetCaptcha,
+  shareToken,
 }: UseReserveItemArgs) {
   const supabase = createClient();
   const queryClient = useQueryClient();
@@ -40,7 +82,41 @@ export function useReserveItem({
   const t = useTranslations("Boards");
   const [isPending, setIsPending] = useState(false);
 
-  const reserve = async (): Promise<boolean> => {
+  /**
+   * Guests have no address on file — anonymous sessions carry no email — so
+   * they have to give one. That includes a returning guest whose anonymous
+   * session is still alive.
+   */
+  const needsEmail = !user || user.is_anonymous === true;
+
+  /**
+   * Turns the guest's anonymous session into a real account, keeping the same
+   * auth.uid() — which is why this runs AFTER the reservation rather than
+   * sending them to /register first. Registration needs email verification, so
+   * a redirect would take them off the site with the gift still unheld.
+   */
+  const upgradeGuestAccount = async (
+    email: string,
+    password: string
+  ): Promise<Pick<ReserveResult, "accountCreated" | "accountError">> => {
+    const { error } = await supabase.auth.updateUser({ email, password });
+    if (!error) {
+      router.refresh();
+      return { accountCreated: true };
+    }
+    console.error("Guest account upgrade failed:", error);
+    const taken =
+      error.code === "email_exists" ||
+      /already been registered|already registered|already in use/i.test(
+        error.message
+      );
+    return { accountError: taken ? "email_taken" : "failed" };
+  };
+
+  const reserve = async (
+    email?: string,
+    password?: string
+  ): Promise<ReserveResult> => {
     setIsPending(true);
     try {
       // Guests can reserve without an account: create a silent anonymous
@@ -52,7 +128,7 @@ export function useReserveItem({
         } catch (captchaError) {
           toast.error(t("errorReserve"));
           console.error("Captcha verification failed:", captchaError);
-          return false;
+          return { ok: false, error: "captcha_failed" };
         }
 
         const { error: authError } = await supabase.auth.signInAnonymously({
@@ -62,28 +138,73 @@ export function useReserveItem({
           toast.error(t("errorReserve"));
           console.error("Error creating guest session:", authError);
           resetCaptcha?.();
-          return false;
+          return { ok: false, error: "auth_failed" };
         }
       }
 
-      const { data, error } = await supabase.rpc("reserve_item", {
+      const trimmedEmail = email?.trim() ?? "";
+
+      const { data, error } = await supabase.rpc("reserve_item_with_contact", {
         p_item_id: itemId,
+        p_email: trimmedEmail || null,
+        p_share_token: shareToken ?? null,
       });
 
       if (error) {
         toast.error(t("errorReserve"));
         console.error("Error reserving item:", error);
-        return false;
+        return { ok: false, error: "rpc_failed" };
       }
-      if (data) {
-        toast.success(t("successReserve"));
-        queryClient.invalidateQueries({ queryKey: ["items", boardId] });
-        // Re-render server components with the new (anonymous) session so the
-        // "my reservation" state stays in sync.
-        router.refresh();
-        return true;
+
+      const result = data as
+        | { ok: true; expires_at: string; email: string }
+        | { ok: false; error: string };
+
+      if (!result?.ok) {
+        const reason = result?.error;
+
+        // The caller opens the dialog for this one — a toast telling someone
+        // their address is missing, with nowhere to type it, helps nobody.
+        // Reached when a signed-in account has no address on file.
+        if (reason === "email_required") return { ok: false, error: reason };
+
+        if (reason === "invalid_email") {
+          toast.error(t("reserveEmailInvalid"));
+        } else if (reason === "unavailable") {
+          // Somebody reserved it first, or the wish moved on. Re-fetch so the
+          // card stops offering a stale action.
+          toast.error(t("reserveTakenError"));
+          queryClient.invalidateQueries({ queryKey: ["items", boardId] });
+        } else {
+          toast.error(t("errorReserve"));
+          console.error("Reserve rejected:", reason);
+        }
+        return { ok: false, error: reason };
       }
-      return false;
+
+      if (trimmedEmail) rememberGuestEmail(trimmedEmail);
+
+      toast.success(t("successReserve"));
+      queryClient.invalidateQueries({ queryKey: ["items", boardId] });
+      // Re-render server components with the new (anonymous) session so the
+      // "my reservation" state stays in sync.
+      router.refresh();
+
+      // Confirmation email, best-effort: the reservation is already made and
+      // must not be undone because an inbox was unreachable.
+      void fetch("/api/reservations/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ itemId }),
+      }).catch((err) => console.error("Confirmation email failed:", err));
+
+      // Optional, and never allowed to fail the reservation.
+      const account =
+        password && trimmedEmail
+          ? await upgradeGuestAccount(trimmedEmail, password)
+          : {};
+
+      return { ok: true, expiresAt: result.expires_at, ...account };
     } finally {
       setIsPending(false);
     }
@@ -111,5 +232,5 @@ export function useReserveItem({
     }
   };
 
-  return { reserve, unreserve, isPending };
+  return { reserve, unreserve, isPending, needsEmail };
 }
