@@ -76,20 +76,22 @@
   --color-neutral: oklch(32% 0.04 250);
   --color-neutral-content: oklch(96% 0.02 250);
 
-  /* semantic colours, slightly tuned to fit the palette */
-  --color-info: oklch(70% 0.18 230);
-  --color-info-content: oklch(98% 0.02 230);
+  /* Semantic colours. Darkened to clear WCAG AA both ways: each reads as
+     text/icon on this theme's near-white base-100 (#effaff), AND carries white
+     content text on top when used as a fill. The old values sat between the
+     two and did neither — success was 3.04:1 on the page and 3.06:1 under its
+     own white text, info 2.33:1, warning 1.88:1. */
+  --color-info: oklch(52% 0.14 230); /* 4.93 on base, 5.24 under white */
+  --color-info-content: #ffffff;
 
-  --color-success: oklch(
-    63% 0.22 140
-  ); /* greenish, works with Christmas theme */
-  --color-success-content: oklch(98% 0.02 140);
+  --color-success: oklch(51% 0.16 150); /* 4.92 on base, 5.22 under white */
+  --color-success-content: #ffffff;
 
-  --color-warning: oklch(78% 0.22 90); /* warm gold/orange */
-  --color-warning-content: oklch(22% 0.06 90);
+  --color-warning: oklch(54% 0.12 80); /* 4.96 on base, 5.26 under white */
+  --color-warning-content: #ffffff;
 
-  --color-error: oklch(58% 0.26 25); /* deeper Christmas red */
-  --color-error-content: oklch(98% 0.02 25);
+  --color-error: oklch(56% 0.20 25); /* 4.97 on base, 5.27 under white */
+  --color-error-content: #ffffff;
 
   /* border radius */
   --radius-selector: 1rem;
@@ -155,17 +157,26 @@
   /* ------------------------------------------------------------------
    * FEEDBACK STATES (warm-tuned)
    * ------------------------------------------------------------------ */
-  --color-info: #bfddf6;
-  --color-info-content: #1f3b52;
+  /* These were tints — designed to sit BEHIND dark text, and correct in that
+     role. But DaisyUI spends one token on two jobs: `bg-error` (a fill, paired
+     with error-content) and `text-error` (ink on the page). As pastels they
+     scored 1.2-1.7:1 against cream, so every `text-success` / `text-error` /
+     icon in the app was effectively invisible.
+     Solid mid-darks now carry both jobs — contrast is symmetric, so a colour
+     ~5:1 against the page also takes white text at ~5:1. The pastels keep
+     their real job as --nr-*-soft tints further down; nothing is thrown away.
+     Green matches the mobile app's `accent` exactly. */
+  --color-info: #1e5f8c; /* 6.39 on cream, 6.84 under white */
+  --color-info-content: #ffffff;
 
-  --color-success: #bfead1;
-  --color-success-content: #1e4632;
+  --color-success: #0b7a4b; /* 5.03 on cream, 5.39 under white */
+  --color-success-content: #ffffff;
 
-  --color-warning: #ffd166;
-  --color-warning-content: #5c4a1a;
+  --color-warning: #96631a; /* 4.79 on cream, 5.13 under white */
+  --color-warning-content: #ffffff;
 
-  --color-error: #f0b4a8;
-  --color-error-content: #5a2318;
+  --color-error: #c0392b; /* 5.08 on cream, 5.44 under white */
+  --color-error-content: #ffffff;
 
   /* ------------------------------------------------------------------
    * SHAPES — generous, friendly radii
@@ -242,8 +253,49 @@
   }
 
   .sticky-mint {
-    @apply bg-success/40;
+    background: var(--nr-success-soft);
   }
+}
+
+/* --------------------------------------------------------------------
+ * Alerts: tinted, not solid.
+ *
+ * DaisyUI paints alert-* with the semantic colour as a full-bleed fill.
+ * Now that those are solid mid-darks, an inline validation notice would
+ * arrive as a block of saturated red — louder than this warm, quiet brand
+ * wants, and no easier to read. The tint pairings are stronger anyway
+ * (7.0-8.3:1 against their ink, versus ~5.4:1 for white on the solid), so
+ * this is the more legible option as well as the calmer one.
+ *
+ * The solid tokens still drive text-*, btn-*, badge-* and icons, which is
+ * where they belong.
+ * ------------------------------------------------------------------ */
+/* Deliberately NOT inside @layer. DaisyUI registers its components in a layer
+   of its own, and layer order outranks specificity — an @layer components rule
+   here lost to `.alert-error` no matter how specific it was. Unlayered rules
+   beat every layered one, so this is the override that actually lands. */
+.alert.alert-success {
+  background-color: var(--nr-success-soft);
+  border-color: color-mix(in oklab, var(--color-success) 25%, transparent);
+  color: var(--nr-success-ink);
+}
+
+.alert.alert-error {
+  background-color: var(--nr-error-soft);
+  border-color: color-mix(in oklab, var(--color-error) 25%, transparent);
+  color: var(--nr-error-ink);
+}
+
+.alert.alert-info {
+  background-color: var(--nr-info-soft);
+  border-color: color-mix(in oklab, var(--color-info) 25%, transparent);
+  color: var(--nr-info-ink);
+}
+
+.alert.alert-warning {
+  background-color: var(--nr-warning-soft);
+  border-color: color-mix(in oklab, var(--color-warning) 25%, transparent);
+  color: var(--nr-warning-ink);
 }
 
 /* ====================================================================
@@ -271,6 +323,18 @@
   --nr-gold-text: #8a7a52; /* small labels on white */
   --nr-gold-strong: #8a6d1f; /* labels on --nr-tile */
   --nr-on-yellow-muted: #5c4a1a;
+
+  /* Feedback tints — the old pastel semantic values, kept for the job they
+     were actually good at: a soft background with dark ink on top. Pair each
+     -soft only with its own -ink (7.0-8.3:1); never put white on a -soft. */
+  --nr-success-soft: #bfead1;
+  --nr-success-ink: #1e4632; /* 8.04:1 on its soft */
+  --nr-error-soft: #f0b4a8;
+  --nr-error-ink: #5a2318; /* 6.99:1 */
+  --nr-info-soft: #bfddf6;
+  --nr-info-ink: #1f3b52; /* 8.25:1 */
+  --nr-warning-soft: #ffd166;
+  --nr-warning-ink: #5c4a1a; /* 5.95:1 */
 
   /* semantic aliases ------------------------------------------------ */
   --surface-page: var(--nr-cream);
