@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { format } from "date-fns";
-import { lt } from "date-fns/locale";
 import { createClient } from "@/utils/supabase/server";
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import { signReservationToken } from "@/lib/reservationToken";
@@ -44,7 +42,7 @@ export async function POST(request: Request) {
   const { data: item, error } = await supabaseAdmin
     .from("items")
     .select(
-      "id, title, reserved_by, reserved_at, reserve_expires_at, reminder_email, status, boards(name, slug, is_public, share_token)"
+      "id, title, reserved_by, reserved_at, reminder_email, status, boards(name, slug, is_public, share_token)"
     )
     .eq("id", itemId)
     .is("archived_at", null)
@@ -79,10 +77,6 @@ export async function POST(request: Request) {
     ? `${baseUrl}/b/s/${board.share_token}`
     : null;
 
-  const expiryLabel = item.reserve_expires_at
-    ? format(new Date(item.reserve_expires_at), "PPP", { locale: lt })
-    : "";
-
   try {
     const token = signReservationToken(item.id, HOLD_DAYS_MAX);
     const resend = new Resend(process.env.RESEND_API_KEY);
@@ -95,7 +89,6 @@ export async function POST(request: Request) {
         boardName: board?.name,
         boardUrl,
         releaseUrl: `${baseUrl}/r/release/${token}`,
-        expiryLabel,
       }),
     });
   } catch (err) {

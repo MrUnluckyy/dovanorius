@@ -13,9 +13,7 @@ import {
 } from "react-icons/lu";
 import { SignOutButton } from "@/app/(auth)/components/SignOutButton";
 import Image from "next/image";
-// Bell hidden until notifications are tested — re-enable by restoring this
-// import and the <NotificationsBell /> in the navbar.
-// import NotificationsBell from "../notification/NotificationBell";
+import NotificationsBell from "../notification/NotificationBell";
 import NotificationsLive from "../notification/NotificationLive";
 import { NavSearch } from "./NavSearch";
 import { usePathname } from "next/navigation";
@@ -64,8 +62,9 @@ export function NavigationV2({ user }: { user?: User | null }) {
 
               <div className="flex flex-none items-center gap-1 lg:hidden">
                 <CreateTriggerButton />
-                {/* Notifications hidden until the feature is tested. The live
-                    listener stays mounted so nothing is lost meanwhile. */}
+                {/* The bell reads the session with a non-null assertion, so it
+                    may only mount for a signed-in user. */}
+                {user && <NotificationsBell />}
                 <NotificationsLive />
                 <label
                   htmlFor="my-drawer-2"
@@ -91,6 +90,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
               </Link>
               {user ? (
                 <>
+                  <NotificationsBell />
                   <NotificationsLive />
                   <CreateTriggerButton />
                   {/* Sign-out and locale move into a menu: they are the least
