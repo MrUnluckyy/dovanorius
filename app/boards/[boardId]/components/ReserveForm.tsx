@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { format } from "date-fns";
-import { enUS, lt } from "date-fns/locale";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { LuCalendarCheck, LuCircleCheck, LuShieldCheck } from "react-icons/lu";
-import { holdExpiryFrom } from "@/lib/reservationWindow";
 import { readRememberedGuestEmail } from "@/hooks/useReserveItem";
 import type { Item } from "./WishList";
 
@@ -54,7 +51,6 @@ export function ReserveForm({
   onDone: () => void;
 }) {
   const t = useTranslations("Boards");
-  const locale = useLocale();
   const pathname = usePathname();
   const [email, setEmail] = useState("");
   const [touched, setTouched] = useState(false);
@@ -74,11 +70,6 @@ export function ReserveForm({
   const passwordValid = !wantsAccount || password.length >= MIN_PASSWORD;
   const canSubmit = emailValid && passwordValid && !isPending;
   const showEmailError = touched && !emailValid;
-
-  // The promise we make up front; the server stamps the authoritative value.
-  const expiryLabel = format(holdExpiryFrom(), "PPP", {
-    locale: locale === "lt" ? lt : enUS,
-  });
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,7 +96,7 @@ export function ReserveForm({
           <div>
             <p className="font-semibold">{t("reserveDoneTitle")}</p>
             <p className="text-sm text-base-content/70 mt-0.5">
-              {t("reservedUntil", { date: expiryLabel })}
+              {t("reservedUntil")}
             </p>
             <p className="text-sm text-base-content/70 mt-3">
               {outcome.accountCreated
@@ -167,7 +158,8 @@ export function ReserveForm({
         </>
       )}
 
-      {/* The single fact people came back for and did not find: the date. */}
+      {/* The single fact people came back for and did not find: how long the
+          hold lasts. It lasts until they end it. */}
       <div
         className={`flex items-start gap-3 px-6 py-5 bg-base-200/60 ${
           variant === "inline" ? "mt-8 rounded-xl" : ""
@@ -176,7 +168,7 @@ export function ReserveForm({
         <LuCalendarCheck className="text-xl shrink-0 mt-0.5 text-success" aria-hidden />
         <div>
           <p className="text-sm text-base-content/70">{t("reserveHoldLabel")}</p>
-          <p className="font-semibold text-lg leading-tight">{expiryLabel}</p>
+          <p className="font-semibold text-lg leading-tight">{t("reserveHoldValue")}</p>
           <p className="text-xs text-base-content/50 mt-1">{t("reserveHoldHint")}</p>
         </div>
       </div>

@@ -9,15 +9,25 @@ import {
   Section,
 } from "@react-email/components";
 
+/**
+ * A check-in, not a warning.
+ *
+ * This email used to say the hold was about to lapse and offered two buttons,
+ * keep and release — which made ignoring it the destructive choice. Reservations
+ * no longer expire, so silence is now the safe answer and the only action left
+ * is the one a giver has an actual reason to take: letting the gift go.
+ *
+ * `keepUrl` is still accepted so already-signed links keep working; nothing
+ * links to it here.
+ */
 export function ReservationReminderEmail({
   itemTitle,
   boardName,
-  keepUrl,
   releaseUrl,
 }: {
   itemTitle: string;
   boardName?: string | null;
-  keepUrl: string;
+  keepUrl?: string;
   releaseUrl: string;
 }) {
   return (
@@ -37,39 +47,28 @@ export function ReservationReminderEmail({
           </Heading>
 
           <Text>
-            Prieš kurį laiką rezervavai dovaną{" "}
-            <strong>{itemTitle}</strong>
+            Prieš kurį laiką rezervavai dovaną <strong>{itemTitle}</strong>
             {boardName ? (
               <>
                 {" "}
                 norų lentoje <strong>{boardName}</strong>
               </>
             ) : null}
-            . Netrukus ši rezervacija baigs galioti ir taps laisva kitiems.
+            . Ji vis dar tavo — rezervacija negalioja terminuotai ir savaime
+            nedings.
           </Text>
 
           <Text>
-            Jei vis dar ketini ją padovanoti - palik rezervaciją. Jei
-            persigalvojai - atlaisvink ją, kad galėtų pasirūpinti kažkas kitas.
+            <strong>Jei vis dar planuoji ją padovanoti, daryti nieko
+            nereikia.</strong> Tiesiog ištrink šį laišką.
+          </Text>
+
+          <Text>
+            O jei persigalvojai — atlaisvink dovaną, kad ja galėtų pasirūpinti
+            kas nors kitas.
           </Text>
 
           <Section style={{ marginTop: "16px" }}>
-            <Button
-              href={keepUrl}
-              style={{
-                backgroundColor: "#31473A",
-                color: "#ffffff",
-                padding: "12px 20px",
-                borderRadius: "6px",
-                fontWeight: "bold",
-                display: "inline-block",
-                textDecoration: "none",
-                marginRight: "12px",
-              }}
-            >
-              Palikti rezervaciją
-            </Button>
-
             <Button
               href={releaseUrl}
               style={{
@@ -83,7 +82,7 @@ export function ReservationReminderEmail({
                 border: "1px solid #31473A",
               }}
             >
-              Atlaisvinti
+              Atlaisvinti dovaną
             </Button>
           </Section>
 

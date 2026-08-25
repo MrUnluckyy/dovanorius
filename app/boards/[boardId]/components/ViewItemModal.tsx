@@ -2,10 +2,8 @@
 
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { format } from "date-fns";
-import { enUS, lt } from "date-fns/locale";
 import { LuExternalLink, LuPencil, LuTrash2, LuX } from "react-icons/lu";
 import { Item } from "./WishList";
 import { User } from "@supabase/supabase-js";
@@ -15,7 +13,6 @@ import { useConfirm } from "@/components/ConfirmDialogProvider";
 import { useReserveItem } from "@/hooks/useReserveItem";
 import { ReserveForm } from "./ReserveForm";
 import { ARCHIVE_KEY, useRevertPurchase } from "@/hooks/useArchive";
-import { HOLD_MONTHS } from "@/lib/reservationWindow";
 
 export function ViewItemModal({
   item,
@@ -74,7 +71,6 @@ export function ViewItemModal({
       ? [item.image_url]
       : [];
   const t = useTranslations("Boards");
-  const locale = useLocale();
   const confirm = useConfirm();
 
   const supabase = createClient();
@@ -97,18 +93,13 @@ export function ViewItemModal({
   // Infinite ("unlimited") wish: can be given many times, never reserved.
   const isInfinite = item.is_reservable === false;
 
-  const expiryLabel = item.reserve_expires_at
-    ? format(new Date(item.reserve_expires_at), "PPP", {
-        locale: locale === "lt" ? lt : enUS,
-      })
-    : null;
-
   // Run open side-effects whenever the modal opens — works for both the
   // built-in trigger and a parent (clickable card) opening it in controlled mode.
   useEffect(() => {
     if (!isOpen) return;
     setActiveIndex(0);
-    // Renew-on-activity: re-opening your own hold pushes the expiry out.
+    // Renew-on-activity: opening your own hold pushes the check-in date out,
+    // so we don't ask "still planning to give this?" of someone who plainly is.
     if (inPublicBoard && isMyReservation) {
       supabase
         .rpc("renew_reservation", { p_item_id: id })
@@ -398,7 +389,7 @@ export function ViewItemModal({
                   item.status === "wanted" &&
                   !isPending && (
                     <p className="text-sm text-base-content/60 mt-8 -mb-4 text-center md:text-left">
-                      {t("reserveHoldPreview", { months: HOLD_MONTHS })}
+                      {t("reserveHoldPreview")}
                     </p>
                   )}
 
@@ -423,9 +414,9 @@ export function ViewItemModal({
 
                   {inPublicBoard && !isInfinite && item.status === "reserved" && (
                     <div className="flex flex-col gap-2 w-full md:w-auto">
-                      {isMyReservation && expiryLabel && (
+                      {isMyReservation && (
                         <p className="text-sm text-success font-medium text-center md:text-left">
-                          {t("reservedUntil", { date: expiryLabel })}
+                          {t("reservedUntil")}
                         </p>
                       )}
                       <button

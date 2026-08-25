@@ -23,13 +23,11 @@ export function ReservationConfirmedEmail({
   boardName,
   boardUrl,
   releaseUrl,
-  expiryLabel,
 }: {
   itemTitle: string;
   boardName?: string | null;
   boardUrl?: string | null;
   releaseUrl: string;
-  expiryLabel: string;
 }) {
   return (
     <Html>
@@ -68,7 +66,7 @@ export function ReservationConfirmedEmail({
             }}
           >
             <Text style={{ margin: 0, fontSize: "14px", color: "#5a6b62" }}>
-              Rezervacija galioja iki
+              Dovana rezervuota
             </Text>
             <Text
               style={{
@@ -78,13 +76,14 @@ export function ReservationConfirmedEmail({
                 color: "#31473A",
               }}
             >
-              {expiryLabel}
+              kol pats ją atšauksi
             </Text>
           </Section>
 
           <Text>
-            Prieš šią datą atsiųsime priminimą — nieko atsiminti nereikia.
-            Išsaugok šį laišką, jei norėsi grįžti prie lentos.
+            Rezervacija negalioja terminuotai ir savaime nedings. Išsaugok šį
+            laišką — jame yra nuoroda grįžti prie lentos ir, jei persigalvotum,
+            atlaisvinti dovaną.
           </Text>
 
           {boardUrl && (
