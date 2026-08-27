@@ -1,17 +1,24 @@
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
 import SetNewPassword from "../components/SetNewPassword";
+import type { Metadata } from "next";
 
-export default async function ForgotPassword() {
-  const client = await createClient();
-  const {
-    data: { user },
-  } = await client.auth.getUser();
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
-  if (user) {
-    redirect("boards");
-  }
-
+/**
+ * Deliberately unguarded.
+ *
+ * This page used to redirect anyone holding a session away to /boards, which
+ * bounced the exact person it exists for: clicking a recovery link establishes
+ * a recovery session, so by the time this rendered they *had* one. It also shut
+ * out every anonymous guest, the same bug /login already fixed.
+ *
+ * Arriving here with an ordinary session is fine — updateUser({ password })
+ * acts on that session and nothing else. The deliberate "change my password"
+ * flow in /account asks for the current password; this one treats the emailed
+ * link as the proof, which is what recovery means.
+ */
+export default async function ResetPassword() {
   return (
     <main>
       <div className="hero min-h-screen">

@@ -1,12 +1,6 @@
-import {
-  Html,
-  Head,
-  Body,
-  Container,
-  Heading,
-  Text,
-  Button,
-} from "@react-email/components";
+import { Text, Button, Section } from "@react-email/components";
+import { EmailLayout, EmailHeading } from "./_components/EmailLayout";
+import { brand, buttonPrimary, text, textMuted } from "./_components/theme";
 
 export function BoardInviteEmail({
   boardName,
@@ -16,58 +10,31 @@ export function BoardInviteEmail({
   joinUrl: string;
 }) {
   return (
-    <Html>
-      <Head />
-      <Body style={{ backgroundColor: "#f5f5f5", fontFamily: "Arial" }}>
-        <Container
-          style={{
-            backgroundColor: "#ffffff",
-            padding: "24px",
-            borderRadius: "8px",
-            maxWidth: "480px",
-          }}
-        >
-          <Heading style={{ color: "#31473A", fontSize: "24px" }}>
-            Kvietimas bendradarbiauti 🎁
-          </Heading>
+    <EmailLayout
+      preview={`Kvietimas prisidėti prie norų lentos ${boardName}`}
+      footnote="Šį laišką gavai todėl, kad kažkas pakvietė tave prisidėti prie savo norų lentos Noriuto.lt."
+    >
+      <EmailHeading>Kvietimas bendradarbiauti 🎁</EmailHeading>
 
-          <Text>
-            Tave pakvietė prisidėti prie norų lentos{" "}
-            <strong>{boardName}</strong> Noriuto platformoje. Gali pridėti idėjų
-            ir dovanų pasiūlymų.
-          </Text>
+      <Text style={text}>
+        Tave pakvietė prisidėti prie norų lentos <strong>{boardName}</strong>.
+        Gali pridėti idėjų ir dovanų pasiūlymų.
+      </Text>
 
-          <Text>
-            Paskyros kurti nereikia - tiesiog paspausk mygtuką ir prisijunk kaip
-            svečias:
-          </Text>
+      <Text style={text}>
+        Paskyros kurti nereikia — tiesiog paspausk mygtuką ir prisijunk kaip
+        svečias.
+      </Text>
 
-          <Button
-            href={joinUrl}
-            style={{
-              backgroundColor: "#31473A",
-              color: "#ffffff",
-              padding: "12px 20px",
-              borderRadius: "6px",
-              fontWeight: "bold",
-              display: "inline-block",
-              marginTop: "16px",
-              textDecoration: "none",
-            }}
-          >
-            Prisijungti prie lentos
-          </Button>
+      <Section style={{ margin: "24px 0 8px" }}>
+        <Button href={joinUrl} style={buttonPrimary}>
+          Prisijungti prie lentos
+        </Button>
+      </Section>
 
-          <Text style={{ marginTop: "24px" }}>
-            Jei nesitikėjai šio kvietimo - gali jį ignoruoti.
-          </Text>
-
-          <Text style={{ marginTop: "12px", opacity: 0.7 }}>
-            Su pagarba,
-            <br /> <strong>Noriuto komanda</strong>
-          </Text>
-        </Container>
-      </Body>
-    </Html>
+      <Text style={{ ...textMuted, margin: "16px 0 0", color: brand.faint }}>
+        Jei nesitikėjai šio kvietimo — gali jį ignoruoti.
+      </Text>
+    </EmailLayout>
   );
 }

@@ -13,8 +13,11 @@ export default async function ForgotPassword() {
     data: { user },
   } = await client.auth.getUser();
 
-  if (user) {
-    redirect("boards");
+  // A guest who has reserved a gift carries an anonymous session. That is not
+  // "logged in" in any sense they'd recognise, and bouncing them meant someone
+  // who had ever reserved could never reach this page. Same fix /login uses.
+  if (user && !user.is_anonymous) {
+    redirect("/dashboard");
   }
 
   return (

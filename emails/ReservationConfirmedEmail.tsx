@@ -1,22 +1,20 @@
+import { Text, Button, Section, Link } from "@react-email/components";
 import {
-  Html,
-  Head,
-  Body,
-  Container,
-  Heading,
-  Text,
-  Button,
-  Section,
-  Link,
-  Hr,
-} from "@react-email/components";
+  EmailLayout,
+  EmailHeading,
+  EmailCallout,
+} from "./_components/EmailLayout";
+import { brand, buttonPrimary, text, textMuted } from "./_components/theme";
 
 /**
- * Sent the moment someone reserves a gift.
+ * Sent the moment a guest reserves a gift.
  *
- * This is the whole reason the address is now required: it is the only thing a
- * guest keeps. No account, no dashboard — just this email, with the date the
- * hold runs out and a link back to the board.
+ * This is the whole reason the address is required: it is the only thing a
+ * guest keeps. No account, no dashboard — just this email, with a link back to
+ * the board and a way to let the gift go.
+ *
+ * Account holders do not receive it. They get a notification instead, because
+ * the reservation is already sitting on their dashboard.
  */
 export function ReservationConfirmedEmail({
   itemTitle,
@@ -30,97 +28,49 @@ export function ReservationConfirmedEmail({
   releaseUrl: string;
 }) {
   return (
-    <Html>
-      <Head />
-      <Body style={{ backgroundColor: "#f5f5f5", fontFamily: "Arial" }}>
-        <Container
-          style={{
-            backgroundColor: "#ffffff",
-            padding: "24px",
-            borderRadius: "8px",
-            maxWidth: "480px",
-          }}
+    <EmailLayout
+      preview={`${itemTitle} — rezervuota tavo vardu`}
+      footnote="Šį laišką gavai todėl, kad rezervavai dovaną Noriuto.lt. Lentos savininkas nemato nei tavo adreso, nei to, kad rezervavai būtent tu."
+    >
+      <EmailHeading>Dovana rezervuota 🎁</EmailHeading>
+
+      <Text style={text}>
+        Rezervavai <strong>{itemTitle}</strong>
+        {boardName ? (
+          <>
+            {" "}
+            norų lentoje <strong>{boardName}</strong>
+          </>
+        ) : null}
+        . Niekas kitas šios dovanos nebepasiims.
+      </Text>
+
+      <EmailCallout label="Dovana rezervuota" value="kol pats ją atšauksi" />
+
+      <Text style={text}>
+        Rezervacija negalioja terminuotai ir savaime nedings. Išsaugok šį laišką
+        — jame yra nuoroda grįžti prie lentos ir, jei persigalvotum, atlaisvinti
+        dovaną.
+      </Text>
+
+      {boardUrl && (
+        <Section style={{ margin: "24px 0 8px" }}>
+          <Button href={boardUrl} style={buttonPrimary}>
+            Atidaryti norų lentą
+          </Button>
+        </Section>
+      )}
+
+      <Text style={{ ...textMuted, margin: "16px 0 0" }}>
+        Persigalvojai?{" "}
+        <Link
+          href={releaseUrl}
+          style={{ color: brand.ink, textDecoration: "underline" }}
         >
-          <Heading style={{ color: "#31473A", fontSize: "24px" }}>
-            Dovana rezervuota 🎁
-          </Heading>
-
-          <Text>
-            Rezervavai <strong>{itemTitle}</strong>
-            {boardName ? (
-              <>
-                {" "}
-                norų lentoje <strong>{boardName}</strong>
-              </>
-            ) : null}
-            . Niekas kitas šios dovanos nebepasiims — o lentos savininkas
-            nemato, kad ją rezervavai būtent tu.
-          </Text>
-
-          <Section
-            style={{
-              backgroundColor: "#f3f6f4",
-              borderRadius: "8px",
-              padding: "16px",
-              margin: "20px 0",
-            }}
-          >
-            <Text style={{ margin: 0, fontSize: "14px", color: "#5a6b62" }}>
-              Dovana rezervuota
-            </Text>
-            <Text
-              style={{
-                margin: "2px 0 0",
-                fontSize: "18px",
-                fontWeight: "bold",
-                color: "#31473A",
-              }}
-            >
-              kol pats ją atšauksi
-            </Text>
-          </Section>
-
-          <Text>
-            Rezervacija negalioja terminuotai ir savaime nedings. Išsaugok šį
-            laišką — jame yra nuoroda grįžti prie lentos ir, jei persigalvotum,
-            atlaisvinti dovaną.
-          </Text>
-
-          {boardUrl && (
-            <Section style={{ marginTop: "16px" }}>
-              <Button
-                href={boardUrl}
-                style={{
-                  backgroundColor: "#31473A",
-                  color: "#ffffff",
-                  padding: "12px 20px",
-                  borderRadius: "6px",
-                  fontWeight: "bold",
-                  display: "inline-block",
-                  textDecoration: "none",
-                }}
-              >
-                Atidaryti norų lentą
-              </Button>
-            </Section>
-          )}
-
-          <Hr style={{ borderColor: "#e6e6e6", margin: "24px 0 16px" }} />
-
-          <Text style={{ fontSize: "14px", color: "#6b6357", margin: 0 }}>
-            Persigalvojai?{" "}
-            <Link href={releaseUrl} style={{ color: "#31473A" }}>
-              Atlaisvink dovaną
-            </Link>{" "}
-            , kad ją galėtų padovanoti kas nors kitas.
-          </Text>
-
-          <Text style={{ marginTop: "24px", opacity: 0.7 }}>
-            Su pagarba,
-            <br /> <strong>Noriuto komanda</strong>
-          </Text>
-        </Container>
-      </Body>
-    </Html>
+          Atlaisvink dovaną
+        </Link>
+        , kad ją galėtų padovanoti kas nors kitas.
+      </Text>
+    </EmailLayout>
   );
 }
