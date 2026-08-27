@@ -29,12 +29,17 @@ export function LoginForm() {
       });
 
       if (error) {
+        // Only invalid_credentials gets a written message; anything else is an
+        // English Supabase string, so it is logged rather than shown raw.
+        if (error.code !== "invalid_credentials") {
+          console.error("Sign-in failed:", error);
+        }
         setLoginError(
           error.code === "invalid_credentials"
             ? t("invalidCredentials")
-            : error.message
+            : t("errorGeneric")
         );
-        throw Error(error.message);
+        return;
       }
 
       if (data.user) {
@@ -42,7 +47,8 @@ export function LoginForm() {
         return;
       }
     } catch (error) {
-      console.log("Error signing up:", error);
+      console.error("Sign-in threw:", error);
+      setLoginError(t("errorGeneric"));
     } finally {
       setLoading(false);
     }
@@ -69,30 +75,41 @@ export function LoginForm() {
       <div className="divider">{t("or")}</div>
       <form onSubmit={onSubmit} className="space-y-3">
         <fieldset className="fieldset">
-          <label className="label">{t("emailLabel")}</label>
+          <label className="label" htmlFor="login-email">
+            {t("emailLabel")}
+          </label>
           <input
+            id="login-email"
             type="email"
-            className="input"
-            placeholder="Email"
+            inputMode="email"
+            autoComplete="email"
+            className="input w-full"
+            placeholder={t("emailPlaceholder")}
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
 
-          <label className="label">{t("passwordLabel")}</label>
+          <label className="label" htmlFor="login-password">
+            {t("passwordLabel")}
+          </label>
           <input
+            id="login-password"
             type="password"
-            className="input"
-            placeholder="Password"
+            autoComplete="current-password"
+            className="input w-full"
+            placeholder={t("passwordLabel")}
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           {loginError && (
-            <p className="text-sm text-error mt-2">{loginError}</p>
+            <p className="text-sm text-error mt-2" role="alert">
+              {loginError}
+            </p>
           )}
           <div className="flex flex-col gap-2">
-            <Link href="forgot-password" className="link link-hover">
+            <Link href="/forgot-password" className="link link-hover">
               {t("forgotPasswordLink")}
             </Link>
             <Link href="/register" className="link link-hover">
