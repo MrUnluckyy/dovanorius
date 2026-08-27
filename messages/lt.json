@@ -114,7 +114,8 @@
     "myBoard": "Mano lenta",
     "discover": "Dovanų idėjos",
     "account": "Paskyra",
-    "language": "Kalba"
+    "language": "Kalba",
+    "accountSettings": "Paskyros nustatymai"
   },
   "Boards": {
     "public": "Vieša",
@@ -750,5 +751,39 @@
     "reservedBody": "Rezervavai <item></item>. Niekas kitas jos nepasiims.",
     "checkInTitle": "Vis dar planuoji dovanoti?",
     "checkInBody": "Rezervavai <item></item>. Jei vis dar planuoji ją padovanoti, daryti nieko nereikia."
+  },
+  "Account": {
+    "title": "Paskyros nustatymai",
+    "lead": "Čia keiti prisijungimo duomenis — el. paštą ir slaptažodį.",
+    "emailSectionTitle": "El. pašto adresas",
+    "emailSectionLead": "Šiuo adresu jungiesi ir gauni laiškus iš Noriuto.",
+    "currentEmailLabel": "Dabartinis adresas",
+    "newEmailLabel": "Naujas adresas",
+    "newEmailPlaceholder": "naujas@elpastas.lt",
+    "emailChangeNote": "Patvirtinimo laišką atsiųsime į abu adresus — ir į senąjį, ir į naująjį. Adresas pasikeis tik patvirtinus abu.",
+    "ctaChangeEmail": "Keisti adresą",
+    "emailPendingTitle": "Patikrink paštą",
+    "emailPendingBody": "Išsiuntėme patvirtinimo nuorodas į {email} ir į tavo dabartinį adresą. Adresas pasikeis, kai patvirtinsi abu.",
+    "passwordSectionTitle": "Slaptažodis",
+    "passwordSectionLead": "Kad pakeistum slaptažodį, pirma įrašyk dabartinį.",
+    "currentPasswordLabel": "Dabartinis slaptažodis",
+    "newPasswordLabel": "Naujas slaptažodis",
+    "confirmPasswordLabel": "Pakartok naują slaptažodį",
+    "ctaChangePassword": "Keisti slaptažodį",
+    "passwordChangedToast": "🔒 Slaptažodis pakeistas",
+    "profileSectionTitle": "Profilis",
+    "profileSectionLead": "Slapyvardį, nuotrauką ir aprašymą keisk savo skydelyje.",
+    "ctaEditProfile": "Redaguoti profilį",
+    "errorInvalidEmail": "Įrašyk galiojantį el. pašto adresą.",
+    "errorEmailTaken": "Šis el. pašto adresas jau užregistruotas.",
+    "errorEmailUnchanged": "Tai tas pats adresas, kurį jau naudoji.",
+    "errorCurrentPasswordRequired": "Įrašyk dabartinį slaptažodį.",
+    "errorCurrentPasswordWrong": "Neteisingas dabartinis slaptažodis.",
+    "errorConfirmPasswordRequired": "Pakartok naują slaptažodį.",
+    "errorPasswordTooShort": "Slaptažodis turi būti bent 6 simbolių ilgio.",
+    "errorPasswordTooLong": "Slaptažodis negali būti ilgesnis nei 50 simbolių.",
+    "errorPasswordsDoNotMatch": "Slaptažodžiai nesutampa.",
+    "errorPasswordUnchanged": "Naujas slaptažodis turi skirtis nuo dabartinio.",
+    "errorGeneric": "Kažkas nepavyko. Bandyk dar kartą."
   }
 }

@@ -10,6 +10,7 @@ import {
   LuHouse,
   LuCircleUser,
   LuSparkles,
+  LuSettings,
 } from "react-icons/lu";
 import { SignOutButton } from "@/app/(auth)/components/SignOutButton";
 import Image from "next/image";
@@ -115,6 +116,12 @@ export function NavigationV2({ user }: { user?: User | null }) {
                           {t("dashboard")}
                         </Link>
                       </li>
+                      <li>
+                        <Link href="/account">
+                          <LuSettings />
+                          {t("accountSettings")}
+                        </Link>
+                      </li>
                       <li className="flex flex-row items-center justify-between px-3 py-2">
                         <span className="text-sm opacity-70">{t("language")}</span>
                         <LocaleToggle />
@@ -177,6 +184,16 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 >
                   <LuHouse />
                   {t("dashboard")}
+                </Link>
+                <Link
+                  href="/account"
+                  className={`btn btn-ghost w-full justify-start gap-3 text-xl ${
+                    pathnames.includes("account") ? "font-bold" : "font-normal"
+                  }`}
+                  onClick={() => ref.current?.click()}
+                >
+                  <LuSettings />
+                  {t("accountSettings")}
                 </Link>
 
                 <div className="divider my-2" />

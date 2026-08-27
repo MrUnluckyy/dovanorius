@@ -94,7 +94,8 @@
     "ctaStartBuilding": "Start building",
     "ctaStartToUse": "Start using",
     "ctaTryOut": "Try Out!",
-    "ctaBuildYourWishList": "Build Your Wishlist"
+    "ctaBuildYourWishList": "Build Your Wishlist",
+    "recommend": "Recommended by"
   },
   "Navbar": {
     "login": "Login",
@@ -113,7 +114,8 @@
     "myBoard": "My Board",
     "discover": "Gift ideas",
     "account": "Account",
-    "language": "Language"
+    "language": "Language",
+    "accountSettings": "Account settings"
   },
   "Boards": {
     "public": "Public",
@@ -308,7 +310,8 @@
     "edit": "Edit",
     "delete": "Delete",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "close": "Close"
   },
   "States": {
     "loading": "Loading...",
@@ -748,5 +751,39 @@
     "reservedBody": "You reserved <item></item>. Nobody else can take it.",
     "checkInTitle": "Still planning to give this?",
     "checkInBody": "You reserved <item></item>. If you still plan to give it, there's nothing to do."
+  },
+  "Account": {
+    "title": "Account settings",
+    "lead": "Change your sign-in details here — email address and password.",
+    "emailSectionTitle": "Email address",
+    "emailSectionLead": "You sign in with this address, and we write to it.",
+    "currentEmailLabel": "Current address",
+    "newEmailLabel": "New address",
+    "newEmailPlaceholder": "new@email.com",
+    "emailChangeNote": "We'll send a confirmation to both addresses — the old one and the new one. The change takes effect once both are confirmed.",
+    "ctaChangeEmail": "Change address",
+    "emailPendingTitle": "Check your inbox",
+    "emailPendingBody": "We've sent confirmation links to {email} and to your current address. The change lands once you confirm both.",
+    "passwordSectionTitle": "Password",
+    "passwordSectionLead": "To change your password, enter your current one first.",
+    "currentPasswordLabel": "Current password",
+    "newPasswordLabel": "New password",
+    "confirmPasswordLabel": "Repeat new password",
+    "ctaChangePassword": "Change password",
+    "passwordChangedToast": "🔒 Password changed",
+    "profileSectionTitle": "Profile",
+    "profileSectionLead": "Change your display name, photo and bio from your dashboard.",
+    "ctaEditProfile": "Edit profile",
+    "errorInvalidEmail": "Please enter a valid email address.",
+    "errorEmailTaken": "That email address is already registered.",
+    "errorEmailUnchanged": "That's the address you're already using.",
+    "errorCurrentPasswordRequired": "Enter your current password.",
+    "errorCurrentPasswordWrong": "That current password isn't right.",
+    "errorConfirmPasswordRequired": "Repeat your new password.",
+    "errorPasswordTooShort": "Password must be at least 6 characters.",
+    "errorPasswordTooLong": "Password can't be longer than 50 characters.",
+    "errorPasswordsDoNotMatch": "Passwords don't match.",
+    "errorPasswordUnchanged": "The new password must differ from the current one.",
+    "errorGeneric": "Something went wrong. Please try again."
   }
 }
