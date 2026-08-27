@@ -716,5 +716,14 @@
       "body": "Discover gift ideas and guides by occasion and interests.",
       "cta": "Browse ideas"
     }
+  },
+  "Notifications": {
+    "empty": "No notifications",
+    "ctaDismiss": "Dismiss",
+    "ctaOpenBoard": "Open board",
+    "reservedTitle": "Gift reserved",
+    "reservedBody": "You reserved <item></item>. Nobody else can take it.",
+    "checkInTitle": "Still planning to give this?",
+    "checkInBody": "You reserved <item></item>. If you still plan to give it, there's nothing to do."
   }
 }

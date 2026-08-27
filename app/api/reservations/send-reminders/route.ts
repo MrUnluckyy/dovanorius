@@ -10,14 +10,18 @@ import { ReservationReminderEmail } from "@/emails/ReservationReminderEmail";
 // whether they still mean to give the gift. Ignoring it keeps the hold — the
 // only action offered is releasing it.
 //
-// This used to filter on `reminder_email is not null` and nothing else, which
-// meant it sent no mail at all for its entire life: before the reserve rework,
-// that column was only written by an optional prompt shown AFTER reserving, and
-// almost nobody filled it in. `reserve_item_with_contact` now records an address
-// on every web reservation, but two groups still arrive here without one — holds
-// placed before the rework, and mobile reservations, which still go through the
-// old `reserve_item`. Most of those reservers are signed in and have had a
-// perfectly good address on their account the whole time, so fall back to it.
+// The channel depends on who is holding:
+//
+//   guest (anonymous)  -> email. They keep no account and no dashboard, so an
+//                         email is the only way to reach them at all.
+//   account holder     -> an in-app notification. They already have the
+//                         dashboard listing their holds and the bell; mailing
+//                         them as well is the noise this split exists to stop.
+//
+// Guests only ever come from the web reserve flow — the mobile app is gated
+// behind login — so `is_anonymous` is the exact discriminator. It is read live
+// rather than trusted from `reminder_email`, so a guest who has since upgraded
+// their session into a real account moves to in-app automatically.
 
 export const dynamic = "force-dynamic";
 
@@ -27,10 +31,11 @@ const FROM = process.env.RESEND_FROM ?? "Noriuto <noreply@noriuto.lt>";
 type ReminderRow = {
   id: string;
   title: string;
+  board_id: string;
   reserved_by: string | null;
   reminder_email: string | null;
   reserve_expires_at: string | null;
-  boards: { name: string | null } | { name: string | null }[] | null;
+  boards: { name: string | null; slug: string | null } | null;
 };
 
 export async function GET(request: Request) {
@@ -49,11 +54,12 @@ export async function GET(request: Request) {
   const { data: items, error } = await supabaseAdmin
     .from("items")
     .select(
-      "id, title, reserved_by, reminder_email, reserve_expires_at, boards(name)"
+      "id, title, board_id, reserved_by, reminder_email, reserve_expires_at, boards(name, slug)"
     )
     .eq("status", "reserved")
     .is("archived_at", null)
     .is("reminder_sent_at", null)
+    .not("reserved_by", "is", null)
     .lte("reserve_expires_at", cutoff.toISOString())
     .limit(BATCH_LIMIT);
 
@@ -62,77 +68,103 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Query failed" }, { status: 500 });
   }
 
-  // One board can have several holds from the same giver; look each account up
-  // once. `null` is a cached "this reserver has no usable address".
-  const accountEmails = new Map<string, string | null>();
+  const rows = (items ?? []) as unknown as ReminderRow[];
 
-  async function accountEmail(userId: string): Promise<string | null> {
-    const cached = accountEmails.get(userId);
-    if (cached !== undefined) return cached;
+  // One giver often holds several gifts from the same board; look each account
+  // up once rather than per row.
+  const isGuest = new Map<string, boolean>();
+  const reserverIds = [...new Set(rows.map((r) => r.reserved_by!))];
 
-    let resolved: string | null = null;
+  for (const id of reserverIds) {
     try {
       const { data, error: lookupError } =
-        await supabaseAdmin.auth.admin.getUserById(userId);
-      // Anonymous guests carry no address — for them `reminder_email` is the
-      // only channel there will ever be, and it is already null here.
-      if (!lookupError && data?.user && !data.user.is_anonymous) {
-        resolved = data.user.email?.trim() || null;
+        await supabaseAdmin.auth.admin.getUserById(id);
+      if (lookupError || !data?.user) {
+        // Unknown reserver: leave the hold alone rather than guess a channel.
+        console.error(`Reserver lookup failed for ${id}:`, lookupError);
+        continue;
       }
+      isGuest.set(id, data.user.is_anonymous === true);
     } catch (err) {
-      console.error(`Account lookup failed for reserver ${userId}:`, err);
+      console.error(`Reserver lookup threw for ${id}:`, err);
     }
-
-    accountEmails.set(userId, resolved);
-    return resolved;
   }
 
-  let sent = 0;
-  let unreachable = 0;
+  let emailed = 0;
+  let notified = 0;
+  let skipped = 0;
 
-  for (const item of (items ?? []) as unknown as ReminderRow[]) {
-    // An address recorded against this hold beats the account default: someone
-    // who asked us to write to a specific inbox meant it.
-    const to =
-      item.reminder_email?.trim() ||
-      (item.reserved_by ? await accountEmail(item.reserved_by) : null);
+  /** Marks the hold as asked, so the next run leaves it alone. */
+  const markAsked = (itemId: string) =>
+    supabaseAdmin
+      .from("items")
+      .update({ reminder_sent_at: new Date().toISOString() })
+      .eq("id", itemId);
 
-    if (!to) {
-      // Left unmarked on purpose. If this reserver ever signs up, or the mobile
-      // app moves to `reserve_item_with_contact`, a later run picks the hold up.
-      unreachable++;
+  for (const item of rows) {
+    const reserverId = item.reserved_by!;
+    const guest = isGuest.get(reserverId);
+
+    if (guest === undefined) {
+      skipped++; // lookup failed above; retried on the next run
       continue;
     }
 
+    const boardName = item.boards?.name ?? null;
+
     try {
-      const token = signReservationToken(item.id);
-      const boardName = Array.isArray(item.boards)
-        ? item.boards[0]?.name
-        : item.boards?.name;
+      if (guest) {
+        const to = item.reminder_email?.trim();
+        if (!to) {
+          // A guest with no address cannot be reached by any channel. Left
+          // unmarked so it is picked up if one ever appears.
+          skipped++;
+          continue;
+        }
 
-      await resend.emails.send({
-        from: FROM,
-        to,
-        subject: "Vis dar planuoji dovanoti? 🎁",
-        react: ReservationReminderEmail({
-          itemTitle: item.title,
-          boardName,
-          releaseUrl: `${baseUrl}/r/release/${token}`,
-        }),
-      });
+        const token = signReservationToken(item.id);
+        await resend.emails.send({
+          from: FROM,
+          to,
+          subject: "Vis dar planuoji dovanoti? 🎁",
+          react: ReservationReminderEmail({
+            itemTitle: item.title,
+            boardName,
+            releaseUrl: `${baseUrl}/r/release/${token}`,
+          }),
+        });
 
-      // Asked once. `renew_reservation` clears this when the giver revisits
-      // their hold, which is the only thing that re-arms the question.
-      await supabaseAdmin
-        .from("items")
-        .update({ reminder_sent_at: new Date().toISOString() })
-        .eq("id", item.id);
+        await markAsked(item.id);
+        emailed++;
+      } else {
+        const { error: insertError } = await supabaseAdmin
+          .from("notifications")
+          .insert({
+            user_id: reserverId,
+            type: "reservation_checkin",
+            payload: {
+              item_id: item.id,
+              item_title: item.title,
+              board_id: item.board_id,
+              board_name: boardName,
+              board_slug: item.boards?.slug ?? null,
+            },
+          });
 
-      sent++;
+        if (insertError) throw insertError;
+
+        await markAsked(item.id);
+        notified++;
+      }
     } catch (err) {
-      console.error(`Failed to send reminder for item ${item.id}:`, err);
+      console.error(`Check-in failed for item ${item.id}:`, err);
     }
   }
 
-  return NextResponse.json({ checked: items?.length ?? 0, sent, unreachable });
+  return NextResponse.json({
+    checked: rows.length,
+    emailed,
+    notified,
+    skipped,
+  });
 }
