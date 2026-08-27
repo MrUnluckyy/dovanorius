@@ -1,4 +1,4 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { RegisterForm } from "../components/RegisterForm";
 import { Metadata } from "next";
 
@@ -9,16 +9,18 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function Register() {
+export default async function Register() {
+  const t = await getTranslations("Auth");
   return (
     <main>
       <div className="hero min-h-screen">
         <div className="hero-content flex-col lg:flex-row-reverse">
           <div className="text-center lg:text-left w-full px-4 md:min-w-md">
-            <h1 className="text-5xl font-bold font-heading">Registruokis!</h1>
+            <h1 className="text-5xl font-bold font-heading">
+              {t("registerHeading")}
+            </h1>
             <p className="py-6 max-w-prose font-heading">
-              Prisiregistruokite prie Noriuto.lt ir pradėkite kurti savo norų
-              sąrašus bei dalintis jais su draugais ir šeima.
+              {t("registerDescription")}
             </p>
           </div>
           <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">

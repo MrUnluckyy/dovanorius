@@ -1,6 +1,6 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -15,6 +15,7 @@ type FormValues = z.infer<typeof RegisterSchema>;
 
 export function RegisterForm() {
   const t = useTranslations("Auth");
+  const locale = useLocale();
   const supabase = createClient();
   const [completed, setCompleted] = useState(false);
 
@@ -40,25 +41,33 @@ export function RegisterForm() {
         email: values.email,
         password: values.password,
         options: {
-          data: { display_name: values.displayName },
+          data: { display_name: values.displayName, locale },
           emailRedirectTo: `${process.env.NEXT_PUBLIC_WEB_URL}/api/auth/callback`,
         },
       });
 
       if (error) {
-        // Surface Supabase error at form level
-        setError("root", { message: error.message });
-        toast.error("Opps, klaida registruojantis.");
+        // `errors.root.message` is rendered through t(), so it has to be a
+        // translation KEY. Passing Supabase's raw English string here meant
+        // next-intl was asked to look up a whole sentence as a key.
+        console.error("Sign-up failed:", error);
+        setError("root", {
+          message:
+            error.code === "user_already_exists" ||
+            /already registered/i.test(error.message)
+              ? "errorEmailTaken"
+              : "errorGeneric",
+        });
+        toast.error(t("registerGenericErrorToast"));
         return;
       }
 
-      toast.success("Registration successful! Check your email to verify.");
+      toast.success(t("registerSuccessToast"));
       setCompleted(true);
     } catch (err) {
-      setError("root", {
-        message: "An unexpected error occurred. Please try again.",
-      });
-      toast.error("Opps, klaida registruojantis.");
+      console.error("Sign-up threw:", err);
+      setError("root", { message: "errorGeneric" });
+      toast.error(t("registerGenericErrorToast"));
     }
   };
 
@@ -78,6 +87,9 @@ export function RegisterForm() {
 
   return (
     <>
+      <h2 className="text-2xl font-semibold font-heading mb-6">
+        {t("registerFormTitle")}
+      </h2>
       <button
         className="btn btn-primary"
         type="button"
@@ -106,7 +118,7 @@ export function RegisterForm() {
             <input
               id="displayName"
               type="text"
-              className={`input ${errors.displayName ? "input-error" : ""}`}
+              className={`input w-full ${errors.displayName ? "input-error" : ""}`}
               placeholder={t("displayNameLabel")}
               {...register("displayName")}
             />
@@ -124,8 +136,8 @@ export function RegisterForm() {
             <input
               id="email"
               type="email"
-              className={`input ${errors.email ? "input-error" : ""}`}
-              placeholder={t("emailLabel")}
+              className={`input w-full ${errors.email ? "input-error" : ""}`}
+              placeholder={t("emailPlaceholder")}
               autoComplete="email"
               {...register("email")}
             />
@@ -141,7 +153,7 @@ export function RegisterForm() {
             <input
               id="password"
               type="password"
-              className={`input ${errors.password ? "input-error" : ""}`}
+              className={`input w-full ${errors.password ? "input-error" : ""}`}
               placeholder={t("passwordLabel")}
               autoComplete="new-password"
               {...register("password")}
@@ -159,7 +171,7 @@ export function RegisterForm() {
             <input
               id="confirmPassword"
               type="password"
-              className={`input ${errors.confirmPassword ? "input-error" : ""}`}
+              className={`input w-full ${errors.confirmPassword ? "input-error" : ""}`}
               placeholder={t("confirmPasswordLabel")}
               autoComplete="new-password"
               {...register("confirmPassword")}

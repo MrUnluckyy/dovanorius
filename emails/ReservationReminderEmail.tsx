@@ -1,13 +1,6 @@
-import {
-  Html,
-  Head,
-  Body,
-  Container,
-  Heading,
-  Text,
-  Button,
-  Section,
-} from "@react-email/components";
+import { Text, Button, Section } from "@react-email/components";
+import { EmailLayout, EmailHeading } from "./_components/EmailLayout";
+import { brand, buttonSecondary, text, textMuted } from "./_components/theme";
 
 /**
  * A check-in, not a warning.
@@ -16,6 +9,10 @@ import {
  * keep and release — which made ignoring it the destructive choice. Reservations
  * no longer expire, so silence is now the safe answer and the only action left
  * is the one a giver has an actual reason to take: letting the gift go.
+ *
+ * Only guests receive it. An account holder gets the same check-in through the
+ * notification bell, because they have a dashboard and we are not going to mail
+ * them about something they can already see.
  *
  * `keepUrl` is still accepted so already-signed links keep working; nothing
  * links to it here.
@@ -31,67 +28,42 @@ export function ReservationReminderEmail({
   releaseUrl: string;
 }) {
   return (
-    <Html>
-      <Head />
-      <Body style={{ backgroundColor: "#f5f5f5", fontFamily: "Arial" }}>
-        <Container
-          style={{
-            backgroundColor: "#ffffff",
-            padding: "24px",
-            borderRadius: "8px",
-            maxWidth: "480px",
-          }}
-        >
-          <Heading style={{ color: "#31473A", fontSize: "24px" }}>
-            Vis dar planuoji dovanoti? 🎁
-          </Heading>
+    <EmailLayout
+      preview={`${itemTitle} vis dar rezervuota tavo vardu`}
+      footnote="Šį laišką gavai todėl, kad rezervavai dovaną Noriuto.lt ir palikai savo el. pašto adresą."
+    >
+      <EmailHeading>Vis dar planuoji dovanoti? 🎁</EmailHeading>
 
-          <Text>
-            Prieš kurį laiką rezervavai dovaną <strong>{itemTitle}</strong>
-            {boardName ? (
-              <>
-                {" "}
-                norų lentoje <strong>{boardName}</strong>
-              </>
-            ) : null}
-            . Ji vis dar tavo — rezervacija negalioja terminuotai ir savaime
-            nedings.
-          </Text>
+      <Text style={text}>
+        Prieš kurį laiką rezervavai dovaną <strong>{itemTitle}</strong>
+        {boardName ? (
+          <>
+            {" "}
+            norų lentoje <strong>{boardName}</strong>
+          </>
+        ) : null}
+        . Ji vis dar tavo — rezervacija negalioja terminuotai ir savaime nedings.
+      </Text>
 
-          <Text>
-            <strong>Jei vis dar planuoji ją padovanoti, daryti nieko
-            nereikia.</strong> Tiesiog ištrink šį laišką.
-          </Text>
+      <Text style={{ ...text, fontWeight: 600 }}>
+        Jei vis dar planuoji ją padovanoti, daryti nieko nereikia. Tiesiog
+        ištrink šį laišką.
+      </Text>
 
-          <Text>
-            O jei persigalvojai — atlaisvink dovaną, kad ja galėtų pasirūpinti
-            kas nors kitas.
-          </Text>
+      <Text style={text}>
+        O jei persigalvojai — atlaisvink dovaną, kad ja galėtų pasirūpinti kas
+        nors kitas.
+      </Text>
 
-          <Section style={{ marginTop: "16px" }}>
-            <Button
-              href={releaseUrl}
-              style={{
-                backgroundColor: "#ffffff",
-                color: "#31473A",
-                padding: "12px 20px",
-                borderRadius: "6px",
-                fontWeight: "bold",
-                display: "inline-block",
-                textDecoration: "none",
-                border: "1px solid #31473A",
-              }}
-            >
-              Atlaisvinti dovaną
-            </Button>
-          </Section>
+      <Section style={{ margin: "24px 0 8px" }}>
+        <Button href={releaseUrl} style={buttonSecondary}>
+          Atlaisvinti dovaną
+        </Button>
+      </Section>
 
-          <Text style={{ marginTop: "24px", opacity: 0.7 }}>
-            Su pagarba,
-            <br /> <strong>Noriuto komanda</strong>
-          </Text>
-        </Container>
-      </Body>
-    </Html>
+      <Text style={{ ...textMuted, margin: "16px 0 0", color: brand.faint }}>
+        Lentos savininkas nemato, kad rezervavai būtent tu.
+      </Text>
+    </EmailLayout>
   );
 }

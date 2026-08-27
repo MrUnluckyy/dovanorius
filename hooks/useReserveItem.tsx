@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { User } from "@supabase/supabase-js";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -80,6 +80,7 @@ export function useReserveItem({
   const queryClient = useQueryClient();
   const router = useRouter();
   const t = useTranslations("Boards");
+  const locale = useLocale();
   const [isPending, setIsPending] = useState(false);
 
   /**
@@ -99,7 +100,13 @@ export function useReserveItem({
     email: string,
     password: string
   ): Promise<Pick<ReserveResult, "accountCreated" | "accountError">> => {
-    const { error } = await supabase.auth.updateUser({ email, password });
+    // Carry the locale: the Send Email hook has no other way to know which
+    // language to confirm this address in.
+    const { error } = await supabase.auth.updateUser({
+      email,
+      password,
+      data: { locale },
+    });
     if (!error) {
       router.refresh();
       return { accountCreated: true };
