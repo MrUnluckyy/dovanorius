@@ -41,9 +41,47 @@ export default function SetNewPassword() {
   useEffect(() => {
     let cancelled = false;
 
-    // The recovery session can arrive either way round: already restored from
-    // the cookie by the time this mounts, or moments later when the client
-    // finishes reading the link. Handle both rather than racing them.
+    /**
+     * Supabase's recovery link hands the session back in the URL *fragment*
+     * (`#access_token=...&refresh_token=...`), and a fragment is never sent to
+     * a server — so no route handler can see it, and `getSession()` will not
+     * find one either.
+     *
+     * `createBrowserClient` from @supabase/ssr hardcodes `flowType: "pkce"`,
+     * which only auto-detects a `?code=` query param. Against an implicit
+     * fragment it does nothing at all. That is why every reset ended at
+     * "Auth session missing!": the link worked, the session was minted, and
+     * the page simply never picked it up. Audit log confirms it — recovery
+     * links were being consumed, and `user_updated_password` never followed.
+     *
+     * So read the fragment ourselves. Handles the current Supabase template;
+     * the `?code=` and `token_hash` paths are covered by the route handlers.
+     */
+    const consumeHash = async (): Promise<boolean> => {
+      if (typeof window === "undefined") return false;
+      const hash = window.location.hash;
+      if (!hash.includes("access_token")) return false;
+
+      const params = new URLSearchParams(hash.slice(1));
+      const access_token = params.get("access_token");
+      const refresh_token = params.get("refresh_token");
+      if (!access_token || !refresh_token) return false;
+
+      const { error } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      });
+      if (error) {
+        console.error("Could not restore the recovery session:", error);
+        return false;
+      }
+
+      // Tokens out of the address bar once they are in the session: they would
+      // otherwise sit in history and in anything the browser syncs.
+      window.history.replaceState(null, "", window.location.pathname);
+      return true;
+    };
+
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return;
       if (session && (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN")) {
@@ -51,10 +89,17 @@ export default function SetNewPassword() {
       }
     });
 
-    supabase.auth.getSession().then(({ data }) => {
+    (async () => {
+      const restored = await consumeHash();
+      if (cancelled) return;
+      if (restored) {
+        setStatus("ready");
+        return;
+      }
+      const { data } = await supabase.auth.getSession();
       if (cancelled) return;
       setStatus(data.session ? "ready" : "no-session");
-    });
+    })();
 
     return () => {
       cancelled = true;

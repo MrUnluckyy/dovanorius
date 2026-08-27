@@ -61,6 +61,37 @@ const KNOWN_ACTIONS = new Set<AuthEmailAction>([
   "invite",
 ]);
 
+/**
+ * Where each link should land once the token has been verified. Supabase's own
+ * `redirect_to` is honoured when it is a same-origin path, since that is what
+ * the calling code asked for; otherwise each action gets a sensible home.
+ */
+function destinationFor(
+  action: AuthEmailAction,
+  redirectTo: string,
+  baseUrl: string
+): string {
+  if (redirectTo) {
+    try {
+      const url = new URL(redirectTo, baseUrl);
+      if (url.origin === new URL(baseUrl).origin && url.pathname !== "/") {
+        return url.pathname + url.search;
+      }
+    } catch {
+      // Unparseable redirect_to: fall through to the defaults below.
+    }
+  }
+
+  switch (action) {
+    case "recovery":
+      return "/reset-password";
+    case "email_change":
+      return "/account";
+    default:
+      return "/dashboard";
+  }
+}
+
 type HookPayload = {
   user: {
     id: string;
@@ -120,16 +151,26 @@ export async function POST(request: Request) {
   const locale: AuthEmailLocale =
     user.user_metadata?.locale === "en" ? "en" : "lt";
 
-  // Supabase verifies the token itself; we only assemble the link it expects.
-  const projectRef = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).hostname.split(
-    "."
-  )[0];
+  // Point at our own /api/auth/confirm rather than Supabase's /auth/v1/verify.
+  //
+  // Supabase's verify endpoint answers with the session in the URL *fragment*
+  // (`#access_token=...`), and a fragment never reaches a server — so no route
+  // handler can act on it, and @supabase/ssr's browser client ignores it too
+  // (it is hardcoded to PKCE, which only looks for `?code=`). That combination
+  // is what made every password reset dead-end at "Auth session missing!".
+  //
+  // /api/auth/confirm calls verifyOtp with the token_hash server-side and sets
+  // the session cookies directly. No fragment, no code verifier — so it also
+  // works when the link is opened on a different device from the one that
+  // requested it, which the PKCE path cannot do.
+  const baseUrl = process.env.NEXT_PUBLIC_WEB_URL ?? "https://noriuto.lt";
+  const next = destinationFor(action, data.redirect_to, baseUrl);
   const actionUrl =
-    `https://${projectRef}.supabase.co/auth/v1/verify?` +
+    `${baseUrl}/api/auth/confirm?` +
     new URLSearchParams({
-      token: data.token_hash,
+      token_hash: data.token_hash,
       type: data.email_action_type,
-      redirect_to: data.redirect_to,
+      next,
     }).toString();
 
   // An email change confirms at the NEW address, which is the one Supabase puts

@@ -8,7 +8,14 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const next = searchParams.get("next") ?? "/";
+
+  // Only relative paths. Every auth email now routes through here, so an
+  // unchecked `next` would turn a link we send from our own domain into an
+  // open redirect — the most credible phishing hop there is. `//evil.com` is
+  // protocol-relative and would leave the site, so it is rejected too.
+  const requested = searchParams.get("next") ?? "/";
+  const next =
+    requested.startsWith("/") && !requested.startsWith("//") ? requested : "/";
 
   if (token_hash && type) {
     const supabase = await createClient();
