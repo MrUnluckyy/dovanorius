@@ -719,5 +719,14 @@
       "body": "Atrask dovanų idėjų ir gidų pagal progą bei pomėgius.",
       "cta": "Peržiūrėti idėjas"
     }
+  },
+  "Notifications": {
+    "empty": "Pranešimų nėra",
+    "ctaDismiss": "Uždaryti",
+    "ctaOpenBoard": "Atidaryti lentą",
+    "reservedTitle": "Dovana rezervuota",
+    "reservedBody": "Rezervavai <item></item>. Niekas kitas jos nepasiims.",
+    "checkInTitle": "Vis dar planuoji dovanoti?",
+    "checkInBody": "Rezervavai <item></item>. Jei vis dar planuoji ją padovanoti, daryti nieko nereikia."
   }
 }

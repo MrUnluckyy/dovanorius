@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { NotificationRow } from "@/types/secret-santa";
@@ -17,6 +18,20 @@ type NotificationPayload = {
   event_name: string;
   invite_id: string;
   slug: string;
+};
+
+/**
+ * Reservation check-ins. Account holders are told in-app rather than by email:
+ * they have the dashboard and this bell, so a second copy in their inbox is
+ * noise. Guests keep no account and are emailed instead — see
+ * app/api/reservations/send-reminders/route.ts.
+ */
+type ReservationPayload = {
+  item_id: string;
+  item_title: string;
+  board_id: string;
+  board_name: string | null;
+  board_slug: string | null;
 };
 
 type BroadcastPayload = {
@@ -45,6 +60,7 @@ function addDismissed(id: string) {
 }
 
 export default function NotificationsBell() {
+  const t = useTranslations("Notifications");
   const sb = createClient();
   const qc = useQueryClient();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
@@ -122,7 +138,7 @@ export default function NotificationsBell() {
         className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box min-w-80"
       >
         {totalCount === 0 && (
-          <li className="opacity-70 p-2">Pranešimų nėra</li>
+          <li className="opacity-70 p-2">{t("empty")}</li>
         )}
 
         {/* Broadcast notifications */}
@@ -150,7 +166,7 @@ export default function NotificationsBell() {
                     className="btn btn-ghost btn-xs"
                     onClick={() => onDismissBroadcast(n.id)}
                   >
-                    Uždaryti
+                    {t("ctaDismiss")}
                   </button>
                 </div>
               </div>
@@ -186,6 +202,13 @@ export default function NotificationsBell() {
                     </div>
                   </>
                 )}
+                {(n.type === "reservation_reserved" ||
+                  n.type === "reservation_checkin") && (
+                  <ReservationNotification
+                    notification={n}
+                    onDismiss={() => onDismiss(n.id)}
+                  />
+                )}
                 {n.type === "ss_joined" && (
                   <>
                     <div>
@@ -214,5 +237,48 @@ export default function NotificationsBell() {
         })}
       </ul>
     </div>
+  );
+}
+
+/**
+ * One reservation notification. `reservation_reserved` confirms a hold was
+ * placed; `reservation_checkin` is the later "still planning to give this?"
+ * nudge — the in-app twin of the guest email, and like it, doing nothing keeps
+ * the hold.
+ */
+function ReservationNotification({
+  notification,
+  onDismiss,
+}: {
+  notification: NotificationRow;
+  onDismiss: () => void;
+}) {
+  const t = useTranslations("Notifications");
+  const p = notification.payload as ReservationPayload;
+  const isCheckIn = notification.type === "reservation_checkin";
+
+  return (
+    <>
+      <div>
+        <b>🎁 {isCheckIn ? t("checkInTitle") : t("reservedTitle")}</b>{" "}
+        {isCheckIn
+          ? t.rich("checkInBody", {
+              item: () => <i>{p.item_title}</i>,
+            })
+          : t.rich("reservedBody", {
+              item: () => <i>{p.item_title}</i>,
+            })}
+      </div>
+      <div className="flex justify-end gap-2 w-full">
+        {p.board_slug && (
+          <Link href={`/b/${p.board_slug}`} className="btn btn-primary btn-sm">
+            {t("ctaOpenBoard")}
+          </Link>
+        )}
+        <button className="btn btn-outline btn-sm" onClick={onDismiss}>
+          {t("ctaDismiss")}
+        </button>
+      </div>
+    </>
   );
 }
