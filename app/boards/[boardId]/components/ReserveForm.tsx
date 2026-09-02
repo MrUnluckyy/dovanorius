@@ -4,12 +4,42 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { LuCalendarCheck, LuCircleCheck, LuShieldCheck } from "react-icons/lu";
+import {
+  LuCalendarCheck,
+  LuCircleCheck,
+  LuLogIn,
+  LuShieldCheck,
+} from "react-icons/lu";
 import { readRememberedGuestEmail } from "@/hooks/useReserveItem";
 import type { Item } from "./WishList";
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const MIN_PASSWORD = 8;
+
+/**
+ * Whether this visit has already been asked to sign in. Deliberately
+ * sessionStorage, not localStorage: someone who chose "guest" once should not
+ * be asked again while reserving three more gifts, but the next visit is a
+ * fresh chance to catch an account holder who never noticed they were signed
+ * out. That is the whole failure this gate exists for.
+ */
+const SIGNIN_PROMPT_KEY = "noriuto_reserve_signin_prompted";
+
+function alreadyPrompted(): boolean {
+  try {
+    return window.sessionStorage.getItem(SIGNIN_PROMPT_KEY) === "1";
+  } catch {
+    return false; // private mode / storage disabled: ask, it is not harmful
+  }
+}
+
+function markPrompted() {
+  try {
+    window.sessionStorage.setItem(SIGNIN_PROMPT_KEY, "1");
+  } catch {
+    // Re-asking is a smaller cost than failing a reservation over storage.
+  }
+}
 
 export type ReserveOutcome = {
   ok: boolean;
@@ -58,13 +88,34 @@ export function ReserveForm({
   const [password, setPassword] = useState("");
   const [outcome, setOutcome] = useState<ReserveOutcome | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Sign in, or go on as a guest — asked once per visit, before the email
+  // field rather than around it. This form only ever mounts after a click, so
+  // reading storage during the first render cannot mismatch a server render.
+  const [step, setStep] = useState<"choice" | "form">(() =>
+    alreadyPrompted() ? "form" : "choice"
+  );
 
   // A returning guest shouldn't retype what they gave us last time.
   useEffect(() => {
     setEmail(readRememberedGuestEmail());
+  }, []);
+
+  // Focus follows the email field into view, whether it was there from the
+  // start or arrived when the guest path was chosen.
+  useEffect(() => {
+    if (step !== "form") return;
     const raf = requestAnimationFrame(() => inputRef.current?.focus());
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [step]);
+
+  const continueAsGuest = () => {
+    markPrompted();
+    setStep("form");
+  };
+
+  // Signing in has to come back to the wish they were reserving. Dropping them
+  // on the dashboard is how someone leaves without the gift held.
+  const loginHref = `/login?next=${encodeURIComponent(`${pathname}?wish=${item.id}`)}`;
 
   const emailValid = EMAIL_RE.test(email.trim());
   const passwordValid = !wantsAccount || password.length >= MIN_PASSWORD;
@@ -88,6 +139,80 @@ export function ReserveForm({
     }
   };
 
+  // Inside the item modal the wish is already on screen in full; repeating it
+  // there would just push everything below the fold.
+  const wishHeader = variant === "dialog" && (
+    <>
+      <div className="flex items-center gap-3 p-6 pb-5">
+        <img
+          src={item.image_urls?.[0] ?? item.image_url ?? "/assets/placeholder.jpg"}
+          alt=""
+          aria-hidden
+          className="w-14 h-14 rounded-xl object-cover shrink-0 bg-base-200"
+          onError={(e) => {
+            e.currentTarget.src = "/assets/placeholder.jpg";
+          }}
+        />
+        <div className="min-w-0">
+          <p className="text-xs uppercase tracking-wide text-base-content/50">
+            {t("reserveDialogEyebrow")}
+          </p>
+          <p
+            className="font-semibold leading-snug line-clamp-2"
+            data-clarity-mask="true"
+          >
+            {item.title}
+          </p>
+          {boardName && (
+            <p className="text-xs text-base-content/50 truncate">{boardName}</p>
+          )}
+        </div>
+      </div>
+      {/* Perforation, like a ticket stub being torn off. */}
+      <div className="border-t border-dashed border-base-300" />
+    </>
+  );
+
+  /**
+   * The fork, asked before anything else: this is the exact moment an account
+   * holder who never noticed they were signed out can still be caught. Both
+   * ways out are one tap and neither is hidden — a guest path in small print
+   * would just trade misfiled reservations for abandoned ones.
+   */
+  if (step === "choice") {
+    return (
+      <div>
+        {wishHeader}
+        <div className={variant === "dialog" ? "p-6" : "mt-8"}>
+          <p className="font-semibold text-lg leading-snug">
+            {t("reserveChoiceTitle")}
+          </p>
+          <p className="text-sm text-base-content/60 mt-1.5 leading-relaxed">
+            {t("reserveChoiceBody")}
+          </p>
+          <Link
+            href={loginHref}
+            className="btn btn-primary w-full mt-5"
+            onClick={markPrompted}
+          >
+            <LuLogIn aria-hidden />
+            {t("reserveSignInCta")}
+          </Link>
+          <button
+            type="button"
+            className="btn btn-ghost w-full mt-2"
+            onClick={continueAsGuest}
+          >
+            {t("reserveGuestCta")}
+          </button>
+          <p className="text-xs text-center text-base-content/50 mt-3">
+            {t("reserveChoiceGuestHint")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (outcome?.ok) {
     return (
       <div className={variant === "dialog" ? "p-6" : "mt-8 border-t border-base-300 pt-6"}>
@@ -107,7 +232,7 @@ export function ReserveForm({
             </p>
             {outcome.accountError === "email_taken" && (
               <Link
-                href={`/login?next=${encodeURIComponent(pathname)}`}
+                href={loginHref}
                 className="link link-hover text-sm font-medium inline-block mt-1"
               >
                 {t("reserveSignInLink")}
@@ -126,43 +251,36 @@ export function ReserveForm({
     <form onSubmit={submit}>
       {/* Inside the item modal the wish is already on screen in full; repeating
           it here would just push the form below the fold. */}
-      {variant === "dialog" && (
-        <>
-          <div className="flex items-center gap-3 p-6 pb-5">
-            <img
-              src={item.image_urls?.[0] ?? item.image_url ?? "/assets/placeholder.jpg"}
-              alt=""
-              aria-hidden
-              className="w-14 h-14 rounded-xl object-cover shrink-0 bg-base-200"
-              onError={(e) => {
-                e.currentTarget.src = "/assets/placeholder.jpg";
-              }}
-            />
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-base-content/50">
-                {t("reserveDialogEyebrow")}
-              </p>
-              <p
-                className="font-semibold leading-snug line-clamp-2"
-                data-clarity-mask="true"
-              >
-                {item.title}
-              </p>
-              {boardName && (
-                <p className="text-xs text-base-content/50 truncate">{boardName}</p>
-              )}
-            </div>
-          </div>
-          {/* Perforation, like a ticket stub being torn off. */}
-          <div className="border-t border-dashed border-base-300" />
-        </>
-      )}
+      {wishHeader}
+
+      {/* The quiet, always-present version of the choice above: on a second
+          reserve in the same visit the gate is suppressed, and this is what
+          still offers the way into an account. It used to be a text-xs link
+          under the fold, below the account checkbox — nobody got that far. */}
+      <div
+        className={`flex flex-wrap items-center justify-between gap-3 px-6 py-4 ${
+          variant === "inline"
+            ? "mt-8 rounded-xl border border-base-300"
+            : "border-b border-base-300"
+        }`}
+      >
+        <p className="text-sm leading-snug">
+          <span className="font-medium">{t("reserveSignInTitle")}</span>
+          <span className="block text-base-content/60">
+            {t("reserveSignInWhy")}
+          </span>
+        </p>
+        <Link href={loginHref} className="btn btn-sm btn-outline shrink-0">
+          <LuLogIn aria-hidden />
+          {t("reserveSignInCta")}
+        </Link>
+      </div>
 
       {/* The single fact people came back for and did not find: how long the
           hold lasts. It lasts until they end it. */}
       <div
         className={`flex items-start gap-3 px-6 py-5 bg-base-200/60 ${
-          variant === "inline" ? "mt-8 rounded-xl" : ""
+          variant === "inline" ? "mt-3 rounded-xl" : ""
         }`}
       >
         <LuCalendarCheck className="text-xl shrink-0 mt-0.5 text-success" aria-hidden />
@@ -252,20 +370,16 @@ export function ReserveForm({
           <span>{t("reserveEmailPrivacy")}</span>
         </p>
 
-        <button type="submit" className="btn btn-primary w-full mt-5" disabled={!canSubmit}>
-          {isPending && <span className="loading loading-spinner loading-xs" />}
+        <button
+          type="submit"
+          className="btn btn-primary w-full mt-5"
+          disabled={!canSubmit}
+          data-busy={isPending || undefined}
+        >
           {t("reserveConfirm")}
         </button>
         <p className="text-xs text-center text-base-content/50 mt-2.5">
           {wantsAccount ? t("reserveAccountNote") : t("reserveNoAccount")}
-        </p>
-        <p className="text-xs text-center mt-2">
-          <Link
-            href={`/login?next=${encodeURIComponent(pathname)}`}
-            className="link link-hover text-base-content/60"
-          >
-            {t("reserveSignInLink")}
-          </Link>
         </p>
       </div>
     </form>

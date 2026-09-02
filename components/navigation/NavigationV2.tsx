@@ -26,6 +26,24 @@ export function NavigationV2({ user }: { user?: User | null }) {
   const ref = useRef<HTMLInputElement>(null);
   const pathnames = usePathname();
 
+  /**
+   * A guest who has reserved a gift carries an anonymous Supabase session. It
+   * is a session, not an account: no email, no dashboard, nothing to sign out
+   * of. Treating it as "signed in" hid Login and Register from exactly the
+   * people who already HAD an account and simply hadn't signed into it — so
+   * they kept reserving as guests, and their holds landed in an account they
+   * can never see. Anonymous is signed out, and says so.
+   */
+  const isGuest = !!user && user.is_anonymous === true;
+  const signedIn = !!user && !isGuest;
+
+  // Signing in from a board should come back to that board, not dump the
+  // giver on the dashboard with the gift still unreserved.
+  const loginHref =
+    pathnames && !pathnames.startsWith("/login") && !pathnames.startsWith("/register")
+      ? `/login?next=${encodeURIComponent(pathnames)}`
+      : "/login";
+
   return (
     <div className="drawer drawer-end font-heading">
       <input
@@ -46,7 +64,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                     they already use. This is also what makes the separate
                     "Pagrindinis" link redundant, so it is gone. */}
                 <Link
-                  href={user ? "/dashboard" : "/"}
+                  href={signedIn ? "/dashboard" : "/"}
                   className="text-xl font-bold flex gap-2 items-center"
                 >
                   <Image
@@ -65,7 +83,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 <CreateTriggerButton />
                 {/* The bell reads the session with a non-null assertion, so it
                     may only mount for a signed-in user. */}
-                {user && <NotificationsBell />}
+                {signedIn && <NotificationsBell />}
                 <NotificationsLive />
                 <label
                   htmlFor="my-drawer-2"
@@ -89,7 +107,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 <LuSparkles />
                 {t("discover")}
               </Link>
-              {user ? (
+              {signedIn ? (
                 <>
                   <NotificationsBell />
                   <NotificationsLive />
@@ -134,7 +152,18 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="btn btn-ghost">
+                  {isGuest && (
+                    <span className="hidden xl:flex items-center gap-1.5 self-center pr-1 text-sm text-base-content/60">
+                      <LuCircleUser className="text-base" />
+                      {t("guestMode")}
+                    </span>
+                  )}
+                  {/* For a guest this is the way back into an account they
+                      already have, so it carries the weight of one. */}
+                  <Link
+                    href={loginHref}
+                    className={isGuest ? "btn btn-primary" : "btn btn-ghost"}
+                  >
                     {t("login")}
                   </Link>
                   <Link href="/register" className="btn btn-ghost">
@@ -142,7 +171,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   </Link>
                 </>
               )}
-              {!user && <LocaleToggle />}
+              {!signedIn && <LocaleToggle />}
             </div>
           </div>
         </div>
@@ -173,7 +202,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
               <LuSparkles />
               {t("discover")}
             </Link>
-            {user ? (
+            {signedIn ? (
               <>
                 <Link
                   href="/dashboard"
@@ -206,16 +235,26 @@ export function NavigationV2({ user }: { user?: User | null }) {
             ) : (
               <>
                 <div className="divider my-2" />
+                {isGuest && (
+                  <p className="flex items-start gap-2 px-4 pb-3 text-base leading-snug text-base-content/60">
+                    <LuCircleUser className="mt-0.5 shrink-0 text-lg" />
+                    {t("guestModeHint")}
+                  </p>
+                )}
                 <Link
-                  href="/login"
-                  className="btn btn-ghost w-full justify-start text-xl"
+                  href={loginHref}
+                  className={`btn w-full justify-start text-xl ${
+                    isGuest ? "btn-primary" : "btn-ghost"
+                  }`}
                   onClick={() => ref.current?.click()}
                 >
                   {t("login")}
                 </Link>
                 <Link
                   href="/register"
-                  className="btn btn-primary w-full justify-start text-xl"
+                  className={`btn w-full justify-start text-xl ${
+                    isGuest ? "btn-ghost" : "btn-primary"
+                  }`}
                   onClick={() => ref.current?.click()}
                 >
                   {t("register")}
