@@ -28,7 +28,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const FROM = process.env.RESEND_FROM ?? "Noriuto <noreply@noriuto.lt>";
+const FROM = process.env.RESEND_FROM ?? "Noriuto <labas@noriuto.lt>";
 
 const SUBJECTS: Record<AuthEmailAction, Record<AuthEmailLocale, string>> = {
   signup: {

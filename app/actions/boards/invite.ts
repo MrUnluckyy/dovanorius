@@ -20,7 +20,7 @@ export type CreateInviteResult =
     }
   | { ok: false; error: string };
 
-const FROM = process.env.RESEND_FROM ?? "Noriuto <noreply@noriuto.lt>";
+const FROM = process.env.RESEND_FROM ?? "Noriuto <labas@noriuto.lt>";
 
 export async function createBoardInvite(
   boardId: string,
@@ -57,7 +57,9 @@ export async function createBoardInvite(
 
     const baseUrl = process.env.NEXT_PUBLIC_WEB_URL ?? "https://noriuto.lt";
     const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
+    // A rejected send resolves with { error } rather than throwing, so
+    // emailSent used to be true for invites that never left Resend.
+    const { error: sendError } = await resend.emails.send({
       from: FROM,
       to: trimmed,
       subject: "Kvietimas bendradarbiauti Noriuto lentoje 🎁",
@@ -66,6 +68,8 @@ export async function createBoardInvite(
         joinUrl: `${baseUrl}/boards/join/${invite.token}`,
       }),
     });
+
+    if (sendError) throw sendError;
     emailSent = true;
   } catch (err) {
     console.error("Failed to send board invite email:", err);

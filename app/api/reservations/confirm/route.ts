@@ -15,7 +15,7 @@ import { ReservationConfirmedEmail } from "@/emails/ReservationConfirmedEmail";
 
 export const dynamic = "force-dynamic";
 
-const FROM = process.env.RESEND_FROM ?? "Noriuto <noreply@noriuto.lt>";
+const FROM = process.env.RESEND_FROM ?? "Noriuto <labas@noriuto.lt>";
 
 /**
  * Only confirm a hold that was just placed. Without this the endpoint would be
@@ -111,7 +111,11 @@ export async function POST(request: Request) {
   try {
     const token = signReservationToken(item.id, HOLD_DAYS_MAX);
     const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
+    // resend.emails.send() resolves with { data, error } — a rejected send
+    // does NOT throw. Without reading `error` a bounced or refused address
+    // reported "sent: true", which is how you end up believing every guest
+    // got their only record of the hold.
+    const { error: sendError } = await resend.emails.send({
       from: FROM,
       to: item.reminder_email,
       subject: "Dovana rezervuota 🎁",
@@ -122,6 +126,8 @@ export async function POST(request: Request) {
         releaseUrl: `${baseUrl}/r/release/${token}`,
       }),
     });
+
+    if (sendError) throw sendError;
   } catch (err) {
     console.error(`Failed to confirm reservation ${item.id}:`, err);
     return NextResponse.json({ sent: false }, { status: 200 });
