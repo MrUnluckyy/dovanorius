@@ -63,12 +63,9 @@ export function PartnerLoginForm() {
         type="submit"
         className="btn btn-primary w-full mt-2"
         disabled={loading}
+        data-busy={loading || undefined}
       >
-        {loading ? (
-          <span className="loading loading-spinner loading-sm" />
-        ) : (
-          "Prisijungti"
-        )}
+        Prisijungti
       </button>
     </form>
   );

@@ -7,10 +7,10 @@ export function BoardsLoadingSkeleton() {
         .fill(0)
         .map((_, index) => (
           <div key={index} className="flex flex-col gap-4">
-            <div className="skeleton h-32 w-full"></div>
-            <div className="skeleton h-4 w-28"></div>
-            <div className="skeleton h-4 w-full"></div>
-            <div className="skeleton h-4 w-full"></div>
+            <div className="nr-skeleton h-32 w-full"></div>
+            <div className="nr-skeleton h-4 w-28"></div>
+            <div className="nr-skeleton h-4 w-full"></div>
+            <div className="nr-skeleton h-4 w-full"></div>
           </div>
         ))}
     </div>

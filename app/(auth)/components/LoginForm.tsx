@@ -1,22 +1,38 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
+import {
+  claimGuestReservations,
+  withClaimedParam,
+} from "@/lib/claimGuestReservations";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { FaGoogle } from "react-icons/fa6";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  /**
+   * Set once a redirect is on its way. `finally` used to clear `loading`
+   * before the browser had actually left the page, re-enabling the button for
+   * the second or two the navigation takes — long enough to sign in twice and
+   * fire the claim RPC twice. A ref, not state: `finally` reads it in the same
+   * tick, before any re-render.
+   */
+  const navigatingRef = useRef(false);
   const supabase = createClient();
   const t = useTranslations("Auth");
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   // Only allow relative paths to avoid open-redirects.
   const next = nextParam?.startsWith("/") ? nextParam : "/dashboard";
+
+  // Either way out of this page locks both ways out of it.
+  const busy = loading || oauthLoading;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -43,14 +59,20 @@ export function LoginForm() {
       }
 
       if (data.user) {
-        window.location.href = next;
+        // Anything this account reserved as a guest — with this same address —
+        // follows them in now. Signing in is the only moment the two identities
+        // are both provable.
+        const claimed = await claimGuestReservations(supabase);
+        navigatingRef.current = true;
+        window.location.href = withClaimedParam(next, claimed);
         return;
       }
     } catch (error) {
       console.error("Sign-in threw:", error);
       setLoginError(t("errorGeneric"));
     } finally {
-      setLoading(false);
+      // Stay disabled while the page is on its way out.
+      if (!navigatingRef.current) setLoading(false);
     }
   }
 
@@ -60,14 +82,25 @@ export function LoginForm() {
       <button
         className="btn btn-primary"
         type="button"
-        onClick={() =>
-          supabase.auth.signInWithOAuth({
+        disabled={busy}
+        data-busy={oauthLoading || undefined}
+        onClick={async () => {
+          setOauthLoading(true);
+          setLoginError(null);
+          const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
               redirectTo: `${process.env.NEXT_PUBLIC_WEB_URL}/api/auth/callback?next=${encodeURIComponent(next)}`,
             },
-          })
-        }
+          });
+          // On success the browser is already leaving, so the button stays
+          // disabled on purpose. Only a failure hands it back.
+          if (error) {
+            console.error("Google sign-in failed:", error);
+            setLoginError(t("errorGeneric"));
+            setOauthLoading(false);
+          }
+        }}
       >
         <FaGoogle />
         {t("signInWithGoogle")}
@@ -120,13 +153,10 @@ export function LoginForm() {
           <button
             type="submit"
             className="btn btn-neutral mt-4"
-            disabled={loading}
+            disabled={busy}
+            data-busy={loading || undefined}
           >
-            {loading ? (
-              <span className="loading loading-dots loading-md"></span>
-            ) : (
-              t("ctaLogin")
-            )}
+            {t("ctaLogin")}
           </button>
         </fieldset>
       </form>

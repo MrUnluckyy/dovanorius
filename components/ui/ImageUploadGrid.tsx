@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { LuPlus, LuX } from "react-icons/lu";
 import { prepareImageForUpload } from "@/utils/images/prepareImage";
+import { PendingPips } from "@/components/ui/Pending";
 
 export type ImageSlot = { url: string; isNew: boolean };
 
@@ -73,7 +74,7 @@ export function ImageUploadGrid({
             aria-label="Add image"
           >
             {processing ? (
-              <span className="loading loading-spinner loading-sm" />
+              <PendingPips />
             ) : (
               <LuPlus className="text-2xl" />
             )}

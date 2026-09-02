@@ -215,10 +215,10 @@ export function NavSearch({
             {Array.from({ length: 4 }).map((_, i) => (
               <li key={i}>
                 <div className="flex items-center gap-3">
-                  <div className="skeleton h-8 w-8 rounded-full" />
+                  <div className="nr-skeleton h-8 w-8 rounded-full" />
                   <div className="flex-1 space-y-1">
-                    <div className="skeleton h-3 w-1/2" />
-                    <div className="skeleton h-3 w-1/3" />
+                    <div className="nr-skeleton h-3 w-1/2" />
+                    <div className="nr-skeleton h-3 w-1/3" />
                   </div>
                 </div>
               </li>

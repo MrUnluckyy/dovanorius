@@ -147,7 +147,7 @@ export default function LobbyClient({
       data-theme={meta.theme ?? undefined}
       className="max-w-3xl mx-auto p-4 pb-16 space-y-6"
     >
-      {isLoading && <div className="skeleton h-24 w-full" />}
+      {isLoading && <div className="nr-skeleton h-24 w-full" />}
 
       {event && (
         <>

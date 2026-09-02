@@ -8,14 +8,13 @@ export default async function MyRecipientPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
-
-  const { slug } = await params;
 
   return (
     <main>

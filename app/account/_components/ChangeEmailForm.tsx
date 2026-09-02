@@ -122,12 +122,12 @@ export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
             second one think it silently failed. */}
         <p className="text-sm text-base-content/60">{t("emailChangeNote")}</p>
 
-        <button type="submit" className="btn btn-neutral mt-2 self-start">
-          {isSubmitting ? (
-            <span className="loading loading-dots loading-md" />
-          ) : (
-            t("ctaChangeEmail")
-          )}
+        <button
+          type="submit"
+          className="btn btn-neutral mt-2 self-start"
+          data-busy={isSubmitting || undefined}
+        >
+          {t("ctaChangeEmail")}
         </button>
       </fieldset>
     </form>

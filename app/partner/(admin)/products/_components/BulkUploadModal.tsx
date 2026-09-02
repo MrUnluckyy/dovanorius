@@ -428,10 +428,8 @@ export function BulkUploadModal({
               className="btn btn-primary btn-sm"
               onClick={handleImport}
               disabled={importing}
+              data-busy={importing || undefined}
             >
-              {importing ? (
-                <span className="loading loading-spinner loading-xs" />
-              ) : null}
               Importuoti {parsed.length} produktų
             </button>
           )}

@@ -11,6 +11,7 @@ import { useBoardMembersMap } from "@/hooks/useMemberMap";
 import { AvatarGroup } from "./AvatarGroup";
 import { LuUsers } from "react-icons/lu";
 import { CategoryMosaicGrid } from "./BoardsCardWithPreview";
+import { isAccountUser } from "@/utils/auth/account";
 
 export type BoardWithPreview = {
   id: string;
@@ -46,7 +47,11 @@ export function BoardsList({ user }: { user: User }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <CreateBoard user={user} />
+      {/* A guest reserving a gift is welcome to look around, but a board they
+          own would vanish with their cookies. Creating one needs an account.
+          Contributing to a board they were INVITED to is a different thing and
+          stays open — that is what the invite was for. */}
+      {isAccountUser(user) && <CreateBoard user={user} />}
       {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"> */}
       {boardsWithPreview?.length && boardsWithPreview?.length > 0 && (
         <CategoryMosaicGrid items={boardsWithPreview} />

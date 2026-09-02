@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { LuChevronDown, LuSearch, LuCheck } from "react-icons/lu";
 import { useInspoBrands } from "@/hooks/useInspoBrands";
+import { PendingPips } from "@/components/ui/Pending";
 
 export function BrandFilter({
   value,
@@ -72,7 +73,7 @@ export function BrandFilter({
           </li>
           {isLoading ? (
             <li className="disabled p-2">
-              <span className="loading loading-spinner loading-xs" />
+              <PendingPips />
             </li>
           ) : (
             filtered.map((b) => (

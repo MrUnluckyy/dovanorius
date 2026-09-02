@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Item } from "./WishList";
 import { User } from "@supabase/supabase-js";
 import { ViewItemModal } from "./ViewItemModal";
@@ -66,6 +66,24 @@ export function WishListItem({
       if (error === "email_required") setReserveOpen(true);
     });
   };
+
+  // Coming back from sign-in, the reserve form sends the giver to ?wish=<id>
+  // so they land on the wish they were holding rather than at the top of the
+  // board hunting for it. Read from the URL directly: useSearchParams would
+  // opt every board page into a Suspense boundary for a one-shot mount check.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("wish") !== item.id) return;
+    setDetailsOpen(true);
+    // Spend the param, so a refresh or a Back doesn't reopen the modal.
+    params.delete("wish");
+    const query = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + (query ? `?${query}` : "")
+    );
+  }, [item.id]);
 
   const confirmReserve = (email: string, password?: string) =>
     reserve(email, password);
@@ -173,9 +191,9 @@ export function WishListItem({
             <button
               className="btn btn-sm btn-primary w-full"
               disabled={isPending}
+              data-busy={isPending || undefined}
               onClick={startReserve}
             >
-              {isPending && <span className="loading loading-spinner loading-xs" />}
               {t("ctaReserve")}
             </button>
           )}
@@ -183,9 +201,9 @@ export function WishListItem({
             <button
               className="btn btn-sm btn-outline btn-primary w-full"
               disabled={isPending}
+              data-busy={isPending || undefined}
               onClick={() => unreserve()}
             >
-              {isPending && <span className="loading loading-spinner loading-xs" />}
               {t("ctaUnreserve")}
             </button>
           )}

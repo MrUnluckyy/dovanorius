@@ -15,6 +15,7 @@ import { toCardProduct } from "../_components/CollectionRow";
 import { ProductModal } from "../_components/ProductModal";
 import { CATEGORIES, PRICE_BANDS, SORTS, AUDIENCES } from "../_components/filters";
 import { trackInspo } from "@/utils/trackInspo";
+import { isAccountUser } from "@/utils/auth/account";
 
 /**
  * The catalogue, as a real page.
@@ -79,7 +80,8 @@ export function BrowseClient() {
     let active = true;
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (active && user) setUserId(user.id);
+      // Guests browse; only an account can save. See DiscoverClient.
+      if (active && isAccountUser(user)) setUserId(user.id);
     })();
     return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -183,7 +185,7 @@ export function BrowseClient() {
         ) : isLoading ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className="skeleton h-96 w-full rounded-2xl" />
+              <div key={i} className="nr-skeleton h-96 w-full rounded-2xl" />
             ))}
           </div>
         ) : products.length === 0 ? (
@@ -203,8 +205,8 @@ export function BrowseClient() {
                   className="btn btn-neutral btn-wide cursor-pointer rounded-full"
                   onClick={() => fetchNextPage()}
                   disabled={isFetchingNextPage}
+                  data-busy={isFetchingNextPage || undefined}
                 >
-                  {isFetchingNextPage && <span className="loading loading-spinner loading-sm" />}
                   {t("loadMore")}
                 </button>
               </div>

@@ -115,7 +115,9 @@
     "discover": "Dovanų idėjos",
     "account": "Paskyra",
     "language": "Kalba",
-    "accountSettings": "Paskyros nustatymai"
+    "accountSettings": "Paskyros nustatymai",
+    "guestMode": "Svečias",
+    "guestModeHint": "Naršai kaip svečias — prie savo paskyros neprisijungęs."
   },
   "Boards": {
     "public": "Vieša",
@@ -261,7 +263,15 @@
     "ctaUndo": "Atšaukti",
     "successRestore": "↩️ Noras grąžintas į sąrašą",
     "errorRestore": "😵 Nepavyko grąžinti noro. Bandykite dar kartą vėliau.",
-    "copyFailed": "Nepavyko nukopijuoti nuorodos"
+    "copyFailed": "Nepavyko nukopijuoti nuorodos",
+    "reserveSignInTitle": "Jau turi Noriuto paskyrą?",
+    "reserveSignInWhy": "Prisijunk ir rezervacija atsiras tavo paskyroje.",
+    "reserveSignInCta": "Prisijungti",
+    "reserveChoiceTitle": "Turi Noriuto paskyrą?",
+    "reserveChoiceBody": "Prisijungęs matysi visas savo rezervacijas vienoje vietoje ir galėsi jas atšaukti bet kada. Grąžinsime tave atgal prie šio noro.",
+    "reserveGuestCta": "Tęsti kaip svečias",
+    "reserveChoiceGuestHint": "Rezervuoti gali ir be paskyros — tereikės el. pašto adreso.",
+    "reservationsClaimed": "{count, plural, one {# rezervacija perkelta į tavo paskyrą} few {# rezervacijos perkeltos į tavo paskyrą} other {# rezervacijų perkelta į tavo paskyrą}}"
   },
   "Profile": {
     "displayName": "Slapyvardis",

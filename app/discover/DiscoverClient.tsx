@@ -16,6 +16,7 @@ import { usePersonas } from "@/hooks/usePersonas";
 import { ProductStrip } from "./_components/ProductStrip";
 import { ProductModal } from "./_components/ProductModal";
 import { trackInspo } from "@/utils/trackInspo";
+import { isAccountUser } from "@/utils/auth/account";
 
 export function DiscoverClient() {
   const t = useTranslations("Discover");
@@ -56,7 +57,9 @@ export function DiscoverClient() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!active || !user) return;
+      // An anonymous guest is not an account: every `userId &&` gate below
+      // decides whether something can be SAVED, which a guest cannot do.
+      if (!active || !isAccountUser(user)) return;
       setUserId(user.id);
     })();
     return () => {
@@ -211,7 +214,7 @@ export function DiscoverClient() {
         {!audienceResolved ? (
           <div className="space-y-6">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="skeleton h-72 w-full rounded-3xl" />
+              <div key={i} className="nr-skeleton h-72 w-full rounded-3xl" />
             ))}
           </div>
         ) : (

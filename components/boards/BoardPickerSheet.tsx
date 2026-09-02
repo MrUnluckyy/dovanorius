@@ -10,6 +10,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useBoards } from "@/hooks/useBoards";
 import { foldForSearch } from "@/utils/helpers/search";
 import { generateSlug } from "@/utils/helpers/slugify";
+import { PendingPips } from "@/components/ui/Pending";
 
 export type PickedBoard = { id: string; name: string };
 
@@ -226,8 +227,8 @@ export function BoardPickerSheet({
             <ul className="space-y-1 px-2 py-1">
               {Array.from({ length: 3 }).map((_, i) => (
                 <li key={i} className="flex items-center gap-3 py-2">
-                  <span className="skeleton h-11 w-11 rounded-xl" />
-                  <span className="skeleton h-3.5 w-32" />
+                  <span className="nr-skeleton h-11 w-11 rounded-xl" />
+                  <span className="nr-skeleton h-3.5 w-32" />
                 </li>
               ))}
             </ul>
@@ -270,7 +271,7 @@ export function BoardPickerSheet({
                       </span>
 
                       {saving ? (
-                        <span className="loading loading-spinner loading-xs text-(--nr-muted)" />
+                        <PendingPips />
                       ) : saved ? (
                         <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-(--nr-yellow) text-(--nr-ink)">
                           <LuCheck className="w-4" />

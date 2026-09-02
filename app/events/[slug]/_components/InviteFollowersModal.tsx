@@ -71,7 +71,7 @@ export default function InviteFollowersModal({ slug, open, onClose }: Props) {
       <div className="modal-box">
         <h3 className="font-bold text-lg mb-3">Pakviesti dalyvius</h3>
         <div className="max-h-80 overflow-auto">
-          {isLoading && <div className="skeleton h-10 w-full" />}
+          {isLoading && <div className="nr-skeleton h-10 w-full" />}
           <ul className="menu bg-base-200 rounded-box w-full">
             {(followees ?? []).map((p) => (
               <li key={p.id}>

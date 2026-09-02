@@ -5,6 +5,7 @@ import { BoardWithPreview } from "./BoardsList";
 import { useFormatter, useTranslations } from "next-intl";
 import { useBoardMembersMap } from "@/hooks/useMemberMap";
 import { AvatarGroup } from "./AvatarGroup";
+import { LinkPendingRibbon } from "@/components/ui/LinkPending";
 
 // type MosaicImage = {
 //   src: string;
@@ -65,11 +66,14 @@ const CategoryMosaicCard = React.memo(function CategoryMosaicCard({
       href={`/boards/${item.id}`} // fallback to id if slug is missing
       className={cn(
         "group block rounded-3xl bg-neutral-50 p-3 shadow-sm ring-1 ring-black/5",
-        "transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-black/30"
+        "relative transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-black/30"
       )}
-      prefetch={false} // avoid extra work on landing; enable if you want
+      // Prefetch on purpose: this card exists to open that board, and the
+      // route behind it is server-rendered. Opting out meant every click paid
+      // for the whole round-trip with nothing on screen.
       aria-label={item.name}
     >
+      <LinkPendingRibbon />
       {/* Mosaic */}
       <div className="overflow-hidden rounded-2xl bg-neutral-100">
         <div

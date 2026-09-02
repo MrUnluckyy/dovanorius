@@ -402,11 +402,9 @@ export function ViewItemModal({
                           (inPublicBoard && item.reserved_by === user?.id)
                         }
                         className="btn btn-primary"
+                        data-busy={isPending || undefined}
                         onClick={handleReserve}
                       >
-                        {isPending && (
-                          <span className="loading loading-spinner loading-xs" />
-                        )}
                         {t("ctaReserve")}
                       </button>
                     </>

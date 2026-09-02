@@ -202,12 +202,9 @@ export function RegisterForm() {
             type="submit"
             className="btn btn-neutral mt-4"
             disabled={isSubmitting}
+            data-busy={isSubmitting || undefined}
           >
-            {isSubmitting ? (
-              <span className="loading loading-dots loading-md"></span>
-            ) : (
-              t("ctaRegister")
-            )}
+            {t("ctaRegister")}
           </button>
         </fieldset>
       </form>

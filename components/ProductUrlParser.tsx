@@ -52,11 +52,9 @@ export default function ProductUrlParser({
           type="button"
           className="btn btn-neutral join-item"
           disabled={loading}
+          data-busy={loading || undefined}
           onClick={onParse}
         >
-          {loading && (
-            <span className="loading loading-spinner loading-sm"></span>
-          )}
           {t("getMetadata")}
         </button>
       </div>

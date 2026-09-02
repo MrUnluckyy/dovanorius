@@ -251,6 +251,7 @@ export function ItemForm({
           <button
             type="button"
             className="btn btn-ghost"
+            disabled={formState.isSubmitting}
             onClick={() => {
               reset(defaultValues);
               onCancel();
@@ -258,7 +259,12 @@ export function ItemForm({
           >
             {t("ctaCancel")}
           </button>
-          <button className="btn btn-primary" type="submit">
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={formState.isSubmitting}
+            data-busy={formState.isSubmitting || undefined}
+          >
             {t("ctaSubmit")}
           </button>
         </div>

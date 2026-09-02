@@ -93,12 +93,12 @@ export function ChangePasswordForm({ email }: { email: string }) {
           </p>
         )}
 
-        <button type="submit" className="btn btn-neutral mt-2 self-start">
-          {isSubmitting ? (
-            <span className="loading loading-dots loading-md" />
-          ) : (
-            t("ctaChangePassword")
-          )}
+        <button
+          type="submit"
+          className="btn btn-neutral mt-2 self-start"
+          data-busy={isSubmitting || undefined}
+        >
+          {t("ctaChangePassword")}
         </button>
       </fieldset>
     </form>

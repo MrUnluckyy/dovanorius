@@ -26,7 +26,7 @@ import { ReservationReminderEmail } from "@/emails/ReservationReminderEmail";
 export const dynamic = "force-dynamic";
 
 const BATCH_LIMIT = 100;
-const FROM = process.env.RESEND_FROM ?? "Noriuto <noreply@noriuto.lt>";
+const FROM = process.env.RESEND_FROM ?? "Noriuto <labas@noriuto.lt>";
 
 type ReminderRow = {
   id: string;
@@ -123,7 +123,11 @@ export async function GET(request: Request) {
         }
 
         const token = signReservationToken(item.id);
-        await resend.emails.send({
+        // A rejected send resolves with { error } rather than throwing. Left
+        // unread, markAsked() stamped reminder_sent_at on a reminder that was
+        // never delivered — burning the single attempt this item ever gets and
+        // counting it as sent. Nobody was reminded and the log said otherwise.
+        const { error: sendError } = await resend.emails.send({
           from: FROM,
           to,
           subject: "Vis dar planuoji dovanoti? 🎁",
@@ -133,6 +137,8 @@ export async function GET(request: Request) {
             releaseUrl: `${baseUrl}/r/release/${token}`,
           }),
         });
+
+        if (sendError) throw sendError;
 
         await markAsked(item.id);
         emailed++;

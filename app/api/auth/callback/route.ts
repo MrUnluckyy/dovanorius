@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 // The client you created from the Server-Side Auth instructions
 import { createClient } from "@/utils/supabase/server";
+import {
+  claimGuestReservations,
+  withClaimedParam,
+} from "@/lib/claimGuestReservations";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -16,6 +20,10 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // Same as the password path: guest holds carrying this address come home.
+      const claimed = await claimGuestReservations(supabase);
+      next = withClaimedParam(next, claimed);
+
       const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
       const isLocalEnv = process.env.NODE_ENV === "development";
       if (isLocalEnv) {

@@ -271,8 +271,8 @@ export function ProductFormModal({
               type="submit"
               className="btn btn-primary btn-sm"
               disabled={saving}
+              data-busy={saving || undefined}
             >
-              {saving ? <span className="loading loading-spinner loading-xs" /> : null}
               Išsaugoti
             </button>
           </div>

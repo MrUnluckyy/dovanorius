@@ -115,7 +115,9 @@
     "discover": "Gift ideas",
     "account": "Account",
     "language": "Language",
-    "accountSettings": "Account settings"
+    "accountSettings": "Account settings",
+    "guestMode": "Guest",
+    "guestModeHint": "You're browsing as a guest — not signed in to your account."
   },
   "Boards": {
     "public": "Public",
@@ -261,7 +263,15 @@
     "ctaUndo": "Undo",
     "successRestore": "↩️ Wish is back on the list",
     "errorRestore": "😵 Couldn't restore the wish. Please try again later.",
-    "copyFailed": "Couldn't copy the link"
+    "copyFailed": "Couldn't copy the link",
+    "reserveSignInTitle": "Already have a Noriuto account?",
+    "reserveSignInWhy": "Sign in and the reservation lands in your account.",
+    "reserveSignInCta": "Sign in",
+    "reserveChoiceTitle": "Do you have a Noriuto account?",
+    "reserveChoiceBody": "Signed in, all your reservations sit in one place and you can release them any time. We'll bring you straight back to this wish.",
+    "reserveGuestCta": "Continue as a guest",
+    "reserveChoiceGuestHint": "You can reserve without an account — we'll just need an email address.",
+    "reservationsClaimed": "{count, plural, one {# reservation moved into your account} other {# reservations moved into your account}}"
   },
   "Profile": {
     "displayName": "Display Name",

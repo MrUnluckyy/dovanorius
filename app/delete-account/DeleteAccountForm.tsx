@@ -98,15 +98,10 @@ export function DeleteAccountForm() {
             type="submit"
             className="btn btn-error w-full"
             disabled={loading}
+            data-busy={loading || undefined}
           >
-            {loading ? (
-              <span className="loading loading-dots loading-sm" />
-            ) : (
-              <>
-                <FiMail className="size-4" />
-                {t("ctaSendCode")}
-              </>
-            )}
+            <FiMail className="size-4" />
+            {t("ctaSendCode")}
           </button>
         </form>
       )}
@@ -134,12 +129,9 @@ export function DeleteAccountForm() {
             type="submit"
             className="btn btn-error w-full"
             disabled={loading || otp.length < 6}
+            data-busy={loading || undefined}
           >
-            {loading ? (
-              <span className="loading loading-dots loading-sm" />
-            ) : (
-              t("ctaConfirmDelete")
-            )}
+            {t("ctaConfirmDelete")}
           </button>
           <button
             type="button"

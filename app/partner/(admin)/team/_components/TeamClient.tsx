@@ -125,12 +125,9 @@ export function TeamClient({
                 type="submit"
                 className="btn btn-primary btn-sm"
                 disabled={sending}
+                data-busy={sending || undefined}
               >
-                {sending ? (
-                  <span className="loading loading-spinner loading-xs" />
-                ) : (
-                  "Pakviesti"
-                )}
+                Pakviesti
               </button>
             </form>
 

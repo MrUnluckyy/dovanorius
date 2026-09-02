@@ -8,13 +8,13 @@ export default async function SsLobyPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
-  const { slug } = await params;
   // Theme + Snowfall are applied inside LobbyClient, gated on the event type
   // (Christmas only for Secret Santa), since the type is only known after fetch.
   return (
