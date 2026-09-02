@@ -6,6 +6,7 @@ import Breadcrumbs from "@/components/navigation/Breadcrumbs";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import Footer from "@/components/footer/Footer";
 import BreadCrumbsManual from "@/components/navigation/BreadCrumbsManual";
+import { isAccountUser, loginRedirect } from "@/utils/auth/account";
 
 export default async function BoardsPage() {
   const supabase = await createClient();
@@ -14,7 +15,7 @@ export default async function BoardsPage() {
     error,
   } = await supabase.auth.getUser();
 
-  if (!user || error) redirect("/login");
+  if (!isAccountUser(user) || error) redirect(loginRedirect("/boards"));
 
   const crumbs = [{ label: "boards", href: "/boards" }];
 

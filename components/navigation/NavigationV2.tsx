@@ -80,7 +80,10 @@ export function NavigationV2({ user }: { user?: User | null }) {
               </div>
 
               <div className="flex flex-none items-center gap-1 lg:hidden">
-                <CreateTriggerButton />
+                {/* Creating anything needs an account. A guest tapping this
+                    would build a board on an anonymous session and lose it the
+                    moment their cookies cleared. */}
+                {signedIn && <CreateTriggerButton />}
                 {/* The bell reads the session with a non-null assertion, so it
                     may only mount for a signed-in user. */}
                 {signedIn && <NotificationsBell />}

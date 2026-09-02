@@ -15,6 +15,7 @@ import { toCardProduct } from "../_components/CollectionRow";
 import { ProductModal } from "../_components/ProductModal";
 import { CATEGORIES, PRICE_BANDS, SORTS, AUDIENCES } from "../_components/filters";
 import { trackInspo } from "@/utils/trackInspo";
+import { isAccountUser } from "@/utils/auth/account";
 
 /**
  * The catalogue, as a real page.
@@ -79,7 +80,8 @@ export function BrowseClient() {
     let active = true;
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (active && user) setUserId(user.id);
+      // Guests browse; only an account can save. See DiscoverClient.
+      if (active && isAccountUser(user)) setUserId(user.id);
     })();
     return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps

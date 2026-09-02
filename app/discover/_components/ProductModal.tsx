@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
 import {
@@ -36,6 +37,8 @@ export function ProductModal({
   const addToBoard = useAddIdeaToBoard();
   const [savedBoardIds, setSavedBoardIds] = useState<string[]>([]);
   const [savingBoardId, setSavingBoardId] = useState<string | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reported, setReported] = useState(false);
@@ -287,7 +290,15 @@ export function ProductModal({
 
                 <button
                   type="button"
-                  onClick={() => setPickerOpen(true)}
+                  onClick={() =>
+                    userId
+                      ? setPickerOpen(true)
+                      : // Saving needs an account, and a guest has no boards to
+                        // save to. Offer the way in rather than an empty sheet.
+                        router.push(
+                          `/login?next=${encodeURIComponent(pathname)}`
+                        )
+                  }
                   className="btn btn-outline btn-neutral w-full cursor-pointer gap-2 rounded-full"
                 >
                   {savedBoardIds.length > 0 ? (

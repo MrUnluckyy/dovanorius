@@ -4,6 +4,7 @@ import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import { DashboardUser } from "./components/DashboardUser";
 import { DashboardTabs } from "./components/DashboardTabs";
 import Footer from "@/components/footer/Footer";
+import { isAccountUser, loginRedirect } from "@/utils/auth/account";
 
 export default async function BoardsPage() {
   const supabase = await createClient();
@@ -12,7 +13,7 @@ export default async function BoardsPage() {
     error,
   } = await supabase.auth.getUser();
 
-  if (!user || error) redirect("/login");
+  if (!isAccountUser(user) || error) redirect(loginRedirect("/dashboard"));
 
   return (
     <>
