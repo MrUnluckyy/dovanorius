@@ -2,7 +2,6 @@ import { createClient } from "@/utils/supabase/server";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import { redirect } from "next/navigation";
 import SsHomeScreen from "./_components/SsHomeScreen";
-import { isAccountUser, loginRedirect } from "@/utils/auth/account";
 
 export default async function SecretSantaHome() {
   const supabase = await createClient();
@@ -10,7 +9,7 @@ export default async function SecretSantaHome() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!isAccountUser(user)) redirect(loginRedirect("/events"));
+  if (!user) redirect("/login");
 
   return (
     <main className="pb-20">

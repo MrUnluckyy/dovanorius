@@ -2,7 +2,6 @@ import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import LobbyClient from "./_components/LobbyClient";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { isAccountUser, loginRedirect } from "@/utils/auth/account";
 
 export default async function SsLobyPage({
   params,
@@ -15,7 +14,7 @@ export default async function SsLobyPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!isAccountUser(user)) redirect(loginRedirect(`/events/${slug}`));
+  if (!user) redirect("/login");
   // Theme + Snowfall are applied inside LobbyClient, gated on the event type
   // (Christmas only for Secret Santa), since the type is only known after fetch.
   return (

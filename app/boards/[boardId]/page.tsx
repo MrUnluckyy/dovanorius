@@ -7,7 +7,6 @@ import Breadcrumbs from "@/components/navigation/Breadcrumbs";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import Footer from "@/components/footer/Footer";
 import BreadCrumbsManual from "@/components/navigation/BreadCrumbsManual";
-import { isAccountUser, loginRedirect } from "@/utils/auth/account";
 
 export default async function BoardPage({
   params,
@@ -21,7 +20,7 @@ export default async function BoardPage({
     error,
   } = await supabase.auth.getUser();
 
-  if (!isAccountUser(user) || error) redirect(loginRedirect(`/boards/${boardId}`));
+  if (!user || error) redirect("/login");
 
   // Independent queries, so they go together: sequential awaits made the
   // page wait for one round-trip before starting the other.
