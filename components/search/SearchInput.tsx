@@ -1,5 +1,6 @@
 import React from "react";
 import { LuSearch } from "react-icons/lu";
+import { PendingPips } from "@/components/ui/Pending";
 
 export function SearchInput({
   variant,
@@ -43,7 +44,7 @@ export function SearchInput({
           className="grow"
         />
         {loading && (
-          <span className="loading loading-spinner loading-xs ml-1" />
+          <PendingPips className="ml-1" />
         )}
       </label>
     </form>

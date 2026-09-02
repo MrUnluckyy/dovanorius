@@ -211,7 +211,7 @@ export function DiscoverClient() {
         {!audienceResolved ? (
           <div className="space-y-6">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="skeleton h-72 w-full rounded-3xl" />
+              <div key={i} className="nr-skeleton h-72 w-full rounded-3xl" />
             ))}
           </div>
         ) : (

@@ -115,12 +115,12 @@ export function ForgotPasswordForm() {
             </p>
           )}
 
-          <button type="submit" className="btn btn-neutral mt-2">
-            {loading ? (
-              <span className="loading loading-dots loading-md" />
-            ) : (
-              t("ctaSendResetLink")
-            )}
+          <button
+            type="submit"
+            className="btn btn-neutral mt-2"
+            data-busy={loading || undefined}
+          >
+            {t("ctaSendResetLink")}
           </button>
 
           <Link href="/login" className="link link-hover text-center">

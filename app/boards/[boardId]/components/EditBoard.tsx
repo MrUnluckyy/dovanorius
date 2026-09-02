@@ -70,6 +70,10 @@ export function EditBoard({ userId, board }: { userId: string; board: Board }) {
     },
   });
 
+  // Either mutation locks both controls — saving a board mid-delete, or
+  // deleting one mid-save, is a race nobody meant to start.
+  const boardBusy = updateBoard.isPending || deleteBoard.isPending;
+
   const handleDelete = async () => {
     // items.board_id cascades on delete, so the wishes go with the board —
     // including received ones, which are only visible in the archive by then.
@@ -216,13 +220,20 @@ export function EditBoard({ userId, board }: { userId: string; board: Board }) {
               </fieldset>
 
               <div className="modal-action flex-row-reverse justify-between">
-                <button className="btn btn-primary" type="submit">
+                <button
+                  className="btn btn-primary"
+                  type="submit"
+                  disabled={boardBusy}
+                  data-busy={updateBoard.isPending || undefined}
+                >
                   {t("ctaSave")}
                 </button>
                 <button
                   type="button"
                   className="btn btn-error whitespace-nowrap"
                   onClick={handleDelete}
+                  disabled={boardBusy}
+                  data-busy={deleteBoard.isPending || undefined}
                 >
                   <LuTrash2 />
                   {t("delete")}

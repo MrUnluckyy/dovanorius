@@ -199,12 +199,9 @@ export function AddMemberModal({
               type="submit"
               className="btn btn-primary"
               disabled={inviting}
+              data-busy={inviting || undefined}
             >
-              {inviting ? (
-                <span className="loading loading-spinner loading-sm" />
-              ) : (
-                t("ctaInvite")
-              )}
+              {t("ctaInvite")}
             </button>
           </form>
 

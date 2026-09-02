@@ -9,6 +9,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LuCircleCheck, LuTriangleAlert } from "react-icons/lu";
 import { ResetPasswordSchema } from "@/schemas/ResetPasswordSchema";
+import { PendingPips } from "@/components/ui/Pending";
 
 type FormValues = z.infer<typeof ResetPasswordSchema>;
 
@@ -153,7 +154,7 @@ export default function SetNewPassword() {
         className="flex items-center justify-center gap-3 py-8"
         aria-live="polite"
       >
-        <span className="loading loading-dots loading-md" />
+        <PendingPips />
         <span className="text-sm text-base-content/70">
           {t("resetPreparing")}
         </span>
@@ -244,12 +245,12 @@ export default function SetNewPassword() {
             </p>
           )}
 
-          <button type="submit" className="btn btn-neutral mt-4">
-            {isSubmitting ? (
-              <span className="loading loading-dots loading-md" />
-            ) : (
-              t("ctaSetPassword")
-            )}
+          <button
+            type="submit"
+            className="btn btn-neutral mt-4"
+            data-busy={isSubmitting || undefined}
+          >
+            {t("ctaSetPassword")}
           </button>
         </fieldset>
       </form>

@@ -183,7 +183,7 @@ export function BrowseClient() {
         ) : isLoading ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className="skeleton h-96 w-full rounded-2xl" />
+              <div key={i} className="nr-skeleton h-96 w-full rounded-2xl" />
             ))}
           </div>
         ) : products.length === 0 ? (
@@ -203,8 +203,8 @@ export function BrowseClient() {
                   className="btn btn-neutral btn-wide cursor-pointer rounded-full"
                   onClick={() => fetchNextPage()}
                   disabled={isFetchingNextPage}
+                  data-busy={isFetchingNextPage || undefined}
                 >
-                  {isFetchingNextPage && <span className="loading loading-spinner loading-sm" />}
                   {t("loadMore")}
                 </button>
               </div>

@@ -102,7 +102,12 @@ export function CreateBoard({ user }: { user: User | null }) {
               />
             </fieldset>
             <div className="modal-action">
-              <button className="btn btn-primary" type="submit">
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={createBoard.isPending}
+                data-busy={createBoard.isPending || undefined}
+              >
                 {t("ctaSave")}
               </button>
             </div>

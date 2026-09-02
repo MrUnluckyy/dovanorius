@@ -111,12 +111,9 @@ export function JoinBoardClient({
             className="btn btn-primary w-full"
             onClick={join}
             disabled={joining || (!isRealUser && !name.trim())}
+            data-busy={joining || undefined}
           >
-            {joining ? (
-              <span className="loading loading-dots loading-md" />
-            ) : (
-              "Prisijungti prie lentos"
-            )}
+            Prisijungti prie lentos
           </button>
 
           {!isRealUser && (

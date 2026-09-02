@@ -74,8 +74,8 @@ export default function AdminsSettings({
     return (
       <div className="card bg-base-100 shadow-lg">
         <div className="card-body">
-          <div className="skeleton h-6 w-40 mb-3" />
-          <div className="skeleton h-10 w-full" />
+          <div className="nr-skeleton h-6 w-40 mb-3" />
+          <div className="nr-skeleton h-10 w-full" />
         </div>
       </div>
     );

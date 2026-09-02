@@ -163,11 +163,9 @@ export function SearchUsers() {
               loading ? "btn-disabled" : ""
             }`}
             disabled={term.trim().length < 3 || loading}
+            data-busy={loading || undefined}
           >
-            {loading && (
-              <span className="loading loading-spinner loading-sm"></span>
-            )}
-            {!loading && <span>Search</span>}
+            <span>Search</span>
           </button>
         </div>
       </form>
@@ -214,12 +212,12 @@ export function SearchUsers() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="card border border-base-300">
               <div className="card-body flex-row items-center gap-4 py-4">
-                <div className="skeleton h-12 w-12 rounded-full" />
+                <div className="nr-skeleton h-12 w-12 rounded-full" />
                 <div className="flex-1 space-y-2">
-                  <div className="skeleton h-4 w-1/3" />
-                  <div className="skeleton h-4 w-2/3" />
+                  <div className="nr-skeleton h-4 w-1/3" />
+                  <div className="nr-skeleton h-4 w-2/3" />
                 </div>
-                <div className="skeleton h-8 w-24" />
+                <div className="nr-skeleton h-8 w-24" />
               </div>
             </div>
           ))}

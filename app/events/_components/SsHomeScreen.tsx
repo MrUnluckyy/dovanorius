@@ -60,7 +60,7 @@ export default function SsHomeScreen() {
             {t("newEvent")}
           </Link>
         </div>
-        {isLoading && <div className="skeleton h-24 w-full" />}
+        {isLoading && <div className="nr-skeleton h-24 w-full" />}
         <div className="grid gap-3">
           {events?.map((ev) => (
             <EventCard key={ev.id} ev={ev} />

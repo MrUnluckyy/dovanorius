@@ -432,10 +432,46 @@
   }
 }
 
+@keyframes nrRibbon {
+  from {
+    background-position: -100% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+@keyframes nrPip {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.82);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   [class*="nr-anim"],
   .nr-marquee {
     animation: none !important;
+  }
+  /* The band stops rather than disappearing: a still segment still reads as
+     "working", where an empty track reads as broken. */
+  .nr-ribbon,
+  [data-busy]::after {
+    animation: none !important;
+    background-position: 28% 0 !important;
+  }
+  .nr-pip {
+    animation: none !important;
+    opacity: 0.55 !important;
+    transform: none !important;
+  }
+  /* On a large block the sweep is the only moving part, so it simply goes. */
+  .nr-skeleton::after {
+    display: none;
   }
 }
 
@@ -443,6 +479,115 @@
  * NORIUTO PRIMITIVES — reusable building blocks
  * ------------------------------------------------------------------ */
 @layer components {
+  /* waiting ------------------------------------------------------
+   * One idea at three scales: a band of light travelling across a
+   * surface, the way a ribbon is drawn around a gift. It replaces the
+   * rotating spinner everywhere, so a card opening, a button working
+   * and a page arriving all speak with the same gesture.
+   *
+   *   .nr-ribbon   a hairline band on an edge      (cards, sections)
+   *   [data-busy]  the same band under a label     (buttons)
+   *   .nr-pip      the band at its smallest        (inline, in inputs)
+   *   .nr-skeleton light crossing warm paper       (whole pages)
+   * -------------------------------------------------------------- */
+
+  /* The travelling band. Soft gradient ends so it reads as light
+     passing beneath the paper, not a block sliding along a rail. */
+  .nr-ribbon,
+  [data-busy]::after {
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      var(--nr-yellow) 38%,
+      var(--nr-yellow) 62%,
+      transparent
+    );
+    background-size: 42% 100%;
+    background-repeat: no-repeat;
+    animation: nrRibbon 1.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+
+  .nr-ribbon {
+    height: 3px;
+    border-radius: 999px;
+    background-color: transparent;
+  }
+
+  /* Pinned under the label rather than replacing it: swapping a word
+     for a spinner moves the button's own text out from under the
+     cursor mid-press. */
+  [data-busy] {
+    position: relative;
+    overflow: hidden;
+  }
+  [data-busy]::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 2px;
+    pointer-events: none;
+  }
+  /* On the yellow button the accent is the surface, so the band steps
+     down to the pressed edge to stay visible. */
+  [data-busy].btn-primary::after,
+  [data-busy].nr-btn-primary::after {
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      var(--nr-yellow-deep) 38%,
+      var(--nr-yellow-deep) 62%,
+      transparent
+    );
+  }
+
+  /* Smallest scale: light travelling along three dots. For places too
+     narrow for a band — inside an input, beside a row. */
+  .nr-pips {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .nr-pip {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--nr-yellow-deep);
+    animation: nrPip 1.1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+  .nr-pip:nth-child(2) {
+    animation-delay: 0.13s;
+  }
+  .nr-pip:nth-child(3) {
+    animation-delay: 0.26s;
+  }
+
+  /* Whole-page waiting. Warm paper with light crossing it, so a
+     loading screen still looks like Noriuto instead of a wireframe. */
+  .nr-skeleton {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--nr-radius-chip);
+    background-color: var(--nr-tile);
+  }
+  .nr-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.9) 45%,
+      rgba(255, 255, 255, 0.9) 55%,
+      transparent
+    );
+    background-size: 55% 100%;
+    background-repeat: no-repeat;
+    /* Slower than the band: a full page settling should feel calm, a
+       button should feel prompt. */
+    animation: nrRibbon 1.7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+
   /* layout ------------------------------------------------------- */
   .nr-container {
     width: 100%;

@@ -79,7 +79,7 @@ export default function RevealCard({
             {stage === "reveal" && person.avatar_url ? (
               <img src={person.avatar_url} alt="avatar" />
             ) : (
-              <div className="skeleton w-24 h-24 rounded-full" />
+              <div className="nr-skeleton w-24 h-24 rounded-full" />
             )}
           </div>
         </div>

@@ -132,12 +132,9 @@ export function ProductTable({
                     className="btn btn-ghost btn-xs text-error"
                     onClick={() => handleDelete(p.id)}
                     disabled={deletingId === p.id}
+                    data-busy={deletingId === p.id || undefined}
                   >
-                    {deletingId === p.id ? (
-                      <span className="loading loading-spinner loading-xs" />
-                    ) : (
-                      <LuTrash2 size={13} />
-                    )}
+                    <LuTrash2 size={13} />
                   </button>
                 </div>
               </td>

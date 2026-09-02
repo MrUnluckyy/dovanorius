@@ -87,13 +87,10 @@ export function ArchiveList({ user }: { user: User }) {
               <button
                 className="btn btn-sm btn-outline shrink-0"
                 disabled={isPending}
+                data-busy={isPending || undefined}
                 onClick={() => revert.mutate(item.id)}
               >
-                {isPending ? (
-                  <span className="loading loading-spinner loading-xs" />
-                ) : (
-                  <LuUndo2 />
-                )}
+                <LuUndo2 />
                 {t("ctaRestore")}
               </button>
             </li>

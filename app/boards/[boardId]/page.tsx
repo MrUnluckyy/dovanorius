@@ -22,9 +22,12 @@ export default async function BoardPage({
 
   if (!user || error) redirect("/login");
 
-  const board = await getBoard(boardId);
-
-  const members = await getBoardMembers(boardId);
+  // Independent queries, so they go together: sequential awaits made the
+  // page wait for one round-trip before starting the other.
+  const [board, members] = await Promise.all([
+    getBoard(boardId),
+    getBoardMembers(boardId),
+  ]);
 
   if (
     !board ||

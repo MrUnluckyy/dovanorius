@@ -56,7 +56,7 @@ export function ProductStrip({
           ? Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="skeleton h-80 w-44 shrink-0 rounded-2xl sm:w-48"
+                className="nr-skeleton h-80 w-44 shrink-0 rounded-2xl sm:w-48"
               />
             ))
           : items.map((p) => (
