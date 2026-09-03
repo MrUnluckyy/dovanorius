@@ -7,6 +7,7 @@ import {
   LuBuilding2,
   LuShieldCheck,
   LuSparkles,
+  LuLifeBuoy,
 } from "react-icons/lu";
 
 const items = [
@@ -14,6 +15,7 @@ const items = [
   { href: "/admin/partners", label: "Partneriai", icon: LuBuilding2, exact: true },
   { href: "/admin/partners/queue", label: "Moderavimas", icon: LuShieldCheck },
   { href: "/admin/editorial", label: "Lentynos", icon: LuSparkles },
+  { href: "/admin/reports", label: "Pranešimai", icon: LuLifeBuoy },
 ];
 
 export function AdminNav() {

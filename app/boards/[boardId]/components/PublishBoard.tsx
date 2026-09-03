@@ -5,6 +5,8 @@ import { createClient } from "@/utils/supabase/client";
 import { useTranslations } from "next-intl";
 import { LuLock, LuLockOpen } from "react-icons/lu";
 import { generateSlug } from "@/utils/helpers/slugify";
+import toast from "react-hot-toast";
+import { reportError } from "@/lib/report";
 
 export function PublishBoard({
   boardId,
@@ -36,7 +38,19 @@ export function PublishBoard({
         .from("boards")
         .update({ slug, is_public: !boardPublished })
         .eq("id", boardId);
-      if (!error) qc.invalidateQueries({ queryKey: ["board", boardId] });
+      if (error) {
+        // Previously this failed in total silence: no toast, no log, and the
+        // button simply went back to its old label.
+        console.error("Publish toggle failed:", error);
+        reportError({
+          area: "board",
+          reason: "publish_failed",
+          detail: { boardId, code: error.code, message: error.message },
+        });
+        toast.error(t("errorGenericShort"));
+      } else {
+        qc.invalidateQueries({ queryKey: ["board", boardId] });
+      }
     } finally {
       setBusy(false);
     }

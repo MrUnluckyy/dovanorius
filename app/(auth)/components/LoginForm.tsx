@@ -4,6 +4,7 @@ import {
   claimGuestReservations,
   withClaimedParam,
 } from "@/lib/claimGuestReservations";
+import { reportError } from "@/lib/report";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -48,7 +49,14 @@ export function LoginForm() {
         // Only invalid_credentials gets a written message; anything else is an
         // English Supabase string, so it is logged rather than shown raw.
         if (error.code !== "invalid_credentials") {
+          // Wrong password is a person's mistake, not ours. Anything else is
+          // worth knowing about.
           console.error("Sign-in failed:", error);
+          reportError({
+            area: "auth",
+            reason: "signin_failed",
+            detail: { code: error.code, message: error.message },
+          });
         }
         setLoginError(
           error.code === "invalid_credentials"
@@ -69,6 +77,7 @@ export function LoginForm() {
       }
     } catch (error) {
       console.error("Sign-in threw:", error);
+      reportError({ area: "auth", reason: "signin_threw" });
       setLoginError(t("errorGeneric"));
     } finally {
       // Stay disabled while the page is on its way out.
@@ -97,6 +106,11 @@ export function LoginForm() {
           // disabled on purpose. Only a failure hands it back.
           if (error) {
             console.error("Google sign-in failed:", error);
+            reportError({
+              area: "auth",
+              reason: "oauth_failed",
+              detail: { message: error.message },
+            });
             setLoginError(t("errorGeneric"));
             setOauthLoading(false);
           }

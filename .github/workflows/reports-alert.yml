@@ -1,0 +1,47 @@
+name: Alert on new reports
+
+# Hourly. NOT a Vercel cron: this repo is on a plan where cron jobs may only
+# run once a day, and a daily alert for a broken checkout flow is barely an
+# alert at all — the outage this exists for ran fifteen hours.
+#
+# Required repository secrets:
+#   NORIUTO_BASE_URL   e.g. https://noriuto.lt
+#   CRON_SECRET        must match the value in the Vercel environment
+on:
+  schedule:
+    - cron: "5 * * * *"
+  workflow_dispatch:
+
+# A second run while the first is mid-send could email the same rows twice:
+# alerted_at is only stamped once the send is confirmed.
+concurrency:
+  group: reports-alert
+  cancel-in-progress: false
+
+jobs:
+  alert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ask the app whether anything broke
+        env:
+          BASE_URL: ${{ secrets.NORIUTO_BASE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BASE_URL:-}" ] || [ -z "${CRON_SECRET:-}" ]; then
+            echo "::error::NORIUTO_BASE_URL or CRON_SECRET is not set"
+            exit 1
+          fi
+          body=$(mktemp)
+          code=$(curl -sS --max-time 60 -o "$body" -w '%{http_code}' \
+            -H "authorization: Bearer ${CRON_SECRET}" \
+            "${BASE_URL}/api/reports/alert")
+          echo "HTTP $code"
+          cat "$body"
+          echo
+          # Fail loudly: a silent alerting job is the thing we are fixing.
+          if [ "$code" != "200" ]; then
+            echo "::error::Report alert endpoint returned $code"
+            exit 1
+          fi

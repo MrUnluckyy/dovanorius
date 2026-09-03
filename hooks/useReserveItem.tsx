@@ -7,6 +7,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { reportError } from "@/lib/report";
+import { errorToast } from "@/components/feedback/errorToast";
 
 /** Where we remember a guest's address so their second reserve is one tap. */
 export const GUEST_EMAIL_KEY = "noriuto_guest_email";
@@ -80,6 +82,7 @@ export function useReserveItem({
   const queryClient = useQueryClient();
   const router = useRouter();
   const t = useTranslations("Boards");
+  const tf = useTranslations("Feedback");
   const locale = useLocale();
   const [isPending, setIsPending] = useState(false);
 
@@ -120,6 +123,30 @@ export function useReserveItem({
     return { accountError: taken ? "email_taken" : "failed" };
   };
 
+  /**
+   * Every unexpected reserve failure, reported the same way: the beacon tells
+   * us, and the toast offers the person the one thing they can add — what they
+   * were trying to do. The address they just typed prefills the reply-to.
+   */
+  const failReserve = (
+    reason: string,
+    detail: Record<string, unknown> = {},
+    contactEmail?: string
+  ) => {
+    reportError({ area: "reserve", reason, detail: { itemId, boardId, ...detail } });
+    errorToast({
+      title: t("errorReserve"),
+      body: t("errorReserveDesc"),
+      reportLabel: tf("reportCta"),
+      context: {
+        area: "reserve",
+        reason,
+        detail: { itemId, boardId, ...detail },
+        contactEmail,
+      },
+    });
+  };
+
   const reserve = async (
     email?: string,
     password?: string
@@ -133,8 +160,8 @@ export function useReserveItem({
         try {
           captchaToken = await getCaptchaToken?.();
         } catch (captchaError) {
-          toast.error(t("errorReserve"));
           console.error("Captcha verification failed:", captchaError);
+          failReserve("captcha_failed", {}, email?.trim() || undefined);
           return { ok: false, error: "captcha_failed" };
         }
 
@@ -142,8 +169,12 @@ export function useReserveItem({
           options: { captchaToken },
         });
         if (authError) {
-          toast.error(t("errorReserve"));
           console.error("Error creating guest session:", authError);
+          failReserve(
+            "auth_failed",
+            { message: authError.message },
+            email?.trim() || undefined
+          );
           resetCaptcha?.();
           return { ok: false, error: "auth_failed" };
         }
@@ -158,8 +189,14 @@ export function useReserveItem({
       });
 
       if (error) {
-        toast.error(t("errorReserve"));
         console.error("Error reserving item:", error);
+        // The FK failure that took guest reserving down for fifteen hours
+        // landed exactly here, and went no further than someone's console.
+        failReserve(
+          "rpc_failed",
+          { code: error.code, message: error.message },
+          trimmedEmail || undefined
+        );
         return { ok: false, error: "rpc_failed" };
       }
 
@@ -183,8 +220,12 @@ export function useReserveItem({
           toast.error(t("reserveTakenError"));
           queryClient.invalidateQueries({ queryKey: ["items", boardId] });
         } else {
-          toast.error(t("errorReserve"));
           console.error("Reserve rejected:", reason);
+          failReserve(
+            reason ? `rejected:${reason}` : "rejected:unknown",
+            {},
+            trimmedEmail || undefined
+          );
         }
         return { ok: false, error: reason };
       }
