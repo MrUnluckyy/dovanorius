@@ -53,6 +53,8 @@ export async function POST(req: Request) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Kept for beacons too, not just written reports: a flow that already asked
+  // for an address (reserving) should be able to tell that person it failed.
   const contactEmail = clamp(body.contactEmail, 320);
   const detail =
     body.detail && typeof body.detail === "object" && !Array.isArray(body.detail)
