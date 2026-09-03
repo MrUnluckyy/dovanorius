@@ -271,7 +271,8 @@
     "reserveChoiceBody": "Prisijungęs matysi visas savo rezervacijas vienoje vietoje ir galėsi jas atšaukti bet kada. Grąžinsime tave atgal prie šio noro.",
     "reserveGuestCta": "Tęsti kaip svečias",
     "reserveChoiceGuestHint": "Rezervuoti gali ir be paskyros — tereikės el. pašto adreso.",
-    "reservationsClaimed": "{count, plural, one {# rezervacija perkelta į tavo paskyrą} few {# rezervacijos perkeltos į tavo paskyrą} other {# rezervacijų perkelta į tavo paskyrą}}"
+    "reservationsClaimed": "{count, plural, one {# rezervacija perkelta į tavo paskyrą} few {# rezervacijos perkeltos į tavo paskyrą} other {# rezervacijų perkelta į tavo paskyrą}}",
+    "errorGenericShort": "Nepavyko. Bandyk dar kartą."
   },
   "Profile": {
     "displayName": "Slapyvardis",

@@ -271,7 +271,8 @@
     "reserveChoiceBody": "Signed in, all your reservations sit in one place and you can release them any time. We'll bring you straight back to this wish.",
     "reserveGuestCta": "Continue as a guest",
     "reserveChoiceGuestHint": "You can reserve without an account — we'll just need an email address.",
-    "reservationsClaimed": "{count, plural, one {# reservation moved into your account} other {# reservations moved into your account}}"
+    "reservationsClaimed": "{count, plural, one {# reservation moved into your account} other {# reservations moved into your account}}",
+    "errorGenericShort": "That didn't work. Please try again."
   },
   "Profile": {
     "displayName": "Display Name",

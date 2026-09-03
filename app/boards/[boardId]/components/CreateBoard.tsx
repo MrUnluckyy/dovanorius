@@ -8,6 +8,7 @@ import { FormEvent, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { LuClipboardPlus, LuX } from "react-icons/lu";
+import { reportError } from "@/lib/report";
 
 type FormData = {
   name: string;
@@ -61,6 +62,11 @@ export function CreateBoard({ user }: { user: User | null }) {
     try {
       createBoard.mutate(data);
     } catch (error) {
+      reportError({
+        area: "board",
+        reason: "create_failed",
+        detail: { message: String(error) },
+      });
       toast.error(t("toastBoardCreateError"));
     } finally {
       closeModal();
