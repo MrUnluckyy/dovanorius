@@ -7,6 +7,12 @@ type ErrorBeacon = {
   reason: string;
   /** Item id, board id, the driver's own message — whatever helps triage. */
   detail?: Record<string, unknown>;
+  /**
+   * An address the person had already given us for this exact action, when the
+   * flow has one. Reserving asks for it so we can reach them about the hold;
+   * if the hold failed, that is precisely when reaching them matters.
+   */
+  contactEmail?: string;
 };
 
 /**
@@ -20,7 +26,12 @@ type ErrorBeacon = {
  * never throws into the caller — telemetry must not be able to break a flow
  * that is already going badly.
  */
-export function reportError({ area, reason, detail }: ErrorBeacon): void {
+export function reportError({
+  area,
+  reason,
+  detail,
+  contactEmail,
+}: ErrorBeacon): void {
   if (typeof window === "undefined") return;
   try {
     const body = JSON.stringify({
@@ -28,6 +39,7 @@ export function reportError({ area, reason, detail }: ErrorBeacon): void {
       area,
       reason,
       detail: detail ?? {},
+      contactEmail: contactEmail ?? null,
       path: window.location.pathname,
     });
     if (navigator.sendBeacon) {

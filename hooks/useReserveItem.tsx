@@ -133,7 +133,18 @@ export function useReserveItem({
     detail: Record<string, unknown> = {},
     contactEmail?: string
   ) => {
-    reportError({ area: "reserve", reason, detail: { itemId, boardId, ...detail } });
+    // The address goes with the beacon, not just with a report someone bothers
+    // to write. When guest reserving broke, the only copy of the address each
+    // person typed was inside the RPC payload — a bound parameter Postgres
+    // logs as `$1` — so two people were unreachable and both gave up. They
+    // typed it so we could reach them about this reservation; telling them it
+    // failed is the same purpose.
+    reportError({
+      area: "reserve",
+      reason,
+      detail: { itemId, boardId, ...detail },
+      contactEmail,
+    });
     errorToast({
       title: t("errorReserve"),
       body: t("errorReserveDesc"),
