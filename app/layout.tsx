@@ -10,6 +10,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";
 import { Toaster } from "react-hot-toast";
 import { ClaimedReservationsNotice } from "@/components/reservations/ClaimedReservationsNotice";
+import { ReportProblemDialog } from "@/components/feedback/ReportProblemDialog";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { GtmPageView } from "@/components/GtmPageView";
@@ -136,6 +137,7 @@ export default async function RootLayout({
           <GtmPageView />
           <Toaster />
           <ClaimedReservationsNotice />
+          <ReportProblemDialog />
           <Providers>
             <PostHogProvider userId={user?.id} userEmail={user?.email} />
             <div className="bg-(--nr-cream) text-(--nr-ink) font-body min-h-screen">

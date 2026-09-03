@@ -795,5 +795,21 @@
     "errorPasswordsDoNotMatch": "Passwords don't match.",
     "errorPasswordUnchanged": "The new password must differ from the current one.",
     "errorGeneric": "Something went wrong. Please try again."
+  },
+  "Feedback": {
+    "reportCta": "Report a problem",
+    "title": "What happened?",
+    "lead": "We already have the technical side. Just tell us what you were trying to do, so we know what went wrong for you.",
+    "messageLabel": "What went wrong?",
+    "messagePlaceholder": "I tried to reserve a gift, but…",
+    "emailLabel": "Email (optional)",
+    "emailPlaceholder": "you@example.com",
+    "emailWhy": "Leave it if you'd like a reply. We'll only use it for that.",
+    "send": "Send",
+    "sendFailed": "That didn't send. Please try again.",
+    "thanksTitle": "Thanks — we've got it 🙏",
+    "thanksBody": "We'll take a look and fix it.",
+    "thanksWithEmail": "We'll take a look and write back if we need to.",
+    "close": "Close"
   }
 }

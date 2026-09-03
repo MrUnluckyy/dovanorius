@@ -795,5 +795,21 @@
     "errorPasswordsDoNotMatch": "Slaptažodžiai nesutampa.",
     "errorPasswordUnchanged": "Naujas slaptažodis turi skirtis nuo dabartinio.",
     "errorGeneric": "Kažkas nepavyko. Bandyk dar kartą."
+  },
+  "Feedback": {
+    "reportCta": "Pranešti apie klaidą",
+    "title": "Kas nutiko?",
+    "lead": "Techninę dalį jau gavome. Parašyk tik tai, ką bandei padaryti — taip suprasime, kas tau nepavyko.",
+    "messageLabel": "Kas nepavyko?",
+    "messagePlaceholder": "Bandžiau rezervuoti dovaną, bet…",
+    "emailLabel": "El. paštas (nebūtina)",
+    "emailPlaceholder": "tavo@elpastas.lt",
+    "emailWhy": "Palik, jei nori, kad atsakytume. Naudosime tik šiam atsakymui.",
+    "send": "Siųsti",
+    "sendFailed": "Nepavyko išsiųsti. Pabandyk dar kartą.",
+    "thanksTitle": "Ačiū — gavome 🙏",
+    "thanksBody": "Peržiūrėsime ir sutvarkysime.",
+    "thanksWithEmail": "Peržiūrėsime ir, jei reikės, parašysime tau.",
+    "close": "Uždaryti"
   }
 }
