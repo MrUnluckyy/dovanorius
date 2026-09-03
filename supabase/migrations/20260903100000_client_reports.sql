@@ -53,3 +53,9 @@ alter table public.client_reports enable row level security;
 
 comment on table public.client_reports is
   'Client-side failures (automatic beacons) and the messages people leave about them. Service-role access only.';
+
+-- RLS with no policies already blocks every row, but Supabase grants ALL on
+-- public tables to anon/authenticated by default. Revoking makes the intent
+-- explicit and means a policy added by accident later cannot open the table
+-- to clients: reports are read through the service role only.
+revoke all on public.client_reports from anon, authenticated;
