@@ -27,7 +27,10 @@ const MAX_MESSAGES = 20;
  * late run cannot skip anything and overlapping runs cannot double-send.
  */
 export async function GET(request: Request) {
-  // Vercel Cron sends `Authorization: Bearer <CRON_SECRET>`.
+  // Called hourly by .github/workflows/reports-alert.yml with
+  // `Authorization: Bearer <CRON_SECRET>` — the same shape Vercel Cron sends,
+  // so this works from either. It is a GitHub workflow because Vercel crons on
+  // this plan may only run once a day.
   const auth = request.headers.get("authorization");
   if (!process.env.CRON_SECRET || auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
