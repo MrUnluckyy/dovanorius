@@ -33,10 +33,19 @@ jobs:
             echo "::error::NORIUTO_BASE_URL or CRON_SECRET is not set"
             exit 1
           fi
+          # noriuto.lt 307s to www.noriuto.lt, and curl drops the
+          # Authorization header across a host change — so -L alone would turn
+          # the redirect into a 401. Resolve the final URL first WITHOUT the
+          # secret, then send it only to where the request actually lands.
+          # (Setting NORIUTO_BASE_URL to the canonical host skips this hop.)
+          url=$(curl -sS -L -o /dev/null --max-time 30 \
+            -w '%{url_effective}' "${BASE_URL}/api/reports/alert")
+          echo "Calling ${url}"
+
           body=$(mktemp)
           code=$(curl -sS --max-time 60 -o "$body" -w '%{http_code}' \
             -H "authorization: Bearer ${CRON_SECRET}" \
-            "${BASE_URL}/api/reports/alert")
+            "$url")
           echo "HTTP $code"
           cat "$body"
           echo
