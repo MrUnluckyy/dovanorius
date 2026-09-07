@@ -51,6 +51,12 @@ export function EventJoinedEmail({
             renginį, kai bus ištraukti vardai.
           </Text>
 
+          <Text>
+            Atsiuntėme ir atskirą laišką el. pašto patvirtinimui. Paspaudęs jame
+            esančią nuorodą galėsi grįžti į renginį iš bet kurio įrenginio — be
+            jos tavo vieta išliks tik šioje naršyklėje.
+          </Text>
+
           <Button
             href={eventUrl}
             style={{

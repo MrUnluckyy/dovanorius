@@ -88,9 +88,25 @@ export function JoinEventClient({
         return;
       }
 
-      // The address is the guest's only way back if this browser session goes
-      // away, so send it before navigating. Never block the join on it.
       if (!isRealUser && email.trim() && res.slug) {
+        // Attach the address to the anonymous account. Confirming it turns the
+        // guest into a permanent user on the SAME uid, so the membership and
+        // the name they draw survive a cleared browser or a different device —
+        // an anonymous session cannot be resumed anywhere else on its own.
+        const { error: linkError } = await supabase.auth.updateUser({
+          email: email.trim(),
+          data: { display_name: name.trim() },
+        });
+        if (linkError) {
+          // The commonest cause is an address that already has an account.
+          // They are in the event either way, so this is information, not a
+          // failure — say it once and carry on.
+          console.warn("Could not attach email to guest session:", linkError);
+          toast(t("joinEmailTaken"), { duration: 6000 });
+        }
+
+        // The event's own email, separate from Supabase's confirmation: this
+        // is the one that says where the event is. Never block the join on it.
         void sendJoinedEmail(res.slug, email.trim(), name.trim());
       }
 
