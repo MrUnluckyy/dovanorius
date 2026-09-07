@@ -99,6 +99,10 @@ export default function NotificationsBell() {
       refetch(),
       qc.invalidateQueries({ queryKey: ["ss:members"] }),
       qc.invalidateQueries({ queryKey: ["ss:event"] }),
+      // Answering here must also clear the invitation from the /events inbox
+      // and put the event into the list, or both stay stale until a reload.
+      qc.invalidateQueries({ queryKey: ["ss:myInvites"] }),
+      qc.invalidateQueries({ queryKey: ["ss:myEvents"] }),
     ]);
   };
 
@@ -108,6 +112,10 @@ export default function NotificationsBell() {
       refetch(),
       qc.invalidateQueries({ queryKey: ["ss:members"] }),
       qc.invalidateQueries({ queryKey: ["ss:event"] }),
+      // Answering here must also clear the invitation from the /events inbox
+      // and put the event into the list, or both stay stale until a reload.
+      qc.invalidateQueries({ queryKey: ["ss:myInvites"] }),
+      qc.invalidateQueries({ queryKey: ["ss:myEvents"] }),
     ]);
   };
 

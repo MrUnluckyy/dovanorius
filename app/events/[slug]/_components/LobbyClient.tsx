@@ -181,9 +181,13 @@ export default function LobbyClient({
                 : t("readyToDraw", { count: joinedCount })}
             </p>
             <div className="flex flex-col gap-2 sm:flex-row">
+              {/* Registration closed means accept_ss_join refuses the link, so
+                  inviting here would hand somebody an invitation that bounces
+                  them. Reopening is the action, and it is right below. */}
               <button
                 onClick={() => setInviteOpen(true)}
-                className="nr-btn nr-btn-primary flex-1"
+                disabled={event.status === "locked"}
+                className="nr-btn nr-btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <LuUserPlus className="w-4" />
                 {t("inviteMembers")}
@@ -194,6 +198,11 @@ export default function LobbyClient({
                 disabled={notEnoughMembers || event.status === "archived"}
               />
             </div>
+            {event.status === "locked" && (
+              <p className="mt-3 text-[14px] leading-relaxed text-(--nr-muted)">
+                {t("lockedNoInvites")}
+              </p>
+            )}
             {event.status === "locked" && (
               <button
                 onClick={() => lockMutation.mutate("open")}

@@ -38,8 +38,6 @@ export default function RevealCard({
     const t = setInterval(() => setTick((x) => x + 1), 120);
     const done = setTimeout(() => {
       clearInterval(t);
-      localStorage.setItem("ss-reveal-stage", stage);
-
       setStage("reveal");
     }, 2000);
     return () => {

@@ -42,7 +42,19 @@ export default function DrawButton({
         transition: { duration: 0.6, ease: "easeInOut" },
       });
       try {
-        await runDraw(slug);
+        const res = await runDraw(slug);
+        if (!res.ok) {
+          // The action reports its failures rather than throwing them: a
+          // thrown message never survives to the client in production.
+          toast.error(
+            res.error === "impossible_exclusions"
+              ? t("drawImpossible")
+              : res.error === "too_few"
+              ? t("drawNeedMoreConfirmed")
+              : t("drawFailed")
+          );
+          return;
+        }
         await ctrl.start({ scale: [1, 1.1, 1], transition: { duration: 0.4 } });
         // Refresh what the draw actually changed, rather than every query in
         // the app — the old call was an un-keyed invalidateQueries().
@@ -52,11 +64,7 @@ export default function DrawButton({
         qc.invalidateQueries({ queryKey: ["ss:myAssignment", eventId] });
       } catch (err) {
         console.error("Draw failed:", err);
-        toast.error(
-          err instanceof Error && err.message.includes("exclusion")
-            ? t("drawImpossible")
-            : t("drawFailed")
-        );
+        toast.error(t("drawFailed"));
       } finally {
         setSpinning(false);
       }

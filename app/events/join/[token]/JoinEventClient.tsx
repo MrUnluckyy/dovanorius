@@ -136,9 +136,11 @@ export function JoinEventClient({
           }
         }
 
-        // The event's own email, separate from Supabase's confirmation: this
-        // is the one that says where the event is. Never block the join on it.
-        void sendJoinedEmail(res.slug, email.trim(), name.trim());
+        // Awaited, not fired and forgotten: this is a POST that navigating away
+        // can cut short, and it is the guest's only durable record of where
+        // the event lives. It reports failure rather than throwing, so a dead
+        // mail server still lets them through.
+        await sendJoinedEmail(res.slug, email.trim(), name.trim());
       }
 
       router.push(`/events/${res.slug}`);
