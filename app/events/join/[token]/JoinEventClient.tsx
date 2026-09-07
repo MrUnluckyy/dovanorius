@@ -41,6 +41,9 @@ export function JoinEventClient({
   const [name, setName] = useState(knownName ?? "");
   const [email, setEmail] = useState("");
   const [joining, setJoining] = useState(false);
+  // Set when the address they typed already belongs to a real account. Not a
+  // toast: it needs a button, and it must not scroll away.
+  const [emailHasAccount, setEmailHasAccount] = useState<string | null>(null);
 
   const meta = getEventTypeMeta(info.event_type);
   const closed = ["locked", "drawn", "archived"].includes(info.status);
@@ -50,6 +53,22 @@ export function JoinEventClient({
   const join = async () => {
     setJoining(true);
     try {
+      // Ask BEFORE creating anything. Typing the address of your own account
+      // used to join you as a second, anonymous person: the roster gained a
+      // ghost, the real account stayed outside the event, and the "you're in"
+      // email pointed somewhere that account could not open.
+      if (!isRealUser && email.trim()) {
+        const { data: status } = await supabase.rpc("ss_join_email_status", {
+          p_token: token,
+          p_email: email.trim(),
+        });
+        if (status === "account") {
+          setEmailHasAccount(email.trim());
+          setJoining(false);
+          return;
+        }
+      }
+
       // A guest gets a silent anonymous session; a signed-in visitor keeps the
       // one they have. Either way accept_ss_join runs with a real auth.uid().
       if (!isRealUser) {
@@ -77,6 +96,11 @@ export function JoinEventClient({
 
       const res = data as AcceptResult;
       if (!res?.ok) {
+        if (res?.error === "email_has_account") {
+          setEmailHasAccount(email.trim());
+          setJoining(false);
+          return;
+        }
         toast.error(
           res?.error === "event_closed"
             ? t("joinErrorClosed")
@@ -93,16 +117,23 @@ export function JoinEventClient({
         // guest into a permanent user on the SAME uid, so the membership and
         // the name they draw survive a cleared browser or a different device —
         // an anonymous session cannot be resumed anywhere else on its own.
-        const { error: linkError } = await supabase.auth.updateUser({
-          email: email.trim(),
-          data: { display_name: name.trim() },
-        });
-        if (linkError) {
-          // The commonest cause is an address that already has an account.
-          // They are in the event either way, so this is information, not a
-          // failure — say it once and carry on.
-          console.warn("Could not attach email to guest session:", linkError);
-          toast(t("joinEmailTaken"), { duration: 6000 });
+        const {
+          data: { user: current },
+        } = await supabase.auth.getUser();
+        const alreadyMine =
+          current?.email === email.trim() ||
+          current?.new_email === email.trim();
+
+        if (!alreadyMine) {
+          const { error: linkError } = await supabase.auth.updateUser({
+            email: email.trim(),
+            data: { display_name: name.trim() },
+          });
+          // They are in the event regardless; this only affects whether the
+          // seat can be recovered later, so it never blocks the join.
+          if (linkError) {
+            console.warn("Could not attach email to guest session:", linkError);
+          }
         }
 
         // The event's own email, separate from Supabase's confirmation: this
@@ -232,7 +263,10 @@ export function JoinEventClient({
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setEmailHasAccount(null);
+                    }}
                     placeholder={t("joinEmailPlaceholder")}
                     autoComplete="email"
                     inputMode="email"
@@ -253,6 +287,34 @@ export function JoinEventClient({
               </>
             )}
 
+            {emailHasAccount ? (
+              <div className="rounded-[20px] bg-(--nr-tile) px-5 py-4">
+                <p className="font-heading text-[15px] font-bold text-(--nr-ink)">
+                  {t("joinEmailHasAccountTitle")}
+                </p>
+                <p className="mt-1 text-[14px] leading-relaxed text-(--nr-on-yellow-muted)">
+                  {t("joinEmailHasAccountBody", { email: emailHasAccount })}
+                </p>
+                <Link
+                  href={`/login?next=${encodeURIComponent(
+                    `/events/join/${token}`
+                  )}`}
+                  className="nr-btn nr-btn-dark nr-btn-sm mt-4 w-full"
+                >
+                  {t("joinEmailHasAccountCta")}
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmailHasAccount(null);
+                    setEmail("");
+                  }}
+                  className="mt-3 w-full text-center text-[14px] font-semibold text-(--nr-gold-strong) underline underline-offset-2"
+                >
+                  {t("joinEmailUseAnother")}
+                </button>
+              </div>
+            ) : (
             <button
               onClick={join}
               disabled={!canJoin}
@@ -264,8 +326,9 @@ export function JoinEventClient({
                 t("joinCta")
               )}
             </button>
+            )}
 
-            {!isRealUser && (
+            {!isRealUser && !emailHasAccount && (
               <p className="mt-4 text-center text-[14px] text-(--nr-muted)">
                 {t("joinHaveAccount")}{" "}
                 <Link
