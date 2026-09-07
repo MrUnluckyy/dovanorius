@@ -91,7 +91,12 @@ export async function runDraw(slug: string): Promise<DrawResult> {
   const { data: isAdmin } = await supabase.rpc("is_event_admin", { e: ev.id });
   if (!isAdmin) return { ok: false, error: "not_allowed" };
 
-  if (ev.status !== "locked" && ev.status !== "open")
+  // 'draft' counts. The mobile app creates events without setting a status, so
+  // the column default applies and every event made there is a draft — they
+  // accept joins and behave normally, and its own draw has no status check at
+  // all. Refusing them here meant the organiser of a mobile-created Secret
+  // Santa could never draw from the web.
+  if (!["draft", "open", "locked"].includes(ev.status))
     return { ok: false, error: "wrong_status" };
 
   // Anyone still sitting on an unanswered invitation is not in the draw, and
