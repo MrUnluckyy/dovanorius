@@ -26,7 +26,6 @@ import InvitePeopleSheet from "./InvitePeopleSheet";
 import EventSettingsSheet from "./EventSettingsSheet";
 import MyWishNote from "./MyWishNote";
 import SecureSeatNotice from "./SecureSeatNotice";
-import { Snowfall } from "../../_components/Snowfall";
 import { EventLobbySkeleton } from "@/components/loaders/EventLobbySkeleton";
 
 export default function LobbyClient({
@@ -297,7 +296,10 @@ export default function LobbyClient({
         onClose={() => setSettingsOpen(false)}
       />
 
-      {meta.theme === "christmas" && <Snowfall />}
+      {/* Snowfall is off outside the season. The component is still there and
+          `EVENT_TYPE_META.secret_santa.theme === "christmas"` is still the
+          flag to gate it on, so bringing it back in winter is this one line:
+          {meta.theme === "christmas" && <Snowfall />} */}
     </div>
   );
 }
