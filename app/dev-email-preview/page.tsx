@@ -5,6 +5,8 @@ import { AuthEmail } from "@/emails/AuthEmail";
 import { ReservationConfirmedEmail } from "@/emails/ReservationConfirmedEmail";
 import { ReservationReminderEmail } from "@/emails/ReservationReminderEmail";
 import { BoardInviteEmail } from "@/emails/BoardInviteEmail";
+import { EventInviteEmail } from "@/emails/EventInviteEmail";
+import { EventJoinedEmail } from "@/emails/EventJoinedEmail";
 
 /**
  * Every email in one scrollable page, for local development only.
@@ -71,6 +73,25 @@ export default async function DevEmailPreview() {
       BoardInviteEmail({
         boardName: "Kalėdoms",
         joinUrl: "https://noriuto.lt/boards/join/token",
+      }),
+    ],
+    [
+      "Event invite",
+      EventInviteEmail({
+        eventName: "Šeimos Kalėdos",
+        inviterName: "Rasa",
+        joinUrl: "https://noriuto.lt/events/join/token",
+        eventDate: "2026-12-24",
+        budget: 30,
+        currency: "EUR",
+      }),
+    ],
+    [
+      "Event joined (guest)",
+      EventJoinedEmail({
+        eventName: "Šeimos Kalėdos",
+        eventUrl: "https://noriuto.lt/events/seimos-kaledos-a1b2c3",
+        displayName: "Justas",
       }),
     ],
   ];

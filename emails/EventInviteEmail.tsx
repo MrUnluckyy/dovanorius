@@ -1,20 +1,17 @@
+import { Button, Section, Text } from "@react-email/components";
 import {
-  Html,
-  Head,
-  Body,
-  Container,
-  Heading,
-  Text,
-  Button,
-  Section,
-} from "@react-email/components";
+  EmailCallout,
+  EmailHeading,
+  EmailLayout,
+} from "./_components/EmailLayout";
+import { brand, buttonPrimary, text, textMuted } from "./_components/theme";
 
 /**
  * Sent when an organiser invites an address to an event.
  *
- * The recipient may well have no Noriuto account, so the mail has to carry the
- * whole answer to "what is this?" — who invited them, to what, when, and for
- * how much — before asking them to click anything.
+ * The recipient may well have no Noriuto account, so the mail has to answer
+ * "what is this?" — who invited them, to what, when, and for how much — before
+ * it asks them to click anything.
  */
 export function EventInviteEmail({
   eventName,
@@ -31,92 +28,40 @@ export function EventInviteEmail({
   budget?: number | null;
   currency?: string | null;
 }) {
-  const hasDetails = !!eventDate || budget != null;
-
   return (
-    <Html>
-      <Head />
-      <Body style={{ backgroundColor: "#f5f5f5", fontFamily: "Arial" }}>
-        <Container
-          style={{
-            backgroundColor: "#ffffff",
-            padding: "24px",
-            borderRadius: "8px",
-            maxWidth: "480px",
-          }}
-        >
-          <Heading style={{ color: "#31473A", fontSize: "24px" }}>
-            Kvietimas į {eventName} 🎁
-          </Heading>
+    <EmailLayout
+      preview={`${inviterName ?? "Tave"} kviečia į „${eventName}“`}
+      footnote="Šį laišką gavai, nes kažkas pakvietė tave į renginį Noriuto. Jei nesitikėjai kvietimo — tiesiog ignoruok."
+    >
+      <EmailHeading>Kvietimas į „{eventName}“</EmailHeading>
 
-          <Text>
-            {inviterName ? <strong>{inviterName}</strong> : "Tave"}
-            {inviterName ? " kviečia tave" : " pakvietė"} prisidėti prie
-            renginio <strong>{eventName}</strong> Noriuto platformoje.
-          </Text>
+      <Text style={text}>
+        {inviterName ? <strong>{inviterName}</strong> : "Kažkas"} kviečia tave
+        prisidėti prie renginio <strong>{eventName}</strong>.
+      </Text>
 
-          {hasDetails && (
-            <Section
-              style={{
-                backgroundColor: "#f3f6f4",
-                borderRadius: "8px",
-                padding: "16px",
-                margin: "20px 0",
-              }}
-            >
-              {eventDate && (
-                <Text style={{ margin: 0, fontSize: "14px", color: "#5a6b62" }}>
-                  Data: <strong>{eventDate}</strong>
-                </Text>
-              )}
-              {budget != null && (
-                <Text
-                  style={{
-                    margin: eventDate ? "8px 0 0" : 0,
-                    fontSize: "14px",
-                    color: "#5a6b62",
-                  }}
-                >
-                  Dovanos biudžetas:{" "}
-                  <strong>
-                    {budget} {currency ?? "EUR"}
-                  </strong>
-                </Text>
-              )}
-            </Section>
-          )}
+      {eventDate && <EmailCallout label="Kada" value={eventDate} />}
 
-          <Text>
-            Paskyros kurti nereikia — įrašyk savo vardą ir prisijunk kaip
-            svečias:
-          </Text>
+      {budget != null && (
+        <EmailCallout
+          label="Dovanos biudžetas"
+          value={`${budget} ${currency ?? "EUR"}`}
+        />
+      )}
 
-          <Button
-            href={joinUrl}
-            style={{
-              backgroundColor: "#31473A",
-              color: "#ffffff",
-              padding: "12px 20px",
-              borderRadius: "6px",
-              fontWeight: "bold",
-              display: "inline-block",
-              marginTop: "16px",
-              textDecoration: "none",
-            }}
-          >
-            Prisijungti prie renginio
-          </Button>
+      <Text style={text}>
+        Paskyros kurti nereikia — įrašai vardą ir esi viduje.
+      </Text>
 
-          <Text style={{ marginTop: "24px" }}>
-            Jei nesitikėjai šio kvietimo — gali jį ignoruoti.
-          </Text>
+      <Section style={{ padding: "6px 0 4px" }}>
+        <Button href={joinUrl} style={buttonPrimary}>
+          Prisijungti prie renginio
+        </Button>
+      </Section>
 
-          <Text style={{ marginTop: "12px", opacity: 0.7 }}>
-            Su pagarba,
-            <br /> <strong>Noriuto komanda</strong>
-          </Text>
-        </Container>
-      </Body>
-    </Html>
+      <Text style={{ ...textMuted, margin: "16px 0 0", color: brand.faint }}>
+        Jei mygtukas neveikia, nukopijuok šią nuorodą: {joinUrl}
+      </Text>
+    </EmailLayout>
   );
 }

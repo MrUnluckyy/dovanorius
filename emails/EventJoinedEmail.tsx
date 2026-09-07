@@ -1,20 +1,14 @@
-import {
-  Html,
-  Head,
-  Body,
-  Container,
-  Heading,
-  Text,
-  Button,
-} from "@react-email/components";
+import { Button, Section, Text } from "@react-email/components";
+import { EmailHeading, EmailLayout } from "./_components/EmailLayout";
+import { brand, buttonPrimary, text, textMuted } from "./_components/theme";
 
 /**
  * Sent to a guest the moment they join an event through a link.
  *
- * A guest has no account and no dashboard: this mail is the only durable copy
- * of where their event lives. Without it, clearing browser data would lose
- * them their spot — and with Secret Santa, the name they drew — with nothing
- * to fall back on.
+ * A guest has no account and no dashboard, so this mail is the only durable
+ * copy of where their event lives. It also explains the Supabase confirmation
+ * mail arriving beside it — two messages at once reads as broken unless the
+ * one they expected says why.
  */
 export function EventJoinedEmail({
   eventName,
@@ -26,59 +20,37 @@ export function EventJoinedEmail({
   displayName?: string | null;
 }) {
   return (
-    <Html>
-      <Head />
-      <Body style={{ backgroundColor: "#f5f5f5", fontFamily: "Arial" }}>
-        <Container
-          style={{
-            backgroundColor: "#ffffff",
-            padding: "24px",
-            borderRadius: "8px",
-            maxWidth: "480px",
-          }}
-        >
-          <Heading style={{ color: "#31473A", fontSize: "24px" }}>
-            Tu dalyvauji: {eventName} 🎉
-          </Heading>
+    <EmailLayout
+      preview={`Tu dalyvauji renginyje „${eventName}“`}
+      footnote="Šį laišką gavai, nes prisijungei prie renginio Noriuto."
+    >
+      <EmailHeading>Tu dalyvauji: „{eventName}“</EmailHeading>
 
-          <Text>
-            {displayName ? `${displayName}, tu` : "Tu"} sėkmingai prisijungei
-            prie renginio <strong>{eventName}</strong>.
-          </Text>
+      <Text style={text}>
+        {displayName ? `${displayName}, tu` : "Tu"} sėkmingai prisijungei prie
+        renginio <strong>{eventName}</strong>.
+      </Text>
 
-          <Text>
-            Išsaugok šį laišką — čia esanti nuoroda yra tavo kelias atgal į
-            renginį, kai bus ištraukti vardai.
-          </Text>
+      <Text style={text}>
+        Išsaugok šį laišką — nuoroda žemiau yra tavo kelias atgal, kai bus
+        ištraukti vardai.
+      </Text>
 
-          <Text>
-            Atsiuntėme ir atskirą laišką el. pašto patvirtinimui. Paspaudęs jame
-            esančią nuorodą galėsi grįžti į renginį iš bet kurio įrenginio — be
-            jos tavo vieta išliks tik šioje naršyklėje.
-          </Text>
+      <Section style={{ padding: "6px 0 4px" }}>
+        <Button href={eventUrl} style={buttonPrimary}>
+          Atidaryti renginį
+        </Button>
+      </Section>
 
-          <Button
-            href={eventUrl}
-            style={{
-              backgroundColor: "#31473A",
-              color: "#ffffff",
-              padding: "12px 20px",
-              borderRadius: "6px",
-              fontWeight: "bold",
-              display: "inline-block",
-              marginTop: "16px",
-              textDecoration: "none",
-            }}
-          >
-            Atidaryti renginį
-          </Button>
+      <Text style={{ ...text, margin: "20px 0 0" }}>
+        Atsiuntėme ir atskirą laišką el. pašto patvirtinimui. Paspaudęs jame
+        esančią nuorodą galėsi grįžti į renginį iš bet kurio įrenginio — be jos
+        tavo vieta liks tik šioje naršyklėje.
+      </Text>
 
-          <Text style={{ marginTop: "24px", opacity: 0.7 }}>
-            Su pagarba,
-            <br /> <strong>Noriuto komanda</strong>
-          </Text>
-        </Container>
-      </Body>
-    </Html>
+      <Text style={{ ...textMuted, margin: "16px 0 0", color: brand.faint }}>
+        Jei mygtukas neveikia, nukopijuok šią nuorodą: {eventUrl}
+      </Text>
+    </EmailLayout>
   );
 }
