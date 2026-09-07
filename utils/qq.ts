@@ -15,6 +15,6 @@ export const qq = {
   myInvites: (uid: string) => ["ss:myInvites", uid] as const,
   /** E-mail / link invitations issued for an event (organiser view). */
   emailInvites: (eventId: string) => ["ss:emailInvites", eventId] as const,
-  exclusions: (eventId: string, giverId: string) =>
-    ["ss:exclusions", eventId, giverId] as const,
+  /** Draw rules are per event, not per person — they are pairs. */
+  drawRules: (eventId: string) => ["ss:drawRules", eventId] as const,
 };
