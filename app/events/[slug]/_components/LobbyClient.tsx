@@ -21,12 +21,11 @@ import LobbyHeader from "./LobbyHeader";
 import Participants from "./Participants";
 import DrawButton from "./DrawButton";
 import RevealCard from "./RevealCard";
-import AdminsSettings from "./AdminsSettings";
+import DrawRules from "./DrawRules";
 import InvitePeopleSheet from "./InvitePeopleSheet";
 import EventSettingsSheet from "./EventSettingsSheet";
 import MyWishNote from "./MyWishNote";
 import SecureSeatNotice from "./SecureSeatNotice";
-import { Snowfall } from "../../_components/Snowfall";
 import { EventLobbySkeleton } from "@/components/loaders/EventLobbySkeleton";
 
 export default function LobbyClient({
@@ -43,7 +42,6 @@ export default function LobbyClient({
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   // A freshly created event arrives with ?invite=1 so the organiser's next
   // step — getting people in — is already on screen.
@@ -255,8 +253,6 @@ export default function LobbyClient({
           participants={participants ?? []}
           isAdmin={isAdmin}
           currentUserId={user.id}
-          selectedUserId={selectedUserId}
-          onUserSelect={setSelectedUserId}
           onInvite={() => setInviteOpen(true)}
         />
       </section>
@@ -270,16 +266,20 @@ export default function LobbyClient({
         </section>
       )}
 
-      {/* Exclusions are an organiser's tool and only make sense before a draw. */}
-      {!isGroup && isAdmin && event.status !== "drawn" && selectedUserId && (
-        <section className="mt-4">
-          <AdminsSettings
-            eventId={event.id}
-            giverId={selectedUserId}
-            participants={participants ?? []}
-          />
-        </section>
-      )}
+      {/* An organiser's tool, and only meaningful before the draw and once
+          there are two people to keep apart. */}
+      {!isGroup &&
+        isAdmin &&
+        event.status !== "drawn" &&
+        (participants?.length ?? 0) >= 2 && (
+          <section className="mt-4">
+            <DrawRules
+              slug={slug}
+              eventId={event.id}
+              participants={participants ?? []}
+            />
+          </section>
+        )}
 
       <InvitePeopleSheet
         slug={slug}
@@ -297,7 +297,10 @@ export default function LobbyClient({
         onClose={() => setSettingsOpen(false)}
       />
 
-      {meta.theme === "christmas" && <Snowfall />}
+      {/* Snowfall is off outside the season. The component is still there and
+          `EVENT_TYPE_META.secret_santa.theme === "christmas"` is still the
+          flag to gate it on, so bringing it back in winter is this one line:
+          {meta.theme === "christmas" && <Snowfall />} */}
     </div>
   );
 }

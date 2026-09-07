@@ -51,8 +51,6 @@ export default async function EventLobbyPage({
     );
   }
 
-  // Theme and Snowfall are applied inside LobbyClient, gated on the event type
-  // (Christmas only for Secret Santa), since the type is only known after fetch.
   return (
     <main className="min-h-screen bg-(--nr-cream)">
       <NavigationV2 user={user} />

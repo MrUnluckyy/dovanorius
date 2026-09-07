@@ -24,16 +24,12 @@ export default function Participants({
   participants,
   isAdmin,
   currentUserId,
-  selectedUserId,
-  onUserSelect,
   onInvite,
 }: {
   event: SsEvent;
   participants: Participant[];
   isAdmin: boolean;
   currentUserId: string;
-  selectedUserId: string | null;
-  onUserSelect: (id: string | null) => void;
   onInvite: () => void;
 }) {
   const t = useTranslations("Events");
@@ -42,8 +38,6 @@ export default function Participants({
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const drawn = event.status === "drawn";
-  // Picking a participant is only meaningful while there are exclusions to set.
-  const selectable = isAdmin && !drawn;
 
   const remove = async (p: Participant) => {
     const ok = await confirm({
@@ -64,7 +58,6 @@ export default function Participants({
       );
       return;
     }
-    if (selectedUserId === p.user_id) onUserSelect(null);
     qc.invalidateQueries({ queryKey: qq.participants(event.id) });
     qc.invalidateQueries({ queryKey: qq.members(event.id) });
   };
@@ -101,22 +94,11 @@ export default function Participants({
       ) : (
         <ul className="space-y-1">
           {participants.map((p) => {
-            const isSelected = selectedUserId === p.user_id;
             const isLead = p.role === "owner" || p.role === "admin";
             return (
               <li key={p.user_id}>
-                <div
-                  className={`flex items-center gap-3 rounded-2xl px-2 py-2 transition ${
-                    isSelected ? "bg-(--nr-tile)" : "hover:bg-(--nr-tile)/50"
-                  }`}
-                >
-                  <button
-                    onClick={() =>
-                      selectable && onUserSelect(isSelected ? null : p.user_id)
-                    }
-                    disabled={!selectable}
-                    className="flex min-w-0 flex-1 items-center gap-3 text-left disabled:cursor-default"
-                  >
+                <div className="flex items-center gap-3 rounded-2xl px-2 py-2">
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
                     <Avatar
                       avatar_url={p.avatar_url}
                       name={p.display_name || "?"}
@@ -141,13 +123,8 @@ export default function Participants({
                           />
                         )}
                       </span>
-                      {selectable && isSelected && (
-                        <span className="mt-0.5 block text-[12px] text-(--nr-gold-strong)">
-                          {t("exclusionsHint")}
-                        </span>
-                      )}
                     </span>
-                  </button>
+                  </div>
 
                   <span
                     className={`shrink-0 rounded-full px-2 py-0.5 text-[12px] font-semibold ${

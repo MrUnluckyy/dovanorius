@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
-import { LuCheck } from "react-icons/lu";
+import { LuCheck, LuChevronDown } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
 import { qq } from "@/utils/qq";
 
@@ -34,6 +34,13 @@ export default function MyWishNote({
   const [value, setValue] = useState(initial ?? "");
   const [justSaved, setJustSaved] = useState(false);
 
+  // Prominence follows whether the giver has anything else to look at, not
+  // whether you hold an account: somebody with a wish list already answers the
+  // question, and a second box at the same weight competes with it. Somebody
+  // without one — a guest, or an account holder with no public board — is
+  // writing the only thing their giver gets, so it stays open.
+  const [open, setOpen] = useState(!hasWishlist || !!initial);
+
   useEffect(() => setValue(initial ?? ""), [initial]);
 
   const save = useMutation({
@@ -54,6 +61,18 @@ export default function MyWishNote({
   });
 
   const dirty = (initial ?? "") !== value;
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="nr-card flex w-full items-center gap-2 px-5 py-3.5 text-left text-[15px] font-medium text-(--nr-muted) transition hover:text-(--nr-ink)"
+      >
+        <LuChevronDown className="w-4 shrink-0 text-(--nr-faint)" />
+        {t("wishNoteAddForEvent")}
+      </button>
+    );
+  }
 
   return (
     <div className="nr-card p-5">
