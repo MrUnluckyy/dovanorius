@@ -10,9 +10,22 @@ type Stage = "idle" | "rolling" | "reveal";
 export default function RevealCard({
   person,
   type = "secret_santa",
+  wants = null,
+  hasWishlist = false,
 }: {
-  person: { id: string; display_name?: string; avatar_url?: string };
+  // Nullable, not optional: a profile really can have no name (a guest who
+  // skipped it) and no avatar, and pretending otherwise pushed the null
+  // handling out to every caller.
+  person: {
+    id: string;
+    display_name?: string | null;
+    avatar_url?: string | null;
+  };
   type?: SsEventType;
+  /** What they asked for, for this event. Guests have this and nothing else. */
+  wants?: string | null;
+  /** Only link to a wish list when there is one; guests have none. */
+  hasWishlist?: boolean;
 }) {
   const t = useTranslations("Events");
   // Only Secret Santa points to a wish list — Name Draw has no gifts.
@@ -82,6 +95,23 @@ export default function RevealCard({
           </div>
         </div>
 
+        {stage === "reveal" && showWishlist && wants && (
+          <div className="mt-5 w-full rounded-[16px] bg-(--nr-tile) px-4 py-3 text-left">
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-(--nr-gold-strong)">
+              {t("wishNoteFromRecipient")}
+            </p>
+            <p className="mt-1 whitespace-pre-line text-[15px] leading-relaxed text-(--nr-ink)">
+              {wants}
+            </p>
+          </div>
+        )}
+
+        {stage === "reveal" && showWishlist && !wants && !hasWishlist && (
+          <p className="mt-5 text-[14px] leading-relaxed text-(--nr-muted)">
+            {t("wishNoteNothingYet")}
+          </p>
+        )}
+
         <div className="card-actions mt-6">
           {stage === "idle" && (
             <button
@@ -91,7 +121,9 @@ export default function RevealCard({
               {t("revealBtn")}
             </button>
           )}
-          {stage === "reveal" && showWishlist && (
+          {/* Only offered when there is something behind it — this used to lead
+              every guest's giver to an empty profile page. */}
+          {stage === "reveal" && showWishlist && hasWishlist && (
             <a
               className="btn btn-secondary"
               href={`/users/${person.id}?tab=wishlist`}

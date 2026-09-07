@@ -16,6 +16,7 @@ import { createClient } from "@/utils/supabase/client";
 import { qq } from "@/utils/qq";
 import { getEventTypeMeta } from "@/utils/events/typeMeta";
 import { setEventStatus } from "@/app/actions/events/manage";
+import { fetchRecipient } from "@/utils/events/recipient";
 import LobbyHeader from "./LobbyHeader";
 import Participants from "./Participants";
 import DrawButton from "./DrawButton";
@@ -23,6 +24,7 @@ import RevealCard from "./RevealCard";
 import AdminsSettings from "./AdminsSettings";
 import InvitePeopleSheet from "./InvitePeopleSheet";
 import EventSettingsSheet from "./EventSettingsSheet";
+import MyWishNote from "./MyWishNote";
 import SecureSeatNotice from "./SecureSeatNotice";
 import { Snowfall } from "../../_components/Snowfall";
 import { EventLobbySkeleton } from "@/components/loaders/EventLobbySkeleton";
@@ -100,12 +102,7 @@ export default function LobbyClient({
         .eq("event_id", event!.id)
         .maybeSingle();
       if (!data) return null;
-      const { data: profile } = await sb
-        .from("profiles")
-        .select("id,display_name,avatar_url")
-        .eq("id", data.receiver)
-        .single();
-      return { receiver: profile };
+      return { receiver: await fetchRecipient(sb, event!.id, data.receiver) };
     },
   });
 
@@ -124,6 +121,22 @@ export default function LobbyClient({
     (members ?? []).some(
       (m) => m.user_id === user.id && (m.role === "owner" || m.role === "admin")
     );
+
+  const myMembership = (members ?? []).find((m) => m.user_id === user.id);
+
+  // Only used to word the prompt: somebody with a wish list is adding a note
+  // beside it, somebody without one is writing the only thing their giver gets.
+  const { data: iHaveAWishlist = false } = useQuery({
+    queryKey: ["ss:iHaveAWishlist", user.id],
+    queryFn: async () => {
+      const { count } = await sb
+        .from("boards")
+        .select("id", { count: "exact", head: true })
+        .eq("owner_id", user.id)
+        .eq("is_public", true);
+      return (count ?? 0) > 0;
+    },
+  });
 
   const meta = getEventTypeMeta(event?.type);
   const joinedCount = (participants ?? []).filter(
@@ -165,7 +178,12 @@ export default function LobbyClient({
           </p>
         ) : event.status === "drawn" ? (
           mine?.receiver ? (
-            <RevealCard person={mine.receiver} type={meta.type} />
+            <RevealCard
+              person={mine.receiver}
+              type={meta.type}
+              wants={mine.receiver.wants}
+              hasWishlist={mine.receiver.hasWishlist}
+            />
           ) : (
             <p className="nr-card px-5 py-4 text-[15px] text-(--nr-muted)">
               {t("drawnNoAssignment")}
@@ -219,6 +237,17 @@ export default function LobbyClient({
           </p>
         )}
       </section>
+
+      {myMembership && !isGroup && (
+        <section className="mt-4">
+          <MyWishNote
+            eventId={event.id}
+            userId={user.id}
+            initial={myMembership.wants}
+            hasWishlist={iHaveAWishlist}
+          />
+        </section>
+      )}
 
       <section className="mt-4">
         <Participants

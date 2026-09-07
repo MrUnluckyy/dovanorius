@@ -513,6 +513,15 @@
     "subtitle": "Draws, gift swaps and everything you organise with other people.",
     "title": "Events",
     "viewWishlist": "View wish list",
+    "wishNoteBody": "A few words for whoever draws you — what you like, your size, what you really don't need. No account required.",
+    "wishNoteBodyWithList": "A few words for this event — your size, what you already have, what you don't need. Your wish list is shown separately.",
+    "wishNoteFromRecipient": "What they'd like",
+    "wishNoteNothingYet": "They haven't said what they'd like yet.",
+    "wishNotePlaceholder": "e.g. I like books and tea, size M, no candles",
+    "wishNoteSave": "Save",
+    "wishNoteSaveFailed": "Couldn't save. Try again.",
+    "wishNoteSaved": "Saved",
+    "wishNoteTitle": "What would you like?",
     "youSuffix": "(you)"
   },
   "Blog": {

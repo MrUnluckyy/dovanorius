@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import RevealCard from "../_components/RevealCard";
 import { qq } from "@/utils/qq";
 import { createClient } from "@/utils/supabase/client";
+import { fetchRecipient } from "@/utils/events/recipient";
 
 export default function MyRecipientClient({ slug }: { slug: string }) {
   const sb = createClient();
@@ -28,12 +29,7 @@ export default function MyRecipientClient({ slug }: { slug: string }) {
         .eq("event_id", ev!.id)
         .maybeSingle();
       if (!data) return null;
-      const profile = await sb
-        .from("profiles")
-        .select("id,display_name,avatar_url")
-        .eq("id", data.receiver)
-        .single();
-      return { receiver: profile.data };
+      return { receiver: await fetchRecipient(sb, ev!.id, data.receiver) };
     },
   });
 
@@ -52,7 +48,12 @@ export default function MyRecipientClient({ slug }: { slug: string }) {
     <div className="mx-auto flex max-w-[440px] flex-col items-center gap-5 px-4 py-10">
       <h1 className="nr-h2 text-center text-[28px]">{ev.name}</h1>
       {mine?.receiver ? (
-        <RevealCard person={mine.receiver} type={ev.type} />
+        <RevealCard
+          person={mine.receiver}
+          type={ev.type}
+          wants={mine.receiver.wants}
+          hasWishlist={mine.receiver.hasWishlist}
+        />
       ) : (
         <p className="nr-card w-full px-5 py-6 text-center text-[15px] text-(--nr-muted)">
           {ev.status !== "drawn" ? t("drawWaiting") : t("drawnNoAssignment")}

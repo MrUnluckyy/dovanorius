@@ -513,6 +513,15 @@
     "subtitle": "Traukimai, dovanų mainai ir viskas, ką organizuoji su kitais.",
     "title": "Renginiai",
     "viewWishlist": "Žiūrėti norų sąrašą",
+    "wishNoteBody": "Parašyk kelis žodžius savo dovanotojui — ką mėgsti, dydį, ko tikrai nereikia. Paskyros tam nereikia.",
+    "wishNoteBodyWithList": "Parašyk kelis žodžius šiam renginiui — dydį, ko jau turi, ko tikrai nereikia. Tavo norų lentą dovanotojas matys atskirai.",
+    "wishNoteFromRecipient": "Ko jis norėtų",
+    "wishNoteNothingYet": "Šis dalyvis dar nenurodė, ko norėtų.",
+    "wishNotePlaceholder": "pvz. mėgstu knygas ir arbatą, dydis M, jokių žvakių",
+    "wishNoteSave": "Išsaugoti",
+    "wishNoteSaveFailed": "Nepavyko išsaugoti. Bandyk dar kartą.",
+    "wishNoteSaved": "Išsaugota",
+    "wishNoteTitle": "Ką norėtum gauti?",
     "youSuffix": "(tu)"
   },
   "Blog": {
