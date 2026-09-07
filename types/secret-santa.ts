@@ -19,6 +19,8 @@ export interface SsEvent {
   slug: string;
   notes: string | null;
   cover_image_url: string | null;
+  /** Bearer token behind the reusable "anyone with the link can join" URL. */
+  join_token: string;
   created_at: string; // ISO datetime
 }
 
@@ -77,3 +79,36 @@ export type Participant = {
   role: SsRole;
   joined_at: string; // optional if you want to show when
 };
+
+/** Row of `ss_event_invites` — an invitation addressed to an e-mail address
+ *  rather than to an existing Noriuto account, plus the record of anyone who
+ *  came in through the shared link. */
+export interface SsEventInvite {
+  id: string;
+  event_id: string;
+  email: string | null;
+  display_name: string | null;
+  token: string;
+  invited_by: string | null;
+  via_link: boolean;
+  accepted_at: string | null;
+  accepted_by: string | null;
+  created_at: string;
+}
+
+/** Shape returned by the `get_ss_join_info` RPC, used by the join screen to
+ *  describe the event before anyone commits to joining it. */
+export interface SsJoinInfo {
+  event_id: string;
+  event_name: string;
+  event_type: SsEventType;
+  event_slug: string;
+  event_date: string | null;
+  budget: number | null;
+  currency: string | null;
+  cover_image_url: string | null;
+  status: SsStatus;
+  owner_name: string | null;
+  member_count: number;
+  already_used: boolean;
+}

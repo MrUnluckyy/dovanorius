@@ -1,5 +1,5 @@
 import { SsEvent } from "@/types/secret-santa";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import Link from "next/link";
 import { getEventTypeMeta } from "@/utils/events/typeMeta";
 
@@ -11,41 +11,78 @@ const STATUS_KEY: Record<SsEvent["status"], string> = {
   archived: "statusArchived",
 };
 
-export default function EventCard({ ev }: { ev: SsEvent }) {
+export default function EventCard({
+  ev,
+  memberCount,
+}: {
+  ev: SsEvent;
+  memberCount?: number;
+}) {
   const t = useTranslations("Events");
+  const format = useFormatter();
   const meta = getEventTypeMeta(ev.type);
+  const date = ev.event_date ? new Date(ev.event_date) : null;
+
+  // Status is the useful signal on a list: whether this one still needs people,
+  // or is waiting on the organiser, or is finished.
+  const statusTone =
+    ev.status === "drawn"
+      ? "bg-(--nr-success-soft) text-(--nr-success-ink)"
+      : ev.status === "open"
+      ? "bg-(--nr-tile) text-(--nr-gold-strong)"
+      : "bg-(--nr-cream) text-(--nr-muted)";
 
   return (
     <Link
       href={`/events/${ev.slug}`}
-      className="card card-side bg-base-100 shadow hover:shadow-md transition-shadow overflow-hidden"
+      className="nr-card nr-card-hover flex items-stretch gap-0 overflow-hidden"
     >
-      <figure className="w-24 shrink-0 bg-base-200 flex items-center justify-center">
-        {ev.cover_image_url ? (
-          <img
-            src={ev.cover_image_url}
-            alt={ev.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
+      <div
+        className="grid w-24 shrink-0 place-items-center bg-(--nr-tile) bg-cover bg-center sm:w-28"
+        style={
+          ev.cover_image_url
+            ? { backgroundImage: `url('${ev.cover_image_url}')` }
+            : undefined
+        }
+      >
+        {!ev.cover_image_url && (
           <span className="text-3xl" aria-hidden>
             {meta.emoji}
           </span>
         )}
-      </figure>
-      <div className="card-body p-4 gap-1">
+      </div>
+
+      <div className="min-w-0 flex-1 p-4">
         <div className="flex items-start justify-between gap-2">
-          <h2 className="card-title text-base">{ev.name}</h2>
-          <div className="badge badge-outline whitespace-nowrap">
+          <h3 className="min-w-0 truncate font-heading text-[17px] font-bold text-(--nr-ink)">
+            {ev.name}
+          </h3>
+          <span
+            className={`shrink-0 rounded-full px-2.5 py-1 text-[12px] font-semibold ${statusTone}`}
+          >
             {t(STATUS_KEY[ev.status])}
-          </div>
+          </span>
         </div>
-        <p className="text-sm opacity-70">
-          {t(meta.labelKey)}
-          {meta.showBudget && ev.budget != null
-            ? ` · ${ev.budget} ${ev.currency ?? "EUR"}`
-            : ""}
-          {ev.event_date ? ` · ${ev.event_date}` : ""}
+
+        <p className="mt-1 truncate text-[14px] text-(--nr-muted)">
+          {[
+            t(meta.labelKey),
+            memberCount != null
+              ? t("joinPeopleCount", { count: memberCount })
+              : null,
+            date
+              ? format.dateTime(date, {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              : null,
+            meta.showBudget && ev.budget != null
+              ? `${ev.budget} ${ev.currency ?? "EUR"}`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
         </p>
       </div>
     </Link>
