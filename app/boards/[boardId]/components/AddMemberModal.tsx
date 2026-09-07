@@ -70,7 +70,10 @@ export function AddMemberModal({
         .select("id, email, token")
         .eq("board_id", boardId)
         .is("accepted_at", null)
-        .gt("expires_at", new Date().toISOString())
+        // Board invites stopped expiring, so expires_at is null on every
+        // pending row — and `gt` never matches null. This list was therefore
+        // always empty, which silently killed copy-link and revoke.
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as BoardInvite[];

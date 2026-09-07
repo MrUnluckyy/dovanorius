@@ -8,6 +8,7 @@ import {
   LuX,
   LuMenu,
   LuHouse,
+  LuCalendar,
   LuCircleUser,
   LuSparkles,
   LuSettings,
@@ -138,6 +139,12 @@ export function NavigationV2({ user }: { user?: User | null }) {
                         </Link>
                       </li>
                       <li>
+                        <Link href="/events">
+                          <LuCalendar />
+                          {t("events")}
+                        </Link>
+                      </li>
+                      <li>
                         <Link href="/account">
                           <LuSettings />
                           {t("accountSettings")}
@@ -216,6 +223,16 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 >
                   <LuHouse />
                   {t("dashboard")}
+                </Link>
+                <Link
+                  href="/events"
+                  className={`btn btn-ghost w-full justify-start gap-3 text-xl ${
+                    pathnames.includes("events") ? "font-bold" : "font-normal"
+                  }`}
+                  onClick={() => ref.current?.click()}
+                >
+                  <LuCalendar />
+                  {t("events")}
                 </Link>
                 <Link
                   href="/account"

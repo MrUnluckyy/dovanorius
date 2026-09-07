@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { create } from "domain";
 
 type Pair = [string, string];
 function drawAssignments(
@@ -51,14 +50,35 @@ function drawAssignments(
 export async function runDraw(slug: string) {
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
   const { data: ev, error: e1 } = await supabase
     .from("ss_events")
     .select("id, owner_id, status")
     .eq("slug", slug)
     .single();
-  if (e1) throw e1;
+  if (e1 || !ev) throw e1 ?? new Error("Event not found");
+
+  // The draw writes assignments for everybody, so it is organisers only. RLS on
+  // ss_assignments enforces this too; checking here turns a policy violation
+  // into an error the UI can explain.
+  const { data: isAdmin } = await supabase.rpc("is_event_admin", { e: ev.id });
+  if (!isAdmin) throw new Error("Not allowed");
+
   if (ev.status !== "locked" && ev.status !== "open")
     throw new Error("Lock the event before drawing.");
+
+  // Anyone still sitting on an unanswered invitation is not in the draw, and
+  // their invitation is now meaningless — retire it so the roster stops
+  // showing them as pending forever.
+  await supabase
+    .from("ss_invites")
+    .update({ status: "revoked" })
+    .eq("event_id", ev.id)
+    .eq("status", "pending");
 
   const { data: members } = await supabase
     .from("ss_members")
@@ -78,23 +98,20 @@ export async function runDraw(slug: string) {
   const excluded: Record<string, Set<string>> = {};
   for (const u of userIds) excluded[u] = new Set([u]);
   ex?.forEach(({ a, b }) => {
-    excluded[a].add(b);
-    excluded[b].add(a);
+    // An exclusion can name somebody who has since left the event, and
+    // excluded[a] would then be undefined.
+    excluded[a]?.add(b);
+    excluded[b]?.add(a);
   });
 
   const pairs = drawAssignments(userIds, excluded);
 
   const { data: draw, error: drawError } = await supabase
     .from("ss_draws")
-    .insert({ event_id: ev.id, created_by: ev.owner_id })
-    .select()
+    .insert({ event_id: ev.id, created_by: user.id })
+    .select("id")
     .single();
-
-  console.log("draw", draw);
-  if (drawError || !draw) {
-    console.log("drawError", drawError?.message);
-    throw new Error("draw" + drawError?.message);
-  }
+  if (drawError || !draw) throw drawError ?? new Error("Could not start draw");
 
   const rows = pairs.map(([giver, receiver]) => ({
     draw_id: draw.id,
@@ -102,8 +119,17 @@ export async function runDraw(slug: string) {
     giver,
     receiver,
   }));
-  await supabase.from("ss_assignments").insert(rows);
-  await supabase.from("ss_events").update({ status: "drawn" }).eq("id", ev.id);
+
+  const { error: assignError } = await supabase
+    .from("ss_assignments")
+    .insert(rows);
+  if (assignError) throw assignError;
+
+  const { error: statusError } = await supabase
+    .from("ss_events")
+    .update({ status: "drawn" })
+    .eq("id", ev.id);
+  if (statusError) throw statusError;
 
   return { ok: true, count: rows.length };
 }

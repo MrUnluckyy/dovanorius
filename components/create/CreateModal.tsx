@@ -31,7 +31,7 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
   const handleRenginys = () => {
     handleClose();
-    router.push("/events");
+    router.push("/events/new");
   };
 
   if (!isOpen) return null;
