@@ -25,6 +25,7 @@ import InvitePeopleSheet from "./InvitePeopleSheet";
 import EventSettingsSheet from "./EventSettingsSheet";
 import SecureSeatNotice from "./SecureSeatNotice";
 import { Snowfall } from "../../_components/Snowfall";
+import { EventLobbySkeleton } from "@/components/loaders/EventLobbySkeleton";
 
 export default function LobbyClient({
   slug,
@@ -133,9 +134,8 @@ export default function LobbyClient({
 
   if (isLoading || !event) {
     return (
-      <div className="mx-auto w-full max-w-[720px] space-y-4 px-4 py-8">
-        <div className="nr-skeleton h-[220px] w-full rounded-[24px]" />
-        <div className="nr-skeleton h-[120px] w-full rounded-[24px]" />
+      <div className="px-4 py-6 md:py-10">
+        <EventLobbySkeleton />
       </div>
     );
   }

@@ -9,6 +9,7 @@ import { LuPlus } from "react-icons/lu";
 import EventCard from "./EventCard";
 import InvitationsInbox from "./InvitationsInbox";
 import { qq } from "@/utils/qq";
+import { EventsListSkeleton } from "@/components/loaders/EventsListSkeleton";
 
 type EventWithCount = SsEvent & { member_count: number };
 
@@ -85,10 +86,7 @@ export default function SsHomeScreen({ userId }: { userId: string }) {
       <InvitationsInbox userId={userId} />
 
       {isLoading ? (
-        <div className="space-y-3">
-          <div className="nr-skeleton h-[92px] w-full rounded-[24px]" />
-          <div className="nr-skeleton h-[92px] w-full rounded-[24px]" />
-        </div>
+        <EventsListSkeleton />
       ) : events && events.length > 0 ? (
         <div className="grid gap-3">
           {events.map((ev) => (

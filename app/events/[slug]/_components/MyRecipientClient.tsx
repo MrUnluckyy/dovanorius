@@ -37,7 +37,16 @@ export default function MyRecipientClient({ slug }: { slug: string }) {
     },
   });
 
-  if (!ev) return null;
+  // Rendering nothing while the event loads left this page blank under a real
+  // navbar — indistinguishable from a page that failed.
+  if (!ev) {
+    return (
+      <div className="mx-auto flex max-w-[440px] flex-col items-center gap-5 px-4 py-10">
+        <div className="nr-skeleton h-9 w-56" />
+        <div className="nr-skeleton h-[280px] w-full rounded-[24px]" />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex max-w-[440px] flex-col items-center gap-5 px-4 py-10">
