@@ -1,8 +1,9 @@
 import {
   LuShirt, LuFootprints, LuSparkles, LuShoppingBag, LuGem, LuHouse,
   LuCpu, LuBlocks, LuWrench, LuBike, LuCookingPot, LuSprout, LuPawPrint,
+  LuPackage,
 } from "react-icons/lu";
-import type { Audience, InspoSort } from "@/types/inspo";
+import type { AgeGroup, Audience, InspoSort } from "@/types/inspo";
 
 /**
  * Filter vocabulary shared by /discover and /discover/browse.
@@ -33,7 +34,22 @@ export const CATEGORIES = [
   { key: "shoes", type: "shoes", Icon: LuFootprints },
   { key: "bag", type: "bag", Icon: LuShoppingBag },
   { key: "accessory", type: "accessory", Icon: LuGem },
+  // `other` is a real bucket holding a few thousand giftable rows, and while no
+  // pill pointed at it they were unreachable by browsing at all -- including
+  // most of mideer's kids range, whose breadcrumbs are bare product families.
+  // Last in the rail, because it is a remainder rather than a category.
+  { key: "other", type: "other", Icon: LuPackage },
 ];
+
+/**
+ * Age brackets, widest first. Not a filter among filters: the feed always pins
+ * exactly one, so this is the primary "who am I shopping for" choice and the
+ * only route to the kids catalogue.
+ */
+export const AGE_GROUPS: AgeGroup[] = ["adult", "teen", "kid"];
+
+/** The bracket assumed when nobody has chosen one. */
+export const DEFAULT_AGE_GROUP: AgeGroup = "adult";
 
 export const SORTS: InspoSort[] = [
   "recommended", "price_asc", "price_desc", "discount",
@@ -61,9 +77,14 @@ export function browseHref(params: {
   sort?: InspoSort | null;
   q?: string | null;
   sale?: boolean;
+  age?: AgeGroup | null;
 }): string {
   const sp = new URLSearchParams();
   if (params.type) sp.set("type", params.type);
+  // Unlike the gender lens, the age bracket IS shareable: "here are gift ideas
+  // for a 7-year-old" is the whole point of the link, and it carries nothing
+  // personal about the sender.
+  if (params.age && params.age !== DEFAULT_AGE_GROUP) sp.set("age", params.age);
   if (params.price && params.price !== "all") sp.set("price", params.price);
   if (params.brand) sp.set("brand", params.brand);
   if (params.sort && params.sort !== "recommended") sp.set("sort", params.sort);

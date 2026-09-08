@@ -577,7 +577,8 @@
       "sport": "Sportas",
       "kitchen": "Virtuvė",
       "garden": "Sodas",
-      "pets": "Augintiniams"
+      "pets": "Augintiniams",
+      "other": "Kita"
     },
     "price": {
       "all": "Bet kokia kaina",
@@ -625,6 +626,17 @@
     "empty": "Pagal pasirinktus filtrus prekių nerasta.",
     "error": "Nepavyko įkelti prekių. Bandykite dar kartą.",
     "affiliateDisclosure": "Kai kurios nuorodos yra partnerių – pirkę galite mums skirti nedidelį komisinį, kaina jums nesikeičia.",
+    "agePrompt": "Kokio amžiaus žmogui?",
+    "age": {
+      "adult": "Suaugusiam",
+      "teen": "Paaugliui",
+      "kid": "Vaikui"
+    },
+    "audienceYoung": {
+      "everyone": "Nesvarbu",
+      "her": "Mergaitei",
+      "him": "Berniukui"
+    },
     "audiencePrompt": "Kam ieškote dovanos?",
     "browseAllHint": "Visas katalogas su filtrais ir paieška",
     "backToIdeas": "Grįžti į idėjas",

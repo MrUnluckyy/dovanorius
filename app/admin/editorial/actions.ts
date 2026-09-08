@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { foldForSearch } from "@/utils/helpers/search";
 
 /**
  * Editorial shelves: hand-picked, scheduled shelves on /discover.
@@ -245,10 +246,15 @@ export type ProductHit = {
 /**
  * Product search for the pick browser.
  *
- * ilike on product_name is backed by inspo_products_name_trgm_idx (GIN
- * trigram), so the wildcard prefix is not the table scan it looks like. Only
- * linkable products are offered: a pick with no image or no deep_link renders
- * as a broken card.
+ * Matches /discover: each word is its own ilike against `search_norm`, the
+ * folded "name brand category" column, so a curator gets the same results the
+ * shopper would. Searching product_name raw meant "zaislai" returned nothing
+ * while "žaislai" returned twelve, and a two-word query returned nothing at all
+ * unless the words happened to be adjacent in the title.
+ *
+ * Backed by inspo_products_search_norm_trgm_idx (GIN trigram), so the wildcard
+ * prefix is not the table scan it looks like. Only linkable products are
+ * offered: a pick with no image or no deep_link renders as a broken card.
  */
 export async function searchProducts(
   query: string,
@@ -262,9 +268,12 @@ export async function searchProducts(
   let sb = supabaseAdmin
     .from("inspo_products")
     .select("id, product_name, brand_name, merchant_name, price, image_url, in_stock")
-    .ilike("product_name", `%${q}%`)
     .not("image_url", "is", null)
     .not("deep_link", "is", null);
+
+  for (const term of foldForSearch(q).split(/\s+/)) {
+    if (term) sb = sb.ilike("search_norm", `%${term}%`);
+  }
 
   if (opts?.inStockOnly !== false) sb = sb.eq("in_stock", true);
 

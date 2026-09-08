@@ -9,7 +9,9 @@ import { useGiftIdeas } from "@/hooks/useGiftIdeas";
 import { useDiscoverAudience } from "@/hooks/useDiscoverAudience";
 
 import { type CardProduct } from "./_components/ProductCard";
-import { CATEGORIES, AUDIENCES, browseHref } from "./_components/filters";
+import {
+  CATEGORIES, AUDIENCES, AGE_GROUPS, DEFAULT_AGE_GROUP, browseHref,
+} from "./_components/filters";
 import Link from "next/link";
 import { PersonaShelf } from "./_components/PersonaShelf";
 import { usePersonas } from "@/hooks/usePersonas";
@@ -17,6 +19,7 @@ import { ProductStrip } from "./_components/ProductStrip";
 import { ProductModal } from "./_components/ProductModal";
 import { trackInspo } from "@/utils/trackInspo";
 import { isAccountUser } from "@/utils/auth/account";
+import type { AgeGroup } from "@/types/inspo";
 
 export function DiscoverClient() {
   const t = useTranslations("Discover");
@@ -29,6 +32,15 @@ export function DiscoverClient() {
   const [selected, setSelected] = useState<CardProduct | null>(null);
   /** Which recipient the shopper is buying for; null = no persona chosen. */
   const [personaId, setPersonaId] = useState<string | null>(null);
+  /**
+   * Age bracket, and the route into the kids catalogue.
+   *
+   * Deliberately NOT persisted the way the gender lens is: which gender you
+   * usually shop for is a stable fact about you, but which age you are shopping
+   * for changes per gift — a partner today, a nephew tomorrow — so remembering
+   * it would be wrong more often than right.
+   */
+  const [ageGroup, setAgeGroup] = useState<AgeGroup>(DEFAULT_AGE_GROUP);
 
   const { data: personas } = usePersonas();
   // Recipients are offered in the picker; themes render inline.
@@ -38,9 +50,21 @@ export function DiscoverClient() {
   // rather than LLM-curated). They arrive already filtered by their schedule —
   // the gift_personas SELECT policy drops any shelf outside its window, so an
   // unpublished one is not in `personas` at all.
-  const recipients = personas?.filter((p) => p.kind === "recipient") ?? [];
+  // Shelves follow the chosen bracket. Without this the age chips would change
+  // only the links out of the page while the shelves below went on showing
+  // adult gifts — the control would look broken, and the kids shelves that do
+  // exist ("Vaikams ir žaidimams", "Mažajam meistrui") would stay as hard to
+  // find as they were. A persona predating the audience column reads as adult,
+  // which is what every one of them was.
+  const forThisAge = (p: { audience: string | null }) =>
+    (p.audience ?? "adult") === ageGroup;
+
+  const recipients =
+    personas?.filter((p) => p.kind === "recipient" && forThisAge(p)) ?? [];
   const themes =
-    personas?.filter((p) => p.kind === "theme" || p.kind === "editorial") ?? [];
+    personas?.filter(
+      (p) => (p.kind === "theme" || p.kind === "editorial") && forThisAge(p)
+    ) ?? [];
   const activePersona = recipients.find((p) => p.id === personaId) ?? null;
 
   // Audience comes from the profile now (self-declared gender, or the last
@@ -113,7 +137,7 @@ export function DiscoverClient() {
             e.preventDefault();
             const q = searchInput.trim();
             if (!q) return;
-            router.push(browseHref({ q }));
+            router.push(browseHref({ q, age: ageGroup }));
           }}
           className="mb-5"
         >
@@ -129,6 +153,29 @@ export function DiscoverClient() {
             />
           </label>
         </form>
+
+        {/* Age bracket, above the gender lens because it is the coarser of the
+            two and relabels it: "For her" becomes "For a girl" once the bracket
+            is a child's. It is also the only route into the kids catalogue —
+            ~17,900 products that used to sit behind a "Toys" pill showing
+            2,064 of them. */}
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <span className="text-sm font-medium opacity-70">{t("agePrompt")}</span>
+          {AGE_GROUPS.map((a) => (
+            <button
+              key={a}
+              onClick={() => setAgeGroup(a)}
+              aria-pressed={ageGroup === a}
+              className={`cursor-pointer rounded-full px-4 py-1.5 text-sm transition ${
+                ageGroup === a
+                  ? "bg-neutral text-neutral-content"
+                  : "bg-base-200 hover:bg-base-300"
+              }`}
+            >
+              {t(`age.${a}`)}
+            </button>
+          ))}
+        </div>
 
         {/* Audience — the one control worth showing up front, because it
             changes every shelf below it. Seeded from the profile. */}
@@ -147,7 +194,7 @@ export function DiscoverClient() {
                   : "bg-base-200 hover:bg-base-300"
               }`}
             >
-              {t(`audience.${a}`)}
+              {t(ageGroup === "adult" ? `audience.${a}` : `audienceYoung.${a}`)}
             </button>
           ))}
         </div>
@@ -200,7 +247,7 @@ export function DiscoverClient() {
           {CATEGORIES.map((c) => (
             <Link
               key={c.type}
-              href={browseHref({ type: c.type })}
+              href={browseHref({ type: c.type, age: ageGroup })}
               className="flex shrink-0 items-center gap-1.5 rounded-full bg-base-200 px-3 py-1.5 text-sm transition hover:bg-base-300"
             >
               <c.Icon className="w-4 shrink-0" aria-hidden />
@@ -248,7 +295,7 @@ export function DiscoverClient() {
 
         <div className="mt-10 flex flex-col items-center gap-2">
           <Link
-            href="/discover/browse"
+            href={browseHref({ age: ageGroup })}
             className="btn btn-neutral btn-wide cursor-pointer rounded-full"
           >
             {t("browseAll")}

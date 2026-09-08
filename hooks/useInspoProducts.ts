@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
+import { foldForSearch } from "@/utils/helpers/search";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { InspoFilters, InspoProduct } from "@/types/inspo";
 
@@ -81,10 +82,29 @@ export function useInspoProducts(filters: InspoFilters) {
         query = query.eq("product_type", filters.productType);
       if (filters.priceMax != null) query = query.lte("price", filters.priceMax);
       if (filters.onSaleOnly) query = query.gt("discount_pct", 0);
-      if (filters.search.trim())
-        query = query.ilike("product_name", `%${filters.search.trim()}%`);
 
-      // Audience: hide the opposite gender, but keep unisex + unknown (null),
+      // Age bracket. Always pinned — the shopper is buying for an adult, a teen
+      // or a child, never for an unspecified blend of the three, and leaving it
+      // open is what used to put 17,900 rows of children's clothing in front of
+      // someone shopping for their partner.
+      //
+      // NOTE: `filters.ageGroup` maps to the DB column `audience`, while
+      // `filters.audience` below is the her/him GENDER lens and maps to
+      // `gender`. Two different axes; the names nearly collide.
+      query = query.eq("audience", filters.ageGroup);
+
+      // Search. Each word becomes its own ILIKE against `search_norm`, so terms
+      // match in any order and anywhere in the text — "lego duplo" found
+      // nothing as a single substring because it required exact adjacency in
+      // the title. `search_norm` folds diacritics and appends brand and
+      // category, which is what lets "zaislai" reach "žaislai" rows and "nike"
+      // reach a row whose title never says Nike. The term has to be folded the
+      // same way the column was; foldForSearch is that folding.
+      for (const term of foldForSearch(filters.search).split(/\s+/)) {
+        if (term) query = query.ilike("search_norm", `%${term}%`);
+      }
+
+      // Gender: hide the opposite gender, but keep unisex + unknown (null),
       // so a "For him" user stops seeing dresses/lipstick without losing the
       // large unclassified (genuinely unisex) middle.
       if (filters.audience === "him")

@@ -8,12 +8,14 @@ import { LuX } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
 import { useInspoProducts } from "@/hooks/useInspoProducts";
 import { useDiscoverAudience } from "@/hooks/useDiscoverAudience";
-import type { InspoFilters, InspoSort } from "@/types/inspo";
+import type { AgeGroup, InspoFilters, InspoSort } from "@/types/inspo";
 import { ProductCard, type CardProduct } from "../_components/ProductCard";
 import { BrowseFilters } from "../_components/BrowseFilters";
 import { toCardProduct } from "../_components/CollectionRow";
 import { ProductModal } from "../_components/ProductModal";
-import { CATEGORIES, PRICE_BANDS, SORTS, AUDIENCES } from "../_components/filters";
+import {
+  CATEGORIES, PRICE_BANDS, SORTS, AUDIENCES, AGE_GROUPS, DEFAULT_AGE_GROUP,
+} from "../_components/filters";
 import { trackInspo } from "@/utils/trackInspo";
 import { isAccountUser } from "@/utils/auth/account";
 
@@ -46,6 +48,14 @@ export function BrowseClient() {
   const sort = (params.get("sort") as InspoSort) ?? "recommended";
   const onSaleOnly = params.get("sale") === "1";
   const search = params.get("q") ?? "";
+  // Age IS in the URL, unlike the gender lens below: "gift ideas for a
+  // 7-year-old" is exactly the link someone wants to send, and it discloses
+  // nothing about the sender. An unrecognised value falls back rather than
+  // querying for a bracket that cannot exist.
+  const ageParam = params.get("age");
+  const ageGroup: AgeGroup = AGE_GROUPS.includes(ageParam as AgeGroup)
+    ? (ageParam as AgeGroup)
+    : DEFAULT_AGE_GROUP;
 
   // The one exception: typing should not push a history entry per keystroke.
   const [searchInput, setSearchInput] = useState(search);
@@ -96,11 +106,12 @@ export function BrowseClient() {
       priceMax: band.max,
       search,
       audience,
+      ageGroup,
       inSeason: true,
       onSaleOnly,
       sort,
     }),
-    [productType, brand, band.min, band.max, search, audience, onSaleOnly, sort]
+    [productType, brand, band.min, band.max, search, audience, ageGroup, onSaleOnly, sort]
   );
 
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -138,6 +149,9 @@ export function BrowseClient() {
         brand={brand}
         onBrand={(v) => setParams({ brand: v })}
         onSaleOnly={onSaleOnly}
+        ageGroups={AGE_GROUPS}
+        ageGroup={ageGroup}
+        onAgeGroup={(v) => setParams({ age: v === DEFAULT_AGE_GROUP ? null : v })}
         audiences={AUDIENCES}
         audience={audience}
         onAudience={setAudience}

@@ -59,7 +59,8 @@ export function PersonaShelf({
     // had just rejected — because `tech` still holds 790 of them and they
     // outrank real gadgets on brand and price.
     persona.exclude_keywords ?? [],
-    expanded && !isEditorial
+    expanded && !isEditorial,
+    persona.audience
   );
 
   const label = locale === "en" ? persona.label_en : persona.label_lt;
