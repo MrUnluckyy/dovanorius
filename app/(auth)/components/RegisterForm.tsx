@@ -42,7 +42,9 @@ export function RegisterForm() {
         password: values.password,
         options: {
           data: { display_name: values.displayName, locale },
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_WEB_URL}/api/auth/callback`,
+          // Where the confirmation link lands, not an OAuth callback: that
+          // route wants a `?code=` a confirmation link never has.
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_WEB_URL}/dashboard`,
         },
       });
 
@@ -62,6 +64,9 @@ export function RegisterForm() {
         return;
       }
 
+      // Not "welcome aboard" — they cannot sign in yet. The screen behind this
+      // toast asks them to confirm their address; the toast used to talk over
+      // it, and people went straight to /login and bounced.
       toast.success(t("registerSuccessToast"));
       setCompleted(true);
     } catch (err) {

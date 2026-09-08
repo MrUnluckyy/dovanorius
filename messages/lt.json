@@ -31,7 +31,7 @@
     "errorPasswordsDoNotMatch": "Slaptažodžiai nesutampa.",
     "registerCompleteTitle": "Sėkmingai prisiregistravote!",
     "registerCompleteBody": "Paskyra sukurta. Kad galėtum prisijungti, patvirtink savo el. paštą.",
-    "registerSuccessToast": "🎉 Registracija sėkminga! Sveiki prisijungę!",
+    "registerSuccessToast": "🎉 Paskyra sukurta! Liko patvirtinti el. paštą.",
     "registerGenericErrorToast": "😵 Kažkas nepavyko registruojantis. Bandyk dar kartą.",
     "ctaRegister": "Registruotis",
     "ctaLogin": "Prisijungti",
@@ -57,7 +57,11 @@
     "linkErrorTitle": "Nuoroda nebegalioja",
     "linkErrorLead": "Ši nuoroda jau panaudota arba baigė galioti. Paskyra tvarkoje — tik nuoroda pasenusi.",
     "linkErrorWhatNow": "Užsisakyk naują nuorodą ir ji ateis į tavo el. paštą per kelias akimirkas.",
-    "linkErrorRetry": "Siųsti naują nuorodą"
+    "linkErrorRetry": "Siųsti naują nuorodą",
+    "emailNotConfirmed": "Šis el. pašto adresas dar nepatvirtintas. Patvirtinimo nuorodą išsiuntėme registruojantis — patikrink pašto dėžutę ir šlamšto aplanką.",
+    "resendConfirmation": "Siųsti nuorodą dar kartą",
+    "confirmationResending": "Siunčiama…",
+    "confirmationResent": "Išsiuntėme naują nuorodą. Patikrink paštą."
   },
   "HomePage": {
     "title": "Viena vieta visiems tavo norams",
@@ -525,7 +529,8 @@
     "wishNoteSaveFailed": "Nepavyko išsaugoti. Bandyk dar kartą.",
     "wishNoteSaved": "Išsaugota",
     "wishNoteTitle": "Ką norėtum gauti?",
-    "youSuffix": "(tu)"
+    "youSuffix": "(tu)",
+    "secureSeatError": "Nepavyko išsiųsti patvirtinimo laiško. Pabandyk dar kartą."
   },
   "Blog": {
     "metaTitle": "Tinklaraštis — Noriuto.lt",

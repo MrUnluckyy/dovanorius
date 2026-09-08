@@ -74,7 +74,17 @@ function destinationFor(
   if (redirectTo) {
     try {
       const url = new URL(redirectTo, baseUrl);
-      if (url.origin === new URL(baseUrl).origin && url.pathname !== "/") {
+      // /api/auth/callback is the OAuth landing strip: it exchanges a `?code=`
+      // and, finding none, sends people to the auth-error page. A link from
+      // here has already been verified by /api/auth/confirm and carries no
+      // code, so honouring it showed a freshly confirmed signup an error page
+      // while it was in fact signing them in. Never route back through it.
+      const isOAuthCallback = url.pathname.startsWith("/api/auth/callback");
+      if (
+        url.origin === new URL(baseUrl).origin &&
+        url.pathname !== "/" &&
+        !isOAuthCallback
+      ) {
         return url.pathname + url.search;
       }
     } catch {
@@ -94,8 +104,11 @@ function destinationFor(
 
 type HookPayload = {
   user: {
-    id: string;
+    /** The address the account has TODAY. Empty for an anonymous guest. */
     email: string;
+    id: string;
+    /** `auth.users.email_change` — where a change is heading, once asked for. */
+    new_email?: string;
     is_anonymous?: boolean;
     user_metadata?: Record<string, unknown> | null;
   };
@@ -165,32 +178,82 @@ export async function POST(request: Request) {
   // requested it, which the PKCE path cannot do.
   const baseUrl = process.env.NEXT_PUBLIC_WEB_URL ?? "https://noriuto.lt";
   const next = destinationFor(action, data.redirect_to, baseUrl);
-  const actionUrl =
+  const confirmUrl = (tokenHash: string) =>
     `${baseUrl}/api/auth/confirm?` +
     new URLSearchParams({
-      token_hash: data.token_hash,
+      token_hash: tokenHash,
       type: data.email_action_type,
       next,
     }).toString();
 
-  // An email change confirms at the NEW address, which is the one Supabase puts
-  // in `user.email` for this hook; `old_email` is where the account is today.
-  const to = user.email;
-  if (!to) {
-    console.error(`No recipient address for auth email (user ${user.id}).`);
+  // Who this goes to, and with which token.
+  //
+  // The payload carries the user row as it stands rather than the address the
+  // mail is for: `user.email` is what the account has TODAY, and `user.new_email`
+  // is where a change is heading. Supabase never puts the recipient in the
+  // payload at all — its own source carries a TODO about that — so reading the
+  // address off `user.email` sent nothing whatsoever for a guest attaching
+  // their FIRST address: an anonymous account has no email, so this route
+  // answered 400, and Supabase turns a 400 from a hook into "Invalid payload
+  // sent to hook", failing the whole updateUser call. Guests kept their seat
+  // but could never recover it, which is the one thing the address was for.
+  //
+  // A change also folds BOTH halves into this single call, with the token
+  // fields crossed over (Supabase flags the mismatch in its own source):
+  //   token_hash     + token_new -> the NEW address
+  //   token_hash_new + token     -> the address on the account today
+  // Only the first arrives when secure email change is off, or when there is
+  // no current address to ask — which is exactly the guest case.
+  const messages: { to: string; tokenHash: string; token?: string }[] = [];
+
+  if (action === "email_change") {
+    if (user.new_email) {
+      messages.push({
+        to: user.new_email,
+        tokenHash: data.token_hash,
+        token: data.token_hash_new ? data.token_new : data.token,
+      });
+    }
+    if (data.token_hash_new && user.email) {
+      // Secure email change: the address on file has to agree to losing it.
+      messages.push({
+        to: user.email,
+        tokenHash: data.token_hash_new,
+        token: data.token,
+      });
+    }
+  } else if (user.email) {
+    messages.push({
+      to: user.email,
+      tokenHash: data.token_hash,
+      token: data.token,
+    });
+  }
+
+  if (messages.length === 0) {
+    console.error(
+      `No recipient address for auth email (${action}, user ${user.id}).`
+    );
     return NextResponse.json({ error: "No recipient" }, { status: 400 });
   }
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const { error } = await resend.emails.send({
-      from: FROM,
-      to,
-      subject: SUBJECTS[action][locale],
-      react: AuthEmail({ action, locale, actionUrl, token: data.token }),
-    });
+    for (const message of messages) {
+      const { error } = await resend.emails.send({
+        from: FROM,
+        to: message.to,
+        subject: SUBJECTS[action][locale],
+        react: AuthEmail({
+          action,
+          locale,
+          actionUrl: confirmUrl(message.tokenHash),
+          token: message.token,
+        }),
+      });
 
-    if (error) throw error;
+      if (error) throw error;
+    }
   } catch (err) {
     // Non-2xx so Supabase surfaces it rather than reporting a silent success.
     console.error(`Auth email (${action}) failed for user ${user.id}:`, err);
