@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
 import { LuMail } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
+import { reportError } from "@/lib/report";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -39,7 +40,25 @@ export default function SecureSeatNotice({
     const { error } = await supabase.auth.updateUser({ email: value });
     setSending(false);
     if (error) {
-      toast.error(t("joinEmailTaken"));
+      // Only an address that genuinely belongs to someone else earns the
+      // "already taken" line. Everything else was our fault, and saying it was
+      // theirs sends them off to find another address they do not have — which
+      // is what happened while the send-email hook was rejecting these.
+      const taken =
+        error.code === "email_exists" ||
+        /already been registered|already registered|already in use/i.test(
+          error.message
+        );
+      if (!taken) {
+        console.error("Could not secure guest seat:", error);
+        reportError({
+          area: "auth",
+          reason: "secure_seat_failed",
+          detail: { code: error.code, message: error.message },
+          contactEmail: value,
+        });
+      }
+      toast.error(taken ? t("joinEmailTaken") : t("secureSeatError"));
       return;
     }
     setSent(true);

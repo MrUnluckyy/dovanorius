@@ -18,6 +18,14 @@ export function LoginForm() {
   const [oauthLoading, setOauthLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   /**
+   * Signing in with a correct password on an account that was never confirmed.
+   * Its own state rather than another error string: the password was right,
+   * nothing is broken, and "try again" is the one thing that cannot work.
+   */
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
+  /**
    * Set once a redirect is on its way. `finally` used to clear `loading`
    * before the browser had actually left the page, re-enabling the button for
    * the second or two the navigation takes — long enough to sign in twice and
@@ -35,9 +43,36 @@ export function LoginForm() {
   // Either way out of this page locks both ways out of it.
   const busy = loading || oauthLoading;
 
+  async function resendConfirmation() {
+    setResending(true);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_WEB_URL}/dashboard`,
+      },
+    });
+    setResending(false);
+
+    if (error) {
+      console.error("Resending the confirmation email failed:", error);
+      reportError({
+        area: "auth",
+        reason: "resend_confirmation_failed",
+        detail: { code: error.code, message: error.message },
+        contactEmail: email,
+      });
+      setLoginError(t("errorGeneric"));
+      return;
+    }
+    setResent(true);
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setLoginError(null);
+    setNeedsConfirmation(false);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -46,6 +81,15 @@ export function LoginForm() {
       });
 
       if (error) {
+        if (error.code === "email_not_confirmed") {
+          // The account exists and the password was right — the address was
+          // simply never confirmed. This used to fall through to the generic
+          // "something went wrong, try again", which is both untrue and
+          // useless: people retried the same password instead of opening
+          // their inbox. Say what happened, and offer another link.
+          setNeedsConfirmation(true);
+          return;
+        }
         // Only invalid_credentials gets a written message; anything else is an
         // English Supabase string, so it is logged rather than shown raw.
         if (error.code !== "invalid_credentials") {
@@ -154,6 +198,26 @@ export function LoginForm() {
             <p className="text-sm text-error mt-2" role="alert">
               {loginError}
             </p>
+          )}
+          {needsConfirmation && (
+            <div
+              className="mt-2 rounded-box bg-base-200 p-3 text-sm"
+              role="alert"
+            >
+              <p>{t("emailNotConfirmed")}</p>
+              {resent ? (
+                <p className="mt-2 text-success">{t("confirmationResent")}</p>
+              ) : (
+                <button
+                  type="button"
+                  className="link mt-2"
+                  onClick={resendConfirmation}
+                  disabled={resending}
+                >
+                  {resending ? t("confirmationResending") : t("resendConfirmation")}
+                </button>
+              )}
+            </div>
           )}
           <div className="flex flex-col gap-2">
             <Link href="/forgot-password" className="link link-hover">

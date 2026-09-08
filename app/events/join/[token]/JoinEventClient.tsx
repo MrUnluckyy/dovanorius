@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/client";
 import { getEventTypeMeta } from "@/utils/events/typeMeta";
 import { sendJoinedEmail } from "@/app/actions/events/invite";
+import { reportError } from "@/lib/report";
 import type { SsJoinInfo } from "@/types/secret-santa";
 
 type AcceptResult = {
@@ -130,9 +131,18 @@ export function JoinEventClient({
             data: { display_name: name.trim() },
           });
           // They are in the event regardless; this only affects whether the
-          // seat can be recovered later, so it never blocks the join.
+          // seat can be recovered later, so it never blocks the join. It does
+          // get reported, though — a console.warn on someone else's phone is
+          // how this stayed invisible while every guest's seat was going
+          // unrecoverable.
           if (linkError) {
             console.warn("Could not attach email to guest session:", linkError);
+            reportError({
+              area: "auth",
+              reason: "guest_email_link_failed",
+              detail: { code: linkError.code, message: linkError.message },
+              contactEmail: email.trim(),
+            });
           }
         }
 
