@@ -88,10 +88,21 @@ export function useInspoProducts(filters: InspoFilters) {
       // open is what used to put 17,900 rows of children's clothing in front of
       // someone shopping for their partner.
       //
+      // Adult keeps unclassified rows, the way the gender filter below keeps
+      // gender-null ones. `audience` is derived on write, so a NULL means the
+      // trigger has not reached that row yet (a backfill still draining, an
+      // import that outran it) — and an unclassified product should degrade to
+      // "shown to adults", which is the widest bracket and where it most likely
+      // belongs, rather than vanishing from every bracket at once. The narrow
+      // brackets stay strict: a NULL is not evidence of being for a child.
+      //
       // NOTE: `filters.ageGroup` maps to the DB column `audience`, while
       // `filters.audience` below is the her/him GENDER lens and maps to
       // `gender`. Two different axes; the names nearly collide.
-      query = query.eq("audience", filters.ageGroup);
+      query =
+        filters.ageGroup === "adult"
+          ? query.or("audience.eq.adult,audience.is.null")
+          : query.eq("audience", filters.ageGroup);
 
       // Search. Each word becomes its own ILIKE against `search_norm`, so terms
       // match in any order and anywhere in the text — "lego duplo" found
