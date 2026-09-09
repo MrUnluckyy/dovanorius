@@ -11,8 +11,6 @@ import {
   type InviteResult,
 } from "@/lib/events/emailInvite";
 
-export type { InviteResult };
-
 /**
  * Every action here organises an event, so every one starts by proving the
  * caller may. The check itself lives in `lib/events/emailInvite` because the
