@@ -40,6 +40,12 @@ export type Persona = {
   kind: "recipient" | "theme" | "editorial";
   description: string;
   gender: "female" | "male" | null;
+  /**
+   * Which age bracket to draw candidates from. Unlike gender this is a HARD
+   * filter — `inspo_products.audience` is derived for every row, so narrowing
+   * on it cannot empty a shelf the way narrowing on a mostly-null gender would.
+   */
+  audience: "kid" | "teen" | "adult" | null;
   age_min: number | null;
   age_max: number | null;
   product_types: string[];
@@ -82,7 +88,7 @@ export async function retrievePersonaCandidates(
   // A factory, not a value: Supabase query builders are single-use, and the
   // per-type fan-out below needs a fresh one each time.
   const base = () => {
-    const q = supabase
+    let q = supabase
       .from("inspo_products")
       .select("id, product_name, brand_name, price, product_type")
       .eq("in_stock", true)
@@ -92,6 +98,13 @@ export async function retrievePersonaCandidates(
       .gte("price", persona.price_min)
       .lte("price", persona.price_max)
       .gte("gift_score", 45);
+
+    // The bracket first. Before this existed a kids shelf could only be
+    // approximated by product_type, so "child" drew from the same adult pool as
+    // everything else and filled with adult sport gear (the per-type quota
+    // below was the workaround). Now the pool is genuinely the kids catalogue —
+    // ~17,900 rows rather than the 2,064 that happened to be filed as toys.
+    if (persona.audience) q = q.eq("audience", persona.audience);
 
     // Gender is a hint, never a hard filter: outside fashion it is almost
     // entirely null, so filtering on it would empty most persona shelves.

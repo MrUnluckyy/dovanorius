@@ -577,7 +577,8 @@
       "sport": "Sport",
       "kitchen": "Kitchen",
       "garden": "Garden",
-      "pets": "Pets"
+      "pets": "Pets",
+      "other": "Other"
     },
     "price": {
       "all": "Any price",
@@ -623,8 +624,20 @@
     "viewInStore": "View",
     "loadMore": "Load more",
     "empty": "No products match your filters.",
+    "foundInOtherAge": "Found in another age group:",
     "error": "Couldn't load products. Please try again.",
     "affiliateDisclosure": "Some links are affiliate links — we may earn a small commission at no extra cost to you.",
+    "agePrompt": "What age?",
+    "age": {
+      "adult": "Adult",
+      "teen": "Teen",
+      "kid": "Child"
+    },
+    "audienceYoung": {
+      "everyone": "Either",
+      "her": "For a girl",
+      "him": "For a boy"
+    },
     "audiencePrompt": "Who are you shopping for?",
     "browseAllHint": "The full catalogue, with filters and search",
     "backToIdeas": "Back to ideas",

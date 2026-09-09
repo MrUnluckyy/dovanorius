@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/client";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import type { InspoFilters, InspoProduct } from "@/types/inspo";
+import { foldForSearch } from "@/utils/helpers/search";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import type { AgeGroup, InspoFilters, InspoProduct } from "@/types/inspo";
 
 export const INSPO_PAGE_SIZE = 24;
 
@@ -81,10 +82,40 @@ export function useInspoProducts(filters: InspoFilters) {
         query = query.eq("product_type", filters.productType);
       if (filters.priceMax != null) query = query.lte("price", filters.priceMax);
       if (filters.onSaleOnly) query = query.gt("discount_pct", 0);
-      if (filters.search.trim())
-        query = query.ilike("product_name", `%${filters.search.trim()}%`);
 
-      // Audience: hide the opposite gender, but keep unisex + unknown (null),
+      // Age bracket. Always pinned — the shopper is buying for an adult, a teen
+      // or a child, never for an unspecified blend of the three, and leaving it
+      // open is what used to put 17,900 rows of children's clothing in front of
+      // someone shopping for their partner.
+      //
+      // Adult keeps unclassified rows, the way the gender filter below keeps
+      // gender-null ones. `audience` is derived on write, so a NULL means the
+      // trigger has not reached that row yet (a backfill still draining, an
+      // import that outran it) — and an unclassified product should degrade to
+      // "shown to adults", which is the widest bracket and where it most likely
+      // belongs, rather than vanishing from every bracket at once. The narrow
+      // brackets stay strict: a NULL is not evidence of being for a child.
+      //
+      // NOTE: `filters.ageGroup` maps to the DB column `audience`, while
+      // `filters.audience` below is the her/him GENDER lens and maps to
+      // `gender`. Two different axes; the names nearly collide.
+      query =
+        filters.ageGroup === "adult"
+          ? query.or("audience.eq.adult,audience.is.null")
+          : query.eq("audience", filters.ageGroup);
+
+      // Search. Each word becomes its own ILIKE against `search_norm`, so terms
+      // match in any order and anywhere in the text — "lego duplo" found
+      // nothing as a single substring because it required exact adjacency in
+      // the title. `search_norm` folds diacritics and appends brand and
+      // category, which is what lets "zaislai" reach "žaislai" rows and "nike"
+      // reach a row whose title never says Nike. The term has to be folded the
+      // same way the column was; foldForSearch is that folding.
+      for (const term of foldForSearch(filters.search).split(/\s+/)) {
+        if (term) query = query.ilike("search_norm", `%${term}%`);
+      }
+
+      // Gender: hide the opposite gender, but keep unisex + unknown (null),
       // so a "For him" user stops seeing dresses/lipstick without losing the
       // large unclassified (genuinely unisex) middle.
       if (filters.audience === "him")
@@ -104,5 +135,67 @@ export function useInspoProducts(filters: InspoFilters) {
     },
     getNextPageParam: (lastPage, allPages) =>
       lastPage.length === INSPO_PAGE_SIZE ? allPages.length : undefined,
+  });
+}
+
+/**
+ * Which OTHER age brackets this search would have found something in.
+ *
+ * Pinning an age bracket makes an honest empty state misleading: searching
+ * "lego duplo" as an adult returns nothing, because Duplo is a toddler's toy
+ * and every match sits one bracket away. All the shopper sees is "no products
+ * match", with nothing to suggest the catalogue does in fact have what they
+ * asked for — the same dead end as the old broken search, arrived at from the
+ * opposite direction.
+ *
+ * Counts only, and only when the current bracket came back empty, so this is
+ * two `head: true` requests on a page that is otherwise showing nothing.
+ */
+export function useSearchInOtherAges(filters: InspoFilters, enabled: boolean) {
+  const supabase = createClient();
+
+  return useQuery({
+    queryKey: ["inspo-other-ages", filters],
+    enabled: enabled && !!filters.search.trim(),
+    queryFn: async (): Promise<{ age: AgeGroup; count: number }[]> => {
+      const others = (["adult", "teen", "kid"] as AgeGroup[]).filter(
+        (a) => a !== filters.ageGroup
+      );
+
+      const results = await Promise.all(
+        others.map(async (age) => {
+          // Deliberately mirrors the main query's gates, minus ordering and
+          // paging — a count that counted rows the grid would not show would
+          // send the shopper to another empty page.
+          let q = supabase
+            .from("inspo_products")
+            .select("id", { count: "exact", head: true })
+            .eq("in_stock", true)
+            .eq("giftable", true)
+            .not("image_url", "is", null)
+            .not("deep_link", "is", null)
+            .gte("price", Math.max(PRICE_FLOOR, filters.priceMin ?? 0));
+
+          q =
+            age === "adult"
+              ? q.or("audience.eq.adult,audience.is.null")
+              : q.eq("audience", age);
+
+          for (const term of foldForSearch(filters.search).split(/\s+/)) {
+            if (term) q = q.ilike("search_norm", `%${term}%`);
+          }
+          if (filters.productType) q = q.eq("product_type", filters.productType);
+          if (filters.brand) q = q.eq("brand_name", filters.brand);
+          if (filters.priceMax != null) q = q.lte("price", filters.priceMax);
+          if (filters.onSaleOnly) q = q.gt("discount_pct", 0);
+
+          const { count, error } = await q;
+          if (error) throw error;
+          return { age, count: count ?? 0 };
+        })
+      );
+
+      return results.filter((r) => r.count > 0);
+    },
   });
 }

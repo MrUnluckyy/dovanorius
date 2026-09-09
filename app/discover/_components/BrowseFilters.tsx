@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { IconType } from "react-icons";
 import { LuSearch, LuSlidersHorizontal, LuArrowUpDown, LuX, LuCheck } from "react-icons/lu";
-import type { Audience, InspoSort } from "@/types/inspo";
+import type { AgeGroup, Audience, InspoSort } from "@/types/inspo";
 import { BrandFilter } from "./BrandFilter";
 
 /**
@@ -34,6 +34,7 @@ export function BrowseFilters({
   bands, bandKey, onBandKey,
   brand, onBrand,
   onSaleOnly,
+  ageGroups, ageGroup, onAgeGroup,
   audiences, audience, onAudience,
   sorts, sort, onSort,
   searchInput, onSearchInput,
@@ -53,6 +54,16 @@ export function BrowseFilters({
    * in the count and remains clearable via the chip row.
    */
   onSaleOnly: boolean;
+  /**
+   * Age bracket. Deliberately NOT inside the Filtrai popover: it is the one
+   * control that changes which catalogue you are looking at rather than
+   * narrowing the one you have, and the kids range is reachable through it and
+   * nothing else. Hiding it behind a button is how ~17,900 kids products came
+   * to sit behind a single "Toys" pill that showed 2,064 of them.
+   */
+  ageGroups: AgeGroup[];
+  ageGroup: AgeGroup;
+  onAgeGroup: (a: AgeGroup) => void;
   audiences: Audience[];
   audience: Audience;
   onAudience: (a: Audience) => void;
@@ -157,7 +168,14 @@ export function BrowseFilters({
             >
               <Group label={t("audiencePrompt")}>
                 <Segmented
-                  options={audiences.map((a) => ({ key: a, label: t(`audience.${a}`) }))}
+                  options={audiences.map((a) => ({
+                    key: a,
+                    // "For her" is the wrong word for a seven-year-old, so the
+                    // gender lens is relabelled once the bracket is a child's.
+                    label: t(
+                      ageGroup === "adult" ? `audience.${a}` : `audienceYoung.${a}`
+                    ),
+                  }))}
                   value={audience}
                   onChange={(v) => onAudience(v as Audience)}
                 />
@@ -183,37 +201,54 @@ export function BrowseFilters({
         <SortMenu sorts={sorts} sort={sort} onSort={onSort} />
       </div>
 
-      {/* Category rail. Scrolls rather than wraps, so the bar never changes
-          height; the mask fade is what tells you there is more to the right. */}
-      <div
-        className="-mx-1 mt-2.5 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        style={{
-          maskImage:
-            "linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 28px), transparent 100%)",
-        }}
-      >
-        {categories.map((c) => {
-          const active = productType === c.type;
-          return (
-            <button
-              key={c.type}
-              onClick={() => onProductType(active ? null : c.type)}
-              aria-pressed={active}
-              className="flex shrink-0 cursor-pointer items-center gap-1.5 px-3 py-1.5 text-sm transition-transform active:scale-[0.97]"
-              style={{
-                background: active ? "var(--nr-yellow)" : "var(--nr-surface)",
-                border: `1px solid ${active ? "var(--nr-yellow-deep)" : "var(--nr-border)"}`,
-                boxShadow: active ? "var(--nr-shadow-btn)" : "none",
-                borderRadius: "var(--nr-radius-pill)",
-                color: "var(--nr-ink)",
-                transitionTimingFunction: "var(--nr-ease-spring)",
-              }}
-            >
-              <c.Icon className="w-4 shrink-0" aria-hidden />
-              {t(`category.${c.key}`)}
-            </button>
-          );
-        })}
+      {/* Age bracket, then the category rail. The bracket is pinned outside the
+          scroll container so it cannot scroll out of reach — the categories
+          slide past it instead. */}
+      <div className="mt-2.5 flex items-center gap-2">
+        <div className="shrink-0">
+          <Segmented
+            options={ageGroups.map((a) => ({ key: a, label: t(`age.${a}`) }))}
+            value={ageGroup}
+            onChange={(v) => onAgeGroup(v as AgeGroup)}
+          />
+        </div>
+
+        <div
+          className="h-5 w-px shrink-0"
+          style={{ background: "var(--nr-border)" }}
+          aria-hidden
+        />
+
+        <div
+          className="-mx-1 flex min-w-0 grow gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{
+            maskImage:
+              "linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 28px), transparent 100%)",
+          }}
+        >
+          {categories.map((c) => {
+            const active = productType === c.type;
+            return (
+              <button
+                key={c.type}
+                onClick={() => onProductType(active ? null : c.type)}
+                aria-pressed={active}
+                className="flex shrink-0 cursor-pointer items-center gap-1.5 px-3 py-1.5 text-sm transition-transform active:scale-[0.97]"
+                style={{
+                  background: active ? "var(--nr-yellow)" : "var(--nr-surface)",
+                  border: `1px solid ${active ? "var(--nr-yellow-deep)" : "var(--nr-border)"}`,
+                  boxShadow: active ? "var(--nr-shadow-btn)" : "none",
+                  borderRadius: "var(--nr-radius-pill)",
+                  color: "var(--nr-ink)",
+                  transitionTimingFunction: "var(--nr-ease-spring)",
+                }}
+              >
+                <c.Icon className="w-4 shrink-0" aria-hidden />
+                {t(`category.${c.key}`)}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

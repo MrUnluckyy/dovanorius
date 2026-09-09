@@ -30,6 +30,8 @@ export type GiftPersona = {
    * editorial = hand-picked in /admin, scheduled, never touched by the curator.
    */
   kind: "recipient" | "theme" | "editorial";
+  /** Age bracket this shelf draws from; see gift_personas.audience. */
+  audience: "kid" | "teen" | "adult" | null;
 };
 
 export type PersonaPick = InspoProduct & { reason: string | null };
@@ -44,7 +46,7 @@ export function usePersonas() {
     queryFn: async (): Promise<GiftPersona[]> => {
       const { data, error } = await supabase
         .from("gift_personas")
-        .select("id, slug, label_lt, label_en, gender, kind, exclude_keywords")
+        .select("id, slug, label_lt, label_en, gender, kind, exclude_keywords, audience")
         .eq("is_active", true)
         .order("sort_order");
       if (error) throw error;
@@ -141,16 +143,17 @@ export function useShelfContinuation(
   types: string[],
   excludeIds: string[],
   excludeKeywords: string[],
-  enabled: boolean
+  enabled: boolean,
+  audience?: "kid" | "teen" | "adult" | null
 ) {
   const supabase = createClient();
 
   return useQuery({
-    queryKey: ["shelf-more", types, excludeIds.length, excludeKeywords],
+    queryKey: ["shelf-more", types, excludeIds.length, excludeKeywords, audience],
     enabled: enabled && types.length > 0,
     staleTime: 1000 * 60 * 10,
     queryFn: async (): Promise<InspoProduct[]> => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("inspo_products")
         .select("*")
         .eq("in_stock", true)
@@ -158,7 +161,15 @@ export function useShelfContinuation(
         .not("image_url", "is", null)
         .not("deep_link", "is", null)
         .in("product_type", types)
-        .gte("gift_score", 45)
+        .gte("gift_score", 45);
+
+      // The bracket has to carry into the second tier as well. `types` is
+      // derived from the curated picks, and on a kids shelf those types are
+      // things like `clothing` and `shoes` — which without this would deepen a
+      // children's shelf with adult jackets.
+      if (audience) q = q.eq("audience", audience);
+
+      const { data, error } = await q
         .order("gift_score", { ascending: false })
         .order("sort_key", { ascending: true })
         // Over-fetch: the keyword guard below can reject a lot. On the tech
