@@ -23,7 +23,17 @@
  */
 import { createClient } from "@supabase/supabase-js";
 
-const BATCH = 2000;
+/**
+ * Rows per RPC call.
+ *
+ * 1000 rather than 2000: each touched row rewrites several GIN trigram index
+ * entries, and the larger batch was slow enough per call to be caught by a
+ * gateway timeout whenever the instance was busy — which surfaces in the client
+ * as a bare "TypeError: fetch failed" with nothing to distinguish it from a
+ * dropped connection. Halving it roughly halves the time any one call is
+ * exposed, and costs nothing: the work is the same, in more slices.
+ */
+const BATCH = 1000;
 
 function makeClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
@@ -35,8 +45,18 @@ function makeClient() {
   });
 }
 
-/** Batches to retry before giving up, and how long to wait between tries. */
-const MAX_RETRIES = 5;
+/**
+ * Attempts per batch, and the ceiling on the backoff between them.
+ *
+ * Sized to ride out a real outage rather than a blip. The first attempt at this
+ * gave up after 4 tries and ~30 seconds, during which the instance was in fact
+ * unreachable for the better part of an hour — so the run died with 80k rows
+ * left and a stack of identical "fetch failed" lines. 20 attempts backing off to
+ * a 60s ceiling covers roughly 18 minutes, after which something is genuinely
+ * wrong and stopping is the right answer.
+ */
+const MAX_RETRIES = 20;
+const MAX_BACKOFF_MS = 60_000;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 async function main() {
@@ -64,8 +84,10 @@ async function main() {
       }
       lastError = error.message;
       if (attempt < MAX_RETRIES) {
-        const wait = 2 ** attempt * 1000;
-        console.warn(`  retry ${attempt}/${MAX_RETRIES - 1} in ${wait}ms: ${lastError}`);
+        const wait = Math.min(2 ** attempt * 1000, MAX_BACKOFF_MS);
+        console.warn(
+          `  retry ${attempt}/${MAX_RETRIES - 1} in ${Math.round(wait / 1000)}s: ${lastError}`
+        );
         await sleep(wait);
       }
     }

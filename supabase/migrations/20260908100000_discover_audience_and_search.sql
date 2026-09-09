@@ -185,7 +185,9 @@ $function$;
 -- 257 rows landed in `other` — a bucket no category pill reaches, making the
 -- whole brand unreachable.
 insert into public.merchant_default_type (merchant_name, product_type, note)
-values ('mideer', 'toys', 'children''s arts-and-crafts brand; breadcrumbs are bare product families with no vertical in them')
+values
+  ('mideer', 'toys', 'children''s arts-and-crafts brand; breadcrumbs are bare product families with no vertical in them'),
+  ('IQ Žaislai', 'toys', 'a toy shop; its bare product-family breadcrumbs ("Judėjimo priemonės", "Barškučiai ir kramtukai") name no vertical, so 178 rows fell to other')
 on conflict (merchant_name) do nothing;
 
 -- ---------------------------------------------------------------------------
