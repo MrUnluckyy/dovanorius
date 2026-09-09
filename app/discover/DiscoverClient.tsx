@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { LuSearch, LuSparkles } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
 import { useGiftIdeas } from "@/hooks/useGiftIdeas";
-import { useDiscoverAudience } from "@/hooks/useDiscoverAudience";
+import { useGiftAudience } from "@/hooks/useDiscoverAudience";
 
 import { type CardProduct } from "./_components/ProductCard";
 import {
@@ -50,6 +50,7 @@ export function DiscoverClient() {
   // rather than LLM-curated). They arrive already filtered by their schedule —
   // the gift_personas SELECT policy drops any shelf outside its window, so an
   // unpublished one is not in `personas` at all.
+  //
   // Shelves follow the chosen bracket. Without this the age chips would change
   // only the links out of the page while the shelves below went on showing
   // adult gifts — the control would look broken, and the kids shelves that do
@@ -67,10 +68,11 @@ export function DiscoverClient() {
     ) ?? [];
   const activePersona = recipients.find((p) => p.id === personaId) ?? null;
 
-  // Audience comes from the profile now (self-declared gender, or the last
-  // choice made here) instead of resetting to "everyone" on every visit.
+  // Gender lens for the chosen bracket: persisted from the profile for adults,
+  // in-memory and defaulted to "everyone" for a child — a child's gender is not
+  // a fact about the shopper. See useGiftAudience.
   const { audience, setAudience, resolved: audienceResolved } =
-    useDiscoverAudience(userId);
+    useGiftAudience(userId, ageGroup);
 
   const supabase = createClient();
 

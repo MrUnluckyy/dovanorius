@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import type { Audience } from "@/types/inspo";
+import type { AgeGroup, Audience } from "@/types/inspo";
 
 /**
  * Resolves who the discover feed is for, in priority order:
@@ -70,4 +70,34 @@ export function useDiscoverAudience(userId: string | null) {
   );
 
   return { audience, setAudience, resolved };
+}
+
+/**
+ * The gender lens for whichever age bracket is being browsed.
+ *
+ * The persisted lens describes the SHOPPER — it is seeded from their own
+ * `profiles.gender` and remembers what they last chose — which makes it the
+ * right default for an adult gift and the wrong one for a child's. Left
+ * coupled, a father shopping for his daughter got "Berniukui" preselected
+ * because he is male, which is the same class of bug as the man who kept being
+ * shown bras.
+ *
+ * Worse, it wrote back: choosing "Mergaitei" while browsing the kids catalogue
+ * persisted `discover_audience = 'her'`, so his adult feed silently became "Jai"
+ * on the next visit. A child's gender is not a fact about the shopper and must
+ * not be stored as one.
+ *
+ * So the kid and teen brackets get their own in-memory lens, defaulted to
+ * "everyone" and forgotten on leaving. Only the adult bracket persists.
+ */
+export function useGiftAudience(userId: string | null, ageGroup: AgeGroup) {
+  const adult = useDiscoverAudience(userId);
+  const [young, setYoung] = useState<Audience>("everyone");
+  const isAdult = ageGroup === "adult";
+
+  return {
+    audience: isAdult ? adult.audience : young,
+    setAudience: isAdult ? adult.setAudience : setYoung,
+    resolved: adult.resolved,
+  };
 }

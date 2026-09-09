@@ -6,8 +6,8 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { LuX } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
-import { useInspoProducts } from "@/hooks/useInspoProducts";
-import { useDiscoverAudience } from "@/hooks/useDiscoverAudience";
+import { useInspoProducts, useSearchInOtherAges } from "@/hooks/useInspoProducts";
+import { useGiftAudience } from "@/hooks/useDiscoverAudience";
 import type { AgeGroup, InspoFilters, InspoSort } from "@/types/inspo";
 import { ProductCard, type CardProduct } from "../_components/ProductCard";
 import { BrowseFilters } from "../_components/BrowseFilters";
@@ -27,9 +27,13 @@ import { isAccountUser } from "@/utils/auth/account";
  * every filter, and the only way in was one button at the bottom of the page.
  *
  * Filter state lives in the query string now, so `?type=beauty&price=under25`
- * is a link someone can send. Audience is deliberately NOT in the URL — it is a
- * persistent profile setting, and baking it into a shared link would send the
- * recipient your gender preference along with the products.
+ * is a link someone can send. The gender lens is deliberately NOT in the URL —
+ * it is a persistent profile setting, and baking it into a shared link would
+ * send the recipient your gender preference along with the products.
+ *
+ * The age bracket IS, because it says something about the gift rather than
+ * about the sender: `?age=kid` is "ideas for a child", which is the whole
+ * reason to send the link.
  */
 export function BrowseClient() {
   const t = useTranslations("Discover");
@@ -60,7 +64,7 @@ export function BrowseClient() {
   // The one exception: typing should not push a history entry per keystroke.
   const [searchInput, setSearchInput] = useState(search);
 
-  const { audience, setAudience } = useDiscoverAudience(userId);
+  const { audience, setAudience } = useGiftAudience(userId, ageGroup);
   const band = PRICE_BANDS.find((b) => b.key === bandKey) ?? PRICE_BANDS[0];
 
   const setParams = useCallback(
@@ -117,6 +121,13 @@ export function BrowseClient() {
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInspoProducts(filters);
   const products = useMemo(() => data?.pages.flat() ?? [], [data]);
+
+  // Only asked once the grid is known to be empty, so it costs nothing on a
+  // page that found something.
+  const { data: elsewhere = [] } = useSearchInOtherAges(
+    filters,
+    !isLoading && !isError && products.length === 0
+  );
 
   const openProduct = (p: CardProduct) => {
     setSelected(p);
@@ -203,7 +214,32 @@ export function BrowseClient() {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="py-20 text-center opacity-60">{t("empty")}</div>
+          <div className="py-20 text-center">
+            <p className="opacity-60">{t("empty")}</p>
+
+            {/* The catalogue may well hold what they asked for, one bracket
+                over — "lego duplo" is empty for adults and ten items for a
+                child. Saying so turns a dead end into one tap. */}
+            {elsewhere.length > 0 && (
+              <div className="mt-6">
+                <p className="mb-2 text-sm opacity-70">{t("foundInOtherAge")}</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {elsewhere.map(({ age, count }) => (
+                    <button
+                      key={age}
+                      onClick={() =>
+                        setParams({ age: age === DEFAULT_AGE_GROUP ? null : age })
+                      }
+                      className="cursor-pointer rounded-full bg-base-200 px-4 py-1.5 text-sm transition hover:bg-base-300"
+                    >
+                      {t(`age.${age}`)}
+                      <span className="ml-1.5 opacity-60">{count}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         ) : (
           <>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">

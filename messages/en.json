@@ -624,6 +624,7 @@
     "viewInStore": "View",
     "loadMore": "Load more",
     "empty": "No products match your filters.",
+    "foundInOtherAge": "Found in another age group:",
     "error": "Couldn't load products. Please try again.",
     "affiliateDisclosure": "Some links are affiliate links — we may earn a small commission at no extra cost to you.",
     "agePrompt": "What age?",

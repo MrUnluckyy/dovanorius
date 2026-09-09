@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { foldForSearch } from "@/utils/helpers/search";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import type { InspoFilters, InspoProduct } from "@/types/inspo";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import type { AgeGroup, InspoFilters, InspoProduct } from "@/types/inspo";
 
 export const INSPO_PAGE_SIZE = 24;
 
@@ -135,5 +135,67 @@ export function useInspoProducts(filters: InspoFilters) {
     },
     getNextPageParam: (lastPage, allPages) =>
       lastPage.length === INSPO_PAGE_SIZE ? allPages.length : undefined,
+  });
+}
+
+/**
+ * Which OTHER age brackets this search would have found something in.
+ *
+ * Pinning an age bracket makes an honest empty state misleading: searching
+ * "lego duplo" as an adult returns nothing, because Duplo is a toddler's toy
+ * and every match sits one bracket away. All the shopper sees is "no products
+ * match", with nothing to suggest the catalogue does in fact have what they
+ * asked for — the same dead end as the old broken search, arrived at from the
+ * opposite direction.
+ *
+ * Counts only, and only when the current bracket came back empty, so this is
+ * two `head: true` requests on a page that is otherwise showing nothing.
+ */
+export function useSearchInOtherAges(filters: InspoFilters, enabled: boolean) {
+  const supabase = createClient();
+
+  return useQuery({
+    queryKey: ["inspo-other-ages", filters],
+    enabled: enabled && !!filters.search.trim(),
+    queryFn: async (): Promise<{ age: AgeGroup; count: number }[]> => {
+      const others = (["adult", "teen", "kid"] as AgeGroup[]).filter(
+        (a) => a !== filters.ageGroup
+      );
+
+      const results = await Promise.all(
+        others.map(async (age) => {
+          // Deliberately mirrors the main query's gates, minus ordering and
+          // paging — a count that counted rows the grid would not show would
+          // send the shopper to another empty page.
+          let q = supabase
+            .from("inspo_products")
+            .select("id", { count: "exact", head: true })
+            .eq("in_stock", true)
+            .eq("giftable", true)
+            .not("image_url", "is", null)
+            .not("deep_link", "is", null)
+            .gte("price", Math.max(PRICE_FLOOR, filters.priceMin ?? 0));
+
+          q =
+            age === "adult"
+              ? q.or("audience.eq.adult,audience.is.null")
+              : q.eq("audience", age);
+
+          for (const term of foldForSearch(filters.search).split(/\s+/)) {
+            if (term) q = q.ilike("search_norm", `%${term}%`);
+          }
+          if (filters.productType) q = q.eq("product_type", filters.productType);
+          if (filters.brand) q = q.eq("brand_name", filters.brand);
+          if (filters.priceMax != null) q = q.lte("price", filters.priceMax);
+          if (filters.onSaleOnly) q = q.gt("discount_pct", 0);
+
+          const { count, error } = await q;
+          if (error) throw error;
+          return { age, count: count ?? 0 };
+        })
+      );
+
+      return results.filter((r) => r.count > 0);
+    },
   });
 }
