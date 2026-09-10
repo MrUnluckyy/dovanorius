@@ -14,6 +14,7 @@ import {
   LuSearch,
   LuCircleOff,
   LuPackageX,
+  LuGripVertical,
 } from "react-icons/lu";
 import toast from "react-hot-toast";
 import {
@@ -21,7 +22,7 @@ import {
   setEditorialShelfActive,
   deleteEditorialShelf,
   searchProducts,
-  addPick,
+  addPicks,
   removePick,
   updatePickReason,
   reorderPicks,
@@ -36,6 +37,7 @@ import {
   type ScheduleState,
 } from "../../_lib/types";
 import { fmtDate, toLocalInput, fromLocalInput } from "../../_lib/dates";
+import { useListDrag } from "@/app/admin/_components/useListDrag";
 
 export function ShelfEditorClient({
   shelf,
@@ -63,6 +65,9 @@ export function ShelfEditorClient({
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<ProductHit[]>([]);
   const [searching, setSearching] = useState(false);
+  /** Ticked in the search modal. An array, not a Set, so the picks land in the
+   *  order they were chosen rather than the order the search returned them. */
+  const [selected, setSelected] = useState<string[]>([]);
 
   const pickedIds = new Set(picks.map((p) => p.product_id));
 
@@ -120,17 +125,33 @@ export function ShelfEditorClient({
       return;
     }
     setHits(res.hits);
+    // A new result set makes the old ticks meaningless — and invisible, which
+    // is worse: they would still be added.
+    setSelected([]);
     if (!res.hits.length) toast("Nieko nerasta.", { icon: "🔍" });
   }
 
-  function handleAdd(productId: string) {
+  function toggleSelected(productId: string) {
+    setSelected((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  }
+
+  function handleAddSelected() {
+    if (!selected.length) return;
     startTransition(async () => {
-      const res = await addPick(shelf.id, productId);
+      const res = await addPicks(shelf.id, selected);
       if (!res.ok) {
         toast.error(res.error);
         return;
       }
-      toast.success("Pridėta.");
+      toast.success(
+        res.added === 1 ? "Pridėta." : `Pridėta ${res.added} produktai.`
+      );
+      setSelected([]);
+      searchRef.current?.close();
       router.refresh();
     });
   }
@@ -158,24 +179,32 @@ export function ShelfEditorClient({
     });
   }
 
-  /** Move a pick one slot and send the whole resulting order. */
-  function handleMove(index: number, delta: number) {
-    const next = [...picks];
-    const target = index + delta;
-    if (target < 0 || target >= next.length) return;
-    [next[index], next[target]] = [next[target], next[index]];
-
+  /** Send an explicit order — used by both the drag handle and the arrows. */
+  function commitOrder(orderedIds: string[]) {
     startTransition(async () => {
-      const res = await reorderPicks(
-        shelf.id,
-        next.map((p) => p.product_id)
-      );
+      const res = await reorderPicks(shelf.id, orderedIds);
       if (!res.ok) {
         toast.error(res.error);
         return;
       }
       router.refresh();
     });
+  }
+
+  const drag = useListDrag({
+    items: picks,
+    getId: (p) => p.product_id,
+    onCommit: commitOrder,
+    disabled: pending,
+  });
+
+  /** Move a pick one slot and send the whole resulting order. */
+  function handleMove(index: number, delta: number) {
+    const next = [...picks];
+    const target = index + delta;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    commitOrder(next.map((p) => p.product_id));
   }
 
   function handleResync() {
@@ -382,7 +411,8 @@ export function ShelfEditorClient({
 
           <p className="text-sm text-base-content/60">
             Eiliškumas čia yra eiliškumas Discover puslapyje — rankomis
-            sudėliotos lentynos nesukamos kasdien.
+            sudėliotos lentynos nesukamos kasdien. Tempkite už rankenėlės arba
+            naudokite rodykles.
           </p>
 
           {picks.length === 0 ? (
@@ -391,13 +421,15 @@ export function ShelfEditorClient({
             </div>
           ) : (
             <ul className="mt-2 divide-y divide-base-300">
-              {picks.map((p, i) => (
+              {drag.ordered.map((p, i) => (
                 <PickRow
                   key={p.product_id}
                   pick={p}
                   index={i}
-                  last={i === picks.length - 1}
+                  last={i === drag.ordered.length - 1}
                   pending={pending}
+                  dragging={drag.draggingId === p.product_id}
+                  rowProps={drag.rowProps(p.product_id)}
                   onMove={handleMove}
                   onRemove={handleRemove}
                   onReason={handleReason}
@@ -471,43 +503,71 @@ export function ShelfEditorClient({
               </div>
             )}
             {!searching &&
-              hits.map((h) => (
-                <div
-                  key={h.id}
-                  className="flex items-center gap-3 rounded-lg border border-base-300 p-2"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={h.image_url ?? ""}
-                    alt=""
-                    className="h-12 w-12 shrink-0 rounded object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium">
-                      {h.product_name}
-                    </div>
-                    <div className="text-xs text-base-content/50">
-                      {[h.brand_name, h.merchant_name].filter(Boolean).join(" · ")}
-                      {h.price != null && ` · ${h.price} €`}
-                    </div>
-                  </div>
-                  <button
-                    className="btn btn-sm"
-                    onClick={() => handleAdd(h.id)}
-                    disabled={pending || pickedIds.has(h.id)}
+              hits.map((h) => {
+                const already = pickedIds.has(h.id);
+                const checked = selected.includes(h.id);
+                return (
+                  <label
+                    key={h.id}
+                    className={`flex items-center gap-3 rounded-lg border p-2 ${
+                      checked
+                        ? "border-primary bg-primary/5"
+                        : "border-base-300"
+                    } ${already ? "opacity-50" : "cursor-pointer"}`}
                   >
-                    {pickedIds.has(h.id) ? "Jau atrinkta" : "Pridėti"}
-                  </button>
-                </div>
-              ))}
+                    <input
+                      type="checkbox"
+                      className="checkbox checkbox-sm shrink-0"
+                      checked={checked}
+                      disabled={already || pending}
+                      onChange={() => toggleSelected(h.id)}
+                    />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={h.image_url ?? ""}
+                      alt=""
+                      className="h-12 w-12 shrink-0 rounded object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium">
+                        {h.product_name}
+                      </div>
+                      <div className="text-xs text-base-content/50">
+                        {[h.brand_name, h.merchant_name].filter(Boolean).join(" · ")}
+                        {h.price != null && ` · ${h.price} €`}
+                      </div>
+                    </div>
+                    {already && (
+                      <span className="shrink-0 text-xs text-base-content/50">
+                        Jau atrinkta
+                      </span>
+                    )}
+                  </label>
+                );
+              })}
           </div>
 
-          <div className="modal-action">
+          <div className="modal-action items-center">
+            {selected.length > 0 && (
+              <span className="mr-auto text-sm text-base-content/60">
+                Pažymėta: {selected.length}
+              </span>
+            )}
             <button
               className="btn btn-ghost btn-sm"
-              onClick={() => searchRef.current?.close()}
+              onClick={() => {
+                setSelected([]);
+                searchRef.current?.close();
+              }}
             >
               Uždaryti
+            </button>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={handleAddSelected}
+              disabled={pending || selected.length === 0}
+            >
+              Pridėti{selected.length > 0 && ` (${selected.length})`}
             </button>
           </div>
         </div>
@@ -553,6 +613,8 @@ function PickRow({
   index,
   last,
   pending,
+  dragging,
+  rowProps,
   onMove,
   onRemove,
   onReason,
@@ -561,6 +623,8 @@ function PickRow({
   index: number;
   last: boolean;
   pending: boolean;
+  dragging: boolean;
+  rowProps: React.HTMLAttributes<HTMLLIElement> & { draggable: boolean };
   onMove: (index: number, delta: number) => void;
   onRemove: (productId: string) => void;
   onReason: (productId: string, reason: string) => void;
@@ -574,8 +638,22 @@ function PickRow({
   const image = pick.image_url ?? pick.image_snapshot;
 
   return (
-    <li className={`flex gap-3 py-3 ${dropped ? "opacity-70" : ""}`}>
-      <div className="flex flex-col justify-center gap-0.5">
+    <li
+      {...rowProps}
+      className={`flex gap-3 py-3 ${dropped ? "opacity-70" : ""} ${
+        dragging ? "opacity-40" : ""
+      }`}
+    >
+      <div className="flex flex-col items-center justify-center gap-0.5">
+        {/* The handle is the affordance, but the whole <li> is draggable —
+            grabbing a row by its image is the reflex, and refusing that reads
+            as the drag being broken. */}
+        <span
+          className="cursor-grab text-base-content/30 active:cursor-grabbing"
+          aria-hidden="true"
+        >
+          <LuGripVertical size={14} />
+        </span>
         <button
           className="btn btn-ghost btn-xs px-1"
           onClick={() => onMove(index, -1)}
