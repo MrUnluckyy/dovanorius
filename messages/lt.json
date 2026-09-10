@@ -349,6 +349,22 @@
     "tabArchive": "Archyvas",
     "openButton": "Atidaryti"
   },
+  "AndroidTester": {
+    "title": "Turi Android telefoną?",
+    "body": "Ieškome kelių žmonių, kurie išbandytų naują Noriuto programėlę. Reikia ją tiesiog įsidiegti ir dvi savaites palikti telefone.",
+    "titleOnAndroid": "Padėk išbandyti Noriuto programėlę",
+    "bodyOnAndroid": "Reikia kelių žmonių, kurie ją įsidiegtų ir dvi savaites paliktų telefone. Naudotis nebūtina — užtenka, kad liktų.",
+    "cta": "Noriu padėti",
+    "dismiss": "Uždaryti",
+    "emailLabel": "Gmail adresas, kurį naudoji telefone",
+    "emailHint": "Google Play testuotojų sąrašas veikia pagal Google paskyrą, tad reikia būtent to adreso.",
+    "submit": "Užsirašyti",
+    "submitting": "Siunčiama…",
+    "invalidEmail": "Įrašyk teisingą el. pašto adresą.",
+    "error": "Nepavyko išsaugoti. Pabandyk dar kartą.",
+    "doneTitle": "Ačiū! 🎉",
+    "doneBody": "Įtrauksime tave į testuotojų sąrašą ir atsiųsime nuorodą el. paštu."
+  },
   "Events": {
     "addCover": "Pridėti viršelio nuotrauką",
     "addMoreDetails": "Pridėti viršelį ir pastabas",

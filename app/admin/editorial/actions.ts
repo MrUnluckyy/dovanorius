@@ -328,6 +328,74 @@ export async function addPick(
   return { ok: true };
 }
 
+/**
+ * Add several products in one go, in the order they were ticked.
+ *
+ * Building a shelf a product at a time meant a round trip, a syncPicks() and a
+ * router.refresh() each — for a twelve-item shelf that is twelve of everything,
+ * and the list jumped under the cursor between each one. This does the whole
+ * batch against one rank sequence and syncs once at the end.
+ */
+export async function addPicks(
+  personaId: string,
+  productIds: string[]
+): Promise<ActionResult<{ added: number }>> {
+  await requireAdminId();
+  await requireEditorial(personaId);
+
+  const wanted = [...new Set(productIds)];
+  if (!wanted.length) return { ok: true, added: 0 };
+
+  // Only products still in the catalogue: an id from a stale search result
+  // would otherwise land as a pick with no snapshot to fall back on.
+  const { data: products } = await supabaseAdmin
+    .from("inspo_products")
+    .select("id, product_name, image_url")
+    .in("id", wanted);
+
+  const byId = new Map((products ?? []).map((p) => [p.id, p]));
+  // Preserve the order they were ticked in rather than whatever `in` returned.
+  const found = wanted.filter((id) => byId.has(id));
+
+  if (!found.length) return { ok: false, error: "Produktai nerasti kataloge." };
+
+  const { data: current } = await supabaseAdmin
+    .from("editorial_picks")
+    .select("product_id, rank")
+    .eq("persona_id", personaId);
+
+  // An upsert on a product that is already a pick would rewrite its rank and
+  // silently shunt it to the end of the shelf. The modal disables those
+  // checkboxes, but this action is reachable on its own, so the skip belongs
+  // here rather than only in the UI.
+  const existing = new Set((current ?? []).map((r) => r.product_id));
+  const fresh = found.filter((id) => !existing.has(id));
+  if (!fresh.length) return { ok: true, added: 0 };
+
+  let rank = (current ?? []).reduce((max, r) => Math.max(max, r.rank ?? 0), 0);
+  const rows = fresh.map((id) => {
+    const product = byId.get(id)!;
+    rank += 1;
+    return {
+      persona_id: personaId,
+      product_id: id,
+      rank,
+      name_snapshot: product.product_name,
+      image_snapshot: product.image_url,
+    };
+  });
+
+  const { error } = await supabaseAdmin
+    .from("editorial_picks")
+    .upsert(rows, { onConflict: "persona_id,product_id" });
+
+  if (error) return { ok: false, error: "Nepavyko pridėti produktų." };
+
+  await syncPicks(personaId);
+  revalidate(personaId);
+  return { ok: true, added: rows.length };
+}
+
 export async function removePick(
   personaId: string,
   productId: string
@@ -427,5 +495,50 @@ export async function resyncShelf(personaId: string): Promise<SimpleResult> {
   }
 
   revalidate(personaId);
+  return { ok: true };
+}
+
+/**
+ * Persist a hand-dragged shelf order.
+ *
+ * `sort_order` was editable only as a number typed into each shelf's own form,
+ * so reordering three shelves meant three page visits and doing the arithmetic
+ * yourself. This writes the whole sequence at once.
+ *
+ * Every id is checked against `kind = 'editorial'` before anything is written:
+ * the list only renders editorial shelves, but the ids arrive from the client
+ * and an LLM-curated shelf must not be renumbered from here.
+ */
+export async function reorderShelves(
+  orderedIds: string[]
+): Promise<SimpleResult> {
+  await requireAdminId();
+  if (!orderedIds.length) return { ok: true };
+
+  const { data: rows } = await supabaseAdmin
+    .from("gift_personas")
+    .select("id, kind")
+    .in("id", orderedIds);
+
+  const editorial = new Set(
+    (rows ?? []).filter((r) => r.kind === "editorial").map((r) => r.id)
+  );
+
+  const ordered = orderedIds.filter((id) => editorial.has(id));
+  if (ordered.length !== orderedIds.length) {
+    return { ok: false, error: "Kai kurios lentynos nėra redakcinės." };
+  }
+
+  // Sequential, not upserted: gift_personas rows carry columns this action has
+  // no business rewriting, and an upsert of a partial row would blank them.
+  for (const [i, id] of ordered.entries()) {
+    const { error } = await supabaseAdmin
+      .from("gift_personas")
+      .update({ sort_order: i + 1 })
+      .eq("id", id);
+    if (error) return { ok: false, error: "Nepavyko pakeisti eiliškumo." };
+  }
+
+  revalidate();
   return { ok: true };
 }
