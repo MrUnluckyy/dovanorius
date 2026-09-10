@@ -345,6 +345,22 @@
     "tabArchive": "Archive",
     "openButton": "Open"
   },
+  "AndroidTester": {
+    "title": "Got an Android phone?",
+    "body": "We're looking for a few people to try the new Noriuto app. All it takes is installing it and leaving it on your phone for two weeks.",
+    "titleOnAndroid": "Help us test the Noriuto app",
+    "bodyOnAndroid": "We need a few people to install it and leave it on their phone for two weeks. You don't have to use it.",
+    "cta": "Count me in",
+    "dismiss": "Close",
+    "emailLabel": "The Gmail address you use on your phone",
+    "emailHint": "The Google Play tester list works by Google account, so it has to be that exact address.",
+    "submit": "Sign me up",
+    "submitting": "Sending…",
+    "invalidEmail": "Please enter a valid email address.",
+    "error": "Could not save that. Please try again.",
+    "doneTitle": "Thank you! 🎉",
+    "doneBody": "We'll add you to the tester list and email you the link."
+  },
   "Events": {
     "addCover": "Add cover photo",
     "addMoreDetails": "Add a cover and notes",
