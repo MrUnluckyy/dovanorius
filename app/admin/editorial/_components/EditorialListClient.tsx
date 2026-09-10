@@ -3,9 +3,16 @@
 import Link from "next/link";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { LuPlus, LuTriangleAlert, LuClock, LuPencil } from "react-icons/lu";
+import {
+  LuPlus,
+  LuTriangleAlert,
+  LuClock,
+  LuPencil,
+  LuGripVertical,
+} from "react-icons/lu";
 import toast from "react-hot-toast";
-import { createEditorialShelf } from "../actions";
+import { createEditorialShelf, reorderShelves } from "../actions";
+import { useListDrag } from "@/app/admin/_components/useListDrag";
 import {
   MIN_ITEMS,
   type EditorialShelf,
@@ -44,6 +51,27 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
   const [sortOrder, setSortOrder] = useState("100");
+
+  /**
+   * `sort_order` used to be reachable only as a number typed into each shelf's
+   * own edit form, so putting a third shelf between two others meant opening
+   * three pages and renumbering by hand. Dragging writes the whole sequence.
+   */
+  const drag = useListDrag({
+    items: shelves,
+    getId: (s) => s.id,
+    onCommit: (orderedIds) => {
+      startTransition(async () => {
+        const res = await reorderShelves(orderedIds);
+        if (!res.ok) {
+          toast.error(res.error);
+          return;
+        }
+        router.refresh();
+      });
+    },
+    disabled: pending,
+  });
 
   function handleCreate() {
     startTransition(async () => {
@@ -84,7 +112,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
           <p className="mt-1 max-w-2xl text-sm text-base-content/60">
             Rankomis atrinktos lentynos Discover puslapyje. Savaitinis LLM
             kuratorius jų neliečia, o rodymo laikotarpį nustatote čia — be
-            diegimo.
+            diegimo. Eiliškumą keiskite tempdami eilutes.
           </p>
         </div>
         <button
@@ -118,9 +146,19 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
                     </td>
                   </tr>
                 ) : (
-                  shelves.map((s) => (
-                    <tr key={s.id}>
+                  drag.ordered.map((s) => (
+                    <tr
+                      key={s.id}
+                      {...drag.rowProps(s.id)}
+                      className={drag.draggingId === s.id ? "opacity-40" : ""}
+                    >
                       <td>
+                        <span
+                          className="mr-2 inline-block cursor-grab align-middle text-base-content/30 active:cursor-grabbing"
+                          aria-hidden="true"
+                        >
+                          <LuGripVertical size={14} />
+                        </span>
                         <Link
                           href={`/admin/editorial/${s.id}`}
                           className="font-medium hover:underline"
