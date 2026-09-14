@@ -1,10 +1,13 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { AppStoreButton } from "@/components/landing/AppStoreButton";
+import { StoreLinks } from "@/components/landing/StoreLinks";
 import { Reveal } from "@/components/ui/Reveal";
+import { devicePlatform } from "@/lib/device";
 
 export async function PreFooterCTA() {
   const t = await getTranslations("Landing.cta");
+  const platform = devicePlatform((await headers()).get("user-agent"));
 
   return (
     <section className="nr-container pb-16 pt-4 md:pb-[70px]">
@@ -23,17 +26,14 @@ export async function PreFooterCTA() {
               {t("body")}
             </p>
           </div>
-          <div className="relative flex w-full flex-none flex-col gap-3.5 sm:flex-row md:w-auto">
-            <Link
-              href="/dashboard"
-              className="nr-btn nr-btn-dark w-full sm:w-auto"
-            >
+          {/* Stacked, not side by side: the web and the app are two different
+              decisions, and on yellow the store pill needs its own white
+              ground to stay readable. */}
+          <div className="relative flex w-full flex-none flex-col items-stretch gap-3.5 md:w-auto">
+            <Link href="/dashboard" className="nr-btn nr-btn-dark">
               {t("start")}
             </Link>
-            <AppStoreButton
-              label={t("appStore")}
-              className="nr-btn nr-btn-outline w-full !border-transparent !bg-white hover:!bg-[#fff8ea] sm:w-auto"
-            />
+            <StoreLinks platform={platform} tone="yellow" />
           </div>
         </div>
       </Reveal>

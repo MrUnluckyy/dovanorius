@@ -347,23 +347,12 @@
     "tabEvents": "Events",
     "tabFriends": "Friends",
     "tabArchive": "Archive",
-    "openButton": "Open"
-  },
-  "AndroidTester": {
-    "title": "Got an Android phone?",
-    "body": "We're looking for a few people to try the new Noriuto app. All it takes is installing it and leaving it on your phone for two weeks.",
-    "titleOnAndroid": "Help us test the Noriuto app",
-    "bodyOnAndroid": "We need a few people to install it and leave it on their phone for two weeks. You don't have to use it.",
-    "cta": "Count me in",
-    "dismiss": "Close",
-    "emailLabel": "The Gmail address you use on your phone",
-    "emailHint": "The Google Play tester list works by Google account, so it has to be that exact address.",
-    "submit": "Sign me up",
-    "submitting": "Sending…",
-    "invalidEmail": "Please enter a valid email address.",
-    "error": "Could not save that. Please try again.",
-    "doneTitle": "Thank you! 🎉",
-    "doneBody": "We'll add you to the tester list and email you the link."
+    "openButton": "Open",
+    "appLaunch": {
+      "title": "The Noriuto app is on Google Play",
+      "body": "Testing is done — the Android app is out. Your boards and reservations come with you.",
+      "dismiss": "Close"
+    }
   },
   "Events": {
     "addCover": "Add cover photo",
@@ -762,11 +751,10 @@
       "closeMenu": "Close menu"
     },
     "hero": {
-      "badge": "Free — on the web and App Store",
+      "badge": "New — Noriuto is now on Google Play",
       "title": "One place for everything you wish for",
       "subtitle": "Forget the question “what do you want for your birthday?” — build a wishlist board, share it with family and friends, and get gifts you actually want.",
       "ctaCreate": "Create for free",
-      "appStore": "App Store",
       "chipAdded": "Added to “For baby” board",
       "chipReserved": "Austėja reserved a gift",
       "ctaDiscover": "Browse gift ideas"
@@ -855,8 +843,7 @@
     "cta": {
       "title": "Dream boldly.",
       "body": "Save your wishes in one place and turn dreams into plans — for free.",
-      "start": "Start creating",
-      "appStore": "App Store"
+      "start": "Start creating"
     },
     "footer": {
       "copyright": "© {year} Noriuto.lt",
@@ -896,6 +883,14 @@
       "title": "Not sure what to gift?",
       "body": "Discover gift ideas and guides by occasion and interests.",
       "cta": "Browse ideas"
+    },
+    "stores": {
+      "iosEyebrow": "iPhone",
+      "ios": "App Store",
+      "androidEyebrow": "Android",
+      "android": "Google Play",
+      "iosAria": "Download Noriuto on the App Store",
+      "androidAria": "Get Noriuto on Google Play"
     }
   },
   "Notifications": {
