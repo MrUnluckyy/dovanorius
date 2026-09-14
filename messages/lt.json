@@ -347,23 +347,12 @@
     "tabEvents": "Šventės",
     "tabFriends": "Draugai",
     "tabArchive": "Archyvas",
-    "openButton": "Atidaryti"
-  },
-  "AndroidTester": {
-    "title": "Turi Android telefoną?",
-    "body": "Ieškome kelių žmonių, kurie išbandytų naują Noriuto programėlę. Reikia ją tiesiog įsidiegti ir dvi savaites palikti telefone.",
-    "titleOnAndroid": "Padėk išbandyti Noriuto programėlę",
-    "bodyOnAndroid": "Reikia kelių žmonių, kurie ją įsidiegtų ir dvi savaites paliktų telefone. Naudotis nebūtina — užtenka, kad liktų.",
-    "cta": "Noriu padėti",
-    "dismiss": "Uždaryti",
-    "emailLabel": "Gmail adresas, kurį naudoji telefone",
-    "emailHint": "Google Play testuotojų sąrašas veikia pagal Google paskyrą, tad reikia būtent to adreso.",
-    "submit": "Užsirašyti",
-    "submitting": "Siunčiama…",
-    "invalidEmail": "Įrašyk teisingą el. pašto adresą.",
-    "error": "Nepavyko išsaugoti. Pabandyk dar kartą.",
-    "doneTitle": "Ačiū! 🎉",
-    "doneBody": "Įtrauksime tave į testuotojų sąrašą ir atsiųsime nuorodą el. paštu."
+    "openButton": "Atidaryti",
+    "appLaunch": {
+      "title": "Noriuto programėlė jau „Google Play“",
+      "body": "Testavimas baigtas — Android versiją gali parsisiųsti jau dabar. Lentos ir rezervacijos keliauja kartu.",
+      "dismiss": "Uždaryti"
+    }
   },
   "Events": {
     "addCover": "Pridėti viršelio nuotrauką",
@@ -762,11 +751,10 @@
       "closeMenu": "Uždaryti meniu"
     },
     "hero": {
-      "badge": "Nemokama — internete ir App Store",
+      "badge": "Naujiena — Noriuto jau ir „Google Play“",
       "title": "Viena vieta visiems tavo norams",
       "subtitle": "Pamiršk klausimą „ko nori per gimtadienį?“ — susikurk norų lentą, dalinkis su šeima ir draugais ir gauk dovanas, kurių iš tikrųjų nori.",
       "ctaCreate": "Susikurk nemokamai",
-      "appStore": "App Store",
       "chipAdded": "Pridėta į lentą „Vaikeliui“",
       "chipReserved": "Austėja rezervavo dovaną",
       "ctaDiscover": "Naršyti dovanų idėjas"
@@ -855,8 +843,7 @@
     "cta": {
       "title": "Svajok drąsiai.",
       "body": "Išsisaugok norus vienoje vietoje ir paversk svajones planais — nemokamai.",
-      "start": "Pradėk kurti",
-      "appStore": "App Store"
+      "start": "Pradėk kurti"
     },
     "footer": {
       "copyright": "© {year} Noriuto.lt",
@@ -896,6 +883,14 @@
       "title": "Nežinai, ką padovanoti?",
       "body": "Atrask dovanų idėjų ir gidų pagal progą bei pomėgius.",
       "cta": "Peržiūrėti idėjas"
+    },
+    "stores": {
+      "iosEyebrow": "iPhone",
+      "ios": "App Store",
+      "androidEyebrow": "Android",
+      "android": "Google Play",
+      "iosAria": "Parsisiųsti Noriuto iš App Store",
+      "androidAria": "Parsisiųsti Noriuto iš Google Play"
     }
   },
   "Notifications": {

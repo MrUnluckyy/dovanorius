@@ -1,17 +1,35 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { AppStoreButton } from "@/components/landing/AppStoreButton";
+import {
+  PlayGlyph,
+  PLAY_URL,
+  StoreLinks,
+} from "@/components/landing/StoreLinks";
 import { HeroCollage } from "@/components/hero/HeroCollage";
+import { devicePlatform } from "@/lib/device";
 
 export async function ImageHero() {
   const t = await getTranslations("Landing.hero");
+  const platform = devicePlatform((await headers()).get("user-agent"));
+
   return (
     <section>
       {/* headline block */}
       <div className="mx-auto max-w-[880px] px-[18px] pb-2 pt-10 text-center md:px-12 md:pt-14">
-        <span className="nr-badge nr-badge-outline nr-anim-fadeup mb-5">
-          🎁 {t("badge")}
-        </span>
+        {/* The badge slot used to list where Noriuto runs; the Android release
+            is the more interesting thing it can say, and it is the one line
+            above the headline everyone reads. "Free" has not gone missing —
+            the primary button underneath says it. */}
+        <Link
+          href={PLAY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="nr-badge nr-badge-tint nr-anim-fadeup mb-5 transition-colors hover:bg-(--nr-yellow-soft)"
+        >
+          <PlayGlyph size={14} />
+          {t("badge")}
+        </Link>
         <h1
           className="nr-display nr-anim-fadeup mb-5 text-[40px] md:text-[68px]"
           style={{ animationDelay: "0.1s" }}
@@ -46,10 +64,15 @@ export async function ImageHero() {
           >
             {t("ctaDiscover")}
           </Link>
-          <AppStoreButton
-            label={t("appStore")}
-            className="nr-btn nr-btn-dark w-full sm:w-auto"
-          />
+        </div>
+        {/* The stores sit a step below the two web CTAs rather than in line
+            with them: a fourth button made the row a menu, and the app is a
+            second way into the same thing, not a fourth thing to choose. */}
+        <div
+          className="nr-anim-fadeup mt-5 flex justify-center"
+          style={{ animationDelay: "0.46s" }}
+        >
+          <StoreLinks platform={platform} />
         </div>
       </div>
 
