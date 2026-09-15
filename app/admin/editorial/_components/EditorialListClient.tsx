@@ -138,7 +138,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
                   <th></th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody {...drag.containerProps}>
                 {shelves.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center text-base-content/40">

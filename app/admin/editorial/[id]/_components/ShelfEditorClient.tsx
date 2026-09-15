@@ -420,7 +420,10 @@ export function ShelfEditorClient({
               Kol kas nieko neatrinkta.
             </div>
           ) : (
-            <ul className="mt-2 divide-y divide-base-300">
+            <ul
+              className="mt-2 divide-y divide-base-300"
+              {...drag.containerProps}
+            >
               {drag.ordered.map((p, i) => (
                 <PickRow
                   key={p.product_id}
