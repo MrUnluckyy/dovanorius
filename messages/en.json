@@ -347,12 +347,7 @@
     "tabEvents": "Events",
     "tabFriends": "Friends",
     "tabArchive": "Archive",
-    "openButton": "Open",
-    "appLaunch": {
-      "title": "The Noriuto app is on Google Play",
-      "body": "Testing is done — the Android app is out. Your boards and reservations come with you.",
-      "dismiss": "Close"
-    }
+    "openButton": "Open"
   },
   "Events": {
     "addCover": "Add cover photo",
