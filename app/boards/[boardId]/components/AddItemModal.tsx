@@ -117,8 +117,11 @@ export function AddItemModal({
       if (data?.images && data.images.length > 0) {
         setValue("image_url", data.images[0]);
       }
-      if (data?.price) {
-        setValue("price", Number(data?.price.replace(",", ".")));
+      // The parser already normalises "2 429,50 €" / "$2,429.50" / "1.234,56"
+      // into a plain "2429.5" — re-swapping separators here corrupted those.
+      const parsedPrice = Number(data?.price);
+      if (Number.isFinite(parsedPrice) && parsedPrice > 0) {
+        setValue("price", parsedPrice);
       }
     } catch (err) {
       toast.error(

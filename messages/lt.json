@@ -347,12 +347,7 @@
     "tabEvents": "Šventės",
     "tabFriends": "Draugai",
     "tabArchive": "Archyvas",
-    "openButton": "Atidaryti",
-    "appLaunch": {
-      "title": "Noriuto programėlė jau „Google Play“",
-      "body": "Testavimas baigtas — Android versiją gali parsisiųsti jau dabar. Lentos ir rezervacijos keliauja kartu.",
-      "dismiss": "Uždaryti"
-    }
+    "openButton": "Atidaryti"
   },
   "Events": {
     "addCover": "Pridėti viršelio nuotrauką",
