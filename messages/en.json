@@ -530,7 +530,11 @@
     "wishNoteSaved": "Saved",
     "wishNoteTitle": "What would you like?",
     "youSuffix": "(you)",
-    "secureSeatError": "We couldn't send the confirmation email. Please try again."
+    "secureSeatError": "We couldn't send the confirmation email. Please try again.",
+    "secureSeatResend": "Send it again",
+    "secureSeatResent": "Sent again — give it a minute and check spam too.",
+    "secureSeatChangeEmail": "Use a different address",
+    "secureSeatRateLimited": "We've sent a lot of emails in the last few minutes. Please try again in a little while."
   },
   "Blog": {
     "metaTitle": "Blog — Noriuto.lt",

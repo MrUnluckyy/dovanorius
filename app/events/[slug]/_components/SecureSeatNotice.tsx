@@ -21,14 +21,57 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 export default function SecureSeatNotice({
   knownEmail,
+  pendingEmail,
 }: {
   knownEmail: string | null;
+  /** An address already sent a confirmation link that has not been opened. */
+  pendingEmail: string | null;
 }) {
   const supabase = createClient();
   const t = useTranslations("Events");
-  const [email, setEmail] = useState(knownEmail ?? "");
+  const [email, setEmail] = useState(pendingEmail ?? knownEmail ?? "");
   const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
+  // A pending address means the link is already in their inbox. Showing the
+  // empty form again is what made one guest re-send three times in as many
+  // minutes on 2026-09-26 — each attempt spent the project-wide email quota
+  // and the last two hit the rate limit.
+  const [sent, setSent] = useState(!!pendingEmail);
+  const [resent, setResent] = useState(false);
+
+  const reportFailure = (
+    error: { code?: string; message: string },
+    reason: string,
+    value: string
+  ) => {
+    console.error("Could not secure guest seat:", error);
+    reportError({
+      area: "auth",
+      reason,
+      detail: { code: error.code, message: error.message },
+      contactEmail: value,
+    });
+    toast.error(
+      error.code === "over_email_send_rate_limit"
+        ? t("secureSeatRateLimited")
+        : t("secureSeatError")
+    );
+  };
+
+  const resend = async () => {
+    const value = email.trim();
+    setSending(true);
+    const { error } = await supabase.auth.resend({
+      type: "email_change",
+      email: value,
+    });
+    setSending(false);
+    if (error) {
+      reportFailure(error, "secure_seat_resend_failed", value);
+      return;
+    }
+    // One resend per visit is plenty; a reload brings the button back.
+    setResent(true);
+  };
 
   const send = async () => {
     const value = email.trim();
@@ -49,25 +92,37 @@ export default function SecureSeatNotice({
         /already been registered|already registered|already in use/i.test(
           error.message
         );
-      if (!taken) {
-        console.error("Could not secure guest seat:", error);
-        reportError({
-          area: "auth",
-          reason: "secure_seat_failed",
-          detail: { code: error.code, message: error.message },
-          contactEmail: value,
-        });
-      }
-      toast.error(taken ? t("joinEmailTaken") : t("secureSeatError"));
+      if (taken) toast.error(t("joinEmailTaken"));
+      else reportFailure(error, "secure_seat_failed", value);
       return;
     }
+    setResent(false);
     setSent(true);
   };
 
   if (sent) {
     return (
       <div className="rounded-[20px] bg-(--nr-success-soft) px-5 py-4 text-[14px] leading-relaxed text-(--nr-success-ink)">
-        {t("secureSeatSent", { email: email.trim() })}
+        <p>{t("secureSeatSent", { email: email.trim() })}</p>
+        {resent && <p className="mt-1">{t("secureSeatResent")}</p>}
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[13px] font-semibold">
+          {!resent && (
+            <button
+              onClick={resend}
+              disabled={sending}
+              className="underline underline-offset-2 disabled:opacity-50"
+            >
+              {t("secureSeatResend")}
+            </button>
+          )}
+          <button
+            onClick={() => setSent(false)}
+            disabled={sending}
+            className="underline underline-offset-2 disabled:opacity-50"
+          >
+            {t("secureSeatChangeEmail")}
+          </button>
+        </div>
       </div>
     );
   }
