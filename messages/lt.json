@@ -530,7 +530,11 @@
     "wishNoteSaved": "Išsaugota",
     "wishNoteTitle": "Ką norėtum gauti?",
     "youSuffix": "(tu)",
-    "secureSeatError": "Nepavyko išsiųsti patvirtinimo laiško. Pabandyk dar kartą."
+    "secureSeatError": "Nepavyko išsiųsti patvirtinimo laiško. Pabandyk dar kartą.",
+    "secureSeatResend": "Siųsti dar kartą",
+    "secureSeatResent": "Išsiuntėme dar kartą — palauk minutę ir pažiūrėk ir į šlamšto aplanką.",
+    "secureSeatChangeEmail": "Naudoti kitą adresą",
+    "secureSeatRateLimited": "Per pastarąsias kelias minutes išsiuntėme daug laiškų. Pabandyk dar kartą šiek tiek vėliau."
   },
   "Blog": {
     "metaTitle": "Tinklaraštis — Noriuto.lt",

@@ -164,7 +164,10 @@ export default function LobbyClient({
           address, so the offer to fix that sits above everything else. */}
       {user.is_anonymous && (
         <section className="mt-4">
-          <SecureSeatNotice knownEmail={user.email ?? null} />
+          <SecureSeatNotice
+            knownEmail={user.email ?? null}
+            pendingEmail={user.new_email ?? null}
+          />
         </section>
       )}
 
