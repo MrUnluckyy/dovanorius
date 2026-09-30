@@ -170,6 +170,15 @@ export type RefreshResult = {
   costUsd: number;
 };
 
+// One client for the whole run, not one per persona. In CI the client holds a
+// federated token exchanged from GitHub's OIDC JWT, and that JWT is single-use:
+// a fresh client per persona re-exchanges the same JWT and gets a 401. A shared
+// client exchanges once and refreshes on its own schedule.
+let client: Anthropic | undefined;
+function anthropic() {
+  return (client ??= new Anthropic());
+}
+
 export async function refreshPersona(
   supabase: SupabaseClient,
   persona: Persona
@@ -191,8 +200,7 @@ export async function refreshPersona(
     return { slug: persona.slug, candidates: 0, kept: 0, costUsd: 0 };
   }
 
-  const client = new Anthropic();
-  const res = await client.messages.parse({
+  const res = await anthropic().messages.parse({
     model: GIFT_MODEL,
     max_tokens: 4000,
     thinking: { type: "disabled" },
