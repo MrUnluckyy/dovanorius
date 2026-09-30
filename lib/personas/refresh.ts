@@ -115,31 +115,70 @@ export async function retrievePersonaCandidates(
   const types = persona.product_types.length ? persona.product_types : [null];
   const perType = Math.max(20, Math.ceil((CANDIDATE_LIMIT * 1.5) / types.length));
 
-  const buckets = await Promise.all(
-    types.map(async (type) => {
-      let tq = base();
-      if (type) tq = tq.eq("product_type", type);
-      const { data, error } = await tq
-        .order("gift_score", { ascending: false })
-        .order("sort_key", { ascending: true })
-        .limit(perType);
-      if (error) throw new Error(`candidates(${type ?? "all"}): ${error.message}`);
-      return (data ?? []) as Candidate[];
-    })
-  );
-
   const exclude = persona.exclude_keywords.map((k) => k.toLowerCase());
   const include = persona.include_keywords.map((k) => k.toLowerCase());
 
-  const kept = buckets
-    .flat()
-    .filter((r) => {
-      const name = (r.product_name ?? "").toLowerCase();
-      return !exclude.some((k) => k && name.includes(k));
-    });
+  // ...but the top of a category by score is not the persona's corner of it.
+  // "baby" drew toys/home/kitchen and came back with 7 picks: 212 baby toys were
+  // in stock and in budget, yet only 5 ranked in the toys top 150, which is all
+  // LEGO and board games for older kids. So each type also gets a keyword
+  // bucket. Scoped to one product_type the trigram OR is fast (1.3s on clothing,
+  // the biggest type) — it was the unscoped 326k-row version that timed out.
+  const terms = include.map((k) => k.replace(/[,()%]/g, " ").trim()).filter((k) => k.length >= 3);
+  const keywordOr = terms.map((k) => `product_name.ilike.%${k}%`).join(",");
 
-  // Keywords now only PREFER within an already balanced pool, which is all they
-  // were ever able to do reliably.
+  const buckets = await Promise.all(
+    types.flatMap((type) => {
+      const byScore = async () => {
+        let tq = base();
+        if (type) tq = tq.eq("product_type", type);
+        const { data, error } = await tq
+          .order("gift_score", { ascending: false })
+          .order("sort_key", { ascending: true })
+          .limit(perType);
+        if (error) throw new Error(`candidates(${type ?? "all"}): ${error.message}`);
+        return (data ?? []) as Candidate[];
+      };
+      const byKeyword = async () => {
+        if (!type || !keywordOr) return [];
+        const { data, error } = await base()
+          .eq("product_type", type)
+          .or(keywordOr)
+          .order("gift_score", { ascending: false })
+          .order("sort_key", { ascending: true })
+          .limit(perType);
+        // Extra reach, not a requirement: a slow bucket must not cost the shelf.
+        if (error) {
+          console.warn(`  keyword candidates(${type}) skipped: ${error.message}`);
+          return [];
+        }
+        return (data ?? []) as Candidate[];
+      };
+      return [byScore(), byKeyword()];
+    })
+  );
+
+  // Interleave the buckets rather than concatenating them. With two buckets per
+  // type, a plain flat() let the first types fill the whole pool: man-30plus
+  // came back as tech and sport only, its kitchen, bags and accessories cut off.
+  const seen = new Set<string>();
+  const interleaved: Candidate[] = [];
+  for (let i = 0; i < perType; i++) {
+    for (const bucket of buckets) {
+      const r = bucket[i];
+      if (r && !seen.has(r.id)) {
+        seen.add(r.id);
+        interleaved.push(r);
+      }
+    }
+  }
+  const kept = interleaved.filter((r) => {
+    const name = (r.product_name ?? "").toLowerCase();
+    return !exclude.some((k) => k && name.includes(k));
+  });
+
+  // Keywords widen retrieval (above) and PREFER within the balanced pool
+  // (below); they never decide on their own what a shelf is.
   const scored = kept.map((r) => ({
     r,
     hits: include.filter((k) => k && (r.product_name ?? "").toLowerCase().includes(k)).length,
