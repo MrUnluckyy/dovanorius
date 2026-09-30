@@ -9,7 +9,17 @@ name: Refresh persona shelves
 # The whole run is roughly $1.
 #
 # Required repository secrets:
-#   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SECRET_KEY, ANTHROPIC_API_KEY
+#   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SECRET_KEY
+#
+# No Anthropic API key: the job authenticates with Workload Identity Federation.
+# GitHub mints an OIDC token for the run, the SDK exchanges it for a short-lived
+# Anthropic token, so there is nothing to rotate. Static keys kept dying on us
+# (revoked Aug 24, then a workspace-less replacement) and the shelves went
+# unrefreshed for six weeks. Required repository variables (IDs, not secrets):
+#   ANTHROPIC_FEDERATION_RULE_ID, ANTHROPIC_ORGANIZATION_ID,
+#   ANTHROPIC_SERVICE_ACCOUNT_ID, ANTHROPIC_WORKSPACE_ID
+# The federation rule only matches refs/heads/master of this repo, so branch and
+# PR runs can't authenticate.
 on:
   schedule:
     - cron: "30 6 * * 1"
@@ -25,6 +35,11 @@ on:
 concurrency:
   group: refresh-personas
   cancel-in-progress: false
+
+# id-token: write is what lets the job request a GitHub OIDC token at all.
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   refresh:
@@ -45,8 +60,26 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Curate persona shelves
-        run: pnpm tsx scripts/refresh-personas.ts ${{ github.event.inputs.slugs }}
+        # GitHub's OIDC token lives ~5 minutes and each one is single-use (jti),
+        # but the SDK re-reads the token file whenever it refreshes the Anthropic
+        # token (~10 min lifetime) and one run can take far longer than that. So
+        # a background loop keeps a fresh, unused token in the file for the
+        # whole run. Written via mv so the SDK never reads a half-written file.
+        run: |
+          fetch_token() {
+            curl -sSf -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://api.anthropic.com" \
+              | jq -r .value > "$ANTHROPIC_IDENTITY_TOKEN_FILE.tmp" \
+              && mv "$ANTHROPIC_IDENTITY_TOKEN_FILE.tmp" "$ANTHROPIC_IDENTITY_TOKEN_FILE"
+          }
+          fetch_token
+          ( while sleep 120; do fetch_token || echo "::warning::OIDC token refresh failed"; done ) &
+          pnpm tsx scripts/refresh-personas.ts ${{ github.event.inputs.slugs }}
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_FEDERATION_RULE_ID: ${{ vars.ANTHROPIC_FEDERATION_RULE_ID }}
+          ANTHROPIC_ORGANIZATION_ID: ${{ vars.ANTHROPIC_ORGANIZATION_ID }}
+          ANTHROPIC_SERVICE_ACCOUNT_ID: ${{ vars.ANTHROPIC_SERVICE_ACCOUNT_ID }}
+          ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
+          ANTHROPIC_IDENTITY_TOKEN_FILE: ${{ runner.temp }}/anthropic-oidc.jwt
