@@ -24,7 +24,9 @@
  * breaks shelves instead of to the day of the week.
  *
  * Required env: NEXT_PUBLIC_SUPABASE_URL (or SUPABASE_URL), SUPABASE_SECRET_KEY,
- * ANTHROPIC_API_KEY.
+ * and Anthropic credentials: ANTHROPIC_API_KEY locally, or in CI the Workload
+ * Identity Federation vars (ANTHROPIC_FEDERATION_RULE_ID,
+ * ANTHROPIC_ORGANIZATION_ID, ...), which the SDK picks up on its own.
  */
 import { createClient } from "@supabase/supabase-js";
 import { refreshPersona, type Persona } from "../lib/personas/refresh";
@@ -142,9 +144,14 @@ async function main() {
     return;
   }
 
-  // Checked here rather than at entry so --dry-run works without the key.
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error("ANTHROPIC_API_KEY is not set");
+  // Checked here rather than at entry so --dry-run works without credentials.
+  // CI has no key: it federates the GitHub OIDC token (see the workflow).
+  const federated =
+    process.env.ANTHROPIC_FEDERATION_RULE_ID && process.env.ANTHROPIC_ORGANIZATION_ID;
+  if (!process.env.ANTHROPIC_API_KEY && !federated) {
+    throw new Error(
+      "no Anthropic credentials: set ANTHROPIC_API_KEY, or the ANTHROPIC_FEDERATION_* vars"
+    );
   }
 
   let totalCost = 0;
