@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import type { InspoFilters, InspoProduct } from "@/types/inspo";
 
 export const INSPO_PAGE_SIZE = 24;
@@ -26,9 +26,37 @@ export function useInspoProducts(filters: InspoFilters) {
   return useInfiniteQuery({
     queryKey: ["inspo", filters],
     initialPageParam: 0,
+    // Keep the current grid on screen while the next query runs. Without this
+    // every keystroke that settled blanked the results into skeletons, which
+    // read as "search is slow" even when the query took 50ms.
+    placeholderData: keepPreviousData,
     queryFn: async ({ pageParam }) => {
       const from = pageParam * INSPO_PAGE_SIZE;
       const to = from + INSPO_PAGE_SIZE - 1;
+
+      // Search goes through search_products (shared with noriuto-app): it folds
+      // diacritics, matches each word, and ranks by relevance. The plain query
+      // below is kept for browsing, where its gift_score index is what we want.
+      const term = filters.search.trim();
+      if (term) {
+        const { data, error } = await supabase.rpc("search_products", {
+          p_q: term,
+          p_product_type: filters.productType,
+          p_brand: filters.brand,
+          p_merchant: filters.merchant,
+          p_price_min: Math.max(PRICE_FLOOR, filters.priceMin ?? 0),
+          p_price_max: filters.priceMax,
+          p_gender:
+            filters.audience === "him" ? "male" : filters.audience === "her" ? "female" : null,
+          p_hide_season: filters.inSeason ? offSeasonToHide(new Date().getMonth()) : null,
+          p_on_sale: filters.onSaleOnly,
+          p_sort: filters.sort,
+          p_limit: INSPO_PAGE_SIZE,
+          p_offset: from,
+        });
+        if (error) throw error;
+        return (data ?? []) as InspoProduct[];
+      }
 
       let query = supabase
         .from("inspo_products")
@@ -81,8 +109,6 @@ export function useInspoProducts(filters: InspoFilters) {
         query = query.eq("product_type", filters.productType);
       if (filters.priceMax != null) query = query.lte("price", filters.priceMax);
       if (filters.onSaleOnly) query = query.gt("discount_pct", 0);
-      if (filters.search.trim())
-        query = query.ilike("product_name", `%${filters.search.trim()}%`);
 
       // Audience: hide the opposite gender, but keep unisex + unknown (null),
       // so a "For him" user stops seeing dresses/lipstick without losing the
