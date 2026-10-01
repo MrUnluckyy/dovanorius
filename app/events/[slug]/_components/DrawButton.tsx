@@ -47,7 +47,10 @@ export default function DrawButton({
           // The action reports its failures rather than throwing them: a
           // thrown message never survives to the client in production.
           toast.error(
-            res.error === "impossible_exclusions"
+            res.error === "impossible_exclusions" ||
+              res.error === "no_recipient" ||
+              res.error === "household_too_big" ||
+              res.error === "impossible_other"
               ? t("drawImpossible")
               : res.error === "too_few"
               ? t("drawNeedMoreConfirmed")
