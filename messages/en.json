@@ -899,7 +899,10 @@
     "reservedTitle": "Gift reserved",
     "reservedBody": "You reserved <item></item>. Nobody else can take it.",
     "checkInTitle": "Still planning to give this?",
-    "checkInBody": "You reserved <item></item>. If you still plan to give it, there's nothing to do."
+    "checkInBody": "You reserved <item></item>. If you still plan to give it, there's nothing to do.",
+    "drawnTitle": "Names drawn",
+    "drawnBody": "<event></event>: your person is ready.",
+    "ctaSeeMyDraw": "See who I got"
   },
   "Account": {
     "title": "Account settings",
