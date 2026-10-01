@@ -3,7 +3,8 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useFormatter, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { formatEventDate } from "@/lib/events/formatEventDate";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/client";
@@ -35,7 +36,7 @@ export function JoinEventClient({
 }) {
   const supabase = createClient();
   const router = useRouter();
-  const format = useFormatter();
+  const locale = useLocale();
   const t = useTranslations("Events");
   const turnstileRef = useRef<TurnstileInstance>(null);
 
@@ -223,12 +224,7 @@ export function JoinEventClient({
               <dd className="mt-1 font-heading text-[17px] font-bold text-(--nr-ink)">
                 {meta.showBudget && info.budget != null
                   ? `${info.budget} ${info.currency ?? "EUR"}`
-                  : info.event_date
-                  ? format.dateTime(new Date(info.event_date), {
-                      day: "numeric",
-                      month: "long",
-                    })
-                  : t("joinNoDate")}
+                  : formatEventDate(info.event_date, locale) ?? t("joinNoDate")}
               </dd>
             </div>
           </dl>

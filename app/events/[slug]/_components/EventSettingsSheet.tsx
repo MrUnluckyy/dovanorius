@@ -13,6 +13,7 @@ import { getEventTypeMeta } from "@/utils/events/typeMeta";
 import { qq } from "@/utils/qq";
 import { deleteEvent, leaveEvent, updateEvent } from "@/app/actions/events/manage";
 import type { SsEvent } from "@/types/secret-santa";
+import { todayInVilnius } from "@/lib/events/formatEventDate";
 
 /**
  * Everything an organiser can change after the event exists.
@@ -84,6 +85,12 @@ export default function EventSettingsSheet({
       toast.error(t("errorMissingName"));
       return;
     }
+    // Only a date being changed has to be today or later (as in the
+    // database): an event whose date has since passed can still be renamed.
+    if (date && date !== (event.event_date ?? "") && date < todayInVilnius()) {
+      toast.error(t("dateInPast"));
+      return;
+    }
     setSaving(true);
     try {
       let coverUrl: string | null | undefined;
@@ -108,7 +115,11 @@ export default function EventSettingsSheet({
       onClose();
     } catch (err) {
       console.error("Failed to save event:", err);
-      toast.error(t("settingsSaveFailed"));
+      toast.error(
+        err instanceof Error && err.message.includes("date_in_past")
+          ? t("dateInPast")
+          : t("settingsSaveFailed")
+      );
     } finally {
       setSaving(false);
     }
@@ -228,6 +239,7 @@ export default function EventSettingsSheet({
                 <span className={label}>{t("fieldDate")}</span>
                 <input
                   type="date"
+                  min={todayInVilnius()}
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   className={field}

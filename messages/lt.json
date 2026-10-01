@@ -534,7 +534,8 @@
     "secureSeatResend": "Siųsti dar kartą",
     "secureSeatResent": "Išsiuntėme dar kartą — palauk minutę ir pažiūrėk ir į šlamšto aplanką.",
     "secureSeatChangeEmail": "Naudoti kitą adresą",
-    "secureSeatRateLimited": "Per pastarąsias kelias minutes išsiuntėme daug laiškų. Pabandyk dar kartą šiek tiek vėliau."
+    "secureSeatRateLimited": "Per pastarąsias kelias minutes išsiuntėme daug laiškų. Pabandyk dar kartą šiek tiek vėliau.",
+    "dateInPast": "Pasirink šiandienos arba vėlesnę datą."
   },
   "Blog": {
     "metaTitle": "Tinklaraštis — Noriuto.lt",

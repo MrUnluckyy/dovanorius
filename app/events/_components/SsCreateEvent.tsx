@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldErrors } from "react-hook-form";
+import { todayInVilnius } from "@/lib/events/formatEventDate";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
@@ -98,6 +99,11 @@ export default function SsCreateEvent() {
       } = await sb.auth.getUser();
       if (!user) throw new Error("not authenticated");
 
+      if (v.event_date && v.event_date < todayInVilnius()) {
+        toast.error(t("dateInPast"));
+        return;
+      }
+
       const { data: event, error } = await sb
         .from("ss_events")
         .insert({
@@ -131,8 +137,15 @@ export default function SsCreateEvent() {
       router.replace(`/events/${event.slug}?invite=1`);
     } catch (err) {
       console.error("Error creating event:", err);
-      toast.error(t("errorCreateFailed"));
+      // The ss_events_date_not_past trigger has the final say on dates.
+      const message = (err as { message?: string } | null)?.message ?? "";
+      toast.error(message.includes("date_in_past") ? t("dateInPast") : t("errorCreateFailed"));
     }
+  };
+
+  // react-hook-form stops before onSubmit when a rule fails; say which.
+  const onInvalid = (errors: FieldErrors<Form>) => {
+    if (errors.event_date) toast.error(t("dateInPast"));
   };
 
   const field =
@@ -203,7 +216,7 @@ export default function SsCreateEvent() {
         </h1>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
         <label className="mb-4 block">
           <span className={labelCls}>{t("fieldName")}</span>
           <input
@@ -216,7 +229,15 @@ export default function SsCreateEvent() {
 
         <label className="mb-4 block">
           <span className={labelCls}>{t("fieldDateOptional")}</span>
-          <input type="date" className={field} {...register("event_date")} />
+          <input
+            type="date"
+            min={todayInVilnius()}
+            className={field}
+            {...register("event_date", {
+              // Same rule as the database: today in Vilnius or later.
+              validate: (v) => !v || v >= todayInVilnius(),
+            })}
+          />
         </label>
 
         {meta.showBudget && (
