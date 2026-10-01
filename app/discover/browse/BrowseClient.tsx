@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { LuX } from "react-icons/lu";
@@ -31,7 +31,6 @@ import { isAccountUser } from "@/utils/auth/account";
  */
 export function BrowseClient() {
   const t = useTranslations("Discover");
-  const router = useRouter();
   const params = useSearchParams();
   const supabase = createClient();
 
@@ -62,11 +61,14 @@ export function BrowseClient() {
       }
       // replace, not push: adjusting a filter is refining one view rather than
       // navigating, so Back should leave browse instead of walking every tweak.
-      router.replace(sp.toString() ? `?${sp}` : "/discover/browse", {
-        scroll: false,
-      });
+      //
+      // The History API, not router.replace: the router re-requests the route
+      // from the server before useSearchParams updates, so every search waited
+      // on a server round trip before its query even started. Next syncs
+      // useSearchParams with history.replaceState, with no request at all.
+      window.history.replaceState(null, "", sp.toString() ? `?${sp}` : "/discover/browse");
     },
-    [params, router]
+    [params]
   );
 
   useEffect(() => {
@@ -103,8 +105,12 @@ export function BrowseClient() {
     [productType, brand, band.min, band.max, search, audience, onSaleOnly, sort]
   );
 
-  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInspoProducts(filters);
+  const {
+    data, isLoading, isError, isPlaceholderData, fetchNextPage, hasNextPage, isFetchingNextPage,
+  } = useInspoProducts(filters);
+  // Typed ahead of the debounce, or waiting on the new query: the grid still
+  // shows the previous results, so say that it is updating.
+  const updating = isPlaceholderData || searchInput.trim() !== search.trim();
   const products = useMemo(() => data?.pages.flat() ?? [], [data]);
 
   const openProduct = (p: CardProduct) => {
@@ -189,10 +195,21 @@ export function BrowseClient() {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="py-20 text-center opacity-60">{t("empty")}</div>
+          updating ? (
+            <div className="flex justify-center py-20">
+              <span className="loading loading-spinner loading-md opacity-60" />
+            </div>
+          ) : (
+            <div className="py-20 text-center opacity-60">{t("empty")}</div>
+          )
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div
+              aria-busy={updating || undefined}
+              className={`grid grid-cols-2 gap-4 transition-opacity sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 ${
+                updating ? "opacity-50" : ""
+              }`}
+            >
               {products.map((p) => {
                 const card = toCardProduct(p);
                 return <ProductCard key={p.id} product={card} onOpen={() => openProduct(card)} />;
