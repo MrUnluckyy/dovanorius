@@ -632,6 +632,7 @@
     "viewInStore": "View",
     "loadMore": "Load more",
     "empty": "No products match your filters.",
+    "didYouMean": "Did you mean: {term}",
     "error": "Couldn't load products. Please try again.",
     "affiliateDisclosure": "Some links are affiliate links — we may earn a small commission at no extra cost to you.",
     "audiencePrompt": "Who are you shopping for?",

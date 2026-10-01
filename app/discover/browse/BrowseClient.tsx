@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { LuX } from "react-icons/lu";
@@ -111,6 +112,25 @@ export function BrowseClient() {
   // Typed ahead of the debounce, or waiting on the new query: the grid still
   // shows the previous results, so say that it is updating.
   const updating = isPlaceholderData || searchInput.trim() !== search.trim();
+
+  // Only once a search has settled on nothing: ask for a spelling fix
+  // (begymo -> begimo, samsng -> samsung). search_correct returns null when
+  // every word already exists in the catalogue, so no suggestion is shown then.
+  const noResults =
+    !!search.trim() && !isLoading && !isError && !updating && (data?.pages[0]?.length ?? 0) === 0;
+  const { data: suggestion } = useQuery({
+    queryKey: ["search-correct", search],
+    enabled: noResults,
+    staleTime: Infinity,
+    queryFn: async () => {
+      const { data: fixed } = await supabase.rpc("search_correct", { p_q: search });
+      return (fixed as string | null) ?? null;
+    },
+  });
+  const applySuggestion = (term: string) => {
+    setSearchInput(term);
+    setParams({ q: term });
+  };
   const products = useMemo(() => data?.pages.flat() ?? [], [data]);
 
   const openProduct = (p: CardProduct) => {
@@ -200,7 +220,18 @@ export function BrowseClient() {
               <span className="loading loading-spinner loading-md opacity-60" />
             </div>
           ) : (
-            <div className="py-20 text-center opacity-60">{t("empty")}</div>
+            <div className="py-20 text-center">
+              <p className="opacity-60">{t("empty")}</p>
+              {suggestion && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm mt-3 cursor-pointer rounded-full underline underline-offset-4"
+                  onClick={() => applySuggestion(suggestion)}
+                >
+                  {t("didYouMean", { term: `„${suggestion}“` })}
+                </button>
+              )}
+            </div>
           )
         ) : (
           <>

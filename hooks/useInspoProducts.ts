@@ -53,6 +53,7 @@ export function useInspoProducts(filters: InspoFilters) {
           p_sort: filters.sort,
           p_limit: INSPO_PAGE_SIZE,
           p_offset: from,
+          p_source: "web",
         });
         if (error) throw error;
         return (data ?? []) as InspoProduct[];
