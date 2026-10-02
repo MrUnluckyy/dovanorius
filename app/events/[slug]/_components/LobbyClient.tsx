@@ -141,6 +141,7 @@ export default function LobbyClient({
         confirmText:
           preview.invitees > 0 ? t("repeatEventConfirmCta") : t("repeatEventConfirmCtaNoInvites"),
         cancelText: t("cancel"),
+        tone: "primary",
       });
       if (!ok) return;
       const res = await repeatEvent(slug);
