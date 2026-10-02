@@ -899,7 +899,10 @@
     "reservedTitle": "Dovana rezervuota",
     "reservedBody": "Rezervavai <item></item>. Niekas kitas jos nepasiims.",
     "checkInTitle": "Vis dar planuoji dovanoti?",
-    "checkInBody": "Rezervavai <item></item>. Jei vis dar planuoji ją padovanoti, daryti nieko nereikia."
+    "checkInBody": "Rezervavai <item></item>. Jei vis dar planuoji ją padovanoti, daryti nieko nereikia.",
+    "drawnTitle": "Burtai ištraukti",
+    "drawnBody": "<event></event>: jau žinoma, kam dovanosi.",
+    "ctaSeeMyDraw": "Kam dovanoju?"
   },
   "Account": {
     "title": "Paskyros nustatymai",

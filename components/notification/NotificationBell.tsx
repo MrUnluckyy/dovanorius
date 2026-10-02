@@ -13,6 +13,7 @@ import { LuBell, LuMegaphone } from "react-icons/lu";
 import { markNotificationsRead } from "@/app/notifications/actions";
 import Link from "next/link";
 
+/** ss_invite / ss_joined / ss_drawn. invite_id is set only on ss_invite. */
 type NotificationPayload = {
   event_id: string;
   event_name: string;
@@ -216,6 +217,29 @@ export default function NotificationsBell() {
                     notification={n}
                     onDismiss={() => onDismiss(n.id)}
                   />
+                )}
+                {n.type === "ss_drawn" && (
+                  <>
+                    <div>
+                      <b>🎲 {t("drawnTitle")}</b>{" "}
+                      {t.rich("drawnBody", { event: () => <i>{p.event_name}</i> })}
+                    </div>
+                    <div className="flex justify-end gap-2 w-full">
+                      <Link
+                        href={`/events/${p.slug}/my`}
+                        className="btn btn-primary btn-sm"
+                        onClick={() => onDismiss(n.id)}
+                      >
+                        {t("ctaSeeMyDraw")}
+                      </Link>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => onDismiss(n.id)}
+                      >
+                        {t("ctaDismiss")}
+                      </button>
+                    </div>
+                  </>
                 )}
                 {n.type === "ss_joined" && (
                   <>
