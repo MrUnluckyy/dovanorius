@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import toast from "react-hot-toast";
 import {
   LuCheck,
@@ -59,11 +59,16 @@ export default function InvitePeopleSheet({
   const sb = createClient();
   const qc = useQueryClient();
   const t = useTranslations("Events");
+  const locale = useLocale();
 
   const [tab, setTab] = useState<Tab>("people");
   const [term, setTerm] = useState("");
   const [debounced, setDebounced] = useState("");
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  // A Map, not a Set of ids: the tray shows names and faces for people who
+  // are no longer in the current search results.
+  const [selected, setSelected] = useState<Map<string, FoundProfile>>(new Map());
+  // Ids whose invitation failed on the last send; they stay selected.
+  const [failed, setFailed] = useState<Set<string>>(new Set());
   const [emailValue, setEmailValue] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -75,7 +80,8 @@ export default function InvitePeopleSheet({
     if (!open) {
       setTab("people");
       setTerm("");
-      setSelected(new Set());
+      setSelected(new Map());
+      setFailed(new Set());
       setEmailValue("");
     }
   }, [open]);
@@ -93,9 +99,11 @@ export default function InvitePeopleSheet({
     [token]
   );
 
-  // Anyone already on the roster or already invited is not a candidate.
-  const takenIds = useMemo(
-    () => new Set(participants.map((p) => p.user_id)),
+  // People already in the event stay in the results, marked, so a search for
+  // them doesn't look broken; they just can't be picked again. A declined
+  // invitation can be re-sent, so declined people are pickable.
+  const rosterStatus = useMemo(
+    () => new Map(participants.map((p) => [p.user_id, p.status])),
     [participants]
   );
 
@@ -130,7 +138,12 @@ export default function InvitePeopleSheet({
     },
   });
 
-  const candidates = found.filter((p) => !takenIds.has(p.id));
+  const lockedLabel = (id: string): string | null => {
+    const st = rosterStatus.get(id);
+    if (st === "joined" || st === "accepted") return t("inviteInEvent");
+    if (st === "pending") return t("inviteAlreadyInvited");
+    return null;
+  };
 
   const refreshRoster = () => {
     qc.invalidateQueries({ queryKey: qq.participants(eventId) });
@@ -139,28 +152,62 @@ export default function InvitePeopleSheet({
     qc.invalidateQueries({ queryKey: qq.emailInvites(eventId) });
   };
 
-  const toggle = (id: string) =>
+  const toggle = (p: FoundProfile) => {
     setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      const next = new Map(prev);
+      if (next.has(p.id)) next.delete(p.id);
+      else next.set(p.id, p);
       return next;
     });
+    setFailed((prev) => {
+      if (!prev.has(p.id)) return prev;
+      const next = new Set(prev);
+      next.delete(p.id);
+      return next;
+    });
+  };
+
+  const firstName = (p?: FoundProfile) =>
+    (p?.display_name ?? "").trim().split(/\s+/)[0] || t("invitePersonUnnamed");
 
   const submitPeople = async () => {
     if (!selected.size) return;
     setBusy(true);
-    const res = await inviteUsers(slug, Array.from(selected));
+    const res = await inviteUsers(slug, Array.from(selected.keys()));
     setBusy(false);
-    if (!res.ok) {
+    const failedIds = new Set(res.failed ?? []);
+    if (!res.ok && failedIds.size === 0) {
       toast.error(t("inviteError"));
       return;
     }
-    toast.success(t("inviteSentCount", { count: res.sent ?? 0 }));
-    setSelected(new Set());
-    setTerm("");
+    if ((res.sent ?? 0) > 0) toast.success(t("inviteSentCount", { count: res.sent ?? 0 }));
+    // Keep exactly the people who failed, marked, so a retry is one tap.
+    setSelected((prev) => new Map([...prev].filter(([id]) => failedIds.has(id))));
+    setFailed(failedIds);
+    if (failedIds.size === 0) setTerm("");
     refreshRoster();
   };
+
+  // Tray: wraps to two rows, then "+N more". Rendered in full once to measure
+  // where rows break, then cut to what fits (leaving room for the +N chip).
+  const trayRef = useRef<HTMLDivElement>(null);
+  const [trayExpanded, setTrayExpanded] = useState(false);
+  const [trayLimit, setTrayLimit] = useState<number | null>(null);
+  const selectionKey = Array.from(selected.keys()).join(",");
+  useEffect(() => setTrayLimit(null), [selectionKey, trayExpanded]);
+  useLayoutEffect(() => {
+    if (trayExpanded || trayLimit !== null || !trayRef.current) return;
+    const chips = Array.from(trayRef.current.querySelectorAll<HTMLElement>("[data-chip]"));
+    const rows = [...new Set(chips.map((c) => c.offsetTop))].sort((a, b) => a - b);
+    if (rows.length <= 2) return;
+    const fit = chips.filter((c) => c.offsetTop <= rows[1]).length;
+    setTrayLimit(Math.max(fit - 1, 1));
+  }, [selectionKey, trayExpanded, trayLimit]);
+
+  const people = Array.from(selected.values());
+  const shown = trayLimit === null || trayExpanded ? people : people.slice(0, trayLimit);
+  const hiddenCount = people.length - shown.length;
+  const failedNames = people.filter((p) => failed.has(p.id)).map((p) => firstName(p));
 
   const submitEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -263,6 +310,56 @@ export default function InvitePeopleSheet({
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
           {tab === "people" && (
             <>
+              {people.length === 0 ? (
+                <p className="mb-3 text-[13px] text-(--nr-faint)" data-testid="tray-empty">
+                  {t("inviteTrayEmpty")}
+                </p>
+              ) : (
+                <div ref={trayRef} className="mb-3 flex flex-wrap gap-1.5" data-testid="tray">
+                  {shown.map((p) => {
+                    const bad = failed.has(p.id);
+                    return (
+                      <span
+                        key={p.id}
+                        data-chip
+                        className={`flex items-center gap-1.5 rounded-full py-1 pl-1 pr-1.5 text-[13px] font-medium ${
+                          bad
+                            ? "bg-(--nr-error-soft) text-(--nr-error-ink)"
+                            : "bg-(--nr-tile) text-(--nr-ink)"
+                        }`}
+                        title={bad ? t("inviteChipFailed") : undefined}
+                      >
+                        <Avatar avatar_url={p.avatar_url} name={p.display_name} size={6} />
+                        <span className="max-w-[110px] truncate">{firstName(p)}</span>
+                        <button
+                          onClick={() => toggle(p)}
+                          aria-label={t("inviteChipRemove", { name: firstName(p) })}
+                          className="grid h-5 w-5 cursor-pointer place-items-center rounded-full transition hover:bg-black/10"
+                        >
+                          <LuX size={12} />
+                        </button>
+                      </span>
+                    );
+                  })}
+                  {hiddenCount > 0 && (
+                    <button
+                      data-chip
+                      onClick={() => setTrayExpanded(true)}
+                      className="cursor-pointer rounded-full bg-(--nr-cream) px-2.5 py-1 text-[13px] font-semibold text-(--nr-gold-strong)"
+                    >
+                      {t("inviteTrayMore", { count: hiddenCount })}
+                    </button>
+                  )}
+                </div>
+              )}
+              {failedNames.length > 0 && (
+                <p className="mb-3 text-[13px] leading-snug text-(--nr-error-ink)" role="alert">
+                  {t("inviteFailedSome", {
+                    names: new Intl.ListFormat(locale, { type: "conjunction" }).format(failedNames),
+                  })}
+                </p>
+              )}
+
               <div className="flex items-center gap-2 rounded-[var(--nr-radius-input)] border border-(--nr-border) bg-(--nr-cream) px-3 py-2.5">
                 <LuSearch className="w-4 shrink-0 text-(--nr-faint)" />
                 <input
@@ -283,19 +380,39 @@ export default function InvitePeopleSheet({
                   <div className="nr-skeleton h-12 w-full rounded-2xl" />
                   <div className="nr-skeleton h-12 w-full rounded-2xl" />
                 </div>
-              ) : candidates.length === 0 ? (
+              ) : found.length === 0 ? (
                 <p className="px-1 py-8 text-center text-[14px] text-(--nr-muted)">
                   {t("invitePeopleEmpty")}
                 </p>
               ) : (
                 <ul className="mt-3 space-y-1">
-                  {candidates.map((p) => {
+                  {found.map((p) => {
                     const on = selected.has(p.id);
+                    const locked = lockedLabel(p.id);
+                    if (locked) {
+                      return (
+                        <li key={p.id}>
+                          <div
+                            className="flex w-full items-center gap-3 rounded-2xl px-2 py-2 opacity-60"
+                            aria-disabled="true"
+                          >
+                            <Avatar avatar_url={p.avatar_url} name={p.display_name} size={10} />
+                            <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-(--nr-ink)">
+                              {p.display_name ?? t("invitePersonUnnamed")}
+                            </span>
+                            <span className="shrink-0 text-[12px] font-semibold text-(--nr-muted)">
+                              {locked}
+                            </span>
+                          </div>
+                        </li>
+                      );
+                    }
                     return (
                       <li key={p.id}>
                         <button
-                          onClick={() => toggle(p.id)}
-                          className="flex w-full items-center gap-3 rounded-2xl px-2 py-2 text-left transition hover:bg-(--nr-tile)/55"
+                          onClick={() => toggle(p)}
+                          aria-pressed={on}
+                          className="flex w-full cursor-pointer items-center gap-3 rounded-2xl px-2 py-2 text-left transition hover:bg-(--nr-tile)/55"
                         >
                           <Avatar
                             avatar_url={p.avatar_url}
@@ -428,8 +545,8 @@ export default function InvitePeopleSheet({
               disabled={selected.size === 0 || busy}
               className="nr-btn nr-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {selected.size
-                ? t("inviteSelectedCta", { count: selected.size })
+              {people.length
+                ? t("inviteSendNamed", { name: firstName(people[0]), others: people.length - 1 })
                 : t("inviteSelectNobody")}
             </button>
           </footer>
