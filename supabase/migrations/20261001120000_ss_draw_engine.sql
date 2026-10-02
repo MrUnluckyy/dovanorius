@@ -418,13 +418,20 @@ begin
     return jsonb_build_object('ok', false, 'error', 'not_authenticated');
   end if;
 
-  -- Lock the event: two organisers pressing Draw at once get one draw.
-  select id, status, type into ev from ss_events where id = p_event_id for update;
-  if not found then
+  -- Permission before the lock: a non-organiser must not be able to take the
+  -- row lock (and stall the real organiser's draw) just by calling this.
+  -- The existence check is a plain read, so an unknown id is still not_found.
+  if not exists (select 1 from ss_events where id = p_event_id) then
     return jsonb_build_object('ok', false, 'error', 'not_found');
   end if;
   if not is_event_admin(p_event_id) then
     return jsonb_build_object('ok', false, 'error', 'not_allowed');
+  end if;
+
+  -- Lock the event: two organisers pressing Draw at once get one draw.
+  select id, status, type into ev from ss_events where id = p_event_id for update;
+  if not found then
+    return jsonb_build_object('ok', false, 'error', 'not_found'); -- deleted meanwhile
   end if;
   if ev.type not in ('secret_santa', 'name_draw') then
     return jsonb_build_object('ok', false, 'error', 'not_draw_type');
