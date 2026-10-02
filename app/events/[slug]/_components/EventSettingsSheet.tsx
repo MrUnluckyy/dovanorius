@@ -13,7 +13,7 @@ import { getEventTypeMeta } from "@/utils/events/typeMeta";
 import { qq } from "@/utils/qq";
 import { deleteEvent, leaveEvent, updateEvent } from "@/app/actions/events/manage";
 import type { SsEvent } from "@/types/secret-santa";
-import { todayInVilnius } from "@/lib/events/formatEventDate";
+import { maxEventDate, todayInVilnius } from "@/lib/events/formatEventDate";
 import DatePicker from "@/components/DatePicker";
 
 /**
@@ -88,9 +88,15 @@ export default function EventSettingsSheet({
     }
     // Only a date being changed has to be today or later (as in the
     // database): an event whose date has since passed can still be renamed.
-    if (date && date !== (event.event_date ?? "") && date < todayInVilnius()) {
-      toast.error(t("dateInPast"));
-      return;
+    if (date && date !== (event.event_date ?? "")) {
+      if (date < todayInVilnius()) {
+        toast.error(t("dateInPast"));
+        return;
+      }
+      if (date > maxEventDate()) {
+        toast.error(t("dateTooFar"));
+        return;
+      }
     }
     setSaving(true);
     try {
@@ -119,6 +125,8 @@ export default function EventSettingsSheet({
       toast.error(
         err instanceof Error && err.message.includes("date_in_past")
           ? t("dateInPast")
+          : err instanceof Error && err.message.includes("date_too_far")
+          ? t("dateTooFar")
           : t("settingsSaveFailed")
       );
     } finally {
@@ -244,6 +252,7 @@ export default function EventSettingsSheet({
                   value={date}
                   onChange={setDate}
                   min={todayInVilnius()}
+                  max={maxEventDate()}
                   className={field}
                 />
               </div>

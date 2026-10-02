@@ -42,6 +42,7 @@ export default function DatePicker({
   value,
   onChange,
   min,
+  max,
   id,
   labelledBy,
   placeholder,
@@ -51,6 +52,8 @@ export default function DatePicker({
   onChange: (value: string) => void;
   /** Earliest pickable day, "YYYY-MM-DD". */
   min?: string;
+  /** Latest pickable day, "YYYY-MM-DD". */
+  max?: string;
   id?: string;
   /** Id of the visible label. Don't wrap the picker in <label>: a click on
    *  the open calendar would "activate" the label and close it. */
@@ -114,12 +117,10 @@ export default function DatePicker({
     [locale]
   );
 
-  const isDisabled = (day: string) => !!min && day < min;
-  /** Move the view, never onto a day before min. */
-  const goMonth = (n: number) => {
-    const next = addMonths(cursor, n);
-    setCursor(min && next < min ? min : next);
-  };
+  const isDisabled = (day: string) => (!!min && day < min) || (!!max && day > max);
+  /** Keep the cursor between min and max. */
+  const clamp = (day: string) => (min && day < min ? min : max && day > max ? max : day);
+  const goMonth = (n: number) => setCursor(clamp(addMonths(cursor, n)));
   const pick = (day: string) => {
     if (isDisabled(day)) return;
     onChange(day);
@@ -128,8 +129,11 @@ export default function DatePicker({
   };
 
   const firstOfView = iso(view.year, view.month, 1);
-  // Every day of the previous month is before min once this month starts at or before it.
+  // Every day of the previous month is before min once this month starts at
+  // or before it; likewise the next month once this one ends at or after max.
   const prevDisabled = !!min && firstOfView <= min;
+  const lastOfView = iso(view.year, view.month, daysIn(view.year, view.month));
+  const nextDisabled = !!max && lastOfView >= max;
   const lead = weekday(view.year, view.month, 1);
   const cells: (string | null)[] = [
     ...Array.from({ length: lead }, () => null),
@@ -147,8 +151,7 @@ export default function DatePicker({
     };
     if (moves[e.key]) {
       e.preventDefault();
-      const next = moves[e.key]();
-      if (!min || next >= min) setCursor(next);
+      setCursor(clamp(moves[e.key]()));
     } else if (e.key === "Escape") {
       e.preventDefault();
       setOpen(false);
@@ -211,8 +214,9 @@ export default function DatePicker({
             <button
               type="button"
               onClick={() => goMonth(1)}
+              disabled={nextDisabled}
               aria-label={t("nextMonth")}
-              className="grid h-9 w-9 cursor-pointer place-items-center rounded-full text-(--nr-ink) transition hover:bg-(--nr-tile)"
+              className="grid h-9 w-9 cursor-pointer place-items-center rounded-full text-(--nr-ink) transition hover:bg-(--nr-tile) disabled:cursor-default disabled:opacity-25 disabled:hover:bg-transparent"
             >
               <LuChevronRight />
             </button>

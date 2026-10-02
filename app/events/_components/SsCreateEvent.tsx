@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Controller, useForm, type FieldErrors } from "react-hook-form";
 import DatePicker from "@/components/DatePicker";
-import { todayInVilnius } from "@/lib/events/formatEventDate";
+import { maxEventDate, todayInVilnius } from "@/lib/events/formatEventDate";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
@@ -105,6 +105,10 @@ export default function SsCreateEvent() {
         toast.error(t("dateInPast"));
         return;
       }
+      if (v.event_date && v.event_date > maxEventDate()) {
+        toast.error(t("dateTooFar"));
+        return;
+      }
 
       const { data: event, error } = await sb
         .from("ss_events")
@@ -141,13 +145,20 @@ export default function SsCreateEvent() {
       console.error("Error creating event:", err);
       // The ss_events_date_not_past trigger has the final say on dates.
       const message = (err as { message?: string } | null)?.message ?? "";
-      toast.error(message.includes("date_in_past") ? t("dateInPast") : t("errorCreateFailed"));
+      toast.error(
+        message.includes("date_in_past")
+          ? t("dateInPast")
+          : message.includes("date_too_far")
+          ? t("dateTooFar")
+          : t("errorCreateFailed")
+      );
     }
   };
 
   // react-hook-form stops before onSubmit when a rule fails; say which.
   const onInvalid = (errors: FieldErrors<Form>) => {
-    if (errors.event_date) toast.error(t("dateInPast"));
+    if (errors.event_date)
+      toast.error(errors.event_date.type === "tooFar" ? t("dateTooFar") : t("dateInPast"));
   };
 
   const field =
@@ -235,7 +246,12 @@ export default function SsCreateEvent() {
             name="event_date"
             control={control}
             // Same rule as the database: today in Vilnius or later.
-            rules={{ validate: (v) => !v || v >= todayInVilnius() }}
+            rules={{
+              validate: {
+                notPast: (v) => !v || v >= todayInVilnius(),
+                tooFar: (v) => !v || v <= maxEventDate(),
+              },
+            }}
             render={({ field: f }) => (
               <DatePicker
                 id="event-date"
@@ -243,6 +259,7 @@ export default function SsCreateEvent() {
                 value={f.value ?? ""}
                 onChange={f.onChange}
                 min={todayInVilnius()}
+                max={maxEventDate()}
                 className={field}
               />
             )}

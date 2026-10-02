@@ -35,6 +35,21 @@ export function todayInVilnius(now: Date = new Date()): string {
   }).format(now);
 }
 
+/** How far ahead an event may be dated (same as the ss_events trigger). */
+export const MAX_YEARS_AHEAD = 10;
+
+/**
+ * Latest allowed event date: today in Vilnius plus MAX_YEARS_AHEAD years, as
+ * "YYYY-MM-DD". 29 February rolls back to the 28th, like Postgres'
+ * date + interval does.
+ */
+export function maxEventDate(now: Date = new Date()): string {
+  const [y, m, d] = todayInVilnius(now).split("-").map(Number);
+  const year = y + MAX_YEARS_AHEAD;
+  const lastDay = new Date(Date.UTC(year, m, 0)).getUTCDate();
+  return `${year}-${String(m).padStart(2, "0")}-${String(Math.min(d, lastDay)).padStart(2, "0")}`;
+}
+
 /** True when a "YYYY-MM-DD" date is before today in Vilnius. */
 export function isPastEventDate(value: string | null | undefined, now: Date = new Date()): boolean {
   const d = parseCalendarDate(value);
