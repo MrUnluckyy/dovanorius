@@ -576,10 +576,14 @@
     "lastYearUnlink": "Unlink",
     "drawStatusOk": "Ready: the draw will work with these rules.",
     "repeatEvent": "Repeat this event",
-    "repeatEventBody": "Start next year's draw with the same people and rules. Nobody will get the same person as this year.",
+    "repeatEventBody": "Start next year's draw with the same people and rules. The draw will avoid this year's pairs where it can.",
     "repeatEventFailed": "Couldn't create the new event. Try again.",
     "dateInPast": "Pick today or a later date.",
-    "dateTooFar": "Pick a date within the next 10 years."
+    "dateTooFar": "Pick a date within the next 10 years.",
+    "repeatEventConfirmTitle": "Create “{name}”?",
+    "repeatEventConfirmBody": "{count, plural, =0 {Nobody from this event will be invited; you can invite people afterwards.} one {# person from this event will be invited.} other {# people from this event will be invited.}}",
+    "repeatEventConfirmCta": "Create and invite",
+    "repeatEventConfirmCtaNoInvites": "Create"
   },
   "Blog": {
     "metaTitle": "Blog — Noriuto.lt",

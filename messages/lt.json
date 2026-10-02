@@ -576,10 +576,14 @@
     "lastYearUnlink": "Atsieti",
     "drawStatusOk": "Viskas gerai: su šiomis taisyklėmis burtus ištraukti galima.",
     "repeatEvent": "Pakartoti renginį",
-    "repeatEventBody": "Pradėk kitų metų burtus su tais pačiais žmonėmis ir taisyklėmis. Niekas negaus to paties žmogaus kaip šiemet.",
+    "repeatEventBody": "Pradėk kitų metų burtus su tais pačiais žmonėmis ir taisyklėmis. Burtai, kur įmanoma, vengs šiųmečių porų.",
     "repeatEventFailed": "Nepavyko sukurti naujo renginio. Bandyk dar kartą.",
     "dateInPast": "Pasirink šiandienos arba vėlesnę datą.",
-    "dateTooFar": "Pasirink datą per artimiausius 10 metų."
+    "dateTooFar": "Pasirink datą per artimiausius 10 metų.",
+    "repeatEventConfirmTitle": "Sukurti „{name}“?",
+    "repeatEventConfirmBody": "{count, plural, =0 {Iš šio renginio niekas nebus pakviestas – žmonių galėsi pakviesti vėliau.} one {Bus pakviestas # žmogus iš šio renginio.} few {Bus pakviesti # žmonės iš šio renginio.} other {Bus pakviesta # žmonių iš šio renginio.}}",
+    "repeatEventConfirmCta": "Sukurti ir pakviesti",
+    "repeatEventConfirmCtaNoInvites": "Sukurti"
   },
   "Blog": {
     "metaTitle": "Tinklaraštis — Noriuto.lt",
