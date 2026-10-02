@@ -14,6 +14,7 @@ import { qq } from "@/utils/qq";
 import { deleteEvent, leaveEvent, updateEvent } from "@/app/actions/events/manage";
 import type { SsEvent } from "@/types/secret-santa";
 import { todayInVilnius } from "@/lib/events/formatEventDate";
+import DatePicker from "@/components/DatePicker";
 
 /**
  * Everything an organiser can change after the event exists.
@@ -235,16 +236,17 @@ export default function EventSettingsSheet({
                 />
               </label>
 
-              <label className="mb-4 block">
-                <span className={label}>{t("fieldDate")}</span>
-                <input
-                  type="date"
-                  min={todayInVilnius()}
+              <div className="mb-4 block">
+                <span id="settings-date-label" className={label}>{t("fieldDate")}</span>
+                <DatePicker
+                  id="settings-date"
+                  labelledBy="settings-date-label"
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={setDate}
+                  min={todayInVilnius()}
                   className={field}
                 />
-              </label>
+              </div>
 
               {meta.showBudget && (
                 <label className="mb-4 block">

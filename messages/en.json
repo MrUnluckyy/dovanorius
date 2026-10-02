@@ -951,5 +951,13 @@
     "thanksBody": "We'll take a look and fix it.",
     "thanksWithEmail": "We'll take a look and write back if we need to.",
     "close": "Close"
+  },
+  "DatePicker": {
+    "placeholder": "Pick a date",
+    "clear": "Clear",
+    "today": "Today",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "dialogLabel": "Choose a date"
   }
 }

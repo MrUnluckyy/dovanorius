@@ -951,5 +951,13 @@
     "thanksBody": "Peržiūrėsime ir sutvarkysime.",
     "thanksWithEmail": "Peržiūrėsime ir, jei reikės, parašysime tau.",
     "close": "Uždaryti"
+  },
+  "DatePicker": {
+    "placeholder": "Pasirink datą",
+    "clear": "Išvalyti",
+    "today": "Šiandien",
+    "prevMonth": "Ankstesnis mėnuo",
+    "nextMonth": "Kitas mėnuo",
+    "dialogLabel": "Pasirink datą"
   }
 }

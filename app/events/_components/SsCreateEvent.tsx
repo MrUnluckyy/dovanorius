@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, type FieldErrors } from "react-hook-form";
+import { Controller, useForm, type FieldErrors } from "react-hook-form";
+import DatePicker from "@/components/DatePicker";
 import { todayInVilnius } from "@/lib/events/formatEventDate";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -61,6 +62,7 @@ export default function SsCreateEvent() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { isSubmitting },
   } = useForm<Form>();
 
@@ -227,18 +229,25 @@ export default function SsCreateEvent() {
           />
         </label>
 
-        <label className="mb-4 block">
-          <span className={labelCls}>{t("fieldDateOptional")}</span>
-          <input
-            type="date"
-            min={todayInVilnius()}
-            className={field}
-            {...register("event_date", {
-              // Same rule as the database: today in Vilnius or later.
-              validate: (v) => !v || v >= todayInVilnius(),
-            })}
+        <div className="mb-4 block">
+          <span id="event-date-label" className={labelCls}>{t("fieldDateOptional")}</span>
+          <Controller
+            name="event_date"
+            control={control}
+            // Same rule as the database: today in Vilnius or later.
+            rules={{ validate: (v) => !v || v >= todayInVilnius() }}
+            render={({ field: f }) => (
+              <DatePicker
+                id="event-date"
+                labelledBy="event-date-label"
+                value={f.value ?? ""}
+                onChange={f.onChange}
+                min={todayInVilnius()}
+                className={field}
+              />
+            )}
           />
-        </label>
+        </div>
 
         {meta.showBudget && (
           <label className="mb-4 block">
