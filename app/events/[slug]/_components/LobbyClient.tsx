@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -16,7 +16,8 @@ import { createClient } from "@/utils/supabase/client";
 import { qq } from "@/utils/qq";
 import { getEventTypeMeta } from "@/utils/events/typeMeta";
 import { setEventStatus } from "@/app/actions/events/manage";
-import { repeatEvent } from "@/app/actions/events/repeat";
+import { previewRepeatEvent, repeatEvent } from "@/app/actions/events/repeat";
+import { useConfirm } from "@/components/ConfirmDialogProvider";
 import { fetchRecipient } from "@/utils/events/recipient";
 import LobbyHeader from "./LobbyHeader";
 import Participants from "./Participants";
@@ -115,18 +116,49 @@ export default function LobbyClient({
     onError: () => toast.error(t("lockFailed")),
   });
 
-  const repeatMutation = useMutation({
-    mutationFn: async () => {
+  // Repeat this event: preview (name + invite count) -> confirm -> create.
+  // Busy from the first tap until we navigate away, so a double tap can't
+  // open two dialogs or create two events; the ref closes the gap before
+  // React re-renders the disabled button. repeatEvent itself also returns
+  // the existing event if the same repeat arrives twice.
+  const confirm = useConfirm();
+  const [repeating, setRepeating] = useState(false);
+  const repeatingRef = useRef(false);
+  const startRepeat = async () => {
+    if (repeatingRef.current) return;
+    repeatingRef.current = true;
+    setRepeating(true);
+    let navigating = false;
+    try {
+      const preview = await previewRepeatEvent(slug);
+      if (!preview.ok) {
+        toast.error(t("repeatEventFailed"));
+        return;
+      }
+      const ok = await confirm({
+        title: t("repeatEventConfirmTitle", { name: preview.name }),
+        message: t("repeatEventConfirmBody", { count: preview.invitees }),
+        confirmText:
+          preview.invitees > 0 ? t("repeatEventConfirmCta") : t("repeatEventConfirmCtaNoInvites"),
+        cancelText: t("cancel"),
+      });
+      if (!ok) return;
       const res = await repeatEvent(slug);
-      if (!res.ok) throw new Error(res.error);
-      return res.slug;
-    },
-    onSuccess: (newSlug) => {
+      if (!res.ok) {
+        toast.error(t("repeatEventFailed"));
+        return;
+      }
       qc.invalidateQueries({ queryKey: qq.myEventsAll() });
-      router.push(`/events/${newSlug}`);
-    },
-    onError: () => toast.error(t("repeatEventFailed")),
-  });
+      navigating = true;
+      router.push(`/events/${res.slug}`);
+    } finally {
+      // Stay disabled while the new event loads; this page unmounts anyway.
+      if (!navigating) {
+        repeatingRef.current = false;
+        setRepeating(false);
+      }
+    }
+  };
 
   const isOwner = event?.owner_id === user.id;
   const isAdmin =
@@ -264,13 +296,15 @@ export default function LobbyClient({
         )}
       </section>
 
-      {/* Next year's edition: same people and rules, this year's pairs avoided. */}
+      {/* Next year's edition: same people and rules; the draw avoids this
+          year's pairs where it can. */}
       {!isGroup && isAdmin && event.status === "drawn" && (
         <section className="nr-card mt-4 p-5">
           <p className="text-[14px] leading-relaxed text-(--nr-muted)">{t("repeatEventBody")}</p>
           <button
-            onClick={() => repeatMutation.mutate()}
-            disabled={repeatMutation.isPending}
+            onClick={startRepeat}
+            disabled={repeating}
+            aria-busy={repeating || undefined}
             className="nr-btn nr-btn-outline mt-3 cursor-pointer disabled:opacity-50"
           >
             <LuRepeat className="w-4" />
