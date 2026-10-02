@@ -96,3 +96,59 @@ export async function removeDrawRule(
   revalidatePath(`/events/${slug}`);
   return { ok: true };
 }
+
+/**
+ * A household: people who must not draw each other at all.
+ *
+ * Stored as every pair inside the group (ss_exclusions has no group concept,
+ * and the draw engine only reads pairs). Adding someone already in another
+ * household joins the two: the screen merges connected pairs into one group.
+ */
+export async function addHousehold(
+  slug: string,
+  memberIds: string[]
+): Promise<DrawRuleResult> {
+  const ids = [...new Set(memberIds)];
+  if (ids.length < 2) return { ok: false, error: "too_few_people" };
+
+  const ctx = await requireAdmin(slug);
+  if ("error" in ctx) return { ok: false, error: ctx.error };
+
+  const rows: { event_id: string; a: string; b: string }[] = [];
+  for (let i = 0; i < ids.length; i++)
+    for (let j = i + 1; j < ids.length; j++) {
+      const [a, b] = orderPair(ids[i], ids[j]);
+      rows.push({ event_id: ctx.event.id, a, b });
+    }
+
+  const { error } = await ctx.supabase
+    .from("ss_exclusions")
+    .upsert(rows, { onConflict: "event_id,a,b", ignoreDuplicates: true });
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/events/${slug}`);
+  return { ok: true };
+}
+
+/** Dissolve a household: delete every pair among its members, either order. */
+export async function removeHousehold(
+  slug: string,
+  memberIds: string[]
+): Promise<DrawRuleResult> {
+  const ids = [...new Set(memberIds)];
+  if (ids.length < 2) return { ok: true };
+
+  const ctx = await requireAdmin(slug);
+  if ("error" in ctx) return { ok: false, error: ctx.error };
+
+  const { error } = await ctx.supabase
+    .from("ss_exclusions")
+    .delete()
+    .eq("event_id", ctx.event.id)
+    .in("a", ids)
+    .in("b", ids);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/events/${slug}`);
+  return { ok: true };
+}
