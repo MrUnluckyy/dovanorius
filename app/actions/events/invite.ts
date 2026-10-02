@@ -71,6 +71,14 @@ export async function rotateJoinLink(
   return { ok: true, token };
 }
 
+export type InviteUsersResult = {
+  ok: boolean;
+  sent?: number;
+  /** Ids that could not be invited; the rest were. */
+  failed?: string[];
+  error?: string;
+};
+
 /**
  * Invite existing Noriuto users by id.
  *
@@ -81,8 +89,8 @@ export async function rotateJoinLink(
 export async function inviteUsers(
   slug: string,
   toUserIds: string[]
-): Promise<{ ok: boolean; sent?: number; error?: string }> {
-  if (toUserIds.length === 0) return { ok: true, sent: 0 };
+): Promise<InviteUsersResult> {
+  if (toUserIds.length === 0) return { ok: true, sent: 0, failed: [] };
 
   const ctx = await requireAdminEvent(slug);
   if ("error" in ctx) return { ok: false, error: ctx.error };
@@ -95,26 +103,40 @@ export async function inviteUsers(
     .eq("event_id", event.id);
   const already = new Set((members ?? []).map((m) => m.user_id as string));
   const targets = toUserIds.filter((id) => !already.has(id));
-  if (targets.length === 0) return { ok: true, sent: 0 };
+  if (targets.length === 0) return { ok: true, sent: 0, failed: [] };
+
+  const row = (to: string) => ({
+    event_id: event.id,
+    from_user: userId,
+    to_user: to,
+    status: "pending" as const,
+  });
 
   const { data: invites, error } = await supabase
     .from("ss_invites")
-    .upsert(
-      targets.map((to) => ({
-        event_id: event.id,
-        from_user: userId,
-        to_user: to,
-        status: "pending" as const,
-      })),
-      { onConflict: "event_id,to_user" }
-    )
+    .upsert(targets.map(row), { onConflict: "event_id,to_user" })
     .select("id, to_user");
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    // The batch is all-or-nothing, and one bad id (a deleted profile, say)
+    // would fail everyone. Retry one by one so the sheet can keep exactly the
+    // people who failed selected, with the rest invited.
+    console.error("inviteUsers batch failed, retrying per person:", error);
+    const failed: string[] = [];
+    let sent = 0;
+    for (const to of targets) {
+      const { error: oneError } = await supabase
+        .from("ss_invites")
+        .upsert(row(to), { onConflict: "event_id,to_user" });
+      if (oneError) failed.push(to);
+      else sent++;
+    }
+    return { ok: sent > 0, sent, failed, ...(sent === 0 ? { error: error.message } : {}) };
+  }
 
   // No notification call here: the ss_invites triggers write the 'ss_invite'
   // notification for every invite that becomes pending, for web and app alike
   // (migration 20261001100000).
-  return { ok: true, sent: invites?.length ?? 0 };
+  return { ok: true, sent: invites?.length ?? 0, failed: [] };
 }
 
 /**
