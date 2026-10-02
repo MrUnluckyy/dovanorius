@@ -5,6 +5,7 @@ import {
   EmailLayout,
 } from "./_components/EmailLayout";
 import { brand, buttonPrimary, text, textMuted } from "./_components/theme";
+import { formatEventDate } from "@/lib/events/formatEventDate";
 
 /**
  * Sent when an organiser invites an address to an event.
@@ -28,6 +29,7 @@ export function EventInviteEmail({
   budget?: number | null;
   currency?: string | null;
 }) {
+  const when = formatEventDate(eventDate, "lt");
   return (
     <EmailLayout
       preview={`${inviterName ?? "Tave"} kviečia į „${eventName}“`}
@@ -40,7 +42,7 @@ export function EventInviteEmail({
         prisidėti prie renginio <strong>{eventName}</strong>.
       </Text>
 
-      {eventDate && <EmailCallout label="Kada" value={eventDate} />}
+      {when && <EmailCallout label="Kada" value={when} />}
 
       {budget != null && (
         <EmailCallout

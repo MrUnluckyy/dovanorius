@@ -1,6 +1,7 @@
 import { Button, Section, Text } from "@react-email/components";
-import { EmailHeading, EmailLayout } from "./_components/EmailLayout";
+import { EmailCallout, EmailHeading, EmailLayout } from "./_components/EmailLayout";
 import { brand, buttonPrimary, text, textMuted } from "./_components/theme";
+import { formatEventDate } from "@/lib/events/formatEventDate";
 
 /**
  * Sent to a guest the moment they join an event through a link.
@@ -14,11 +15,15 @@ export function EventJoinedEmail({
   eventName,
   eventUrl,
   displayName,
+  eventDate,
 }: {
   eventName: string;
   eventUrl: string;
   displayName?: string | null;
+  /** "YYYY-MM-DD" from ss_events.event_date. */
+  eventDate?: string | null;
 }) {
+  const when = formatEventDate(eventDate, "lt");
   return (
     <EmailLayout
       preview={`Tu dalyvauji renginyje „${eventName}“`}
@@ -30,6 +35,8 @@ export function EventJoinedEmail({
         {displayName ? `${displayName}, tu` : "Tu"} sėkmingai prisijungei prie
         renginio <strong>{eventName}</strong>.
       </Text>
+
+      {when && <EmailCallout label="Kada" value={when} />}
 
       <Text style={text}>
         Išsaugok šį laišką — nuoroda žemiau yra tavo kelias atgal, kai bus

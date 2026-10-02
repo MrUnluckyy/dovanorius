@@ -534,7 +534,9 @@
     "secureSeatResend": "Siųsti dar kartą",
     "secureSeatResent": "Išsiuntėme dar kartą — palauk minutę ir pažiūrėk ir į šlamšto aplanką.",
     "secureSeatChangeEmail": "Naudoti kitą adresą",
-    "secureSeatRateLimited": "Per pastarąsias kelias minutes išsiuntėme daug laiškų. Pabandyk dar kartą šiek tiek vėliau."
+    "secureSeatRateLimited": "Per pastarąsias kelias minutes išsiuntėme daug laiškų. Pabandyk dar kartą šiek tiek vėliau.",
+    "dateInPast": "Pasirink šiandienos arba vėlesnę datą.",
+    "dateTooFar": "Pasirink datą per artimiausius 10 metų."
   },
   "Blog": {
     "metaTitle": "Tinklaraštis — Noriuto.lt",
@@ -953,5 +955,13 @@
     "thanksBody": "Peržiūrėsime ir sutvarkysime.",
     "thanksWithEmail": "Peržiūrėsime ir, jei reikės, parašysime tau.",
     "close": "Uždaryti"
+  },
+  "DatePicker": {
+    "placeholder": "Pasirink datą",
+    "clear": "Išvalyti",
+    "today": "Šiandien",
+    "prevMonth": "Ankstesnis mėnuo",
+    "nextMonth": "Kitas mėnuo",
+    "dialogLabel": "Pasirink datą"
   }
 }
