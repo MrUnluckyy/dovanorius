@@ -15,6 +15,15 @@ const nextConfig: NextConfig = {
     // Serve modern formats — much smaller than JPEG/PNG for the same quality.
     formats: ["image/avif", "image/webp"],
   },
+  async headers() {
+    return [
+      {
+        // Apple reads this file as JSON; it has no extension, so say so.
+        source: "/.well-known/apple-app-site-association",
+        headers: [{ key: "Content-Type", value: "application/json" }],
+      },
+    ];
+  },
   async redirects() {
     // The events area moved from /secret-santa to /events (it now hosts all
     // event types, not just Secret Santa). Keep old links/bookmarks working.
