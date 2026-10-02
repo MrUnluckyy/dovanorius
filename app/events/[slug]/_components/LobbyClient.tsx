@@ -17,7 +17,8 @@ import { qq } from "@/utils/qq";
 import { getEventTypeMeta } from "@/utils/events/typeMeta";
 import { setEventStatus } from "@/app/actions/events/manage";
 import { previewRepeatEvent, repeatEvent } from "@/app/actions/events/repeat";
-import { useConfirm } from "@/components/ConfirmDialogProvider";
+import RepeatEventSheet from "./RepeatEventSheet";
+import { todayInVilnius } from "@/lib/events/formatEventDate";
 import { fetchRecipient } from "@/utils/events/recipient";
 import LobbyHeader from "./LobbyHeader";
 import Participants from "./Participants";
@@ -116,49 +117,58 @@ export default function LobbyClient({
     onError: () => toast.error(t("lockFailed")),
   });
 
-  // Repeat this event: preview (name + invite count) -> confirm -> create.
-  // Busy from the first tap until we navigate away, so a double tap can't
-  // open two dialogs or create two events; the ref closes the gap before
-  // React re-renders the disabled button. repeatEvent itself also returns
-  // the existing event if the same repeat arrives twice.
-  const confirm = useConfirm();
+  // Repeat this event: preview -> RepeatEventSheet (name, date, invite count)
+  // -> create. Busy from the first tap until we navigate away, so a double tap
+  // can't open two sheets or create two events; the ref closes the gap before
+  // React re-renders. repeatEvent itself also returns the existing event if
+  // the same repeat arrives twice.
   const [repeating, setRepeating] = useState(false);
   const repeatingRef = useRef(false);
+  const [repeatPlan, setRepeatPlan] = useState<{
+    name: string;
+    invitees: number;
+    suggestedDate: string | null;
+  } | null>(null);
+  const [submittingRepeat, setSubmittingRepeat] = useState(false);
+  const submittingRef = useRef(false);
+  const releaseRepeat = () => {
+    repeatingRef.current = false;
+    setRepeating(false);
+  };
   const startRepeat = async () => {
     if (repeatingRef.current) return;
     repeatingRef.current = true;
     setRepeating(true);
-    let navigating = false;
-    try {
-      const preview = await previewRepeatEvent(slug);
-      if (!preview.ok) {
-        toast.error(t("repeatEventFailed"));
-        return;
-      }
-      const ok = await confirm({
-        title: t("repeatEventConfirmTitle", { name: preview.name }),
-        message: t("repeatEventConfirmBody", { count: preview.invitees }),
-        confirmText:
-          preview.invitees > 0 ? t("repeatEventConfirmCta") : t("repeatEventConfirmCtaNoInvites"),
-        cancelText: t("cancel"),
-        tone: "primary",
-      });
-      if (!ok) return;
-      const res = await repeatEvent(slug);
-      if (!res.ok) {
-        toast.error(t("repeatEventFailed"));
-        return;
-      }
-      qc.invalidateQueries({ queryKey: qq.myEventsAll() });
-      navigating = true;
-      router.push(`/events/${res.slug}`);
-    } finally {
-      // Stay disabled while the new event loads; this page unmounts anyway.
-      if (!navigating) {
-        repeatingRef.current = false;
-        setRepeating(false);
-      }
+    const preview = await previewRepeatEvent(slug);
+    if (!preview.ok) {
+      toast.error(t("repeatEventFailed"));
+      releaseRepeat();
+      return;
     }
+    setRepeatPlan(preview);
+  };
+  const confirmRepeat = async (input: { name: string; eventDate: string }) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setSubmittingRepeat(true);
+    const res = await repeatEvent(slug, input);
+    if (!res.ok) {
+      submittingRef.current = false;
+      setSubmittingRepeat(false);
+      toast.error(
+        res.error === "date_in_past"
+          ? t("dateInPast")
+          : res.error === "date_too_far"
+          ? t("dateTooFar")
+          : t("repeatEventFailed")
+      );
+      setRepeatPlan(null);
+      releaseRepeat();
+      return;
+    }
+    qc.invalidateQueries({ queryKey: qq.myEventsAll() });
+    // Stay busy while the new event loads; this page unmounts anyway.
+    router.push(`/events/${res.slug}`);
   };
 
   const isOwner = event?.owner_id === user.id;
@@ -297,9 +307,13 @@ export default function LobbyClient({
         )}
       </section>
 
-      {/* Next year's edition: same people and rules; the draw avoids this
-          year's pairs where it can. */}
-      {!isGroup && isAdmin && event.status === "drawn" && (
+      {/* Next year's edition, once this one is over: drawn and its date has
+          passed (Vilnius), or archived. Same rule as repeatEvent on the server.
+          The draw avoids this year's pairs where it can. */}
+      {!isGroup &&
+        isAdmin &&
+        (event.status === "archived" ||
+          (event.status === "drawn" && !!event.event_date && event.event_date < todayInVilnius())) && (
         <section className="nr-card mt-4 p-5">
           <p className="text-[14px] leading-relaxed text-(--nr-muted)">{t("repeatEventBody")}</p>
           <button
@@ -359,6 +373,20 @@ export default function LobbyClient({
             />
           </section>
         )}
+
+      {repeatPlan && (
+        <RepeatEventSheet
+          initialName={repeatPlan.name}
+          initialDate={repeatPlan.suggestedDate}
+          invitees={repeatPlan.invitees}
+          busy={submittingRepeat}
+          onCancel={() => {
+            setRepeatPlan(null);
+            releaseRepeat();
+          }}
+          onConfirm={confirmRepeat}
+        />
+      )}
 
       <InvitePeopleSheet
         slug={slug}

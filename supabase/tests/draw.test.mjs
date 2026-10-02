@@ -13,7 +13,12 @@ import { PGlite } from "@electric-sql/pglite";
 
 const here = new URL(".", import.meta.url);
 const read = (p) => readFileSync(new URL(p, here), "utf8");
-const MIGRATION = "../migrations/20261001120000_ss_draw_engine.sql";
+// Every migration the draw depends on, in order.
+const MIGRATIONS = [
+  "../migrations/20261001120000_ss_draw_engine.sql",
+  "../migrations/20261002090000_ss_assignments_respect_exclusions.sql",
+  "../migrations/20261002120000_ss_exclusions_direction.sql",
+];
 
 /** user index -> uuid; 0 is the organiser. */
 const uid = (n) => `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
@@ -22,7 +27,7 @@ let eventSeq = 0;
 async function freshDb() {
   const db = new PGlite();
   await db.exec(read("fixtures/base_schema.sql"));
-  await db.exec(read(MIGRATION));
+  for (const m of MIGRATIONS) await db.exec(read(m));
   await db.exec(
     `insert into profiles select ('00000000-0000-0000-0000-' || lpad(g::text, 12, '0'))::uuid, 'p' || g
        from generate_series(0, 60) g`
@@ -58,8 +63,11 @@ async function makeEvent(db, { type = "secret_santa", members, exclusions = [], 
       [id, uid(m)]
     );
   }
-  for (const [a, b] of exclusions) {
-    await db.query(`insert into ss_exclusions (event_id, a, b) values ($1, $2, $3)`, [id, uid(a), uid(b)]);
+  // [a, b] = never draw each other; [a, b, "oneway"] = a must not draw b.
+  for (const [a, b, kind] of exclusions) {
+    await db.query(`insert into ss_exclusions (event_id, a, b, mutual) values ($1, $2, $3, $4)`, [
+      id, uid(a), uid(b), kind !== "oneway",
+    ]);
   }
   return id;
 }
@@ -102,7 +110,11 @@ async function assertValidDraw(db, eventId, members, exclusions = []) {
     assert.ok(givers.has(uid(m)));
     assert.ok(receivers.has(uid(m)));
   }
-  const banned = new Set(exclusions.flatMap(([a, b]) => [`${uid(a)}>${uid(b)}`, `${uid(b)}>${uid(a)}`]));
+  const banned = new Set(
+    exclusions.flatMap(([a, b, kind]) =>
+      kind === "oneway" ? [`${uid(a)}>${uid(b)}`] : [`${uid(a)}>${uid(b)}`, `${uid(b)}>${uid(a)}`]
+    )
+  );
   for (const { g, r } of rows) {
     assert.notEqual(g, r, "nobody draws themselves");
     assert.ok(!banned.has(`${g}>${r}`), "exclusions hold");
@@ -335,4 +347,44 @@ test("50 people stays fast", async () => {
   assert.equal(r.ok, true);
   await assertValidDraw(db, id, members, exclusions);
   assert.ok(ms < 10000, `check + draw took ${ms}ms`);
+});
+
+test("one-way rules: a can't draw b, but b may draw a", async () => {
+  const db = await freshDb();
+  // 3 people have two possible draws (the two 3-cycles). 1 -> 2 forbidden
+  // one way leaves 1->3, 3->2, 2->1 - which includes 2 drawing 1.
+  const id = await makeEvent(db, { members: [1, 2, 3], exclusions: [[1, 2, "oneway"]] });
+  const c = await check(db, id);
+  assert.equal(c.status, "predictable");
+  const r = await run(db, id);
+  assert.equal(r.ok, true);
+  const rows = await assertValidDraw(db, id, [1, 2, 3], [[1, 2, "oneway"]]);
+  const got = Object.fromEntries(rows.map(({ g, r }) => [g, r]));
+  assert.equal(got[uid(2)], uid(1), "the reverse direction is allowed");
+
+  // The same rule two-way makes 3 people impossible.
+  const both = await makeEvent(db, { members: [1, 2, 3], exclusions: [[1, 2]] });
+  assert.equal((await check(db, both)).status, "impossible");
+});
+
+test("one-way rules that block a draw are impossible_other, not a household", async () => {
+  const db = await freshDb();
+  // 1, 2, 3 each blocked one-way from the other two: all three need 4.
+  const ex = [[1, 2], [1, 3], [2, 1], [2, 3], [3, 1], [3, 2]].map(([a, b]) => [a, b, "oneway"]);
+  const id = await makeEvent(db, { members: [1, 2, 3, 4], exclusions: ex });
+  const c = await check(db, id);
+  assert.equal(c.status, "impossible");
+  assert.equal(c.reason, "impossible_other");
+});
+
+test("the assignments trigger respects direction", async () => {
+  const db = await freshDb();
+  const id = await makeEvent(db, { members: [1, 2, 3], exclusions: [[1, 2, "oneway"], [1, 3]] });
+  await as(db, null);
+  const draw = (await db.query(`insert into ss_draws (event_id, created_by) values ($1, $2) returning id`, [id, uid(0)])).rows[0].id;
+  const ins = (g, r) =>
+    db.query(`insert into ss_assignments (draw_id, event_id, giver, receiver) values ($1, $2, $3, $4)`, [draw, id, uid(g), uid(r)]);
+  await assert.rejects(ins(1, 2), /excluded_pair/);
+  await ins(2, 1); // reverse of a one-way rule: fine
+  await assert.rejects(ins(3, 1), /excluded_pair/, "reverse of a two-way rule is not");
 });

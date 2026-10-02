@@ -158,7 +158,13 @@ export default function SsCreateEvent() {
   // react-hook-form stops before onSubmit when a rule fails; say which.
   const onInvalid = (errors: FieldErrors<Form>) => {
     if (errors.event_date)
-      toast.error(errors.event_date.type === "tooFar" ? t("dateTooFar") : t("dateInPast"));
+      toast.error(
+        errors.event_date.type === "required"
+          ? t("dateRequired")
+          : errors.event_date.type === "tooFar"
+          ? t("dateTooFar")
+          : t("dateInPast")
+      );
   };
 
   const field =
@@ -241,12 +247,15 @@ export default function SsCreateEvent() {
         </label>
 
         <div className="mb-4 block">
-          <span id="event-date-label" className={labelCls}>{t("fieldDateOptional")}</span>
+          <span id="event-date-label" className={labelCls}>{t("fieldDate")}</span>
           <Controller
             name="event_date"
             control={control}
             // Same rule as the database: today in Vilnius or later.
             rules={{
+              // Required: "is it over?" (e.g. for "Repeat this event") is
+              // answered by the date.
+              required: true,
               validate: {
                 notPast: (v) => !v || v >= todayInVilnius(),
                 tooFar: (v) => !v || v <= maxEventDate(),
@@ -260,6 +269,7 @@ export default function SsCreateEvent() {
                 onChange={f.onChange}
                 min={todayInVilnius()}
                 max={maxEventDate()}
+                clearable={false}
                 className={field}
               />
             )}

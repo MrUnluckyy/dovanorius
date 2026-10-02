@@ -6,14 +6,13 @@ import { createClient } from "@/utils/supabase/server";
 export type DrawRuleResult = { ok: true } | { ok: false; error: string };
 
 /**
- * Draw rules are pairs, not per-person lists.
+ * Draw rules between two people, with a direction.
  *
- * runDraw applies every exclusion in both directions — blocking A from drawing
- * B also stops B drawing A — so a row is really a statement about a couple, and
- * storing or presenting it per-giver was a lie the interface had to keep
- * explaining. Both orientations are treated as the same rule: written in a
- * fixed order so a pair cannot be stored twice, and deleted in either order so
- * rows created by the old per-person screen still come out.
+ * ss_exclusions rows are either two-way (mutual: neither draws the other,
+ * stored once with a < b) or one-way (a must not draw b, stored as giver a,
+ * receiver b). See migration 20261002120000. Every write goes through
+ * setPairRule, which replaces whatever the pair had, so a pair can never hold
+ * contradictory rows.
  */
 function orderPair(a: string, b: string): [string, string] {
   return a < b ? [a, b] : [b, a];
@@ -52,102 +51,48 @@ async function requireAdmin(slug: string): Promise<AdminCtx> {
   return { supabase, event };
 }
 
-export async function addDrawRule(
-  slug: string,
-  personA: string,
-  personB: string
-): Promise<DrawRuleResult> {
-  if (personA === personB) return { ok: false, error: "same_person" };
-
-  const ctx = await requireAdmin(slug);
-  if ("error" in ctx) return { ok: false, error: ctx.error };
-
-  const [a, b] = orderPair(personA, personB);
-  const { error } = await ctx.supabase
-    .from("ss_exclusions")
-    .upsert(
-      { event_id: ctx.event.id, a, b },
-      { onConflict: "event_id,a,b", ignoreDuplicates: true }
-    );
-  if (error) return { ok: false, error: error.message };
-
-  revalidatePath(`/events/${slug}`);
-  return { ok: true };
-}
-
-export async function removeDrawRule(
-  slug: string,
-  personA: string,
-  personB: string
-): Promise<DrawRuleResult> {
-  const ctx = await requireAdmin(slug);
-  if ("error" in ctx) return { ok: false, error: ctx.error };
-
-  const [a, b] = orderPair(personA, personB);
-  // Either orientation: the old per-person screen wrote whichever way round
-  // the organiser happened to set it.
-  const { error } = await ctx.supabase
-    .from("ss_exclusions")
-    .delete()
-    .eq("event_id", ctx.event.id)
-    .or(`and(a.eq.${a},b.eq.${b}),and(a.eq.${b},b.eq.${a})`);
-  if (error) return { ok: false, error: error.message };
-
-  revalidatePath(`/events/${slug}`);
-  return { ok: true };
-}
+/** The rule between two people x and y. */
+export type PairRule = "none" | "x_to_y" | "y_to_x" | "both";
 
 /**
- * A household: people who must not draw each other at all.
- *
- * Stored as every pair inside the group (ss_exclusions has no group concept,
- * and the draw engine only reads pairs). Adding someone already in another
- * household joins the two: the screen merges connected pairs into one group.
+ * Set the rule between x and y, replacing any rule the pair had (in either
+ * orientation, including rows from older screens).
+ *   both    - neither draws the other (partners)
+ *   x_to_y  - x must not draw y; y may draw x (e.g. x drew y last year)
+ *   y_to_x  - the reverse
+ *   none    - no rule
  */
-export async function addHousehold(
+export async function setPairRule(
   slug: string,
-  memberIds: string[]
+  x: string,
+  y: string,
+  rule: PairRule
 ): Promise<DrawRuleResult> {
-  const ids = [...new Set(memberIds)];
-  if (ids.length < 2) return { ok: false, error: "too_few_people" };
+  if (x === y) return { ok: false, error: "same_person" };
 
   const ctx = await requireAdmin(slug);
   if ("error" in ctx) return { ok: false, error: ctx.error };
 
-  const rows: { event_id: string; a: string; b: string }[] = [];
-  for (let i = 0; i < ids.length; i++)
-    for (let j = i + 1; j < ids.length; j++) {
-      const [a, b] = orderPair(ids[i], ids[j]);
-      rows.push({ event_id: ctx.event.id, a, b });
-    }
-
-  const { error } = await ctx.supabase
-    .from("ss_exclusions")
-    .upsert(rows, { onConflict: "event_id,a,b", ignoreDuplicates: true });
-  if (error) return { ok: false, error: error.message };
-
-  revalidatePath(`/events/${slug}`);
-  return { ok: true };
-}
-
-/** Dissolve a household: delete every pair among its members, either order. */
-export async function removeHousehold(
-  slug: string,
-  memberIds: string[]
-): Promise<DrawRuleResult> {
-  const ids = [...new Set(memberIds)];
-  if (ids.length < 2) return { ok: true };
-
-  const ctx = await requireAdmin(slug);
-  if ("error" in ctx) return { ok: false, error: ctx.error };
-
-  const { error } = await ctx.supabase
+  const { error: delError } = await ctx.supabase
     .from("ss_exclusions")
     .delete()
     .eq("event_id", ctx.event.id)
-    .in("a", ids)
-    .in("b", ids);
-  if (error) return { ok: false, error: error.message };
+    .or(`and(a.eq.${x},b.eq.${y}),and(a.eq.${y},b.eq.${x})`);
+  if (delError) return { ok: false, error: delError.message };
+
+  if (rule !== "none") {
+    const row =
+      rule === "both"
+        ? (() => {
+            const [a, b] = orderPair(x, y);
+            return { event_id: ctx.event.id, a, b, mutual: true };
+          })()
+        : rule === "x_to_y"
+        ? { event_id: ctx.event.id, a: x, b: y, mutual: false }
+        : { event_id: ctx.event.id, a: y, b: x, mutual: false };
+    const { error } = await ctx.supabase.from("ss_exclusions").insert(row);
+    if (error) return { ok: false, error: error.message };
+  }
 
   revalidatePath(`/events/${slug}`);
   return { ok: true };
