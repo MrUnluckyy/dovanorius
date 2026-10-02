@@ -3,10 +3,27 @@ import { updateSession } from "@/utils/supabase/middleware";
 
 const PARTNER_HOSTNAMES = ["partner.noriuto.lt", "partner.localhost"];
 
+// The bare domain sends visitors to www. This used to be a Vercel domain
+// redirect, which also redirected /.well-known/*: Apple and Google fetch the
+// app-link files (apple-app-site-association, assetlinks.json) from exactly
+// noriuto.lt and don't follow redirects, so links shared as
+// https://noriuto.lt/... could never open the app. Done here instead, the
+// files are served on the apex as-is (the matcher below never runs on paths
+// with a dot, and /.well-known is skipped explicitly as well).
+const APEX_HOST = "noriuto.lt";
+
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get("host") ?? "";
   // Strip port so partner.localhost:3000 matches too
   const host = hostname.split(":")[0];
+
+  if (host === APEX_HOST && !request.nextUrl.pathname.startsWith("/.well-known/")) {
+    const url = request.nextUrl.clone();
+    url.host = `www.${APEX_HOST}`;
+    url.port = "";
+    url.protocol = "https:";
+    return NextResponse.redirect(url, 308);
+  }
   const isPartnerSubdomain = PARTNER_HOSTNAMES.includes(host);
 
   if (isPartnerSubdomain) {

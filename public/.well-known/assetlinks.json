@@ -4,7 +4,9 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.justassobutas.noriutoapp",
-      "sha256_cert_fingerprints": [""]
+      "sha256_cert_fingerprints": [
+        "A7:FC:1F:29:98:D7:FC:54:BD:F1:B8:03:14:01:86:29:8D:61:56:DE:DA:92:5B:20:22:E7:2D:BD:30:93:77:31"
+      ]
     }
   }
 ]
