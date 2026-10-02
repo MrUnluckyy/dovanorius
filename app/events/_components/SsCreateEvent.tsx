@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm, type FieldErrors } from "react-hook-form";
+import DatePicker from "@/components/DatePicker";
+import { maxEventDate, todayInVilnius } from "@/lib/events/formatEventDate";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
@@ -60,6 +62,7 @@ export default function SsCreateEvent() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { isSubmitting },
   } = useForm<Form>();
 
@@ -98,6 +101,15 @@ export default function SsCreateEvent() {
       } = await sb.auth.getUser();
       if (!user) throw new Error("not authenticated");
 
+      if (v.event_date && v.event_date < todayInVilnius()) {
+        toast.error(t("dateInPast"));
+        return;
+      }
+      if (v.event_date && v.event_date > maxEventDate()) {
+        toast.error(t("dateTooFar"));
+        return;
+      }
+
       const { data: event, error } = await sb
         .from("ss_events")
         .insert({
@@ -131,8 +143,22 @@ export default function SsCreateEvent() {
       router.replace(`/events/${event.slug}?invite=1`);
     } catch (err) {
       console.error("Error creating event:", err);
-      toast.error(t("errorCreateFailed"));
+      // The ss_events_date_not_past trigger has the final say on dates.
+      const message = (err as { message?: string } | null)?.message ?? "";
+      toast.error(
+        message.includes("date_in_past")
+          ? t("dateInPast")
+          : message.includes("date_too_far")
+          ? t("dateTooFar")
+          : t("errorCreateFailed")
+      );
     }
+  };
+
+  // react-hook-form stops before onSubmit when a rule fails; say which.
+  const onInvalid = (errors: FieldErrors<Form>) => {
+    if (errors.event_date)
+      toast.error(errors.event_date.type === "tooFar" ? t("dateTooFar") : t("dateInPast"));
   };
 
   const field =
@@ -203,7 +229,7 @@ export default function SsCreateEvent() {
         </h1>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
         <label className="mb-4 block">
           <span className={labelCls}>{t("fieldName")}</span>
           <input
@@ -214,10 +240,31 @@ export default function SsCreateEvent() {
           />
         </label>
 
-        <label className="mb-4 block">
-          <span className={labelCls}>{t("fieldDateOptional")}</span>
-          <input type="date" className={field} {...register("event_date")} />
-        </label>
+        <div className="mb-4 block">
+          <span id="event-date-label" className={labelCls}>{t("fieldDateOptional")}</span>
+          <Controller
+            name="event_date"
+            control={control}
+            // Same rule as the database: today in Vilnius or later.
+            rules={{
+              validate: {
+                notPast: (v) => !v || v >= todayInVilnius(),
+                tooFar: (v) => !v || v <= maxEventDate(),
+              },
+            }}
+            render={({ field: f }) => (
+              <DatePicker
+                id="event-date"
+                labelledBy="event-date-label"
+                value={f.value ?? ""}
+                onChange={f.onChange}
+                min={todayInVilnius()}
+                max={maxEventDate()}
+                className={field}
+              />
+            )}
+          />
+        </div>
 
         {meta.showBudget && (
           <label className="mb-4 block">

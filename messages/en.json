@@ -550,7 +550,9 @@
     "drawCheckDrawAnyway": "Draw anyway",
     "drawCheckTurnOffRule": "Turn off rule",
     "drawCheckEditRules": "Edit rules",
-    "drawCheckInvite": "Invite people"
+    "drawCheckInvite": "Invite people",
+    "dateInPast": "Pick today or a later date.",
+    "dateTooFar": "Pick a date within the next 10 years."
   },
   "Blog": {
     "metaTitle": "Blog — Noriuto.lt",
@@ -915,7 +917,10 @@
     "reservedTitle": "Gift reserved",
     "reservedBody": "You reserved <item></item>. Nobody else can take it.",
     "checkInTitle": "Still planning to give this?",
-    "checkInBody": "You reserved <item></item>. If you still plan to give it, there's nothing to do."
+    "checkInBody": "You reserved <item></item>. If you still plan to give it, there's nothing to do.",
+    "drawnTitle": "Names drawn",
+    "drawnBody": "<event></event>: your person is ready.",
+    "ctaSeeMyDraw": "See who I got"
   },
   "Account": {
     "title": "Account settings",
@@ -966,5 +971,13 @@
     "thanksBody": "We'll take a look and fix it.",
     "thanksWithEmail": "We'll take a look and write back if we need to.",
     "close": "Close"
+  },
+  "DatePicker": {
+    "placeholder": "Pick a date",
+    "clear": "Clear",
+    "today": "Today",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "dialogLabel": "Choose a date"
   }
 }
