@@ -14,6 +14,8 @@ type ConfirmOptions = {
   message?: string | ReactNode;
   confirmText?: string;
   cancelText?: string;
+  /** "danger" (default) for deletes and other loss; "primary" for creating or sending. */
+  tone?: "danger" | "primary";
 };
 
 type ConfirmContextValue = (options?: ConfirmOptions) => Promise<boolean>;
@@ -79,7 +81,7 @@ export function ConfirmDialogProvider({ children }: Props) {
                 {options.cancelText ?? t("cancel")}
               </button>
               <button
-                className="btn btn-error"
+                className={`btn ${options.tone === "primary" ? "btn-primary" : "btn-error"}`}
                 type="button"
                 onClick={() => handleClose(true)}
               >

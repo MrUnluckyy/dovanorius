@@ -46,6 +46,7 @@ export default function DatePicker({
   id,
   labelledBy,
   placeholder,
+  clearable = true,
   className = "",
 }: {
   value: string;
@@ -59,6 +60,8 @@ export default function DatePicker({
    *  the open calendar would "activate" the label and close it. */
   labelledBy?: string;
   placeholder?: string;
+  /** False for a required date: no ✕ and no "Clear". */
+  clearable?: boolean;
   /** Classes for the field, so it matches the form's other inputs. */
   className?: string;
 }) {
@@ -179,7 +182,7 @@ export default function DatePicker({
             {shown ? capitalise(shown) : placeholder ?? t("placeholder")}
           </span>
         </button>
-        {value && (
+        {value && clearable && (
           <button
             type="button"
             aria-label={t("clear")}
@@ -266,6 +269,7 @@ export default function DatePicker({
           </div>
 
           <div className="mt-3 flex items-center justify-between border-t border-(--nr-border) pt-3">
+            {clearable ? (
             <button
               type="button"
               onClick={() => {
@@ -276,6 +280,9 @@ export default function DatePicker({
             >
               {t("clear")}
             </button>
+            ) : (
+              <span />
+            )}
             <button
               type="button"
               onClick={() => pick(today)}
