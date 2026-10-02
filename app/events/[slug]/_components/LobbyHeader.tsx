@@ -1,5 +1,6 @@
 import type { SsEvent } from "@/types/secret-santa";
-import { useFormatter, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { formatEventDate } from "@/lib/events/formatEventDate";
 import { LuCalendar, LuGift, LuSettings, LuUsers } from "react-icons/lu";
 import { getEventTypeMeta } from "@/utils/events/typeMeta";
 
@@ -27,9 +28,9 @@ export default function LobbyHeader({
   onOpenSettings: () => void;
 }) {
   const t = useTranslations("Events");
-  const format = useFormatter();
   const meta = getEventTypeMeta(ev.type);
-  const date = ev.event_date ? new Date(ev.event_date) : null;
+  const locale = useLocale();
+  const date = formatEventDate(ev.event_date, locale);
   const showBudget = meta.showBudget && ev.budget != null;
 
   return (
@@ -91,11 +92,7 @@ export default function LobbyHeader({
         <Fact
           icon={<LuCalendar size={14} />}
           label={t("fieldDate")}
-          value={
-            date
-              ? format.dateTime(date, { day: "numeric", month: "long" })
-              : "—"
-          }
+          value={date ?? "—"}
         />
         <Fact
           icon={<LuGift size={14} />}

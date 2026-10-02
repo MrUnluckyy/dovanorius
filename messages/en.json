@@ -542,7 +542,44 @@
     "inviteChipRemove": "Remove {name}",
     "inviteChipFailed": "Couldn't invite. Tap Invite to try again.",
     "inviteFailedSome": "Couldn't invite {names}. Still selected, so you can try again.",
-    "inviteSendNamed": "Invite {name}{others, plural, =0 {} one { and # other} other { and # others}}"
+    "inviteSendNamed": "Invite {name}{others, plural, =0 {} one { and # other} other { and # others}}",
+    "drawCheckTooFewTitle": "Not enough people yet",
+    "drawCheckTooFew": "You need at least {min} people. {count} have joined.",
+    "drawCheckNoRecipientTitle": "Someone has nobody to give to",
+    "drawCheckNoRecipient": "{name} can't give to anyone: everyone else is excluded for them.",
+    "drawCheckHouseholdTitle": "One group is too big",
+    "drawCheckHousehold": "{names} are {k} of {n} people, so they can't all give outside their group. Add people or split the group.",
+    "drawCheckOtherTitle": "These rules don't allow a draw",
+    "drawCheckOther": "With the current rules, nobody can be matched. Remove a rule and try again.",
+    "drawCheckRelaxedTitle": "Same as last year",
+    "drawCheckRelaxed": "{repeats, plural, one {# person} other {# people}} will get the same person as last year.",
+    "drawCheckPredictableTitle": "Easy to guess",
+    "drawCheckPredictable": "Only one draw fits, so people may guess who has whom.",
+    "drawCheckDrawAnyway": "Draw anyway",
+    "drawCheckTurnOffRule": "Turn off rule",
+    "drawCheckEditRules": "Edit rules",
+    "drawCheckInvite": "Invite people",
+    "cancel": "Cancel",
+    "householdsBody": "People in the same household won't draw each other — partners, families, flatmates.",
+    "householdNew": "New household",
+    "householdPick": "Tap everyone in this household",
+    "householdNamePlaceholder": "Name (optional), e.g. The Smiths",
+    "householdPickMore": "Pick at least 2 people",
+    "householdSave": "Save household of {count}",
+    "householdRemove": "Remove household",
+    "lastYearTitle": "Last year",
+    "lastYearBody": "Link last year's event so nobody gets the same person again.",
+    "lastYearLink": "Link last year's event",
+    "lastYearNone": "You don't have an earlier drawn event of this kind yet.",
+    "lastYearAvoid": "Don't repeat pairs from “{name}”",
+    "lastYearPairs": "Last year's pairs ({count})",
+    "lastYearUnlink": "Unlink",
+    "drawStatusOk": "Ready: the draw will work with these rules.",
+    "repeatEvent": "Repeat this event",
+    "repeatEventBody": "Start next year's draw with the same people and rules. Nobody will get the same person as this year.",
+    "repeatEventFailed": "Couldn't create the new event. Try again.",
+    "dateInPast": "Pick today or a later date.",
+    "dateTooFar": "Pick a date within the next 10 years."
   },
   "Blog": {
     "metaTitle": "Blog — Noriuto.lt",
@@ -907,7 +944,10 @@
     "reservedTitle": "Gift reserved",
     "reservedBody": "You reserved <item></item>. Nobody else can take it.",
     "checkInTitle": "Still planning to give this?",
-    "checkInBody": "You reserved <item></item>. If you still plan to give it, there's nothing to do."
+    "checkInBody": "You reserved <item></item>. If you still plan to give it, there's nothing to do.",
+    "drawnTitle": "Names drawn",
+    "drawnBody": "<event></event>: your person is ready.",
+    "ctaSeeMyDraw": "See who I got"
   },
   "Account": {
     "title": "Account settings",
@@ -958,5 +998,13 @@
     "thanksBody": "We'll take a look and fix it.",
     "thanksWithEmail": "We'll take a look and write back if we need to.",
     "close": "Close"
+  },
+  "DatePicker": {
+    "placeholder": "Pick a date",
+    "clear": "Clear",
+    "today": "Today",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "dialogLabel": "Choose a date"
   }
 }

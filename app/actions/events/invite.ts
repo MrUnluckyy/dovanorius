@@ -163,7 +163,7 @@ export async function sendJoinedEmail(
 
   const { data: event } = await supabase
     .from("ss_events")
-    .select("id, name, slug")
+    .select("id, name, slug, event_date")
     .eq("slug", slug)
     .single();
   if (!event) return { ok: false };
@@ -188,6 +188,7 @@ export async function sendJoinedEmail(
         eventName: event.name,
         eventUrl: `${INVITE_BASE_URL}/events/${event.slug}`,
         displayName: displayName ?? null,
+        eventDate: event.event_date,
       }),
     });
     if (sendError) throw sendError;

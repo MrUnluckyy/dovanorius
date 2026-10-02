@@ -542,7 +542,44 @@
     "inviteChipRemove": "Pašalinti: {name}",
     "inviteChipFailed": "Nepavyko pakviesti. Paspausk „Pakviesti“ dar kartą.",
     "inviteFailedSome": "Nepavyko pakviesti: {names}. Jie liko pažymėti, tad gali bandyti dar kartą.",
-    "inviteSendNamed": "Pakviesti: {name}{others, plural, =0 {} other { ir dar #}}"
+    "inviteSendNamed": "Pakviesti: {name}{others, plural, =0 {} other { ir dar #}}",
+    "drawCheckTooFewTitle": "Kol kas per mažai žmonių",
+    "drawCheckTooFew": "Reikia bent {min} žmonių. Prisijungė: {count}.",
+    "drawCheckNoRecipientTitle": "Kažkas neturi kam dovanoti",
+    "drawCheckNoRecipient": "{name} negali niekam dovanoti: visi kiti jam ar jai uždrausti.",
+    "drawCheckHouseholdTitle": "Viena grupė per didelė",
+    "drawCheckHousehold": "{names} – tai {k} iš {n} žmonių, todėl jie visi negali dovanoti už savo grupės ribų. Pakviesk daugiau žmonių arba išskaidyk grupę.",
+    "drawCheckOtherTitle": "Su šiomis taisyklėmis burtų ištraukti negalima",
+    "drawCheckOther": "Su dabartinėmis taisyklėmis nepavyksta visų suporuoti. Pašalink kurią nors taisyklę ir bandyk dar kartą.",
+    "drawCheckRelaxedTitle": "Kaip ir pernai",
+    "drawCheckRelaxed": "{repeats, plural, one {# žmogus gaus} few {# žmonės gaus} other {# žmonių gaus}} tą patį žmogų kaip pernai.",
+    "drawCheckPredictableTitle": "Lengva atspėti",
+    "drawCheckPredictable": "Tinka tik vienas burtų variantas, todėl žmonės gali atspėti, kas kam dovanoja.",
+    "drawCheckDrawAnyway": "Vis tiek traukti",
+    "drawCheckTurnOffRule": "Išjungti taisyklę",
+    "drawCheckEditRules": "Keisti taisykles",
+    "drawCheckInvite": "Pakviesti žmonių",
+    "cancel": "Atšaukti",
+    "householdsBody": "To paties namų ūkio žmonės vienas kito netrauks – poros, šeimos, kambariokai.",
+    "householdNew": "Naujas namų ūkis",
+    "householdPick": "Pažymėk visus šio namų ūkio žmones",
+    "householdNamePlaceholder": "Pavadinimas (nebūtina), pvz. Petraičiai",
+    "householdPickMore": "Pažymėk bent 2 žmones",
+    "householdSave": "Išsaugoti ({count} žm.)",
+    "householdRemove": "Pašalinti namų ūkį",
+    "lastYearTitle": "Pernai",
+    "lastYearBody": "Susiek su pernykščiu renginiu, kad niekas vėl negautų to paties žmogaus.",
+    "lastYearLink": "Susieti pernykštį renginį",
+    "lastYearNone": "Kol kas neturi ankstesnio tokio paties tipo renginio su ištrauktais burtais.",
+    "lastYearAvoid": "Nekartoti porų iš „{name}“",
+    "lastYearPairs": "Pernykštės poros ({count})",
+    "lastYearUnlink": "Atsieti",
+    "drawStatusOk": "Viskas gerai: su šiomis taisyklėmis burtus ištraukti galima.",
+    "repeatEvent": "Pakartoti renginį",
+    "repeatEventBody": "Pradėk kitų metų burtus su tais pačiais žmonėmis ir taisyklėmis. Niekas negaus to paties žmogaus kaip šiemet.",
+    "repeatEventFailed": "Nepavyko sukurti naujo renginio. Bandyk dar kartą.",
+    "dateInPast": "Pasirink šiandienos arba vėlesnę datą.",
+    "dateTooFar": "Pasirink datą per artimiausius 10 metų."
   },
   "Blog": {
     "metaTitle": "Tinklaraštis — Noriuto.lt",
@@ -907,7 +944,10 @@
     "reservedTitle": "Dovana rezervuota",
     "reservedBody": "Rezervavai <item></item>. Niekas kitas jos nepasiims.",
     "checkInTitle": "Vis dar planuoji dovanoti?",
-    "checkInBody": "Rezervavai <item></item>. Jei vis dar planuoji ją padovanoti, daryti nieko nereikia."
+    "checkInBody": "Rezervavai <item></item>. Jei vis dar planuoji ją padovanoti, daryti nieko nereikia.",
+    "drawnTitle": "Burtai ištraukti",
+    "drawnBody": "<event></event>: jau žinoma, kam dovanosi.",
+    "ctaSeeMyDraw": "Kam dovanoju?"
   },
   "Account": {
     "title": "Paskyros nustatymai",
@@ -958,5 +998,13 @@
     "thanksBody": "Peržiūrėsime ir sutvarkysime.",
     "thanksWithEmail": "Peržiūrėsime ir, jei reikės, parašysime tau.",
     "close": "Uždaryti"
+  },
+  "DatePicker": {
+    "placeholder": "Pasirink datą",
+    "clear": "Išvalyti",
+    "today": "Šiandien",
+    "prevMonth": "Ankstesnis mėnuo",
+    "nextMonth": "Kitas mėnuo",
+    "dialogLabel": "Pasirink datą"
   }
 }

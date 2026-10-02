@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "import:feed": "tsx scripts/import-feed.ts",
-    "sync:partners": "tsx scripts/sync-partner-feeds.ts"
+    "sync:partners": "tsx scripts/sync-partner-feeds.ts",
+    "test:sql": "node --test \"supabase/tests/*.test.mjs\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.114.0",
@@ -49,6 +50,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

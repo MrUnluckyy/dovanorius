@@ -11,6 +11,8 @@ type EventPatch = {
   budget?: number | null;
   notes?: string | null;
   cover_image_url?: string | null;
+  avoid_previous_match?: boolean;
+  previous_event_id?: string | null;
 };
 
 /**
@@ -48,6 +50,14 @@ export async function updateEvent(
       ...(patch.notes !== undefined ? { notes: patch.notes || null } : {}),
       ...(patch.cover_image_url !== undefined
         ? { cover_image_url: patch.cover_image_url }
+        : {}),
+      ...(patch.avoid_previous_match !== undefined
+        ? { avoid_previous_match: patch.avoid_previous_match }
+        : {}),
+      // Only an event the caller organises can be linked; the
+      // ss_events_guard_previous trigger enforces it.
+      ...(patch.previous_event_id !== undefined
+        ? { previous_event_id: patch.previous_event_id }
         : {}),
     })
     .eq("slug", slug)

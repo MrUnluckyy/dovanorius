@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { User } from "@supabase/supabase-js";
 import toast from "react-hot-toast";
-import { LuUserPlus } from "react-icons/lu";
+import { LuRepeat, LuUserPlus } from "react-icons/lu";
 import type {
   Participant,
   SsEvent,
@@ -16,6 +16,7 @@ import { createClient } from "@/utils/supabase/client";
 import { qq } from "@/utils/qq";
 import { getEventTypeMeta } from "@/utils/events/typeMeta";
 import { setEventStatus } from "@/app/actions/events/manage";
+import { repeatEvent } from "@/app/actions/events/repeat";
 import { fetchRecipient } from "@/utils/events/recipient";
 import LobbyHeader from "./LobbyHeader";
 import Participants from "./Participants";
@@ -39,6 +40,7 @@ export default function LobbyClient({
   const qc = useQueryClient();
   const t = useTranslations("Events");
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -111,6 +113,19 @@ export default function LobbyClient({
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: qq.event(slug) }),
     onError: () => toast.error(t("lockFailed")),
+  });
+
+  const repeatMutation = useMutation({
+    mutationFn: async () => {
+      const res = await repeatEvent(slug);
+      if (!res.ok) throw new Error(res.error);
+      return res.slug;
+    },
+    onSuccess: (newSlug) => {
+      qc.invalidateQueries({ queryKey: qq.myEventsAll() });
+      router.push(`/events/${newSlug}`);
+    },
+    onError: () => toast.error(t("repeatEventFailed")),
   });
 
   const isOwner = event?.owner_id === user.id;
@@ -211,10 +226,20 @@ export default function LobbyClient({
                 <LuUserPlus className="w-4" />
                 {t("inviteMembers")}
               </button>
+              {/* Not disabled for too few people: tapping explains why there
+                  is no draw yet, with an Invite button, instead of a dead
+                  button. ss_check_draw counts confirmed members itself. */}
               <DrawButton
                 slug={slug}
                 eventId={event.id}
-                disabled={notEnoughMembers || event.status === "archived"}
+                participants={participants ?? []}
+                disabled={event.status === "archived"}
+                onInvite={() => setInviteOpen(true)}
+                onEditRules={() =>
+                  document
+                    .getElementById("draw-rules")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
               />
             </div>
             {event.status === "locked" && (
@@ -238,6 +263,21 @@ export default function LobbyClient({
           </p>
         )}
       </section>
+
+      {/* Next year's edition: same people and rules, this year's pairs avoided. */}
+      {!isGroup && isAdmin && event.status === "drawn" && (
+        <section className="nr-card mt-4 p-5">
+          <p className="text-[14px] leading-relaxed text-(--nr-muted)">{t("repeatEventBody")}</p>
+          <button
+            onClick={() => repeatMutation.mutate()}
+            disabled={repeatMutation.isPending}
+            className="nr-btn nr-btn-outline mt-3 cursor-pointer disabled:opacity-50"
+          >
+            <LuRepeat className="w-4" />
+            {t("repeatEvent")}
+          </button>
+        </section>
+      )}
 
       {myMembership && !isGroup && (
         <section className="mt-4">
@@ -275,11 +315,12 @@ export default function LobbyClient({
         isAdmin &&
         event.status !== "drawn" &&
         (participants?.length ?? 0) >= 2 && (
-          <section className="mt-4">
+          <section id="draw-rules" className="mt-4 scroll-mt-4">
             <DrawRules
               slug={slug}
-              eventId={event.id}
+              event={event}
               participants={participants ?? []}
+              currentUserId={user.id}
             />
           </section>
         )}
