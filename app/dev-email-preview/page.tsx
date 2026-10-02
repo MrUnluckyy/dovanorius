@@ -92,6 +92,7 @@ export default async function DevEmailPreview() {
         eventName: "Šeimos Kalėdos",
         eventUrl: "https://noriuto.lt/events/seimos-kaledos-a1b2c3",
         displayName: "Justas",
+        eventDate: "2026-12-24",
       }),
     ],
   ];

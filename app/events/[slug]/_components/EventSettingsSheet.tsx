@@ -13,6 +13,8 @@ import { getEventTypeMeta } from "@/utils/events/typeMeta";
 import { qq } from "@/utils/qq";
 import { deleteEvent, leaveEvent, updateEvent } from "@/app/actions/events/manage";
 import type { SsEvent } from "@/types/secret-santa";
+import { maxEventDate, todayInVilnius } from "@/lib/events/formatEventDate";
+import DatePicker from "@/components/DatePicker";
 
 /**
  * Everything an organiser can change after the event exists.
@@ -84,6 +86,18 @@ export default function EventSettingsSheet({
       toast.error(t("errorMissingName"));
       return;
     }
+    // Only a date being changed has to be today or later (as in the
+    // database): an event whose date has since passed can still be renamed.
+    if (date && date !== (event.event_date ?? "")) {
+      if (date < todayInVilnius()) {
+        toast.error(t("dateInPast"));
+        return;
+      }
+      if (date > maxEventDate()) {
+        toast.error(t("dateTooFar"));
+        return;
+      }
+    }
     setSaving(true);
     try {
       let coverUrl: string | null | undefined;
@@ -108,7 +122,13 @@ export default function EventSettingsSheet({
       onClose();
     } catch (err) {
       console.error("Failed to save event:", err);
-      toast.error(t("settingsSaveFailed"));
+      toast.error(
+        err instanceof Error && err.message.includes("date_in_past")
+          ? t("dateInPast")
+          : err instanceof Error && err.message.includes("date_too_far")
+          ? t("dateTooFar")
+          : t("settingsSaveFailed")
+      );
     } finally {
       setSaving(false);
     }
@@ -224,15 +244,18 @@ export default function EventSettingsSheet({
                 />
               </label>
 
-              <label className="mb-4 block">
-                <span className={label}>{t("fieldDate")}</span>
-                <input
-                  type="date"
+              <div className="mb-4 block">
+                <span id="settings-date-label" className={label}>{t("fieldDate")}</span>
+                <DatePicker
+                  id="settings-date"
+                  labelledBy="settings-date-label"
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={setDate}
+                  min={todayInVilnius()}
+                  max={maxEventDate()}
                   className={field}
                 />
-              </label>
+              </div>
 
               {meta.showBudget && (
                 <label className="mb-4 block">

@@ -569,7 +569,9 @@
     "drawStatusOk": "Ready: the draw will work with these rules.",
     "repeatEvent": "Repeat this event",
     "repeatEventBody": "Start next year's draw with the same people and rules. Nobody will get the same person as this year.",
-    "repeatEventFailed": "Couldn't create the new event. Try again."
+    "repeatEventFailed": "Couldn't create the new event. Try again.",
+    "dateInPast": "Pick today or a later date.",
+    "dateTooFar": "Pick a date within the next 10 years."
   },
   "Blog": {
     "metaTitle": "Blog — Noriuto.lt",
@@ -934,7 +936,10 @@
     "reservedTitle": "Gift reserved",
     "reservedBody": "You reserved <item></item>. Nobody else can take it.",
     "checkInTitle": "Still planning to give this?",
-    "checkInBody": "You reserved <item></item>. If you still plan to give it, there's nothing to do."
+    "checkInBody": "You reserved <item></item>. If you still plan to give it, there's nothing to do.",
+    "drawnTitle": "Names drawn",
+    "drawnBody": "<event></event>: your person is ready.",
+    "ctaSeeMyDraw": "See who I got"
   },
   "Account": {
     "title": "Account settings",
@@ -985,5 +990,13 @@
     "thanksBody": "We'll take a look and fix it.",
     "thanksWithEmail": "We'll take a look and write back if we need to.",
     "close": "Close"
+  },
+  "DatePicker": {
+    "placeholder": "Pick a date",
+    "clear": "Clear",
+    "today": "Today",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "dialogLabel": "Choose a date"
   }
 }

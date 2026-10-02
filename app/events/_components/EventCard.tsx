@@ -1,5 +1,6 @@
 import { SsEvent } from "@/types/secret-santa";
-import { useFormatter, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { formatEventDate } from "@/lib/events/formatEventDate";
 import Link from "next/link";
 import { getEventTypeMeta } from "@/utils/events/typeMeta";
 
@@ -19,9 +20,9 @@ export default function EventCard({
   memberCount?: number;
 }) {
   const t = useTranslations("Events");
-  const format = useFormatter();
   const meta = getEventTypeMeta(ev.type);
-  const date = ev.event_date ? new Date(ev.event_date) : null;
+  const locale = useLocale();
+  const date = formatEventDate(ev.event_date, locale);
 
   // Status is the useful signal on a list: whether this one still needs people,
   // or is waiting on the organiser, or is finished.
@@ -70,13 +71,7 @@ export default function EventCard({
             memberCount != null
               ? t("joinPeopleCount", { count: memberCount })
               : null,
-            date
-              ? format.dateTime(date, {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })
-              : null,
+            date,
             meta.showBudget && ev.budget != null
               ? `${ev.budget} ${ev.currency ?? "EUR"}`
               : null,

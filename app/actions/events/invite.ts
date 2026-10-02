@@ -75,9 +75,8 @@ export async function rotateJoinLink(
  * Invite existing Noriuto users by id.
  *
  * Replaces the old `sendInvites`, which trusted the caller: it never checked
- * that you organise the event, and `ss_notify_invite` (which does check) ran
- * only afterwards — so an unauthorised call inserted the invite row and *then*
- * threw, leaving the invitation half-created.
+ * that you organise the event, so an unauthorised call inserted the invite row
+ * and only failed afterwards, leaving the invitation half-created.
  */
 export async function inviteUsers(
   slug: string,
@@ -112,19 +111,9 @@ export async function inviteUsers(
     .select("id, to_user");
   if (error) return { ok: false, error: error.message };
 
-  for (const inv of invites ?? []) {
-    const { error: notifyError } = await supabase.rpc("ss_notify_invite", {
-      p_event_id: event.id,
-      p_invite_id: inv.id,
-      p_to_user: inv.to_user,
-      p_event_name: event.name,
-      p_slug: event.slug,
-    });
-    // A missed notification is not worth losing the invitation over — it still
-    // shows up on the invitee's /events page.
-    if (notifyError) console.error("ss_notify_invite failed:", notifyError);
-  }
-
+  // No notification call here: the ss_invites triggers write the 'ss_invite'
+  // notification for every invite that becomes pending, for web and app alike
+  // (migration 20261001100000).
   return { ok: true, sent: invites?.length ?? 0 };
 }
 
@@ -152,7 +141,7 @@ export async function sendJoinedEmail(
 
   const { data: event } = await supabase
     .from("ss_events")
-    .select("id, name, slug")
+    .select("id, name, slug, event_date")
     .eq("slug", slug)
     .single();
   if (!event) return { ok: false };
@@ -177,6 +166,7 @@ export async function sendJoinedEmail(
         eventName: event.name,
         eventUrl: `${INVITE_BASE_URL}/events/${event.slug}`,
         displayName: displayName ?? null,
+        eventDate: event.event_date,
       }),
     });
     if (sendError) throw sendError;
