@@ -151,6 +151,7 @@ test("household_too_big: an exclusion group over half the members", async () => 
   assert.equal(c.status, "impossible");
   assert.equal(c.reason, "household_too_big");
   assert.deepEqual(c.people.sort(), [uid(1), uid(2), uid(3)]);
+  assert.equal(c.count, 5, "count is always returned");
 });
 
 test("every impossible draw is explained: no_recipient or household_too_big", async () => {

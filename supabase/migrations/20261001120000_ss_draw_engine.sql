@@ -387,18 +387,21 @@ begin
   end if;
   res := ss_draw_solve(p_event_id, false);
   -- The check never hands out pairs: it is a preview, not a draw.
+  -- count (confirmed members in the draw) is always there, so a message can
+  -- say "3 of 5 people"; min only with too_few.
   return jsonb_build_object(
     'status',  res->'status',
     'reason',  res->'reason',
     'people',  coalesce(res->'people', '[]'::jsonb),
-    'repeats', coalesce(res->'repeats', '0'::jsonb)
-  ) || case when res ? 'min' then jsonb_build_object('min', res->'min', 'count', res->'count')
+    'repeats', coalesce(res->'repeats', '0'::jsonb),
+    'count',   (select count(*) from ss_members m where m.event_id = p_event_id and m.is_confirmed)
+  ) || case when res ? 'min' then jsonb_build_object('min', res->'min')
             else '{}'::jsonb end;
 end
 $function$;
 
 comment on function public.ss_check_draw(uuid) is
-  'Preview a draw without writing: {status: ok|predictable|relaxed|impossible, reason, people[], repeats}. Event admins only. See 20261001120000.';
+  'Preview a draw without writing: {status: ok|predictable|relaxed|impossible, reason, people[], repeats, count, min?}. Event admins only. See 20261001120000.';
 
 create or replace function public.ss_run_draw(p_event_id uuid)
 returns jsonb
