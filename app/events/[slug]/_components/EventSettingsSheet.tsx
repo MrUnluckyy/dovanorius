@@ -88,7 +88,12 @@ export default function EventSettingsSheet({
     }
     // Only a date being changed has to be today or later (as in the
     // database): an event whose date has since passed can still be renamed.
-    if (date && date !== (event.event_date ?? "")) {
+    // Required for every event now; older events without one get asked here.
+    if (!date) {
+      toast.error(t("dateRequired"));
+      return;
+    }
+    if (date !== (event.event_date ?? "")) {
       if (date < todayInVilnius()) {
         toast.error(t("dateInPast"));
         return;
@@ -253,6 +258,7 @@ export default function EventSettingsSheet({
                   onChange={setDate}
                   min={todayInVilnius()}
                   max={maxEventDate()}
+                  clearable={false}
                   className={field}
                 />
               </div>

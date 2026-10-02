@@ -1,29 +1,46 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import toast from "react-hot-toast";
-import { LuCheck, LuChevronDown, LuHouse, LuLink, LuX } from "react-icons/lu";
+import { LuArrowLeftRight, LuArrowRight, LuCheck, LuChevronDown, LuChevronRight, LuLink, LuX } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
 import { qq } from "@/utils/qq";
-import { addHousehold, removeHousehold } from "@/app/actions/events/drawRules";
+import { setPairRule, type PairRule } from "@/app/actions/events/drawRules";
 import { updateEvent } from "@/app/actions/events/manage";
 import type { DrawCheck, Participant, SsEvent } from "@/types/secret-santa";
 
-type Pair = { a: string; b: string };
+/** One ss_exclusions row: a must not draw b; with mutual, b must not draw a either. */
+type Rule = { a: string; b: string; mutual: boolean };
 type LinkableEvent = { id: string; name: string; event_date: string | null; created_at: string };
 
+/** The rule between x and y, as setPairRule understands it. */
+function ruleBetween(rules: Rule[], x: string, y: string): PairRule {
+  let xy = false;
+  let yx = false;
+  for (const r of rules) {
+    if (r.a === x && r.b === y) {
+      xy = true;
+      if (r.mutual) yx = true;
+    } else if (r.a === y && r.b === x) {
+      yx = true;
+      if (r.mutual) xy = true;
+    }
+  }
+  return xy && yx ? "both" : xy ? "x_to_y" : yx ? "y_to_x" : "none";
+}
+
 /**
- * Who must not draw whom, as households.
+ * Who must not draw whom, person by person.
  *
- * The engine stores pairs (ss_exclusions) and applies them both ways. People
- * think in households: "the three of us live together". A household is saved
- * as every pair inside it, and pairs load back as households by merging
- * connected pairs, so rules from the old two-dropdown screen show up as
- * two-person households.
+ * The card lists everyone with a one-line summary; tapping a person opens a
+ * sheet to tick who they can't draw. A rule is two-way by default (partners:
+ * neither draws the other) and can be made one-way ("Ona drew Rūta last year,
+ * so not again", while Rūta may still draw Ona). Stored in ss_exclusions with a
+ * direction (migration 20261002120000) and applied by the draw engine.
  *
- * Below the households: last year's event (avoid repeating its pairs) and a
+ * Below: last year's event (avoid repeating its pairs automatically) and a
  * status line from ss_check_draw, refreshed on every rule or roster change.
  */
 export default function DrawRules({
@@ -43,119 +60,31 @@ export default function DrawRules({
   const locale = useLocale();
   const eventId = event.id;
 
-  // ---- households ---------------------------------------------------------
+  // ---- rules ----------------------------------------------------------------
 
-  const { data: pairs = [] } = useQuery<Pair[]>({
+  const { data: rules = [] } = useQuery<Rule[]>({
     queryKey: qq.drawRules(eventId),
     queryFn: async () => {
-      const { data, error } = await sb.from("ss_exclusions").select("a, b").eq("event_id", eventId);
+      const { data, error } = await sb.from("ss_exclusions").select("a, b, mutual").eq("event_id", eventId);
       if (error) throw error;
-      const seen = new Set<string>();
-      const out: Pair[] = [];
-      for (const row of data ?? []) {
-        const [a, b] = row.a < row.b ? [row.a, row.b] : [row.b, row.a];
-        const key = `${a}:${b}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
-        out.push({ a, b });
-      }
-      return out;
+      return (data ?? []) as Rule[];
     },
   });
 
   const joined = useMemo(() => participants.filter((p) => p.status === "joined"), [participants]);
   const byId = useMemo(() => new Map(participants.map((p) => [p.user_id, p])), [participants]);
   const nameOf = (id: string) => byId.get(id)?.display_name || t("invitePersonUnnamed");
+  const list = (ids: string[]) =>
+    new Intl.ListFormat(locale, { style: "long", type: "conjunction" }).format(ids.map(nameOf));
 
-  // Connected pairs -> groups. A rule naming someone who left constrains
-  // nothing (the engine skips it), so only present people count.
-  const households = useMemo(() => {
-    const parent = new Map<string, string>();
-    const find = (x: string): string => {
-      while (parent.get(x) !== x) x = parent.get(x)!;
-      return x;
-    };
-    for (const { a, b } of pairs) {
-      if (!byId.has(a) || !byId.has(b)) continue;
-      if (!parent.has(a)) parent.set(a, a);
-      if (!parent.has(b)) parent.set(b, b);
-      parent.set(find(a), find(b));
-    }
-    const groups = new Map<string, string[]>();
-    for (const id of parent.keys()) {
-      const root = find(id);
-      groups.set(root, [...(groups.get(root) ?? []), id]);
-    }
-    return [...groups.values()].map((g) => g.sort()).sort((x, y) => y.length - x.length);
-  }, [pairs, byId]);
+  /** Who `giver` can't draw, with whether the rule is two-way. */
+  const blockedFor = (giver: string) =>
+    joined
+      .filter((p) => p.user_id !== giver)
+      .map((p) => ({ id: p.user_id, rule: ruleBetween(rules, giver, p.user_id) }))
+      .filter((x) => x.rule === "both" || x.rule === "x_to_y");
 
-  // Optional household names. ss_exclusions has nowhere to keep one (no schema
-  // change for this), so they live in this browser, keyed by the members.
-  const labelsKey = `nr:households:${eventId}`;
-  const [labels, setLabels] = useState<Record<string, string>>({});
-  useEffect(() => {
-    try {
-      setLabels(JSON.parse(localStorage.getItem(labelsKey) ?? "{}"));
-    } catch {
-      setLabels({});
-    }
-  }, [labelsKey]);
-  const saveLabel = (members: string[], label: string) => {
-    const next = { ...labels, [members.slice().sort().join(",")]: label };
-    if (!label) delete next[members.slice().sort().join(",")];
-    setLabels(next);
-    try {
-      localStorage.setItem(labelsKey, JSON.stringify(next));
-    } catch {
-      /* private mode: the name just isn't remembered */
-    }
-  };
-
-  const [creating, setCreating] = useState(false);
-  const [picked, setPicked] = useState<Set<string>>(new Set());
-  const [newName, setNewName] = useState("");
-  const toggle = (id: string) =>
-    setPicked((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-
-  const invalidateRules = () => {
-    qc.invalidateQueries({ queryKey: qq.drawRules(eventId) });
-    qc.invalidateQueries({ queryKey: ["ss:drawCheck", eventId] });
-  };
-
-  const add = useMutation({
-    mutationFn: async () => {
-      const ids = [...picked];
-      const res = await addHousehold(slug, ids);
-      if (!res.ok) throw new Error(res.error);
-      return ids;
-    },
-    onSuccess: (ids) => {
-      if (newName.trim()) saveLabel(ids, newName.trim());
-      setCreating(false);
-      setPicked(new Set());
-      setNewName("");
-      invalidateRules();
-    },
-    onError: () => toast.error(t("drawRuleSaveFailed")),
-  });
-
-  const remove = useMutation({
-    mutationFn: async (members: string[]) => {
-      const res = await removeHousehold(slug, members);
-      if (!res.ok) throw new Error(res.error);
-      return members;
-    },
-    onSuccess: (members) => {
-      saveLabel(members, "");
-      invalidateRules();
-    },
-    onError: () => toast.error(t("drawRuleSaveFailed")),
-  });
+  const [editing, setEditing] = useState<string | null>(null);
 
   // ---- last year ----------------------------------------------------------
 
@@ -216,7 +145,10 @@ export default function DrawRules({
   // ---- status line ----------------------------------------------------------
 
   const rosterKey = joined.map((p) => p.user_id).sort().join(",");
-  const rulesKey = pairs.map((p) => `${p.a}:${p.b}`).join(",");
+  const rulesKey = rules
+    .map((r) => `${r.a}:${r.b}:${r.mutual ? 2 : 1}`)
+    .sort()
+    .join(",");
   const { data: check } = useQuery<DrawCheck>({
     queryKey: ["ss:drawCheck", eventId, rosterKey, rulesKey, event.previous_event_id, event.avoid_previous_match],
     queryFn: async () => {
@@ -225,9 +157,6 @@ export default function DrawRules({
       return data as DrawCheck;
     },
   });
-
-  const list = (ids: string[]) =>
-    new Intl.ListFormat(locale, { style: "long", type: "conjunction" }).format(ids.map(nameOf));
 
   const status = (() => {
     if (!check) return null;
@@ -258,110 +187,50 @@ export default function DrawRules({
     <div>
       <div className="nr-card p-5">
         <h2 className="nr-h3 text-[16px]">{t("drawRulesTitle")}</h2>
-        <p className="mt-1 text-[14px] leading-relaxed text-(--nr-muted)">{t("householdsBody")}</p>
+        <p className="mt-1 text-[14px] leading-relaxed text-(--nr-muted)">{t("rulesBody")}</p>
 
-        {households.length > 0 && (
-          <ul className="mt-4 space-y-2">
-            {households.map((members) => {
-              const label = labels[members.join(",")];
-              return (
-                <li
-                  key={members.join(",")}
-                  className="flex items-center gap-3 rounded-[18px] bg-(--nr-cream) py-2.5 pl-3 pr-2"
-                  data-testid="household"
+        <ul className="mt-4 space-y-1" data-testid="rules-people">
+          {joined.map((p) => {
+            const blocked = blockedFor(p.user_id);
+            return (
+              <li key={p.user_id}>
+                <button
+                  onClick={() => setEditing(p.user_id)}
+                  className="flex w-full cursor-pointer items-center gap-3 rounded-[16px] px-2 py-2 text-left transition hover:bg-(--nr-cream)"
                 >
-                  <div className="flex -space-x-2">
-                    {members.map((id) => (
-                      <PersonDot key={id} person={byId.get(id)} size={34} ring />
-                    ))}
-                  </div>
+                  <PersonDot person={p} size={36} />
                   <span className="min-w-0 flex-1">
-                    {label && (
-                      <span className="block truncate text-[14px] font-semibold text-(--nr-ink)">{label}</span>
-                    )}
-                    <span className={`block truncate ${label ? "text-[13px] text-(--nr-muted)" : "text-[14px] font-medium text-(--nr-ink)"}`}>
-                      {list(members)}
-                    </span>
-                  </span>
-                  <button
-                    onClick={() => remove.mutate(members)}
-                    disabled={remove.isPending}
-                    aria-label={t("householdRemove")}
-                    className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-(--nr-faint) transition hover:bg-(--nr-error-soft) hover:text-(--nr-error-ink) disabled:opacity-40"
-                  >
-                    <LuX size={15} />
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        {creating ? (
-          <div className="mt-4 rounded-[18px] border border-(--nr-border) p-4" data-testid="household-editor">
-            <p className="text-[14px] font-semibold text-(--nr-ink)">{t("householdPick")}</p>
-            <div className="mt-3 flex flex-wrap gap-3">
-              {joined.map((p) => {
-                const on = picked.has(p.user_id);
-                return (
-                  <button
-                    key={p.user_id}
-                    onClick={() => toggle(p.user_id)}
-                    aria-pressed={on}
-                    className="flex w-[68px] cursor-pointer flex-col items-center gap-1"
-                  >
-                    <span className="relative">
-                      <PersonDot person={p} size={48} selected={on} />
-                      {on && (
-                        <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-(--nr-ink) text-white">
-                          <LuCheck size={12} />
-                        </span>
-                      )}
-                    </span>
-                    <span className="w-full truncate text-center text-[12px] text-(--nr-ink-2)">
+                    <span className="block truncate text-[15px] font-medium text-(--nr-ink)">
                       {p.display_name || t("invitePersonUnnamed")}
                     </span>
-                  </button>
-                );
-              })}
-            </div>
-            <input
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder={t("householdNamePlaceholder")}
-              className="mt-4 w-full rounded-[var(--nr-radius-input)] border border-(--nr-border) bg-(--nr-cream) px-3 py-2.5 text-[15px] outline-none focus:border-(--nr-yellow-deep)"
-            />
-            <div className="mt-3 flex gap-2">
-              <button
-                onClick={() => add.mutate()}
-                disabled={picked.size < 2 || add.isPending}
-                className="nr-btn nr-btn-dark nr-btn-sm flex-1 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {picked.size < 2 ? t("householdPickMore") : t("householdSave", { count: picked.size })}
-              </button>
-              <button
-                onClick={() => {
-                  setCreating(false);
-                  setPicked(new Set());
-                  setNewName("");
-                }}
-                className="nr-btn nr-btn-outline nr-btn-sm"
-              >
-                {t("cancel")}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            onClick={() => setCreating(true)}
-            className="nr-btn nr-btn-outline nr-btn-sm mt-4 cursor-pointer"
-          >
-            <LuHouse className="w-4" />
-            {t("householdNew")}
-          </button>
-        )}
+                    <span className="block truncate text-[13px] text-(--nr-muted)">
+                      {blocked.length === 0 ? (
+                        t("rulesCanDrawAnyone")
+                      ) : (
+                        <>
+                          {t("rulesCantDrawPrefix")}{" "}
+                          {blocked.map((b, i) => (
+                            <span key={b.id} className="whitespace-nowrap text-(--nr-ink-2)">
+                              {i > 0 && ", "}
+                              {nameOf(b.id)}
+                              {b.rule === "both" ? (
+                                <LuArrowLeftRight className="ml-0.5 inline w-3.5" aria-label={t("rulesMutualShort")} />
+                              ) : (
+                                <LuArrowRight className="ml-0.5 inline w-3.5" aria-label={t("rulesOneWayShort")} />
+                              )}
+                            </span>
+                          ))}
+                        </>
+                      )}
+                    </span>
+                  </span>
+                  <LuChevronRight className="shrink-0 text-(--nr-faint)" />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
 
-        {/* Last year */}
         <div className="mt-5 border-t border-(--nr-border) pt-4">
           <h3 className="text-[14px] font-semibold text-(--nr-ink)">{t("lastYearTitle")}</h3>
           {event.previous_event_id ? (
@@ -465,6 +334,198 @@ export default function DrawRules({
           {status.text}
         </p>
       )}
+
+      {editing && byId.get(editing) && (
+        <PersonRulesSheet
+          key={editing}
+          slug={slug}
+          person={byId.get(editing)!}
+          others={joined.filter((p) => p.user_id !== editing)}
+          rules={rules}
+          nameOf={nameOf}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            setEditing(null);
+            qc.invalidateQueries({ queryKey: qq.drawRules(eventId) });
+            qc.invalidateQueries({ queryKey: ["ss:drawCheck", eventId] });
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+
+/**
+ * Who one person can't draw. Each ticked person gets a "both ways" switch,
+ * on by default (partners). Saved on Save, pair by pair, only where changed.
+ */
+function PersonRulesSheet({
+  slug,
+  person,
+  others,
+  rules,
+  nameOf,
+  onClose,
+  onSaved,
+}: {
+  slug: string;
+  person: Participant;
+  others: Participant[];
+  rules: Rule[];
+  nameOf: (id: string) => string;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const t = useTranslations("Events");
+  const me = person.user_id;
+  const initial = useMemo(
+    () => new Map(others.map((o) => [o.user_id, ruleBetween(rules, me, o.user_id)])),
+    [others, rules, me]
+  );
+  const [draft, setDraft] = useState(() =>
+    new Map(
+      others.map((o) => {
+        const r = initial.get(o.user_id)!;
+        return [o.user_id, { blocked: r === "both" || r === "x_to_y", mutual: r !== "x_to_y" }];
+      })
+    )
+  );
+  const [saving, setSaving] = useState(false);
+
+  const next = (id: string): PairRule => {
+    const d = draft.get(id)!;
+    if (d.blocked) return d.mutual ? "both" : "x_to_y";
+    // Unticking only removes this person's side; the other's one-way rule stays.
+    return initial.get(id) === "y_to_x" ? "y_to_x" : "none";
+  };
+  const changed = others.filter((o) => next(o.user_id) !== initial.get(o.user_id));
+
+  const save = async () => {
+    setSaving(true);
+    const results = await Promise.all(changed.map((o) => setPairRule(slug, me, o.user_id, next(o.user_id))));
+    setSaving(false);
+    if (results.some((r) => !r.ok)) {
+      toast.error(t("drawRuleSaveFailed"));
+      return;
+    }
+    onSaved();
+  };
+
+  const set = (id: string, patch: Partial<{ blocked: boolean; mutual: boolean }>) =>
+    setDraft((prev) => new Map(prev).set(id, { ...prev.get(id)!, ...patch }));
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-(--nr-ink)/45 sm:items-center sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="person-rules-title"
+      onClick={onClose}
+    >
+      <div
+        className="flex max-h-[88svh] w-full flex-col overflow-hidden rounded-t-[28px] bg-(--nr-surface) sm:max-w-[460px] sm:rounded-[24px]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <header className="flex items-center gap-3 border-b border-(--nr-border) px-5 py-4">
+          <PersonDot person={person} size={36} />
+          <h2 id="person-rules-title" className="nr-h3 flex-1 text-[18px]">
+            {t("rulesSheetTitle", { name: nameOf(me) })}
+          </h2>
+          <button
+            onClick={onClose}
+            aria-label={t("close")}
+            className="grid h-8 w-8 place-items-center rounded-full text-(--nr-muted) transition hover:bg-(--nr-tile) hover:text-(--nr-ink)"
+          >
+            <LuX />
+          </button>
+        </header>
+
+        <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-3">
+          {others.map((o) => {
+            const d = draft.get(o.user_id)!;
+            const incoming = initial.get(o.user_id) === "y_to_x" && !d.blocked;
+            return (
+              <li key={o.user_id} className="rounded-[16px] px-2 py-2">
+                <label className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    className="peer sr-only"
+                    checked={d.blocked}
+                    onChange={(e) => set(o.user_id, { blocked: e.target.checked })}
+                  />
+                  {/* The theme's checkbox drew no visible tick; this one does. */}
+                  <span
+                    aria-hidden
+                    className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border transition peer-focus-visible:ring-2 peer-focus-visible:ring-(--nr-ink) ${
+                      d.blocked
+                        ? "border-(--nr-yellow-deep) bg-(--nr-yellow) text-(--nr-ink)"
+                        : "border-(--nr-border) bg-(--nr-surface)"
+                    }`}
+                  >
+                    {d.blocked && <LuCheck size={14} />}
+                  </span>
+                  <PersonDot person={o} size={32} />
+                  <span className="min-w-0 flex-1 truncate text-[15px] text-(--nr-ink)">{nameOf(o.user_id)}</span>
+                </label>
+                {d.blocked && (
+                  <div className="ml-[36px] mt-2">
+                    {/* Two explicit options, not a switch: which way the rule
+                        works is the decision here, and a switch's off state
+                        read as ambiguous. */}
+                    <div
+                      role="radiogroup"
+                      aria-label={t("rulesDirection")}
+                      className="inline-flex rounded-full bg-(--nr-cream) p-1 text-[13px]"
+                    >
+                      {([true, false] as const).map((m) => (
+                        <button
+                          key={String(m)}
+                          type="button"
+                          role="radio"
+                          aria-checked={d.mutual === m}
+                          onClick={() => set(o.user_id, { mutual: m })}
+                          className={`flex cursor-pointer items-center gap-1 rounded-full px-3 py-1.5 font-semibold transition ${
+                            d.mutual === m
+                              ? "bg-(--nr-ink) text-white"
+                              : "text-(--nr-muted) hover:text-(--nr-ink)"
+                          }`}
+                        >
+                          {m ? <LuArrowLeftRight className="w-3.5" /> : <LuArrowRight className="w-3.5" />}
+                          {m ? t("rulesMutual") : t("rulesOneWay")}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-1.5 text-[12px] leading-snug text-(--nr-muted)">
+                      {d.mutual
+                        ? t("rulesMutualHint", { other: nameOf(o.user_id), name: nameOf(me) })
+                        : t("rulesOneWayHint", { other: nameOf(o.user_id), name: nameOf(me) })}
+                    </p>
+                  </div>
+                )}
+                {incoming && (
+                  <p className="ml-[36px] mt-1 text-[12px] text-(--nr-muted)">
+                    {t("rulesIncomingHint", { other: nameOf(o.user_id), name: nameOf(me) })}
+                  </p>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+
+        <footer className="flex gap-2 border-t border-(--nr-border) px-5 pb-[max(1.1rem,env(safe-area-inset-bottom))] pt-3">
+          <button onClick={onClose} className="nr-btn nr-btn-outline flex-1">
+            {t("cancel")}
+          </button>
+          <button
+            onClick={save}
+            disabled={saving || changed.length === 0}
+            className="nr-btn nr-btn-dark flex-1 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {t("rulesSave")}
+          </button>
+        </footer>
+      </div>
     </div>
   );
 }
