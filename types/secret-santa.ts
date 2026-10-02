@@ -22,7 +22,24 @@ export interface SsEvent {
   /** Bearer token behind the reusable "anyone with the link can join" URL. */
   join_token: string;
   created_at: string; // ISO datetime
+  /** Last edition of this event; its pairs are avoided when drawing. */
+  previous_event_id?: string | null;
+  /** Soft draw rule: nobody draws who they drew in previous_event_id. */
+  avoid_previous_match?: boolean;
 }
+
+/** ss_check_draw()'s answer (migration 20261001120000). */
+export type DrawCheck = {
+  status: "ok" | "predictable" | "relaxed" | "impossible";
+  reason: null | "too_few" | "no_recipient" | "household_too_big" | "impossible_other";
+  /** User ids: who is stuck, the oversized group, who repeats, or everyone. */
+  people: string[];
+  repeats: number;
+  /** Confirmed members in the draw. */
+  count: number;
+  /** Minimum for this event type; too_few only. */
+  min?: number;
+};
 
 export interface Profile {
   id: string;

@@ -211,10 +211,20 @@ export default function LobbyClient({
                 <LuUserPlus className="w-4" />
                 {t("inviteMembers")}
               </button>
+              {/* Not disabled for too few people: tapping explains why there
+                  is no draw yet, with an Invite button, instead of a dead
+                  button. ss_check_draw counts confirmed members itself. */}
               <DrawButton
                 slug={slug}
                 eventId={event.id}
-                disabled={notEnoughMembers || event.status === "archived"}
+                participants={participants ?? []}
+                disabled={event.status === "archived"}
+                onInvite={() => setInviteOpen(true)}
+                onEditRules={() =>
+                  document
+                    .getElementById("draw-rules")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
               />
             </div>
             {event.status === "locked" && (
@@ -275,7 +285,7 @@ export default function LobbyClient({
         isAdmin &&
         event.status !== "drawn" &&
         (participants?.length ?? 0) >= 2 && (
-          <section className="mt-4">
+          <section id="draw-rules" className="mt-4 scroll-mt-4">
             <DrawRules
               slug={slug}
               eventId={event.id}
