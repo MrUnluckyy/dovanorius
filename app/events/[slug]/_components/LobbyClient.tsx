@@ -104,7 +104,10 @@ export default function LobbyClient({
         .eq("event_id", event!.id)
         .maybeSingle();
       if (!data) return null;
-      return { receiver: await fetchRecipient(sb, event!.id, data.receiver) };
+      return {
+        receiver: await fetchRecipient(sb, event!.id, data.receiver),
+        revealed: !!data.revealed,
+      };
     },
   });
 
@@ -238,6 +241,8 @@ export default function LobbyClient({
         ) : event.status === "drawn" ? (
           mine?.receiver ? (
             <RevealCard
+              eventId={event.id}
+              revealed={mine.revealed}
               person={mine.receiver}
               type={meta.type}
               wants={mine.receiver.wants}

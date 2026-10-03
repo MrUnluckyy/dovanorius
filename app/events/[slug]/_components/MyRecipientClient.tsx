@@ -29,7 +29,10 @@ export default function MyRecipientClient({ slug }: { slug: string }) {
         .eq("event_id", ev!.id)
         .maybeSingle();
       if (!data) return null;
-      return { receiver: await fetchRecipient(sb, ev!.id, data.receiver) };
+      return {
+        receiver: await fetchRecipient(sb, ev!.id, data.receiver),
+        revealed: !!data.revealed,
+      };
     },
   });
 
@@ -49,6 +52,8 @@ export default function MyRecipientClient({ slug }: { slug: string }) {
       <h1 className="nr-h2 text-center text-[28px]">{ev.name}</h1>
       {mine?.receiver ? (
         <RevealCard
+          eventId={ev.id}
+          revealed={mine.revealed}
           person={mine.receiver}
           type={ev.type}
           wants={mine.receiver.wants}
