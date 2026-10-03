@@ -1,7 +1,12 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { supabaseAdmin } from "@/utils/supabase/admin";
-import { GIFT_MODEL, MAX_PICKS, REC_TTL_HOURS } from "./config";
+import {
+  GIFT_MODEL,
+  MAX_MISSES_PER_HOUR,
+  MAX_PICKS,
+  REC_TTL_HOURS,
+} from "./config";
 import { PicksSchema, type TasteProfile } from "./schema";
 import { getOrInferTasteProfile } from "./tasteProfile";
 import { retrieveCandidates } from "./candidates";
@@ -33,6 +38,14 @@ Rules:
 - VARIETY: spread picks across product categories (clothing, shoes, beauty, bags, accessories, and non-fashion gifts such as tools, toys, tech, sport and home) — do NOT return mostly one category like all shoes. Avoid several near-identical items.
 - Prefer products that clearly match an interest, brand, or life-context over generic ones. If few candidates truly fit, return fewer picks rather than padding.
 - For each pick write "reason" in Lithuanian: one short, specific sentence tying the gift to the person (their hobby, brand, life context, or price fit). Be concrete ("Puikiai tinka bėgimo pomėgiui"), never generic ("graži dovana").`;
+
+/** Thrown on a cache miss once the subject has used up MAX_MISSES_PER_HOUR. */
+export class GiftIdeasRateLimitError extends Error {
+  constructor() {
+    super("Too many fresh gift rankings this hour");
+    this.name = "GiftIdeasRateLimitError";
+  }
+}
 
 export type GiftIdeasOpts = {
   priceMin?: number | null;
@@ -74,6 +87,17 @@ export async function getGiftIdeas(
       cost: profileCost,
       fromCache: true,
     };
+  }
+
+  // Every miss below inserts one gift_recommendations row, so counting this
+  // person's rows from the last hour counts their paid ranker calls.
+  const { count: recentMisses } = await supabaseAdmin
+    .from("gift_recommendations")
+    .select("id", { count: "exact", head: true })
+    .eq("subject_user_id", subjectUserId)
+    .gt("created_at", new Date(Date.now() - 3600e3).toISOString());
+  if ((recentMisses ?? 0) >= MAX_MISSES_PER_HOUR) {
+    throw new GiftIdeasRateLimitError();
   }
 
   const excludeIds = await getDislikedProductIds(subjectUserId);
