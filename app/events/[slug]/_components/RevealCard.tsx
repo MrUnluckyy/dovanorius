@@ -66,8 +66,14 @@ export default function RevealCard({
       setStage("reveal");
       setJustRevealed(true);
       // Remember it, so the next visit shows the result. Fire and forget: if
-      // it fails, the reveal simply plays once more.
-      void createClient().rpc("ss_mark_revealed", { p_event_id: eventId });
+      // it fails, the reveal simply plays once more. Supabase queries are lazy
+      // (the request is sent from then()), so `void query` alone never ran it.
+      createClient()
+        .rpc("ss_mark_revealed", { p_event_id: eventId })
+        .then(
+          () => undefined,
+          () => undefined
+        );
     }, 2000);
     return () => {
       clearInterval(t);
