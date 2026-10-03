@@ -20,3 +20,22 @@ export const MODEL_PRICES: Record<string, { in: number; out: number }> = {
   "claude-sonnet-5": { in: 3, out: 15 },
   "claude-opus-4-8": { in: 5, out: 25 },
 };
+
+// Abuse limits for /api/gift-ideas. A cache miss is a paid model call, and the
+// cache key is built from the request, so free-form inputs would let one caller
+// mint endless misses. Occasions come from this list, prices snap to
+// PRICE_STEP, and each person gets MAX_MISSES_PER_HOUR fresh rankings an hour
+// (cached answers are free and unlimited).
+export const OCCASIONS = [
+  "any",
+  "birthday",
+  "christmas",
+  "nameday",
+  "anniversary",
+  "wedding",
+  "baby",
+] as const;
+export type Occasion = (typeof OCCASIONS)[number];
+export const PRICE_STEP = 10; // EUR
+export const PRICE_CAP = 2000; // EUR; anything above is treated as "no max"
+export const MAX_MISSES_PER_HOUR = 10;
