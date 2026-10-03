@@ -10,6 +10,12 @@ const PARTNER_HOSTNAMES = ["partner.noriuto.lt", "partner.localhost"];
 // https://noriuto.lt/... could never open the app. Done here instead, the
 // files are served on the apex as-is (the matcher below never runs on paths
 // with a dot, and /.well-known is skipped explicitly as well).
+//
+// /api/* on the apex must redirect too. Supabase sends people back to
+// ${NEXT_PUBLIC_WEB_URL}/api/auth/callback (and /api/auth/confirm), which is
+// the apex. The PKCE code verifier cookie lives on www, where sign-in started,
+// so a callback run on the apex fails ("code verifier should be non-empty")
+// and lands on /auth/auth-code-error. Redirected to www, it has the cookie.
 const APEX_HOST = "noriuto.lt";
 
 export async function middleware(request: NextRequest) {
@@ -23,6 +29,12 @@ export async function middleware(request: NextRequest) {
     url.port = "";
     url.protocol = "https:";
     return NextResponse.redirect(url, 308);
+  }
+
+  // API routes ran without this middleware before the apex rule needed them;
+  // keep that: no session refresh, no partner rewrite.
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.next();
   }
   const isPartnerSubdomain = PARTNER_HOSTNAMES.includes(host);
 
@@ -54,5 +66,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/|api/|.*\\..*).*)"],
+  // api/ is included so the apex redirect above covers it; API routes are
+  // passed straight through on every other host.
+  matcher: ["/((?!_next/|.*\\..*).*)"],
 };
