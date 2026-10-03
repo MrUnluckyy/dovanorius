@@ -4,15 +4,25 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ConfettiBurst } from "../../_components/Confetti";
 import type { SsEventType } from "@/types/secret-santa";
+import { createClient } from "@/utils/supabase/client";
 
 type Stage = "idle" | "rolling" | "reveal";
 
 export default function RevealCard({
+  eventId,
+  revealed = false,
   person,
   type = "secret_santa",
   wants = null,
   hasWishlist = false,
 }: {
+  eventId: string;
+  /**
+   * Already seen (ss_assignments.revealed): show the result straight away. The
+   * slot-roll plays once per person and event, on any device; replaying it on
+   * every visit read as drawing again. Shared with noriuto-app.
+   */
+  revealed?: boolean;
   // Nullable, not optional: a profile really can have no name (a guest who
   // skipped it) and no avatar, and pretending otherwise pushed the null
   // handling out to every caller.
@@ -43,7 +53,9 @@ export default function RevealCard({
     ],
     []
   );
-  const [stage, setStage] = useState<Stage>("idle");
+  const [stage, setStage] = useState<Stage>(revealed ? "reveal" : "idle");
+  // Confetti belongs to the moment of revealing, not to every later visit.
+  const [justRevealed, setJustRevealed] = useState(false);
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -52,6 +64,10 @@ export default function RevealCard({
     const done = setTimeout(() => {
       clearInterval(t);
       setStage("reveal");
+      setJustRevealed(true);
+      // Remember it, so the next visit shows the result. Fire and forget: if
+      // it fails, the reveal simply plays once more.
+      void createClient().rpc("ss_mark_revealed", { p_event_id: eventId });
     }, 2000);
     return () => {
       clearInterval(t);
@@ -83,7 +99,7 @@ export default function RevealCard({
           </motion.div>
         </AnimatePresence>
 
-        {stage === "reveal" && <ConfettiBurst burstKey={person.id} />}
+        {stage === "reveal" && justRevealed && <ConfettiBurst burstKey={person.id} />}
 
         <div className="avatar mt-4">
           <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
