@@ -1,15 +1,8 @@
 import Link from "next/link";
 import { supabaseAdmin } from "@/utils/supabase/admin";
+import { StatTable, type StatRow } from "./_components/StatTable";
 
 export const dynamic = "force-dynamic";
-
-type StatRow = {
-  term: string;
-  searches: number;
-  zero_share: number;
-  avg_results: number;
-  last_at: string;
-};
 
 const RANGES = [7, 30, 90] as const;
 
@@ -108,72 +101,6 @@ export default async function AdminSearchesPage({
         rows={top}
       />
     </div>
-  );
-}
-
-function StatTable({
-  title,
-  hint,
-  rows,
-}: {
-  title: string;
-  hint: string;
-  rows: StatRow[];
-}) {
-  return (
-    <section className="card bg-base-100 card-border">
-      <div className="card-body">
-        <h2 className="font-heading text-lg font-bold">{title}</h2>
-        <p className="-mt-1 mb-2 text-xs text-base-content/50">{hint}</p>
-        <div className="overflow-x-auto">
-          <table className="table table-sm">
-            <thead>
-              <tr>
-                <th>Frazė</th>
-                <th className="text-right">Paieškos</th>
-                <th className="text-right">Be rezultatų</th>
-                <th className="text-right">Vid. rezultatų</th>
-                <th className="text-right">Paskutinį kartą</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="text-center text-base-content/40">
-                    —
-                  </td>
-                </tr>
-              ) : (
-                rows.map((r) => (
-                  <tr key={r.term}>
-                    <td className="font-medium">
-                      <Link
-                        href={`/discover/browse?q=${encodeURIComponent(r.term)}`}
-                        target="_blank"
-                        className="link-hover cursor-pointer"
-                      >
-                        {r.term}
-                      </Link>
-                    </td>
-                    <td className="text-right tabular-nums">{r.searches}</td>
-                    <td className="text-right tabular-nums">
-                      {Math.round(r.zero_share * 100)}%
-                    </td>
-                    <td className="text-right tabular-nums">
-                      {/* results are capped at 601 in search_products */}
-                      {r.avg_results >= 600 ? "600+" : r.avg_results}
-                    </td>
-                    <td className="text-right text-xs text-base-content/60">
-                      {new Date(r.last_at).toLocaleDateString("lt-LT")}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
   );
 }
 
