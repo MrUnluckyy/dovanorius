@@ -15,6 +15,7 @@ import {
   LuCircleOff,
   LuPackageX,
   LuGripVertical,
+  LuInstagram,
 } from "react-icons/lu";
 import toast from "react-hot-toast";
 import {
@@ -38,6 +39,7 @@ import {
 } from "../../_lib/types";
 import { fmtDate, toLocalInput, fromLocalInput } from "../../_lib/dates";
 import { useListDrag } from "@/app/admin/_components/useListDrag";
+import { CarouselDialog } from "./CarouselDialog";
 
 export function ShelfEditorClient({
   shelf,
@@ -54,6 +56,8 @@ export function ShelfEditorClient({
   const router = useRouter();
   const deleteRef = useRef<HTMLDialogElement>(null);
   const searchRef = useRef<HTMLDialogElement>(null);
+  const carouselRef = useRef<HTMLDialogElement>(null);
+  const [carouselOpen, setCarouselOpen] = useState(false);
 
   const [labelLt, setLabelLt] = useState(shelf.label_lt);
   const [labelEn, setLabelEn] = useState(shelf.label_en);
@@ -234,6 +238,15 @@ export function ShelfEditorClient({
             <p className="text-sm text-base-content/50">{shelf.slug}</p>
           </div>
           <div className="flex gap-2">
+            <button
+              className="btn btn-ghost btn-sm gap-1"
+              onClick={() => {
+                setCarouselOpen(true);
+                carouselRef.current?.showModal();
+              }}
+            >
+              <LuInstagram size={14} /> Instagram karuselė
+            </button>
             <button
               className={`btn btn-sm ${shelf.is_active ? "btn-ghost" : "btn-primary"}`}
               onClick={handleToggleActive}
@@ -444,6 +457,14 @@ export function ShelfEditorClient({
       </div>
 
       {/* Delete confirm */}
+      <CarouselDialog
+        ref={carouselRef}
+        shelf={shelf}
+        picks={picks}
+        open={carouselOpen}
+        onClose={() => setCarouselOpen(false)}
+      />
+
       <dialog ref={deleteRef} className="modal">
         <div className="modal-box max-w-md">
           <h3 className="font-heading text-lg font-bold">Ištrinti lentyną?</h3>
