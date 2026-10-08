@@ -25,6 +25,9 @@ type PartnerRow = {
   feed_last_status: string | null;
   feed_last_error: string | null;
   feed_last_count: number | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
 };
 
 export default async function AdminPartnersPage() {
@@ -37,7 +40,7 @@ export default async function AdminPartnersPage() {
     supabaseAdmin
       .from("partners")
       .select(
-        "id, name, slug, website_url, is_active, created_at, store_domain, feed_platform, feed_auto_approve, feed_last_synced_at, feed_last_status, feed_last_error, feed_last_count"
+        "id, name, slug, website_url, is_active, created_at, store_domain, feed_platform, feed_auto_approve, feed_last_synced_at, feed_last_status, feed_last_error, feed_last_count, contact_name, contact_email, contact_phone"
       )
       .order("created_at", { ascending: false }),
     supabaseAdmin.from("partner_users").select("partner_id, user_id, role"),
@@ -86,6 +89,11 @@ export default async function AdminPartnersPage() {
     memberCount: members.get(p.id) ?? 0,
     isStaff: staffOf.has(p.id),
     invites: invitesByPartner.get(p.id) ?? [],
+    contact: {
+      name: p.contact_name,
+      email: p.contact_email,
+      phone: p.contact_phone,
+    },
     contacts: contactsByPartner.get(p.id) ?? [],
     trial: (() => {
       const t = trialStatus(p.created_at);
@@ -123,9 +131,7 @@ export default async function AdminPartnersPage() {
                   {r.trial.state === "ended" ? "baigėsi" : "baigiasi"}{" "}
                   {new Date(r.trial.endsAt).toLocaleDateString("lt-LT")}
                   {": "}
-                  {r.contacts.length > 0
-                    ? r.contacts.map((c) => c.email).join(", ")
-                    : "nėra kontakto"}
+                  {contactLine(r)}
                 </li>
               ))}
             </ul>
@@ -176,4 +182,13 @@ async function loadContacts(
     byPartner.set(m.partner_id, list);
   }
   return byPartner;
+}
+
+function contactLine(r: AdminPartnerRow): string {
+  const saved = [r.contact.name, r.contact.email, r.contact.phone].filter(Boolean);
+  const emails = [
+    ...(saved.length ? [saved.join(", ")] : []),
+    ...r.contacts.map((c) => c.email).filter((e) => e !== r.contact.email),
+  ];
+  return emails.length ? emails.join("; ") : "nėra kontakto";
 }

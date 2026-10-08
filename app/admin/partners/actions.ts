@@ -246,3 +246,30 @@ export async function setPartnerActive(
   revalidatePath("/admin/partners");
   return { ok: true };
 }
+
+/** Who to talk to about this partner. Empty strings clear a field. */
+export async function updatePartnerContact(
+  partnerId: string,
+  contact: { name: string; email: string; phone: string }
+): Promise<SimpleResult> {
+  await requireAdminId();
+
+  const email = contact.email.trim().toLowerCase();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: false, error: "Neteisingas el. pašto adresas." };
+  }
+
+  const { error } = await supabaseAdmin
+    .from("partners")
+    .update({
+      contact_name: contact.name.trim() || null,
+      contact_email: email || null,
+      contact_phone: contact.phone.trim() || null,
+    })
+    .eq("id", partnerId);
+
+  if (error) return { ok: false, error: "Nepavyko išsaugoti kontakto." };
+
+  revalidatePath("/admin/partners");
+  return { ok: true };
+}
