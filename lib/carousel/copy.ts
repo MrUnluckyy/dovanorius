@@ -3,17 +3,10 @@
  * (server) and the admin dialog (client, for the caption) can import it.
  */
 
+import { ltPlural } from "@/lib/lt-plural";
+
 /** Cover + product slides + closing slide must fit Instagram's 10-photo cap. */
 export const MAX_PRODUCT_SLIDES = 8;
-
-/** Lithuanian has three plural forms: 1 idėja, 2 idėjos, 10 idėjų. */
-export function ltPlural(n: number, one: string, few: string, many: string) {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return one;
-  if (mod10 >= 2 && mod10 <= 9 && (mod100 < 11 || mod100 > 19)) return few;
-  return many;
-}
 
 export function ideasLabel(n: number) {
   return `${n} dovanų ${ltPlural(n, "idėja", "idėjos", "idėjų")}`;

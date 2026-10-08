@@ -22,6 +22,8 @@ import {
   setPartnerActive,
   setPartnerFeedAutoApprove,
 } from "../actions";
+import { TRIAL_MONTHS, type TrialState } from "@/lib/partner/trial";
+import { ltPlural } from "@/lib/lt-plural";
 
 export type AdminInvite = {
   id: string;
@@ -29,6 +31,12 @@ export type AdminInvite = {
   role: string;
   token: string;
   expires_at: string;
+};
+
+export type AdminContact = {
+  email: string;
+  name: string | null;
+  role: string;
 };
 
 export type AdminPartnerRow = {
@@ -50,6 +58,9 @@ export type AdminPartnerRow = {
   feedLastError: string | null;
   feedLastCount: number | null;
   invites: AdminInvite[];
+  /** Non-staff members — who to talk to about this partner. */
+  contacts: AdminContact[];
+  trial: { state: TrialState; endsAt: string; daysLeft: number };
 };
 
 export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
@@ -201,13 +212,14 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
                   <th className="text-right">Produktai</th>
                   <th className="text-right">Nariai</th>
                   <th>Sukurta</th>
+                  <th>Bandomasis / kontaktai</th>
                   <th className="text-right">Veiksmai</th>
                 </tr>
               </thead>
               <tbody>
                 {partners.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center text-base-content/40">
+                    <td colSpan={7} className="text-center text-base-content/40">
                       Kol kas nėra partnerių.
                     </td>
                   </tr>
@@ -340,6 +352,31 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
                       </td>
                       <td className="text-sm text-base-content/60">
                         {new Date(p.created_at).toLocaleDateString("lt-LT")}
+                      </td>
+                      <td className="text-xs">
+                        <TrialBadge trial={p.trial} />
+                        <div className="mt-1 space-y-0.5">
+                          {p.contacts.length > 0 ? (
+                            p.contacts.map((c) => (
+                              <div key={c.email} className="flex items-center gap-1">
+                                <a
+                                  href={`mailto:${c.email}`}
+                                  className="link link-hover"
+                                  title={c.name ?? undefined}
+                                >
+                                  {c.email}
+                                </a>
+                                <span className="opacity-50">({c.role})</span>
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-base-content/40">
+                              {p.invites.length > 0
+                                ? "Tik nepriimtas kvietimas"
+                                : "Nėra kontakto"}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td>
                         <div className="flex justify-end gap-1">
@@ -495,5 +532,25 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
         </form>
       </dialog>
     </>
+  );
+}
+
+function TrialBadge({ trial }: { trial: AdminPartnerRow["trial"] }) {
+  const date = new Date(trial.endsAt).toLocaleDateString("lt-LT");
+  if (trial.state === "ended") {
+    return (
+      <span className="badge badge-error badge-sm" title={`${TRIAL_MONTHS} mėn. nuo sukūrimo`}>
+        Baigėsi {date}
+      </span>
+    );
+  }
+  const days = `${trial.daysLeft} ${ltPlural(trial.daysLeft, "diena", "dienos", "dienų")}`;
+  return (
+    <span
+      className={`badge badge-sm ${trial.state === "ending" ? "badge-warning" : "badge-ghost"}`}
+      title={`${TRIAL_MONTHS} mėn. nuo sukūrimo`}
+    >
+      Iki {date} · liko {days}
+    </span>
   );
 }

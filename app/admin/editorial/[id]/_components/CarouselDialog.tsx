@@ -3,7 +3,8 @@
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import { LuCopy, LuDownload, LuRefreshCw, LuTriangleAlert } from "react-icons/lu";
 import toast from "react-hot-toast";
-import { buildCaption, ltPlural, MAX_PRODUCT_SLIDES } from "@/lib/carousel/copy";
+import { buildCaption, MAX_PRODUCT_SLIDES } from "@/lib/carousel/copy";
+import { ltPlural } from "@/lib/lt-plural";
 import type { EditorialPick, EditorialShelf } from "../../_lib/types";
 
 /**

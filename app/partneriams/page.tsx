@@ -3,8 +3,9 @@ import Link from "next/link";
 import { LuArrowRight, LuCheck } from "react-icons/lu";
 import { PartnerHeader } from "@/components/partners/PartnerHeader";
 import { Reveal } from "@/components/ui/Reveal";
+import { PARTNER_CONTACT_EMAIL } from "@/lib/partner/trial";
 
-const CONTACT = "mailto:partneriai@noriuto.lt";
+const CONTACT = `mailto:${PARTNER_CONTACT_EMAIL}`;
 
 export const metadata: Metadata = {
   title: "Partneriams — pasiek pirkėjus, kai jie renkasi dovanas | Noriuto",
