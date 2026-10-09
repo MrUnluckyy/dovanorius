@@ -11,6 +11,7 @@ import {
   LuStore,
   LuTriangleAlert,
   LuClock,
+  LuPencil,
 } from "react-icons/lu";
 import toast from "react-hot-toast";
 import {
@@ -21,7 +22,10 @@ import {
   revokePartnerInvite,
   setPartnerActive,
   setPartnerFeedAutoApprove,
+  updatePartnerContact,
 } from "../actions";
+import { TRIAL_MONTHS, type TrialState } from "@/lib/partner/trial";
+import { ltPlural } from "@/lib/lt-plural";
 
 export type AdminInvite = {
   id: string;
@@ -29,6 +33,12 @@ export type AdminInvite = {
   role: string;
   token: string;
   expires_at: string;
+};
+
+export type AdminContact = {
+  email: string;
+  name: string | null;
+  role: string;
 };
 
 export type AdminPartnerRow = {
@@ -50,12 +60,22 @@ export type AdminPartnerRow = {
   feedLastError: string | null;
   feedLastCount: number | null;
   invites: AdminInvite[];
+  /** Contact entered by staff in /admin (partners.contact_*). */
+  contact: { name: string | null; email: string | null; phone: string | null };
+  /** Non-staff members — who to talk to about this partner. */
+  contacts: AdminContact[];
+  trial: { state: TrialState; endsAt: string; daysLeft: number };
 };
 
 export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
   const [pending, startTransition] = useTransition();
   const createRef = useRef<HTMLDialogElement>(null);
   const inviteRef = useRef<HTMLDialogElement>(null);
+  const contactRef = useRef<HTMLDialogElement>(null);
+  const [contactFor, setContactFor] = useState<AdminPartnerRow | null>(null);
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -155,6 +175,31 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
     });
   }
 
+  function openContact(p: AdminPartnerRow) {
+    setContactFor(p);
+    setContactName(p.contact.name ?? "");
+    setContactEmail(p.contact.email ?? "");
+    setContactPhone(p.contact.phone ?? "");
+    contactRef.current?.showModal();
+  }
+
+  function handleSaveContact() {
+    if (!contactFor) return;
+    startTransition(async () => {
+      const res = await updatePartnerContact(contactFor.id, {
+        name: contactName,
+        email: contactEmail,
+        phone: contactPhone,
+      });
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      toast.success("Kontaktas išsaugotas.");
+      contactRef.current?.close();
+    });
+  }
+
   function handleToggleActive(p: AdminPartnerRow) {
     startTransition(async () => {
       const res = await setPartnerActive(p.id, !p.is_active);
@@ -201,13 +246,14 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
                   <th className="text-right">Produktai</th>
                   <th className="text-right">Nariai</th>
                   <th>Sukurta</th>
+                  <th>Bandomasis / kontaktai</th>
                   <th className="text-right">Veiksmai</th>
                 </tr>
               </thead>
               <tbody>
                 {partners.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center text-base-content/40">
+                    <td colSpan={7} className="text-center text-base-content/40">
                       Kol kas nėra partnerių.
                     </td>
                   </tr>
@@ -341,6 +387,60 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
                       <td className="text-sm text-base-content/60">
                         {new Date(p.created_at).toLocaleDateString("lt-LT")}
                       </td>
+                      <td className="text-xs">
+                        <TrialBadge trial={p.trial} />
+                        <div className="mt-1 space-y-0.5">
+                          {(p.contact.name || p.contact.email || p.contact.phone) && (
+                            <div>
+                              {p.contact.name && (
+                                <div className="font-medium">{p.contact.name}</div>
+                              )}
+                              {p.contact.email && (
+                                <a
+                                  href={`mailto:${p.contact.email}`}
+                                  className="link link-hover block"
+                                >
+                                  {p.contact.email}
+                                </a>
+                              )}
+                              {p.contact.phone && (
+                                <a
+                                  href={`tel:${p.contact.phone.replace(/\s+/g, "")}`}
+                                  className="link link-hover block"
+                                >
+                                  {p.contact.phone}
+                                </a>
+                              )}
+                            </div>
+                          )}
+                          {p.contacts
+                            .filter((c) => c.email !== p.contact.email)
+                            .map((c) => (
+                              <div key={c.email} className="flex items-center gap-1">
+                                <a
+                                  href={`mailto:${c.email}`}
+                                  className="link link-hover"
+                                  title={c.name ?? undefined}
+                                >
+                                  {c.email}
+                                </a>
+                                <span className="opacity-50">({c.role})</span>
+                              </div>
+                            ))}
+                          {!p.contact.email &&
+                            !p.contact.phone &&
+                            p.contacts.length === 0 && (
+                              <span className="text-base-content/40">Nėra kontakto</span>
+                            )}
+                          <button
+                            className="btn btn-ghost btn-xs gap-1 px-1"
+                            onClick={() => openContact(p)}
+                            disabled={pending}
+                          >
+                            <LuPencil size={11} /> Kontaktas
+                          </button>
+                        </div>
+                      </td>
                       <td>
                         <div className="flex justify-end gap-1">
                           {p.isStaff ? (
@@ -450,6 +550,67 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
         </form>
       </dialog>
 
+      {/* Contact person */}
+      <dialog ref={contactRef} className="modal">
+        <div className="modal-box max-w-md">
+          <h3 className="font-heading text-lg font-bold">
+            Kontaktas{contactFor ? ` — ${contactFor.name}` : ""}
+          </h3>
+          <p className="mt-1 text-sm text-base-content/60">
+            Kam rašyti ar skambinti dėl šio partnerio. Partneris mato tik savo
+            duomenis.
+          </p>
+          <label className="form-control mt-4 w-full">
+            <span className="label-text text-sm">Vardas</span>
+            <input
+              className="input input-bordered w-full"
+              value={contactName}
+              onChange={(e) => setContactName(e.target.value)}
+            />
+          </label>
+          <label className="form-control mt-3 w-full">
+            <span className="label-text text-sm">El. paštas</span>
+            <input
+              className="input input-bordered w-full"
+              type="email"
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+              placeholder="vardas@parduotuve.lt"
+            />
+          </label>
+          <label className="form-control mt-3 w-full">
+            <span className="label-text text-sm">Telefonas</span>
+            <input
+              className="input input-bordered w-full"
+              type="tel"
+              value={contactPhone}
+              onChange={(e) => setContactPhone(e.target.value)}
+              placeholder="+370 600 00000"
+            />
+          </label>
+          <div className="modal-action">
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => contactRef.current?.close()}
+            >
+              Atšaukti
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={handleSaveContact}
+              disabled={pending}
+            >
+              Išsaugoti
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+
       {/* Invite owner */}
       <dialog ref={inviteRef} className="modal">
         <div className="modal-box max-w-md">
@@ -495,5 +656,25 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
         </form>
       </dialog>
     </>
+  );
+}
+
+function TrialBadge({ trial }: { trial: AdminPartnerRow["trial"] }) {
+  const date = new Date(trial.endsAt).toLocaleDateString("lt-LT");
+  if (trial.state === "ended") {
+    return (
+      <span className="badge badge-error badge-sm" title={`${TRIAL_MONTHS} mėn. nuo sukūrimo`}>
+        Baigėsi {date}
+      </span>
+    );
+  }
+  const days = `${trial.daysLeft} ${ltPlural(trial.daysLeft, "diena", "dienos", "dienų")}`;
+  return (
+    <span
+      className={`badge badge-sm ${trial.state === "ending" ? "badge-warning" : "badge-ghost"}`}
+      title={`${TRIAL_MONTHS} mėn. nuo sukūrimo`}
+    >
+      Iki {date} · liko {days}
+    </span>
   );
 }

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { getPartnerContext } from "@/lib/partner/context";
 import { PartnerNav } from "./_components/PartnerNav";
+import { TrialBanner } from "./_components/TrialBanner";
 
 export default async function PartnerAdminLayout({
   children,
@@ -33,7 +34,10 @@ export default async function PartnerAdminLayout({
           name: m.partner.name,
         }))}
       />
-      <main className="max-w-5xl mx-auto px-4 py-8">{children}</main>
+      <main className="max-w-5xl mx-auto px-4 py-8">
+        <TrialBanner createdAt={ctx.active.partner.created_at} />
+        {children}
+      </main>
     </div>
   );
 }

@@ -15,6 +15,14 @@ const nextConfig: NextConfig = {
     // Serve modern formats — much smaller than JPEG/PNG for the same quality.
     formats: ["image/avif", "image/webp"],
   },
+  // The carousel renderer reads its fonts and the logo from disk at runtime;
+  // file tracing cannot see a path built with process.cwd(), so name them.
+  outputFileTracingIncludes: {
+    "/admin/editorial/[id]/carousel/**": [
+      "./lib/carousel/fonts/**",
+      "./public/assets/logo.png",
+    ],
+  },
   async headers() {
     return [
       {
