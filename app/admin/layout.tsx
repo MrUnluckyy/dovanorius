@@ -1,29 +1,17 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/utils/supabase/server";
-import { supabaseAdmin } from "@/utils/supabase/admin";
 import { AdminNav } from "./_components/AdminNav";
+import { requireAdmin } from "./_lib/requireAdmin";
 
 /** Internal Dovanorius admin area. Gated by profiles.is_admin (not partner
- * membership). Non-admins are bounced to their dashboard. */
+ * membership). Non-admins are bounced to their dashboard.
+ *
+ * This gate alone does NOT protect the pages — they render in parallel with
+ * the layout. Every page.tsx under /admin must call requireAdmin() itself. */
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/");
-
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.is_admin) redirect("/dashboard");
+  await requireAdmin();
 
   return (
     <div className="min-h-screen bg-base-200">

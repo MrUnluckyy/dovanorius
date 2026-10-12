@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import { LuEye, LuBookmark, LuExternalLink } from "react-icons/lu";
+import { requireAdmin } from "@/app/admin/_lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,7 @@ const pct = (part: number, whole: number) =>
   whole > 0 ? Math.round((100 * part) / whole) : 0;
 
 export default async function AdminAnalyticsPage() {
+  await requireAdmin();
   const [merchants, catalog, brands, types] = await Promise.all([
     supabaseAdmin.from("inspo_merchant_funnel").select("*"),
     supabaseAdmin.from("inspo_catalog_by_merchant").select("*"),

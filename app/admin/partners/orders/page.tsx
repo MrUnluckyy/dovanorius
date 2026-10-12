@@ -1,6 +1,7 @@
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import { fmtEur, loadTracking, TRACKING_DAYS } from "@/lib/partner/tracking";
 import { OrdersTrackingClient, type TrackingRow } from "./_components/OrdersTrackingClient";
+import { requireAdmin } from "@/app/admin/_lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,7 @@ export const dynamic = "force-dynamic";
  * the two. Only Shopify for now.
  */
 export default async function PartnerOrdersPage() {
+  await requireAdmin();
   const [{ data: partners }, { data: secrets }, { data: recent }] = await Promise.all([
     supabaseAdmin
       .from("partners")

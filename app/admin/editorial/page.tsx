@@ -4,10 +4,12 @@ import {
   EditorialListClient,
   type ShelfRow,
 } from "./_components/EditorialListClient";
+import { requireAdmin } from "@/app/admin/_lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminEditorialPage() {
+  await requireAdmin();
   const shelves = await loadShelves();
   const picksByShelf = await loadPicks(shelves.map((s) => s.id));
 

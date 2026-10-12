@@ -4,6 +4,7 @@ import {
   QueueBulkActions,
   type PendingPartner,
 } from "./_components/QueueBulkActions";
+import { requireAdmin } from "@/app/admin/_lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,7 @@ type PendingProduct = {
 };
 
 export default async function PartnerModerationPage() {
+  await requireAdmin();
   const { data: products } = await supabaseAdmin
     .from("partner_products")
     .select(

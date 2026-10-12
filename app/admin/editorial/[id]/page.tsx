@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/utils/supabase/admin";
 import { loadPicks } from "../_lib/health";
 import { summarise, scheduleState, type EditorialShelf } from "../_lib/types";
 import { ShelfEditorClient } from "./_components/ShelfEditorClient";
+import { requireAdmin } from "@/app/admin/_lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,7 @@ export default async function EditorialShelfPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireAdmin();
   const { id } = await params;
 
   const { data } = await supabaseAdmin

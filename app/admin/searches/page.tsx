@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import { StatTable, type StatRow } from "./_components/StatTable";
+import { requireAdmin } from "@/app/admin/_lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,7 @@ export default async function AdminSearchesPage({
 }: {
   searchParams: Promise<{ days?: string }>;
 }) {
+  await requireAdmin();
   const { days: daysParam } = await searchParams;
   const days = RANGES.find((d) => String(d) === daysParam) ?? 30;
 
