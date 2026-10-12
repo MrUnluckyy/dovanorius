@@ -5,6 +5,7 @@ import Link from "next/link";
 import React from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { BoardsLoadingSkeleton } from "@/components/loaders/BoardsLoadingSkeleton";
+import { LinkPendingRibbon } from "@/components/ui/LinkPending";
 
 type BoardWithPreview = {
   id: string;
@@ -47,11 +48,13 @@ function PublicBoardCard({ board, userId }: { board: BoardWithPreview; userId: s
     <Link
       href={`/users/${userId}/${board.slug}`}
       className={cn(
-        "group block rounded-3xl bg-neutral-50 p-3 shadow-sm ring-1 ring-black/5",
+        "group relative block rounded-3xl bg-neutral-50 p-3 shadow-sm ring-1 ring-black/5",
         "transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-black/30"
       )}
       aria-label={board.name}
     >
+      {/* Acknowledges the click before the board's loading state takes over. */}
+      <LinkPendingRibbon />
       <div className="overflow-hidden rounded-2xl bg-base-200">
         <div className="grid h-[150px] grid-cols-3 grid-rows-2 gap-2 md:h-[170px] lg:h-[190px]">
           <MosaicCell className="col-span-2 row-span-2" image={imgs[0]} />
