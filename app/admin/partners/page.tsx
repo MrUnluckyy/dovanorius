@@ -8,6 +8,7 @@ import {
   type AdminInvite,
   type AdminContact,
 } from "./_components/PartnersClient";
+import { requireAdmin } from "@/app/admin/_lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ type PartnerRow = {
 };
 
 export default async function AdminPartnersPage() {
+  await requireAdmin();
   const supabase = await createClient();
   const {
     data: { user },

@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import { ReportsList, type ReportRow } from "./_components/ReportsList";
+import { requireAdmin } from "@/app/admin/_lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ export default async function AdminReportsPage({
 }: {
   searchParams: Promise<{ show?: string }>;
 }) {
+  await requireAdmin();
   const { show } = await searchParams;
   const showAll = show === "all";
 
