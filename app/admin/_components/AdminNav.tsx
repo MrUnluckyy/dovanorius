@@ -9,12 +9,14 @@ import {
   LuSparkles,
   LuLifeBuoy,
   LuSearch,
+  LuReceipt,
 } from "react-icons/lu";
 
 const items = [
   { href: "/admin", label: "Analitika", icon: LuChartNoAxesColumn, exact: true },
   { href: "/admin/partners", label: "Partneriai", icon: LuBuilding2, exact: true },
   { href: "/admin/partners/queue", label: "Moderavimas", icon: LuShieldCheck },
+  { href: "/admin/partners/orders", label: "Užsakymai", icon: LuReceipt },
   { href: "/admin/editorial", label: "Lentynos", icon: LuSparkles },
   { href: "/admin/searches", label: "Paieškos", icon: LuSearch },
   { href: "/admin/reports", label: "Pranešimai", icon: LuLifeBuoy },
