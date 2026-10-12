@@ -19,6 +19,7 @@ import {
   type PickedBoard,
 } from "@/components/boards/BoardPickerSheet";
 import { trackInspo } from "@/utils/trackInspo";
+import { shopHref } from "@/utils/affiliate/outHref";
 import type { CardProduct } from "./ProductCard";
 
 const ISSUES = ["wrong_category", "wrong_gender", "not_a_gift"] as const;
@@ -277,7 +278,7 @@ export function ProductModal({
               <div className="flex flex-col gap-2">
                 {product.deepLink && (
                   <a
-                    href={product.deepLink}
+                    href={shopHref({ id: product.id, deepLink: product.deepLink })}
                     target="_blank"
                     rel="noopener noreferrer sponsored"
                     onClick={() => trackInspo("click_out", product.id)}

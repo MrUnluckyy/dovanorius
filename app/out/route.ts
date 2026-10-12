@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 import { resolveMerchant } from "@/utils/affiliate/resolveMerchant";
 import { buildDeeplink } from "@/utils/affiliate/buildDeeplink";
+import { resolvePartner, tagPartnerUrl } from "@/utils/affiliate/partnerLink";
 import type { AffiliateCredentials } from "@/types/affiliate";
 
 export const dynamic = "force-dynamic";
@@ -21,12 +22,20 @@ function credentials(): AffiliateCredentials {
  * back to Sovrn (if configured) and finally to the raw URL so a click never
  * breaks.
  *
- *   /out?u=<encoded product url>&item=<item id?>
+ *   /out?u=<encoded product url>&item=<item id?>   (board items)
+ *   /out?u=<encoded product url>&p=<partner:uuid>   (Discover partner products)
+ *
+ * Direct partners have no network, so their links are tagged here instead:
+ * utm_* plus nr_click=<sub_id>, the key a later order is matched on.
  */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const raw = searchParams.get("u");
   const itemId = searchParams.get("item");
+  // Only served partner rows; anything else is ignored rather than stored.
+  const rawProduct = searchParams.get("p");
+  const productId =
+    rawProduct && /^partner:[0-9a-f-]{36}$/i.test(rawProduct) ? rawProduct : null;
 
   if (!raw) {
     return NextResponse.json({ error: "Missing url" }, { status: 400 });
@@ -48,6 +57,8 @@ export async function GET(req: Request) {
   const subId = crypto.randomUUID();
 
   const merchant = await resolveMerchant(targetUrl);
+  // Partner shops are checked only when no network owns the host.
+  const partnerId = merchant ? null : await resolvePartner(targetUrl);
 
   let redirectTo = targetUrl;
   let merchantId: string | null = null;
@@ -63,6 +74,8 @@ export async function GET(req: Request) {
       redirectTo = deeplink;
       merchantId = merchant.id;
     }
+  } else if (partnerId) {
+    redirectTo = tagPartnerUrl(targetUrl, subId, productId ? "discover" : "board");
   } else if (creds.sovrnKey && process.env.SOVRN_DEEPLINK_TEMPLATE) {
     // No known merchant → auto-affiliate the long tail through Sovrn.
     const deeplink = buildDeeplink({
@@ -95,6 +108,8 @@ export async function GET(req: Request) {
       item_id: itemId || null,
       user_id: userId,
       merchant_id: merchantId,
+      partner_id: partnerId,
+      product_id: productId,
       target_url: targetUrl,
       sub_id: subId,
     });
