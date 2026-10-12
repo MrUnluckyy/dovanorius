@@ -13,18 +13,24 @@ export default async function PublicUserBoardPage({
   params: Promise<{ slug: string; userId?: string }>;
 }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   const { slug, userId } = await params;
 
-  const { data: board, error: bErr } = await supabase
-    .from("boards")
-    .select("id, name, owner_id, is_public, created_at, slug, description")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .maybeSingle();
+  // Independent lookups; awaiting them one after the other was a full extra
+  // round trip before anything could render.
+  const [
+    {
+      data: { user },
+    },
+    { data: board },
+  ] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from("boards")
+      .select("id, name, owner_id, is_public, created_at, slug, description")
+      .eq("slug", slug)
+      .eq("is_public", true)
+      .maybeSingle(),
+  ]);
 
   if (!board) {
     notFound();
