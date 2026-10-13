@@ -1,12 +1,12 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
 import { createClient as createSanityClient } from "next-sanity";
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import { loadPicks } from "@/app/admin/editorial/_lib/health";
 import { priceBand } from "@/lib/carousel/copy";
+import { claude } from "@/lib/anthropic/client";
 
-// Server-only: service-role Supabase, the Anthropic key and a Sanity write token.
+// Server-only: service-role Supabase, Claude credentials and a Sanity write token.
 
 /**
  * An editorial shelf, written up as a blog gift guide.
@@ -155,7 +155,7 @@ export async function writeArticle(
     .filter((l) => l !== null)
     .join("\n");
 
-  const client = new Anthropic();
+  const client = claude();
   const res = await client.beta.messages.parse({
     model: MODEL,
     max_tokens: 16000,

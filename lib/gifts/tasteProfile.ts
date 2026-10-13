@@ -1,10 +1,11 @@
-import Anthropic from "@anthropic-ai/sdk";
+
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import { GIFT_MODEL } from "./config";
 import { TasteProfileSchema, type TasteProfile } from "./schema";
 import { getUserSignals, signalsHash, type UserSignals } from "./signals";
 import { usdCost } from "./cost";
+import { claude } from "@/lib/anthropic/client";
 
 // Stable instruction → cached across every user (0.1x on repeat reads).
 const SYSTEM = `You build a concise gift-taste profile for one person, to power gift recommendations in a Lithuanian gift app. You receive their wishlist items (titles are often Lithuanian), board names, a short bio, and age.
@@ -51,7 +52,7 @@ export async function getOrInferTasteProfile(
     };
   }
 
-  const client = new Anthropic();
+  const client = claude();
   const res = await client.messages.parse({
     model: GIFT_MODEL,
     max_tokens: 700,
