@@ -9,6 +9,7 @@ import { WishListItem } from "./WishListItem";
 import { LuPlus } from "react-icons/lu";
 import { useCallback, useRef } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { IdeasNudge } from "@/components/discover/IdeasNudge";
 
 export type Item = {
   id: string;
@@ -102,8 +103,14 @@ export function WishList({
             </div>
           )}
           {items.length === 0 ? (
-            <div className="flex flex-col justify-center items-center">
+            <div className="flex flex-col justify-center items-center gap-6">
               <p className="text-center">{t("noItems")}</p>
+              {/* An empty list is a dead end for both sides; ideas are the way on. */}
+              {isPublic ? (
+                <IdeasNudge prominent lead={t("giverIdeasLeadEmpty")} cta={t("giverIdeasCta")} />
+              ) : (
+                <IdeasNudge prominent lead={t("ownerIdeasLead")} cta={t("ownerIdeasCta")} />
+              )}
             </div>
           ) : null}
 
@@ -130,6 +137,15 @@ export function WishList({
               />
             ))}
           </div>
+
+          {/* A gift-giver who has scrolled past the whole list without a match. */}
+          {isPublic && items.length > 0 && (
+            <IdeasNudge
+              className="mt-10 text-center"
+              lead={t("giverIdeasLead")}
+              cta={t("giverIdeasCta")}
+            />
+          )}
         </>
       )}
     </div>

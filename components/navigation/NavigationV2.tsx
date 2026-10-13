@@ -81,6 +81,20 @@ export function NavigationV2({ user }: { user?: User | null }) {
               </div>
 
               <div className="flex flex-none items-center gap-1 lg:hidden">
+                {/* Discover used to live only inside the drawer on phones, one
+                    menu-tap away from everyone who never opens the menu. It
+                    needs no account, so it shows signed in or out. */}
+                <Link
+                  href="/discover"
+                  aria-label={t("discover")}
+                  title={t("discover")}
+                  aria-current={pathnames.includes("discover") ? "page" : undefined}
+                  className={`btn btn-ghost px-3 ${
+                    pathnames.includes("discover") ? "text-(--nr-ink)" : ""
+                  }`}
+                >
+                  <LuSparkles className="w-4 h-4" />
+                </Link>
                 {/* Creating anything needs an account. A guest tapping this
                     would build a board on an anonymous session and lose it the
                     moment their cookies cleared. */}

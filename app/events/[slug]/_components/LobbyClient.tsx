@@ -247,6 +247,7 @@ export default function LobbyClient({
               type={meta.type}
               wants={mine.receiver.wants}
               hasWishlist={mine.receiver.hasWishlist}
+              budget={event.budget}
             />
           ) : (
             <p className="nr-card px-5 py-4 text-[15px] text-(--nr-muted)">

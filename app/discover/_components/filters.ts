@@ -72,3 +72,16 @@ export function browseHref(params: {
   const qs = sp.toString();
   return qs ? `/discover/browse?${qs}` : "/discover/browse";
 }
+
+/**
+ * The price band a gift budget falls into, for "ideas within budget" links
+ * (Secret Santa). The band containing the budget, not the one below it: a
+ * €30 cap should still show the €25–50 ideas.
+ */
+export function bandForBudget(budget: number | null | undefined): string | null {
+  if (budget == null || !Number.isFinite(budget) || budget <= 0) return null;
+  if (budget <= 25) return "under25";
+  if (budget <= 50) return "b25to50";
+  if (budget <= 100) return "b50to100";
+  return "over100";
+}
