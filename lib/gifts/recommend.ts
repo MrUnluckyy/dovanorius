@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import {
@@ -12,6 +12,7 @@ import { getOrInferTasteProfile } from "./tasteProfile";
 import { retrieveCandidates } from "./candidates";
 import { getDislikedProductIds, type UserSignals } from "./signals";
 import { usdCost } from "./cost";
+import { claude } from "@/lib/anthropic/client";
 
 export type GiftIdea = {
   product_id: string;
@@ -108,7 +109,7 @@ export async function getGiftIdeas(
   });
   const byId = new Map(candidates.map((c) => [c.id, c]));
 
-  const client = new Anthropic();
+  const client = claude();
   const res = await client.messages.parse({
     model: GIFT_MODEL,
     max_tokens: 1500,

@@ -24,6 +24,7 @@
     "@tanstack/react-query": "^5.90.5",
     "@types/nprogress": "^0.2.3",
     "@vercel/analytics": "^1.5.0",
+    "@vercel/oidc": "^4.0.0",
     "browser-image-compression": "^2.0.2",
     "cheerio": "^1.1.2",
     "csv-parse": "^7.0.1",
