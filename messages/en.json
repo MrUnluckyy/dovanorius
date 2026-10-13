@@ -277,7 +277,12 @@
     "reserveGuestCta": "Continue as a guest",
     "reserveChoiceGuestHint": "You can reserve without an account — we'll just need an email address.",
     "reservationsClaimed": "{count, plural, one {# reservation moved into your account} other {# reservations moved into your account}}",
-    "errorGenericShort": "That didn't work. Please try again."
+    "errorGenericShort": "That didn't work. Please try again.",
+    "giverIdeasLead": "Can't find the right gift?",
+    "giverIdeasCta": "Browse gift ideas",
+    "giverIdeasLeadEmpty": "But there's no shortage of gift ideas.",
+    "ownerIdeasLead": "Not sure what to wish for?",
+    "ownerIdeasCta": "Get some ideas"
   },
   "Profile": {
     "displayName": "Display Name",
@@ -591,7 +596,11 @@
     "dateRequired": "Pick a date for the event.",
     "repeatEventSheetTitle": "Next year's event",
     "rulesOneWay": "One way only",
-    "rulesDirection": "Which way"
+    "rulesDirection": "Which way",
+    "ideasLead": "Looking for a gift?",
+    "ideasCtaBudget": "Ideas under €{budget}",
+    "ideasCta": "Gift ideas",
+    "ideasLeadEmpty": "Not sure what to get yet? Start with some ideas."
   },
   "Blog": {
     "metaTitle": "Blog — Noriuto.lt",

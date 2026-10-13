@@ -277,7 +277,12 @@
     "reserveGuestCta": "Tęsti kaip svečias",
     "reserveChoiceGuestHint": "Rezervuoti gali ir be paskyros — tereikės el. pašto adreso.",
     "reservationsClaimed": "{count, plural, one {# rezervacija perkelta į tavo paskyrą} few {# rezervacijos perkeltos į tavo paskyrą} other {# rezervacijų perkelta į tavo paskyrą}}",
-    "errorGenericShort": "Nepavyko. Bandyk dar kartą."
+    "errorGenericShort": "Nepavyko. Bandyk dar kartą.",
+    "giverIdeasLead": "Nerandi tinkamos dovanos?",
+    "giverIdeasCta": "Pažiūrėk dovanų idėjas",
+    "giverIdeasLeadEmpty": "Bet dovanų idėjų netrūksta.",
+    "ownerIdeasLead": "Nežinai, ko norėti?",
+    "ownerIdeasCta": "Pasisemk idėjų"
   },
   "Profile": {
     "displayName": "Slapyvardis",
@@ -591,7 +596,11 @@
     "dateRequired": "Pasirink renginio datą.",
     "repeatEventSheetTitle": "Kitų metų renginys",
     "rulesOneWay": "Tik viena kryptimi",
-    "rulesDirection": "Kuria kryptimi"
+    "rulesDirection": "Kuria kryptimi",
+    "ideasLead": "Ieškai dovanos?",
+    "ideasCtaBudget": "Idėjos iki {budget} €",
+    "ideasCta": "Dovanų idėjos",
+    "ideasLeadEmpty": "Kol kas nežinai, ką dovanoti? Pradėk nuo idėjų."
   },
   "Blog": {
     "metaTitle": "Tinklaraštis — Noriuto.lt",

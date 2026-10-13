@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { ConfettiBurst } from "../../_components/Confetti";
 import type { SsEventType } from "@/types/secret-santa";
 import { createClient } from "@/utils/supabase/client";
+import { IdeasNudge } from "@/components/discover/IdeasNudge";
+import { bandForBudget, browseHref } from "@/app/discover/_components/filters";
 
 type Stage = "idle" | "rolling" | "reveal";
 
@@ -15,6 +17,7 @@ export default function RevealCard({
   type = "secret_santa",
   wants = null,
   hasWishlist = false,
+  budget = null,
 }: {
   eventId: string;
   /**
@@ -36,6 +39,8 @@ export default function RevealCard({
   wants?: string | null;
   /** Only link to a wish list when there is one; guests have none. */
   hasWishlist?: boolean;
+  /** The event's gift cap, for "ideas within budget". */
+  budget?: number | null;
 }) {
   const t = useTranslations("Events");
   // Only Secret Santa points to a wish list — Name Draw has no gifts.
@@ -154,6 +159,18 @@ export default function RevealCard({
             </a>
           )}
         </div>
+
+        {/* The moment someone has to buy a gift. With nothing to go on it is the
+            next step and gets a button; next to a wishlist it stays a quiet line. */}
+        {stage === "reveal" && showWishlist && (
+          <IdeasNudge
+            className="mt-5"
+            prominent={!wants && !hasWishlist}
+            lead={!wants && !hasWishlist ? t("ideasLeadEmpty") : t("ideasLead")}
+            cta={budget ? t("ideasCtaBudget", { budget }) : t("ideasCta")}
+            href={browseHref({ price: bandForBudget(budget) })}
+          />
+        )}
       </div>
     </div>
   );
