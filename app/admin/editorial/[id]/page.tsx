@@ -6,6 +6,8 @@ import { ShelfEditorClient } from "./_components/ShelfEditorClient";
 import { requireAdmin } from "@/app/admin/_lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
+// Writing an article with Claude (article-actions.ts) takes up to a minute or two.
+export const maxDuration = 180;
 
 export default async function EditorialShelfPage({
   params,
