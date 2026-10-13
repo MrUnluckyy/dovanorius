@@ -218,7 +218,16 @@ async function uploadImage(
 ) {
   if (!url) return null;
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(15_000),
+      // Pigu's CDN refuses requests that don't look like a browser (same as
+      // lib/carousel/assets.ts).
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129 Safari/537.36",
+        Accept: "image/avif,image/webp,image/png,image/jpeg,*/*",
+      },
+    });
     if (!res.ok) return null;
     const asset = await sanity.assets.upload("image", Buffer.from(await res.arrayBuffer()), {
       filename,
