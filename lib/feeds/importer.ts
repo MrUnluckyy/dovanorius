@@ -276,6 +276,10 @@ export async function runImport(
 
   // Server-side diff-merge, driven in id-range batches so each statement stays
   // well under the DB statement timeout. Writes only rows whose content changed.
+  // Staging is truncated and bulk-loaded each run, so it has no planner
+  // statistics yet; without them the range walks below can fall back to scans.
+  await withRetry("analyze staging", () => supabase.rpc("analyze_feed_staging"));
+
   log(`merging ${staged} staged rows…`);
   let changed = 0;
   await walkRanges<{ last_id: string | null; processed: number; changed: number }>(
@@ -304,6 +308,11 @@ export async function runImport(
   let pruned = 0;
   if (prune) {
     log("pruning rows no longer in the staged set…");
+    // Which merchants this run actually delivered, worked out once. Re-deriving
+    // it inside every prune batch was a full staging scan per batch.
+    const merchants = ((await withRetry("staging merchants", () =>
+      supabase.rpc("feed_staging_merchants", { p_network: adapter.network })
+    )) ?? []) as string[];
     await walkRanges<{ last_id: string | null; scanned: number; deleted: number }>(
       "prune batch",
       (after, batch) =>
@@ -311,6 +320,7 @@ export async function runImport(
           p_network: adapter.network,
           p_after: after,
           p_batch: batch,
+          p_merchants: merchants,
         }),
       (r) => {
         if (r.scanned === 0) return false;
