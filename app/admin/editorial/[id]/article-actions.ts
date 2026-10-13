@@ -14,7 +14,7 @@ export type ArticleResult<T> = ({ ok: true } & T) | { ok: false; error: string }
 /** Errors as Lithuanian text: server-action exceptions reach the client redacted. */
 function message(e: unknown): string {
   if (e instanceof Anthropic.RateLimitError) return "Per daug užklausų modeliui – pabandykite po minutės.";
-  if (e instanceof Anthropic.AuthenticationError) return "Neteisingas ANTHROPIC_API_KEY.";
+  if (e instanceof Anthropic.AuthenticationError) return "Modelis atmetė prisijungimą (API raktas arba Vercel federacija).";
   if (e instanceof Anthropic.APIError) return `Modelio klaida (${e.status ?? "?"}). Pabandykite dar kartą.`;
   return e instanceof Error ? e.message : "Nežinoma klaida.";
 }

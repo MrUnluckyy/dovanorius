@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { isAccountUser } from "@/utils/auth/account";
 import { getGiftIdeas, GiftIdeasRateLimitError } from "@/lib/gifts/recommend";
+import { claudeConfigured } from "@/lib/anthropic/client";
 import { OCCASIONS, PRICE_CAP, PRICE_STEP, type Occasion } from "@/lib/gifts/config";
 
 export const dynamic = "force-dynamic";
@@ -46,7 +47,7 @@ export async function GET(req: Request) {
   const priceMin = priceBand(searchParams.get("priceMin"), Math.floor);
   const priceMax = priceBand(searchParams.get("priceMax"), Math.ceil);
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!claudeConfigured()) {
     return NextResponse.json(
       { error: "Gift ideas are unavailable" },
       { status: 503 }
