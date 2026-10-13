@@ -27,13 +27,31 @@ import { getVercelOidcToken } from "@vercel/oidc";
  */
 let federated: Anthropic | null = null;
 
-export function claude(): Anthropic {
-  if (process.env.ANTHROPIC_API_KEY) return new Anthropic();
-
+function vercelFederation() {
   const ruleId = process.env.ANTHROPIC_FEDERATION_RULE_ID;
   const organizationId = process.env.ANTHROPIC_ORGANIZATION_ID;
   const serviceAccountId = process.env.ANTHROPIC_SERVICE_ACCOUNT_ID;
-  if (process.env.VERCEL && ruleId && organizationId && serviceAccountId) {
+  if (!process.env.VERCEL || !ruleId || !organizationId || !serviceAccountId) {
+    return null;
+  }
+  return { ruleId, organizationId, serviceAccountId };
+}
+
+/**
+ * Whether this server has any Claude credential: an API key or Vercel
+ * federation. Feature guards must use this, not ANTHROPIC_API_KEY, which is
+ * deliberately absent on Vercel.
+ */
+export function claudeConfigured(): boolean {
+  return Boolean(process.env.ANTHROPIC_API_KEY) || vercelFederation() !== null;
+}
+
+export function claude(): Anthropic {
+  if (process.env.ANTHROPIC_API_KEY) return new Anthropic();
+
+  const fed = vercelFederation();
+  if (fed) {
+    const { ruleId, organizationId, serviceAccountId } = fed;
     federated ??= new Anthropic({
       credentials: oidcFederationProvider({
         // Read at exchange time, inside a request: on Vercel the token comes
