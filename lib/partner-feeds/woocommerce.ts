@@ -20,7 +20,7 @@ import {
   type NormalizedProduct,
   type StoreCatalog,
 } from "./types";
-import { getJson, stripHtml, sameHostUrl } from "./http";
+import { getJson, stripHtml, sameHostUrl, decodeEntities } from "./http";
 
 /** The Store API caps per_page at 100, unlike Shopify's 250. */
 const PAGE_SIZE = 100;
@@ -91,7 +91,7 @@ function toCategories(p: WooProduct): string[] {
     ...(p.categories ?? []).map((c) => c?.name ?? ""),
     ...(p.tags ?? []).map((t) => t?.name ?? ""),
   ]
-    .map((t) => t.trim())
+    .map((t) => decodeEntities(t).trim())
     .filter(Boolean)
     .filter((t) => t.length <= 40);
   return Array.from(new Set(all)).slice(0, 10);
@@ -99,7 +99,8 @@ function toCategories(p: WooProduct): string[] {
 
 function normalize(p: WooProduct, domain: string): NormalizedProduct | null {
   const id = p.id != null ? String(p.id) : null;
-  const title = (p.name ?? "").trim();
+  // The Store API HTML-encodes names ("&#8222;…&#8221;").
+  const title = decodeEntities(p.name ?? "").trim();
   if (!id || !title) return null;
 
   // permalink is shop-controlled text that we store and later render as an
