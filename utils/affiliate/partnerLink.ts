@@ -37,7 +37,7 @@ export async function resolvePartner(targetUrl: string): Promise<string | null> 
   return match?.id ?? null;
 }
 
-export type ClickSource = "discover" | "board";
+export type ClickSource = "discover" | "board" | "shop";
 
 export function tagPartnerUrl(targetUrl: string, subId: string, source: ClickSource): string {
   const url = new URL(targetUrl);

@@ -75,7 +75,8 @@ export async function GET(req: Request) {
       merchantId = merchant.id;
     }
   } else if (partnerId) {
-    redirectTo = tagPartnerUrl(targetUrl, subId, productId ? "discover" : "board");
+    const source = productId ? "discover" : searchParams.get("src") === "shop" ? "shop" : "board";
+    redirectTo = tagPartnerUrl(targetUrl, subId, source);
   } else if (creds.sovrnKey && process.env.SOVRN_DEEPLINK_TEMPLATE) {
     // No known merchant → auto-affiliate the long tail through Sovrn.
     const deeplink = buildDeeplink({

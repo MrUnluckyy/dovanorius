@@ -32,6 +32,7 @@ export function toCardProduct(p: InspoProduct): CardProduct {
     productType: p.product_type,
     gender: p.gender,
     merchant: p.merchant_name,
+    partnerId: p.partner_id ?? null,
   };
 }
 

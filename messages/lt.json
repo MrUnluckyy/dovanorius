@@ -752,7 +752,15 @@
     "moreFromCategoryNote": "Nebe atrinkta rankomis - rūšiuota pagal tinkamumą dovanai",
     "filters": "Filtrai",
     "browseMetaTitle": "Visos dovanų prekės - Noriuto.lt",
-    "browseMetaDescription": "Naršykite tūkstančius dovanų idėjų pagal kategoriją, kainą ir prekės ženklą."
+    "browseMetaDescription": "Naršykite tūkstančius dovanų idėjų pagal kategoriją, kainą ir prekės ženklą.",
+    "moreFromShop": "Daugiau iš {shop}",
+    "shop": {
+      "subtitle": "Visos dovanų idėjos iš {shop} vienoje vietoje",
+      "count": "{count, plural, one {# prekė} few {# prekės} other {# prekių}}",
+      "visit": "Apsilankyti parduotuvėje",
+      "metaTitle": "{shop} – dovanų idėjos | Noriuto",
+      "metaDescription": "Dovanų idėjos iš {shop}: išsirinkite, išsaugokite į norų sąrašą arba nusipirkite."
+    }
   },
   "Inspo": {
     "metaTitle": "Dovanų idėjos tau",

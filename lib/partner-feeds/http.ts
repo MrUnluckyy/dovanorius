@@ -64,16 +64,32 @@ export async function getJson(url: string): Promise<JsonResponse> {
   return { body: await res.json(), headers: res.headers };
 }
 
+const NAMED: Record<string, string> = {
+  amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ",
+  ndash: "–", mdash: "—", hellip: "…", laquo: "«", raquo: "»",
+  bdquo: "„", ldquo: "“", rdquo: "”", lsquo: "‘", rsquo: "’",
+};
+
+/**
+ * Decode HTML entities in shop-supplied text.
+ *
+ * WooCommerce's Store API returns product and category names HTML-encoded, so
+ * half of one shop's titles rendered as "&#8222;Pritaikyk paveikslėlį&#8221;".
+ * One pass, so "&amp;#8222;" decodes once to "&#8222;" and no further.
+ */
+export function decodeEntities(text: string): string {
+  return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, code: string) => {
+    if (code[0] === "#") {
+      const n = code[1] === "x" || code[1] === "X" ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
+      return Number.isFinite(n) && n > 0 && n <= 0x10ffff ? String.fromCodePoint(n) : match;
+    }
+    return NAMED[code.toLowerCase()] ?? match;
+  });
+}
+
 export function stripHtml(html: string | null | undefined): string | null {
   if (!html) return null;
-  const text = html
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#\d+;/g, " ")
+  const text = decodeEntities(html.replace(/<[^>]*>/g, " "))
     .replace(/\s+/g, " ")
     .trim();
   return text ? text.slice(0, 2000) : null;
