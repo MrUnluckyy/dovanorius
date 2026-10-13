@@ -20,6 +20,8 @@ export type CardProduct = {
   productType?: string | null;
   gender?: string | null;
   merchant?: string | null;
+  /** Direct-partner products only: opens "more from this shop". */
+  partnerId?: string | null;
 };
 
 /** Longest edge we ever need for a card, which is ~250px at 2x. */

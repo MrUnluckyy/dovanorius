@@ -752,7 +752,15 @@
     "moreFromCategoryNote": "No longer hand-picked – ranked by gift suitability",
     "filters": "Filters",
     "browseMetaTitle": "All gift products – Noriuto.lt",
-    "browseMetaDescription": "Browse thousands of gift ideas by category, price and brand."
+    "browseMetaDescription": "Browse thousands of gift ideas by category, price and brand.",
+    "moreFromShop": "More from {shop}",
+    "shop": {
+      "subtitle": "All gift ideas from {shop} in one place",
+      "count": "{count, plural, one {# product} other {# products}}",
+      "visit": "Visit the shop",
+      "metaTitle": "{shop} – gift ideas | Noriuto",
+      "metaDescription": "Gift ideas from {shop}: pick one, save it to a wishlist or buy it."
+    }
   },
   "Inspo": {
     "metaTitle": "Gift Ideas For You",

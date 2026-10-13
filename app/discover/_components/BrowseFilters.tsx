@@ -37,6 +37,7 @@ export function BrowseFilters({
   audiences, audience, onAudience,
   sorts, sort, onSort,
   searchInput, onSearchInput,
+  hideBrand = false,
 }: {
   categories: CategoryDef[];
   productType: string | null;
@@ -60,6 +61,8 @@ export function BrowseFilters({
   sort: InspoSort;
   onSort: (s: InspoSort) => void;
   searchInput: string;
+  /** Shop pages: the brand list is catalogue-wide, so most entries would be empty there. */
+  hideBrand?: boolean;
   onSearchInput: (v: string) => void;
 }) {
   const t = useTranslations("Discover");
@@ -172,9 +175,11 @@ export function BrowseFilters({
                 />
               </Group>
 
-              <Group label={t("brand.label")}>
-                <BrandFilter value={brand} onSelect={onBrand} productType={productType} />
-              </Group>
+              {!hideBrand && (
+                <Group label={t("brand.label")}>
+                  <BrandFilter value={brand} onSelect={onBrand} productType={productType} />
+                </Group>
+              )}
 
             </div>
           )}

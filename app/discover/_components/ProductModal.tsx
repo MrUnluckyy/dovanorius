@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
 import {
@@ -11,6 +12,7 @@ import {
   LuCheck,
   LuSparkles,
   LuFlag,
+  LuStore,
 } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
 import { useAddIdeaToBoard } from "@/hooks/useAddIdeaToBoard";
@@ -314,6 +316,19 @@ export function ProductModal({
                     </>
                   )}
                 </button>
+
+                {/* "Liked this, show me more like it": the feed cannot match by
+                    taste yet, but the same shop is a good next step. Hidden on
+                    the shop page itself. */}
+                {product.partnerId && product.merchant && !pathname.startsWith("/discover/shop/") && (
+                  <Link
+                    href={`/discover/shop/${product.partnerId}`}
+                    className="mt-1 inline-flex cursor-pointer items-center justify-center gap-1.5 self-center rounded-full px-3 py-1.5 text-sm font-medium opacity-70 transition hover:bg-base-200 hover:opacity-100"
+                  >
+                    <LuStore className="w-4" />
+                    {t("moreFromShop", { shop: product.merchant })}
+                  </Link>
+                )}
               </div>
             </div>
           </div>

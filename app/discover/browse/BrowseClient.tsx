@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { LuX } from "react-icons/lu";
+import { LuX, LuExternalLink } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
 import { useInspoProducts } from "@/hooks/useInspoProducts";
 import { useDiscoverAudience } from "@/hooks/useDiscoverAudience";
@@ -30,10 +30,24 @@ import { isAccountUser } from "@/utils/auth/account";
  * persistent profile setting, and baking it into a shared link would send the
  * recipient your gender preference along with the products.
  */
-export function BrowseClient() {
+/** A direct partner's shop page: the catalogue, scoped to one shop. */
+export type ShopInfo = {
+  name: string;
+  slug: string;
+  websiteUrl: string | null;
+  /** Products currently visible in Discover. */
+  count: number;
+  /** product_type values the shop actually has — the only categories worth offering. */
+  types: string[];
+};
+
+export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
   const t = useTranslations("Discover");
   const params = useSearchParams();
   const supabase = createClient();
+
+  const basePath = shop ? `/discover/shop/${shop.slug}` : "/discover/browse";
+  const categories = shop ? CATEGORIES.filter((c) => shop.types.includes(c.type)) : CATEGORIES;
 
   const [userId, setUserId] = useState<string | null>(null);
   const [selected, setSelected] = useState<CardProduct | null>(null);
@@ -67,9 +81,9 @@ export function BrowseClient() {
       // from the server before useSearchParams updates, so every search waited
       // on a server round trip before its query even started. Next syncs
       // useSearchParams with history.replaceState, with no request at all.
-      window.history.replaceState(null, "", sp.toString() ? `?${sp}` : "/discover/browse");
+      window.history.replaceState(null, "", sp.toString() ? `?${sp}` : basePath);
     },
-    [params]
+    [params, basePath]
   );
 
   useEffect(() => {
@@ -92,7 +106,9 @@ export function BrowseClient() {
 
   const filters: InspoFilters = useMemo(
     () => ({
-      merchant: null,
+      // Partner rows carry the partner's name as merchant_name (see the
+      // partner_product_projection trigger).
+      merchant: shop?.name ?? null,
       productType,
       brand,
       priceMin: band.min,
@@ -103,7 +119,7 @@ export function BrowseClient() {
       onSaleOnly,
       sort,
     }),
-    [productType, brand, band.min, band.max, search, audience, onSaleOnly, sort]
+    [shop?.name, productType, brand, band.min, band.max, search, audience, onSaleOnly, sort]
   );
 
   const {
@@ -149,13 +165,38 @@ export function BrowseClient() {
         >
           ← {t("backToIdeas")}
         </Link>
-        <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-          {t("browseTitle")}
-        </h1>
+        {shop ? (
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+                {shop.name}
+              </h1>
+              <p className="mt-1 text-sm opacity-60">
+                {t("shop.subtitle", { shop: shop.name })} · {t("shop.count", { count: shop.count })}
+              </p>
+            </div>
+            {shop.websiteUrl && (
+              <a
+                // Through /out so the visit is logged and the shop's link tagged.
+                href={`/out?u=${encodeURIComponent(shop.websiteUrl)}&src=shop`}
+                target="_blank"
+                rel="noopener noreferrer sponsored"
+                className="btn btn-outline btn-sm cursor-pointer gap-2 rounded-full"
+              >
+                <LuExternalLink className="w-4" />
+                {t("shop.visit")}
+              </a>
+            )}
+          </div>
+        ) : (
+          <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+            {t("browseTitle")}
+          </h1>
+        )}
       </header>
 
       <BrowseFilters
-        categories={CATEGORIES}
+        categories={categories}
         productType={productType}
         onProductType={(v) => setParams({ type: v })}
         bands={PRICE_BANDS}
@@ -172,6 +213,7 @@ export function BrowseClient() {
         onSort={(v) => setParams({ sort: v })}
         searchInput={searchInput}
         onSearchInput={setSearchInput}
+        hideBrand={!!shop}
       />
 
       {hasFilters && (
@@ -196,7 +238,7 @@ export function BrowseClient() {
             />
           )}
           <Link
-            href="/discover/browse"
+            href={basePath}
             onClick={() => setSearchInput("")}
             className="ml-1 cursor-pointer text-xs font-medium underline underline-offset-2 opacity-60 hover:opacity-100"
           >
