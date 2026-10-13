@@ -16,6 +16,7 @@ import {
   LuPackageX,
   LuGripVertical,
   LuInstagram,
+  LuNewspaper,
 } from "react-icons/lu";
 import toast from "react-hot-toast";
 import {
@@ -40,6 +41,7 @@ import {
 import { fmtDate, toLocalInput, fromLocalInput } from "../../_lib/dates";
 import { useListDrag } from "@/app/admin/_components/useListDrag";
 import { CarouselDialog } from "./CarouselDialog";
+import { ArticleDialog } from "./ArticleDialog";
 
 export function ShelfEditorClient({
   shelf,
@@ -58,6 +60,7 @@ export function ShelfEditorClient({
   const searchRef = useRef<HTMLDialogElement>(null);
   const carouselRef = useRef<HTMLDialogElement>(null);
   const [carouselOpen, setCarouselOpen] = useState(false);
+  const articleRef = useRef<HTMLDialogElement>(null);
 
   const [labelLt, setLabelLt] = useState(shelf.label_lt);
   const [labelEn, setLabelEn] = useState(shelf.label_en);
@@ -246,6 +249,12 @@ export function ShelfEditorClient({
               }}
             >
               <LuInstagram size={14} /> Instagram karuselė
+            </button>
+            <button
+              className="btn btn-ghost btn-sm gap-1"
+              onClick={() => articleRef.current?.showModal()}
+            >
+              <LuNewspaper size={14} /> Sukurti straipsnį
             </button>
             <button
               className={`btn btn-sm ${shelf.is_active ? "btn-ghost" : "btn-primary"}`}
@@ -457,6 +466,8 @@ export function ShelfEditorClient({
       </div>
 
       {/* Delete confirm */}
+      <ArticleDialog ref={articleRef} shelf={shelf} />
+
       <CarouselDialog
         ref={carouselRef}
         shelf={shelf}
