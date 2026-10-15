@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "@/utils/supabase/admin";
+import { foldForSearch } from "@/utils/helpers/search";
 import { CANDIDATE_LIMIT } from "./config";
 import type { TasteProfile } from "./schema";
 
@@ -41,9 +42,13 @@ export type RetrieveOpts = {
   priceMax?: number | null;
 };
 
-// PostgREST `or=` uses commas/parens as syntax — keep interest terms word-only.
-function sanitize(term: string): string {
-  return term.replace(/[,()%]/g, " ").trim();
+// Interest terms are matched against `search_norm` (name + brand + category,
+// lowercased and unaccented — see the inspo_products trigger), so they are
+// folded the same way. PostgREST `or=` uses commas/parens as syntax, so those
+// go too. Under 3 characters a term has no trigram and its LIKE can't use the
+// index — one such term turns the whole OR back into a full-table scan.
+function toMatchTerm(term: string): string {
+  return foldForSearch(term).replace(/[,()"]/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function baseQuery(profile: TasteProfile, opts: RetrieveOpts) {
@@ -107,14 +112,17 @@ export async function retrieveCandidates(
   profile: TasteProfile,
   opts: RetrieveOpts = {}
 ): Promise<Candidate[]> {
-  const terms = [...profile.interests, ...profile.brands]
-    .map(sanitize)
-    .filter(Boolean)
+  const terms = Array.from(
+    new Set([...profile.interests, ...profile.brands].map(toMatchTerm))
+  )
+    .filter((t) => t.length >= 3)
     .slice(0, 20);
+  // One LIKE per term on the trigram-indexed `search_norm`. This used to be
+  // `product_name ILIKE … OR brand_name ILIKE …` per term: brand_name has no
+  // index, so every bucket was a sequential scan of the whole catalogue —
+  // 5-50 s each, six at once, starving the rest of /discover of disk I/O.
   const ors = terms.length
-    ? terms
-        .flatMap((t) => [`product_name.ilike.%${t}%`, `brand_name.ilike.%${t}%`])
-        .join(",")
+    ? terms.map((t) => `search_norm.like.%${t}%`).join(",")
     : null;
 
   const buckets = await Promise.all(
