@@ -7,6 +7,7 @@ import type { SsEventType } from "@/types/secret-santa";
 import { createClient } from "@/utils/supabase/client";
 import { IdeasNudge } from "@/components/discover/IdeasNudge";
 import { bandForBudget, browseHref } from "@/app/discover/_components/filters";
+import { AvatarImg } from "@/components/AvatarImg";
 
 type Stage = "idle" | "rolling" | "reveal";
 
@@ -114,8 +115,16 @@ export default function RevealCard({
 
         <div className="avatar mt-4">
           <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-            {stage === "reveal" && person.avatar_url ? (
-              <img src={person.avatar_url} alt="avatar" />
+            {stage === "reveal" ? (
+              <AvatarImg
+                src={person.avatar_url}
+                alt="avatar"
+                fallback={
+                  <div className="grid w-24 h-24 place-items-center rounded-full bg-(--nr-tile) text-4xl font-semibold text-(--nr-ink)">
+                    {(person.display_name ?? "?").charAt(0).toUpperCase()}
+                  </div>
+                }
+              />
             ) : (
               <div className="nr-skeleton w-24 h-24 rounded-full" />
             )}

@@ -10,6 +10,7 @@ import { qq } from "@/utils/qq";
 import { setPairRule, type PairRule } from "@/app/actions/events/drawRules";
 import { updateEvent } from "@/app/actions/events/manage";
 import type { DrawCheck, Participant, SsEvent } from "@/types/secret-santa";
+import { AvatarImg } from "@/components/AvatarImg";
 
 /** One ss_exclusions row: a must not draw b; with mutual, b must not draw a either. */
 type Rule = { a: string; b: string; mutual: boolean };
@@ -548,18 +549,7 @@ function PersonDot({
     : ring
     ? "outline outline-2 outline-(--nr-cream)"
     : "";
-  return person?.avatar_url ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={person.avatar_url}
-      alt={name}
-      title={name}
-      width={size}
-      height={size}
-      className={`shrink-0 rounded-full object-cover ${border}`}
-      style={{ width: size, height: size }}
-    />
-  ) : (
+  const initial = (
     <span
       title={name}
       className={`grid shrink-0 place-items-center rounded-full bg-(--nr-tile) font-semibold text-(--nr-ink) ${border}`}
@@ -567,5 +557,17 @@ function PersonDot({
     >
       {name.charAt(0).toUpperCase()}
     </span>
+  );
+  return (
+    <AvatarImg
+      src={person?.avatar_url}
+      alt={name}
+      title={name}
+      width={size}
+      height={size}
+      className={`shrink-0 rounded-full object-cover ${border}`}
+      style={{ width: size, height: size }}
+      fallback={initial}
+    />
   );
 }

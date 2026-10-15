@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { foldForSearch } from "@/utils/helpers/search";
 import Link from "next/link";
+import { AvatarImg } from "@/components/AvatarImg";
 
 // Table shape (Supabase `profiles`)
 // id, display_name, about, avatar_url, public
@@ -247,13 +248,15 @@ export function SearchUsers() {
                   <div className="flex items-center gap-4">
                     <div className="avatar">
                       <div className="w-12 rounded-full">
-                        {p.avatar_url ? (
-                          <img src={p.avatar_url} alt={p.display_name} />
-                        ) : (
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-base-200 font-semibold">
-                            {initials(p.display_name)}
-                          </div>
-                        )}
+                        <AvatarImg
+                          src={p.avatar_url}
+                          alt={p.display_name}
+                          fallback={
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-base-200 font-semibold">
+                              {initials(p.display_name)}
+                            </div>
+                          }
+                        />
                       </div>
                     </div>
 
