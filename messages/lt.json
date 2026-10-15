@@ -61,7 +61,14 @@
     "emailNotConfirmed": "Šis el. pašto adresas dar nepatvirtintas. Patvirtinimo nuorodą išsiuntėme registruojantis — patikrink pašto dėžutę ir šlamšto aplanką.",
     "resendConfirmation": "Siųsti nuorodą dar kartą",
     "confirmationResending": "Siunčiama…",
-    "confirmationResent": "Išsiuntėme naują nuorodą. Patikrink paštą."
+    "confirmationResent": "Išsiuntėme naują nuorodą. Patikrink paštą.",
+    "confirmLead": "Paspausk mygtuką žemiau ir tęsime.",
+    "confirmEmailTitle": "Patvirtink el. paštą",
+    "confirmEmailCta": "Patvirtinti el. paštą",
+    "confirmRecoveryTitle": "Slaptažodžio keitimas",
+    "confirmRecoveryCta": "Keisti slaptažodį",
+    "confirmLoginTitle": "Prisijungimas",
+    "confirmLoginCta": "Prisijungti"
   },
   "HomePage": {
     "title": "Viena vieta visiems tavo norams",

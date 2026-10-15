@@ -61,7 +61,14 @@
     "emailNotConfirmed": "This email address hasn't been confirmed yet. We sent the confirmation link when you registered — check your inbox and your spam folder.",
     "resendConfirmation": "Send the link again",
     "confirmationResending": "Sending…",
-    "confirmationResent": "We've sent a new link. Check your inbox."
+    "confirmationResent": "We've sent a new link. Check your inbox.",
+    "confirmLead": "Press the button below to continue.",
+    "confirmEmailTitle": "Confirm your email",
+    "confirmEmailCta": "Confirm email",
+    "confirmRecoveryTitle": "Reset your password",
+    "confirmRecoveryCta": "Reset password",
+    "confirmLoginTitle": "Sign in",
+    "confirmLoginCta": "Sign in"
   },
   "HomePage": {
     "title": "One place for all your wishes",
