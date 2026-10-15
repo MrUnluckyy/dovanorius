@@ -25,6 +25,7 @@ import Participants from "./Participants";
 import DrawButton from "./DrawButton";
 import RevealCard from "./RevealCard";
 import DrawRules from "./DrawRules";
+import RedrawPanel from "./RedrawPanel";
 import InvitePeopleSheet from "./InvitePeopleSheet";
 import EventSettingsSheet from "./EventSettingsSheet";
 import MyWishNote from "./MyWishNote";
@@ -204,6 +205,29 @@ export default function LobbyClient({
   const notEnoughMembers = joinedCount < meta.minMembers;
   const isGroup = meta.type === "group";
 
+  // A redraw is allowed until anyone (the organiser included) has looked at
+  // their result; see ss_redraw. Only the count is read, never the pairs.
+  // Polled while the window is open, so it closes when a member reveals.
+  const redrawWindow =
+    !!event && isAdmin && !isGroup && event.status === "drawn" && !mine?.revealed;
+  const { data: revealedCount } = useQuery({
+    enabled: redrawWindow,
+    queryKey: ["ss:revealedCount", event?.id ?? "none"],
+    refetchInterval: 20_000,
+    queryFn: async () => {
+      const { count, error } = await sb
+        .from("ss_assignments")
+        .select("id", { count: "exact", head: true })
+        .eq("event_id", event!.id)
+        .eq("revealed", true);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+  const canRedraw = redrawWindow && revealedCount === 0;
+  const scrollToRules = () =>
+    document.getElementById("draw-rules")?.scrollIntoView({ behavior: "smooth", block: "start" });
+
   if (isLoading || !event) {
     return (
       <div className="px-4 py-6 md:py-10">
@@ -240,15 +264,25 @@ export default function LobbyClient({
           </p>
         ) : event.status === "drawn" ? (
           mine?.receiver ? (
+            <>
+            {canRedraw && (
+              <RedrawPanel slug={slug} eventId={event.id} onEditRules={scrollToRules} />
+            )}
             <RevealCard
+              key={mine.receiver.id}
               eventId={event.id}
               revealed={mine.revealed}
+              onRevealed={() => {
+                qc.invalidateQueries({ queryKey: qq.myAssignment(event.id, user.id) });
+                qc.invalidateQueries({ queryKey: ["ss:revealedCount", event.id] });
+              }}
               person={mine.receiver}
               type={meta.type}
               wants={mine.receiver.wants}
               hasWishlist={mine.receiver.hasWishlist}
               budget={event.budget}
             />
+            </>
           ) : (
             <p className="nr-card px-5 py-4 text-[15px] text-(--nr-muted)">
               {t("drawnNoAssignment")}
@@ -364,11 +398,11 @@ export default function LobbyClient({
         </section>
       )}
 
-      {/* An organiser's tool, and only meaningful before the draw and once
-          there are two people to keep apart. */}
+      {/* An organiser's tool, and only meaningful before the draw (or while a
+          redraw is still possible) and once there are two people to keep apart. */}
       {!isGroup &&
         isAdmin &&
-        event.status !== "drawn" &&
+        (event.status !== "drawn" || canRedraw) &&
         (participants?.length ?? 0) >= 2 && (
           <section id="draw-rules" className="mt-4 scroll-mt-4">
             <DrawRules

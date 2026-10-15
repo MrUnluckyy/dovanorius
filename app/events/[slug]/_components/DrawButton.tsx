@@ -5,13 +5,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { motion, useAnimationControls } from "framer-motion";
 import toast from "react-hot-toast";
-import { useConfirm } from "@/components/ConfirmDialogProvider";
 import { createClient } from "@/utils/supabase/client";
 import { qq } from "@/utils/qq";
 import type { DrawCheck, Participant } from "@/types/secret-santa";
 import { updateEvent } from "@/app/actions/events/manage";
 import { runDraw } from "../draw/actions";
 import DrawCheckSheet from "./DrawCheckSheet";
+import DrawConfirmSheet from "./DrawConfirmSheet";
 
 const CHECK_REASONS = new Set(["too_few", "no_recipient", "household_too_big", "impossible_other"]);
 
@@ -44,9 +44,10 @@ export default function DrawButton({
   const [check, setCheck] = useState<DrawCheck | null>(null);
   // Checking (and confirming) is not drawing: the label stays "Draw names".
   const [checking, setChecking] = useState(false);
+  /** The summary shown before drawing: people in the draw and rules set. */
+  const [summary, setSummary] = useState<{ count: number; rules: number } | null>(null);
   const qc = useQueryClient();
   const t = useTranslations("Events");
-  const confirm = useConfirm();
   const ctrl = useAnimationControls();
 
   const nameOf = (id: string) =>
@@ -85,6 +86,7 @@ export default function DrawButton({
           return;
         }
         setCheck(null);
+        setSummary(null);
         await ctrl.start({ scale: [1, 1.1, 1], transition: { duration: 0.4 } });
         qc.invalidateQueries({ queryKey: qq.event(slug) });
         qc.invalidateQueries({ queryKey: qq.participants(eventId) });
@@ -101,7 +103,10 @@ export default function DrawButton({
   const go = async () => {
     setChecking(true);
     try {
-      const res = await fetchCheck();
+      const [res, rules] = await Promise.all([
+        fetchCheck(),
+        sb.from("ss_exclusions").select("id", { count: "exact", head: true }).eq("event_id", eventId),
+      ]);
       if (!res) {
         toast.error(t("drawFailed"));
         return;
@@ -110,16 +115,12 @@ export default function DrawButton({
         setCheck(res);
         return;
       }
+      // Drawing closes the roster and is final once anyone looks, so it asks —
+      // with what the draw will use, so a missing rule shows up now.
+      setSummary({ count: res.count, rules: rules.count ?? 0 });
     } finally {
       setChecking(false);
     }
-    // Drawing closes the roster and cannot be undone, so it still asks.
-    const ok = await confirm({
-      title: t("drawConfirmTitle"),
-      message: t("drawConfirmBody"),
-      confirmText: t("drawNames"),
-    });
-    if (ok) draw();
   };
 
   const turnOffRule = async () => {
@@ -147,6 +148,20 @@ export default function DrawButton({
       >
         {pending || spinning ? t("drawing") : t("drawNames")}
       </motion.button>
+
+      {summary && (
+        <DrawConfirmSheet
+          count={summary.count}
+          rules={summary.rules}
+          busy={pending}
+          onConfirm={draw}
+          onClose={() => setSummary(null)}
+          onEditRules={() => {
+            setSummary(null);
+            onEditRules();
+          }}
+        />
+      )}
 
       {check && (
         <DrawCheckSheet

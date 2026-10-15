@@ -18,8 +18,11 @@ export default function RevealCard({
   wants = null,
   hasWishlist = false,
   budget = null,
+  onRevealed,
 }: {
   eventId: string;
+  /** Called once the reveal finishes, e.g. so the lobby can close the redraw window. */
+  onRevealed?: () => void;
   /**
    * Already seen (ss_assignments.revealed): show the result straight away. The
    * slot-roll plays once per person and event, on any device; replaying it on
@@ -76,8 +79,8 @@ export default function RevealCard({
       createClient()
         .rpc("ss_mark_revealed", { p_event_id: eventId })
         .then(
-          () => undefined,
-          () => undefined
+          () => onRevealed?.(),
+          () => onRevealed?.()
         );
     }, 2000);
     return () => {

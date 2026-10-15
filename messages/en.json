@@ -607,7 +607,21 @@
     "ideasLead": "Looking for a gift?",
     "ideasCtaBudget": "Ideas under €{budget}",
     "ideasCta": "Gift ideas",
-    "ideasLeadEmpty": "Not sure what to get yet? Start with some ideas."
+    "ideasLeadEmpty": "Not sure what to get yet? Start with some ideas.",
+    "drawConfirmPeople": "{count, plural, one {# person} other {# people}} in the draw",
+    "drawConfirmRules": "{count, plural, one {# rule} other {# rules}} on who can't draw whom",
+    "drawConfirmNoRules": "No rules — anyone can draw anyone",
+    "drawConfirmEditRules": "Edit rules",
+    "drawConfirmAddRules": "Add",
+    "drawConfirmFinal": "Check the rules now — for example, should couples avoid drawing each other? Once anyone has looked at who they got, the draw can't be changed.",
+    "drawConfirmNotYet": "Not yet",
+    "redrawTitle": "Nobody has looked at their result yet",
+    "redrawBody": "Forgot a rule? You can still add it and draw again. As soon as anyone (you included) looks at who they got, the draw is locked.",
+    "redrawCta": "Draw again",
+    "redrawConfirmTitle": "Draw again?",
+    "redrawConfirmBody": "Everyone gets a new name. Nobody has seen theirs yet, so nobody loses anything.",
+    "redrawDone": "Names drawn again",
+    "redrawTooLate": "Someone has already looked at their result — the draw can't be redone now."
   },
   "Blog": {
     "metaTitle": "Blog — Noriuto.lt",
