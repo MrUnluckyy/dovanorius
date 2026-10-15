@@ -1043,5 +1043,23 @@
     "prevMonth": "Ankstesnis mėnuo",
     "nextMonth": "Kitas mėnuo",
     "dialogLabel": "Pasirink datą"
+  },
+  "Contact": {
+    "launcher": "Pagalba",
+    "title": "Noriuto komanda",
+    "subtitle": "Atsakome el. paštu",
+    "greeting": "Labas! 👋 Kažkas neveikia, neaišku ar turi idėją? Parašyk — perskaitysime ir atsakysime.",
+    "placeholder": "Rašyk žinutę…",
+    "emailPlaceholder": "Tavo el. paštas atsakymui",
+    "emailWhy": "Be el. pašto negalėsime atsakyti. Naudosime tik šiam atsakymui.",
+    "send": "Siųsti",
+    "sendFailed": "Nepavyko išsiųsti. Pabandyk dar kartą.",
+    "close": "Uždaryti",
+    "receivedWithEmail": "Gavome ✓ Atsakysime į {email}.",
+    "receivedNoEmail": "Gavome ✓ Kadangi nepalikai el. pašto, atsakyti negalėsime — jei nori atsakymo, įrašyk jį viršuje ir parašyk dar kartą.",
+    "recreatedEventPrompt": "Matome, kad kuri renginį iš naujo. Gal kažkas nepavyko su ankstesniu? Parašyk, ką norėjai pakeisti — padėsime ir patobulinsime.",
+    "recreateTitle": "Kuri iš naujo?",
+    "recreateBody": "Renginyje „{name}“ vardai jau ištraukti, o pakeisti ištraukimo kol kas negalima. Jei norėjai ką nors pakeisti — parašyk mums, padėsime.",
+    "recreateCta": "Parašyti mums"
   }
 }
