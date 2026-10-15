@@ -1036,5 +1036,23 @@
     "prevMonth": "Previous month",
     "nextMonth": "Next month",
     "dialogLabel": "Choose a date"
+  },
+  "Contact": {
+    "launcher": "Help",
+    "title": "The Noriuto team",
+    "subtitle": "We reply by email",
+    "greeting": "Hi! 👋 Something not working, unclear, or got an idea? Write to us — we'll read it and get back to you.",
+    "placeholder": "Write a message…",
+    "emailPlaceholder": "Your email for the reply",
+    "emailWhy": "Without an email we can't reply. We'll only use it for this.",
+    "send": "Send",
+    "sendFailed": "Couldn't send. Please try again.",
+    "close": "Close",
+    "receivedWithEmail": "Got it ✓ We'll reply to {email}.",
+    "receivedNoEmail": "Got it ✓ You didn't leave an email, so we can't reply — add it above and send again if you'd like an answer.",
+    "recreatedEventPrompt": "Looks like you're setting this event up again. Did something go wrong with the previous one? Tell us what you wanted to change — we'll help and improve it.",
+    "recreateTitle": "Starting over?",
+    "recreateBody": "Names in “{name}” have already been drawn, and a draw can't be changed yet. If you wanted to change something, tell us — we'll help.",
+    "recreateCta": "Write to us"
   }
 }

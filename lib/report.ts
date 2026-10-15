@@ -1,5 +1,5 @@
 /** Which flow a failure came from. Coarse on purpose — useful for grouping. */
-export type ReportArea = "reserve" | "auth" | "board" | "other";
+export type ReportArea = "reserve" | "auth" | "board" | "contact" | "other";
 
 type ErrorBeacon = {
   area: ReportArea;
@@ -116,4 +116,29 @@ export const REPORT_EVENT = "noriuto:report";
 export function openReportDialog(ctx: ReportContext): void {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent<ReportContext>(REPORT_EVENT, { detail: ctx }));
+}
+
+/* ------------------------------------------------------------------
+ * Contact chat
+ * ------------------------------------------------------------------ */
+
+export type ContactContext = {
+  /** Why it was opened, e.g. "recreated_event". Absent when the person opened it. */
+  reason?: string;
+  detail?: Record<string, unknown>;
+  /** First line of the conversation, said by us — sets the topic. */
+  prompt?: string;
+};
+
+/** Event the global contact chat listens for. */
+export const CONTACT_EVENT = "noriuto:contact";
+
+/**
+ * Opens the contact chat from anywhere. Same window-event pattern as
+ * openReportDialog, so a page that notices something odd can offer help
+ * without the chat having to know about that page.
+ */
+export function openContactChat(ctx: ContactContext = {}): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent<ContactContext>(CONTACT_EVENT, { detail: ctx }));
 }
