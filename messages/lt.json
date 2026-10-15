@@ -600,7 +600,21 @@
     "ideasLead": "Ieškai dovanos?",
     "ideasCtaBudget": "Idėjos iki {budget} €",
     "ideasCta": "Dovanų idėjos",
-    "ideasLeadEmpty": "Kol kas nežinai, ką dovanoti? Pradėk nuo idėjų."
+    "ideasLeadEmpty": "Kol kas nežinai, ką dovanoti? Pradėk nuo idėjų.",
+    "drawConfirmPeople": "Dalyvauja {count, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
+    "drawConfirmRules": "{count, plural, one {# taisyklė} few {# taisyklės} other {# taisyklių}}, kas kam negali tekti",
+    "drawConfirmNoRules": "Taisyklių nėra — bet kas gali ištraukti bet ką",
+    "drawConfirmEditRules": "Keisti taisykles",
+    "drawConfirmAddRules": "Pridėti",
+    "drawConfirmFinal": "Pasitikrink taisykles dabar: pavyzdžiui, ar poros neturėtų ištraukti viena kitos. Kai bent vienas dalyvis pažiūrės, kas jam teko, ištraukimo pakeisti nebebus galima.",
+    "drawConfirmNotYet": "Dar ne",
+    "redrawTitle": "Dar niekas nepažiūrėjo, kas jam teko",
+    "redrawBody": "Jei pamiršai taisyklę, dar gali ją pridėti ir traukti iš naujo. Kai bent vienas dalyvis (ir tu) pažiūrės savo rezultatą, ištraukimas užsifiksuos.",
+    "redrawCta": "Traukti iš naujo",
+    "redrawConfirmTitle": "Traukti iš naujo?",
+    "redrawConfirmBody": "Visiems bus ištraukti nauji vardai. Kol kas niekas nematė, kas jam teko, todėl niekas nieko nepraras.",
+    "redrawDone": "Vardai ištraukti iš naujo",
+    "redrawTooLate": "Kažkas jau pažiūrėjo savo rezultatą — traukti iš naujo nebegalima."
   },
   "Blog": {
     "metaTitle": "Tinklaraštis — Noriuto.lt",

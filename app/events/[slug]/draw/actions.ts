@@ -78,3 +78,51 @@ export async function runDraw(slug: string): Promise<DrawResult> {
   console.error("ss_run_draw returned an unknown error:", res.error);
   return { ok: false, error: "failed" };
 }
+
+export type RedrawResult =
+  | { ok: true; count: number }
+  | {
+      ok: false;
+      error:
+        | Exclude<DrawResult, { ok: true }>["error"]
+        // Someone (the organiser included) has already seen who they drew.
+        | "already_revealed";
+    };
+
+/**
+ * Draw again — only while nobody has looked at their result.
+ *
+ * ss_redraw() (migration 20261015150000) refuses once any assignment is
+ * revealed, and keeps the event's status at "drawn" so members don't get a
+ * second "names drawn" notification. Same error shape as runDraw.
+ */
+export async function redraw(slug: string): Promise<RedrawResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "not_authenticated" };
+
+  const { data: ev, error: e1 } = await supabase
+    .from("ss_events")
+    .select("id")
+    .eq("slug", slug)
+    .single();
+  if (e1 || !ev) return { ok: false, error: "not_found" };
+
+  const { data, error } = await supabase.rpc("ss_redraw", { p_event_id: ev.id });
+  if (error || !data) {
+    console.error("ss_redraw failed:", error);
+    return { ok: false, error: "failed" };
+  }
+
+  const res = data as { ok: boolean; error?: string; count?: number };
+  if (res.ok) return { ok: true, count: res.count ?? 0 };
+  if (res.error === "already_revealed") return { ok: false, error: "already_revealed" };
+  if (res.error && KNOWN_ERRORS.has(res.error)) {
+    return { ok: false, error: res.error as Exclude<DrawResult, { ok: true }>["error"] };
+  }
+  console.error("ss_redraw returned an unknown error:", res.error);
+  return { ok: false, error: "failed" };
+}
