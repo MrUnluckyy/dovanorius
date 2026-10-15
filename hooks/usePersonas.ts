@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import type { InspoProduct } from "@/types/inspo";
 
 /**
@@ -37,6 +38,18 @@ export type PersonaPick = InspoProduct & { reason: string | null };
 /** Active personas, in curator-defined order. */
 export function usePersonas() {
   const supabase = createClient();
+  const queryClient = useQueryClient();
+
+  // The shelves can't ask for their picks until this list arrives, which made
+  // the page two round trips deep. Every shelf reads the same single request
+  // (see fetchAllPersonaPicks), so start it now, alongside this one.
+  useEffect(() => {
+    void queryClient.prefetchQuery({
+      queryKey: ["persona-picks-all"],
+      queryFn: fetchAllPersonaPicks,
+      staleTime: PICKS_STALE_MS,
+    });
+  }, [queryClient]);
 
   return useQuery({
     queryKey: ["gift-personas"],
@@ -75,6 +88,46 @@ function rotateByDay<T>(items: T[]): T[] {
 /** How many picks a collapsed shelf shows; "view more" reveals the rest. */
 export const SHELF_SIZE = 12;
 
+const PICKS_STALE_MS = 1000 * 60 * 30;
+
+/** What a shelf card and the product modal read; see toCardProduct. */
+const PICK_COLUMNS =
+  "id, product_name, brand_name, price, rrp, discount_pct, image_url, deep_link, product_type, gender, merchant_name, partner_id, in_stock";
+
+/**
+ * Every persona's picks in ONE request, keyed by persona id.
+ *
+ * Each shelf used to fetch its own picks, so /discover opened with ~16
+ * requests at once, every one a separate trip through PostgREST into a join on
+ * inspo_products — on a small database they queued behind each other and the
+ * shelves filled in one by one. The whole table is a few hundred rows, so it
+ * comes down in one go and every shelf reads its slice from the cache.
+ */
+async function fetchAllPersonaPicks(): Promise<Record<string, PersonaPick[]>> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("persona_products")
+    .select(`persona_id, rank, reason, inspo_products!inner(${PICK_COLUMNS})`)
+    .order("persona_id")
+    .order("rank");
+  if (error) throw error;
+
+  const rows = (data ?? []) as unknown as {
+    persona_id: string;
+    reason: string | null;
+    inspo_products: InspoProduct;
+  }[];
+
+  const byPersona: Record<string, PersonaPick[]> = {};
+  for (const r of rows) {
+    // A pick whose product went out of stock since the last curation run
+    // should not surface; the weekly refresh will replace it.
+    if (!r.inspo_products?.in_stock) continue;
+    (byPersona[r.persona_id] ??= []).push({ ...r.inspo_products, reason: r.reason });
+  }
+  return byPersona;
+}
+
 /**
  * ALL of a persona's curated picks, rotated for today.
  *
@@ -92,32 +145,15 @@ export function usePersonaPicks(
   personaId: string | null,
   opts?: { rotate?: boolean }
 ) {
-  const supabase = createClient();
   const rotate = opts?.rotate ?? true;
 
   return useQuery({
-    queryKey: ["persona-picks", personaId, rotate],
+    queryKey: ["persona-picks-all"],
     enabled: !!personaId,
-    staleTime: 1000 * 60 * 30,
-    queryFn: async (): Promise<PersonaPick[]> => {
-      const { data, error } = await supabase
-        .from("persona_products")
-        .select("rank, reason, inspo_products!inner(*)")
-        .eq("persona_id", personaId!)
-        .order("rank");
-      if (error) throw error;
-
-      const rows = (data ?? []) as unknown as {
-        reason: string | null;
-        inspo_products: InspoProduct;
-      }[];
-
-      // A pick whose product went out of stock since the last curation run
-      // should not surface; the weekly refresh will replace it.
-      const picks = rows
-        .filter((r) => r.inspo_products?.in_stock)
-        .map((r) => ({ ...r.inspo_products, reason: r.reason }));
-
+    staleTime: PICKS_STALE_MS,
+    queryFn: fetchAllPersonaPicks,
+    select: (all) => {
+      const picks = (personaId && all[personaId]) || [];
       return rotate ? rotateByDay(picks) : picks;
     },
   });
