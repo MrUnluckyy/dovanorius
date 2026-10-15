@@ -13,6 +13,7 @@ import { LuSearch } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
 import { foldForSearch } from "@/utils/helpers/search";
 import { SearchInput } from "../search/SearchInput";
+import { AvatarImg } from "@/components/AvatarImg";
 
 // Table shape (Supabase `profiles`)
 interface Profile {
@@ -243,18 +244,16 @@ export function NavSearch({
                         <div className="flex items-center gap-3 w-full">
                           <div className="avatar">
                             <div className="w-8 rounded-full">
-                              {r.avatarUrl ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  src={r.avatarUrl}
-                                  alt={r.title}
-                                  className="object-cover"
-                                />
-                              ) : (
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-base-200 text-xs font-semibold">
-                                  {initials(r.title)}
-                                </div>
-                              )}
+                              <AvatarImg
+                                src={r.avatarUrl}
+                                alt={r.title}
+                                className="object-cover"
+                                fallback={
+                                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-base-200 text-xs font-semibold">
+                                    {initials(r.title)}
+                                  </div>
+                                }
+                              />
                             </div>
                           </div>
                           <div className="min-w-0">

@@ -1,3 +1,5 @@
+import { AvatarImg } from "@/components/AvatarImg";
+
 export function UserAvatar({
   avatarUrl,
   size,
@@ -5,17 +7,7 @@ export function UserAvatar({
   avatarUrl?: string | null;
   size?: string;
 }) {
-  if (avatarUrl) {
-    return (
-      <div className="avatar">
-        <div className={`w-${size || 24} rounded-full`}>
-          <img src={avatarUrl} alt="User avatar" />
-        </div>
-      </div>
-    );
-  }
-
-  return (
+  const placeholder = (
     <div className="avatar avatar-placeholder">
       <div
         className={`bg-neutral text-neutral-content w-${
@@ -25,5 +17,18 @@ export function UserAvatar({
         <span className="text-3xl">User</span>
       </div>
     </div>
+  );
+
+  return (
+    <AvatarImg
+      src={avatarUrl}
+      alt="User avatar"
+      fallback={placeholder}
+      wrap={(img) => (
+        <div className="avatar">
+          <div className={`w-${size || 24} rounded-full`}>{img}</div>
+        </div>
+      )}
+    />
   );
 }

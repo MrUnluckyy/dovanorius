@@ -17,6 +17,7 @@ export default function AvatarUploader({
 }) {
   const supabase = createClient();
   const [file, setFile] = useState<File | null>(null);
+  const [preparing, setPreparing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const t = useTranslations("Profile");
   const router = useRouter();
@@ -24,21 +25,31 @@ export default function AvatarUploader({
 
   const getPreviewUrl = () => (file ? URL.createObjectURL(file) : undefined);
 
+  // Prepared as soon as it's picked, so the preview shows the same JPEG we
+  // upload — a raw iPhone HEIC can't be previewed outside Safari.
+  async function onPick(picked: File | undefined) {
+    if (!picked) return setFile(null);
+
+    const isHeic = /\.heic$/i.test(picked.name) || /\.heif$/i.test(picked.name);
+    const isImage = picked.type.startsWith("image/") || isHeic;
+    if (!isImage) return toast.error("Pasirinkite paveikslėlį.");
+    if (picked.size > 10 * 1024 * 1024)
+      return toast.error("Maximalus failo dydis 10 MB.");
+
+    setPreparing(true);
+    try {
+      // Converts iPhone HEIC → JPEG, then resizes/compresses. Avatars are
+      // always JPEG (no transparency needed), so force the output type.
+      setFile(await prepareImageForUpload(picked, { outputType: "image/jpeg" }));
+    } finally {
+      setPreparing(false);
+    }
+  }
+
   async function onFileChange(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!file) return;
-
-    const isHeic = /\.heic$/i.test(file.name) || /\.heif$/i.test(file.name);
-    const isImage = file.type.startsWith("image/") || isHeic;
-    if (!isImage) return toast.error("Pasirinkite paveikslėlį.");
-    if (file.size > 10 * 1024 * 1024)
-      return toast.error("Maximalus failo dydis 10 MB.");
-
-    // Converts iPhone HEIC → JPEG, then resizes/compresses. Avatars are always
-    // JPEG (no transparency needed), so force the output type.
-    const compressedFile = await prepareImageForUpload(file, {
-      outputType: "image/jpeg",
-    });
+    const compressedFile = file;
 
     setUploading(true);
     try {
@@ -108,13 +119,13 @@ export default function AvatarUploader({
           type="file"
           accept="image/*"
           className="hidden"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          onChange={(e) => onPick(e.target.files?.[0])}
         />
         {file && (
           <button
             className="btn btn-primary"
             type="submit"
-            disabled={uploading}
+            disabled={uploading || preparing}
           >
             {uploading ? t("saving") : t("ctaSave")}
           </button>
