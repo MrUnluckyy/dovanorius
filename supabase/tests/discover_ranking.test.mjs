@@ -59,7 +59,7 @@ async function freshDb() {
   const db = new PGlite();
   await db.exec(read("fixtures/base_schema.sql"));
   await db.exec(SCHEMA);
-  await db.exec(read("../migrations/20261017110000_discover_collection_ranking.sql"));
+  await db.exec(read("../migrations/20261017165910_discover_collection_ranking.sql"));
   for (const [slug, kind, audience, sort, types] of SHELVES) {
     await db.query(
       `insert into gift_personas (slug, kind, audience, sort_order) values ($1, $2, $3, $4)`,
