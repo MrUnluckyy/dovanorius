@@ -12,7 +12,7 @@ export const PAGE_EVENT_TYPES = [
 
 /**
  * The only context keys the server keeps (values: short strings). Mirrors the
- * views in 20261017100000_discover_tracking.sql:
+ * views in 20261017165811_discover_tracking.sql:
  *   page      inspire | browse | shop
  *   state     first-view state, "1".."4" (T2); "legacy" until then
  *   recipient recipient slug or tile key

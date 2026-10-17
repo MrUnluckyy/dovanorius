@@ -11,7 +11,7 @@ const here = new URL(".", import.meta.url);
 const read = (p) => readFileSync(new URL(p, here), "utf8");
 const MIGRATIONS = [
   "../migrations/20260731100300_inspo_events_analytics.sql",
-  "../migrations/20261017100000_discover_tracking.sql",
+  "../migrations/20261017165811_discover_tracking.sql",
 ];
 
 async function freshDb() {
