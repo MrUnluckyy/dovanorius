@@ -1,65 +1,91 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { LuSearch, LuSparkles } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
 import { useGiftIdeas } from "@/hooks/useGiftIdeas";
-import { useDiscoverAudience } from "@/hooks/useDiscoverAudience";
 import {
   useRankedCollections,
   type RankedCollection,
 } from "@/hooks/useRankedCollections";
+import { useMyCategories } from "@/hooks/useMyCategories";
+import { usePersonas, type GiftPersona } from "@/hooks/usePersonas";
+import {
+  recipientLens,
+  type PartnerGender,
+  type RecipientKey,
+  type VisitorGender,
+} from "@/lib/discover/recipients";
+import type { Visitor } from "@/lib/discover/visitorState";
+import { trackInspo, trackDiscover, type TrackContext } from "@/utils/trackInspo";
 
 import { type CardProduct } from "./_components/ProductCard";
-import { CATEGORIES, AUDIENCES, browseHref } from "./_components/filters";
-import Link from "next/link";
+import { CATEGORIES, browseHref } from "./_components/filters";
 import { PersonaShelf } from "./_components/PersonaShelf";
-import { usePersonas } from "@/hooks/usePersonas";
 import { ProductStrip } from "./_components/ProductStrip";
 import { ProductModal } from "./_components/ProductModal";
-import { trackInspo, trackDiscover, type TrackContext } from "@/utils/trackInspo";
-import { isAccountUser } from "@/utils/auth/account";
+import { RecipientChips, RecipientTiles } from "./_components/RecipientPicker";
+import { ForYouBlock } from "./_components/ForYouBlock";
+import { IdeasGrid } from "./_components/IdeasGrid";
 
-export function DiscoverClient() {
+/**
+ * /discover, first view per visitor (dev-issue-discover-premium 4.1-4.5).
+ *
+ *   1  nothing known   "Kam ieškai dovanos?" + eight recipient tiles
+ *   2  gender known    greeting, recipient chips (Sau first), "Tau gali patikti"
+ *   3  gender + age    chips, "Atrinkta tau", "Tavo kategorijos", "Rodoma pagal"
+ *
+ * The state comes resolved from the server (page.tsx). A recipient choice
+ * narrows the whole page: the lead shelves, the ranked collections and the
+ * grid. The age row and the nudge card are T3; state 4 (from an event) is T4.
+ */
+export function DiscoverClient({
+  visitor,
+  userId,
+}: {
+  visitor: Visitor;
+  /** Any session, guest included: who last_recipient is written for. */
+  userId: string | null;
+}) {
   const t = useTranslations("Discover");
   const router = useRouter();
-  // Persona labels are DB rows, not i18n keys, so the locale is picked here.
-  const locale = useLocale();
+  const supabase = createClient();
 
-  const [userId, setUserId] = useState<string | null>(null);
+  // Only a real account can save; guests browse (see utils/auth/account).
+  const accountId = visitor.isAccount ? userId : null;
+
+  const [recipient, setRecipient] = useState<RecipientKey | null>(visitor.recipient);
+  const [partner, setPartner] = useState<PartnerGender>(null);
+  // State 1 visitors can say who they are when they tap "Sau"; it applies at
+  // once and is saved for anyone with a session.
+  const [gender, setGender] = useState<VisitorGender>(visitor.gender);
+  const [genderDeclined, setGenderDeclined] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [selected, setSelected] = useState<CardProduct | null>(null);
-  /** Which recipient the shopper is buying for; null = no persona chosen. */
-  const [personaId, setPersonaId] = useState<string | null>(null);
+  const [showAllShelves, setShowAllShelves] = useState(false);
+
+  const lens = recipientLens(recipient, gender, partner);
 
   const { data: personas } = usePersonas();
-  // Recipients are offered in the picker; themes render inline.
-  //
-  // Editorial shelves sit in the same inline row: same renderer, same
-  // sort_order, only the source of their picks differs (hand-made in /admin
-  // rather than LLM-curated). They arrive already filtered by their schedule —
-  // the gift_personas SELECT policy drops any shelf outside its window, so an
-  // unpublished one is not in `personas` at all.
-  const recipients = personas?.filter((p) => p.kind === "recipient") ?? [];
+  const personaBySlug = useMemo(
+    () => new Map((personas ?? []).map((p) => [p.slug, p])),
+    [personas]
+  );
   const themes =
     personas?.filter((p) => p.kind === "theme" || p.kind === "editorial") ?? [];
-  const activePersona = recipients.find((p) => p.id === personaId) ?? null;
+  const leadPersonas = lens.personas
+    .map((s) => personaBySlug.get(s))
+    .filter((p): p is GiftPersona => !!p);
 
-  // Audience comes from the profile now (self-declared gender, or the last
-  // choice made here) instead of resetting to "everyone" on every visit.
-  const { audience, setAudience, resolved: audienceResolved } =
-    useDiscoverAudience(userId);
-
-  // Shelves ranked for this visitor; only the top few lead the page, the rest
-  // wait under "Visos kolekcijos". Re-ranks when a recipient is tapped.
+  // Ranked collections (T0) follow the chosen recipient.
   const { data: ranked, isLoading: rankLoading } = useRankedCollections(
-    activePersona?.slug ?? null,
-    audience,
-    audienceResolved
+    lens.personas[0] ?? null,
+    lens.audience,
+    true
   );
-  const [showAllShelves, setShowAllShelves] = useState(false);
   const themeById = new Map(themes.map((p) => [p.id, p]));
   const rankedShelves = ranked
     ? ranked.flatMap((r) => {
@@ -67,23 +93,17 @@ export function DiscoverClient() {
         return persona ? [{ persona, rank: r }] : [];
       })
     : null;
-  // No ranking (RPC failed or not deployed yet): the old fixed order, all shown.
+  // No ranking (RPC failed): the old fixed order, all shown.
   const topShelves = rankedShelves
     ? rankedShelves.filter((s) => s.rank.is_top)
     : themes.map((persona) => ({ persona, rank: null }));
-  const restShelves = rankedShelves
-    ? rankedShelves.filter((s) => !s.rank.is_top)
-    : [];
+  const restShelves = rankedShelves ? rankedShelves.filter((s) => !s.rank.is_top) : [];
 
-  // Only personal reasons get a line; season and popularity keep the generic
-  // subtitle, which already says the shelf is hand-picked.
   const reasonText = (r: RankedCollection | null): string | null => {
     if (!r?.reason) return null;
     if (r.reason === "behaviour") {
       return CATEGORIES.some((c) => c.type === r.reason_detail)
-        ? t("collectionReason.behaviour", {
-            category: t(`category.${r.reason_detail}`),
-          })
+        ? t("collectionReason.behaviour", { category: t(`category.${r.reason_detail}`) })
         : null;
     }
     if (r.reason === "recipient" || r.reason === "prior" || r.reason === "explore") {
@@ -92,32 +112,20 @@ export function DiscoverClient() {
     return null;
   };
 
-  const supabase = createClient();
-
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      // An anonymous guest is not an account: every `userId &&` gate below
-      // decides whether something can be SAVED, which a guest cannot do.
-      if (!active || !isAccountUser(user)) return;
-      setUserId(user.id);
-    })();
-    return () => {
-      active = false;
+  // State 3: categories the visitor actually engages with come first.
+  const { data: myTypes = [] } = useMyCategories(visitor.state === "3" && !!userId);
+  const orderedCategories = useMemo(() => {
+    if (!myTypes.length) return CATEGORIES;
+    const rank = (type: string) => {
+      const i = myTypes.indexOf(type);
+      return i === -1 ? Number.MAX_SAFE_INTEGER : i;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return [...CATEGORIES].sort((a, b) => rank(a.type) - rank(b.type));
+  }, [myTypes]);
 
-
-
-
-  // AI "we suggest" strip — only fetched (LLM cost) on the inspire page.
+  // AI "we suggest" strip: accounts only (LLM cost), shopping for themselves.
   const { data: aiData, isLoading: aiLoading } = useGiftIdeas(
-    userId,
+    recipient === "self" ? accountId : null,
     "any",
     null,
     null
@@ -131,234 +139,288 @@ export function DiscoverClient() {
     reason: i.reason,
   }));
 
+  useEffect(() => {
+    trackDiscover("discover_view", {
+      page: "inspire",
+      state: visitor.state,
+      ...(visitor.recipient ? { recipient: visitor.recipient } : {}),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const chooseRecipient = (key: RecipientKey | null) => {
+    setRecipient(key);
+    setPartner(null);
+    setShowAllShelves(false);
+    if (!key) return;
+    trackDiscover("recipient_selected", {
+      page: "inspire",
+      state: visitor.state,
+      recipient: key,
+    });
+    // Preselected next visit. Fire-and-forget: a failed write must never
+    // block browsing.
+    if (userId) {
+      void supabase.from("profiles").update({ last_recipient: key }).eq("id", userId);
+    }
+  };
+
+  const answerGender = (g: "female" | "male" | null) => {
+    trackDiscover("nudge_answered", {
+      page: "inspire",
+      state: visitor.state,
+      question: "gender",
+      answer: g ?? "declined",
+    });
+    if (!g) {
+      setGenderDeclined(true);
+      return;
+    }
+    setGender(g);
+    if (userId) {
+      void supabase.from("profiles").update({ gender: g }).eq("id", userId);
+    }
+  };
 
   const openProduct = (p: CardProduct, context?: TrackContext) => {
     setSelected(p);
-    trackInspo("open", p.id, { page: "inspire", ...context });
+    trackInspo("open", p.id, { page: "inspire", state: visitor.state, ...context });
   };
+  const openFromShelf = (slug: string) => (p: CardProduct) =>
+    openProduct(p, { surface: "shelf", shelf: slug });
 
-  // One view per visit, sent once the audience is known so it reflects what
-  // the visitor actually saw. "legacy" until the first-view states (T2) land.
-  useEffect(() => {
-    if (!audienceResolved) return;
-    trackDiscover("discover_view", { page: "inspire", state: "legacy" });
-  }, [audienceResolved]);
+  const profileText = [
+    gender === "female" ? t("firstView.profileFemale") : gender === "male" ? t("firstView.profileMale") : null,
+    visitor.ageBand ? t("firstView.profileAge", { band: visitor.ageBand.replace("-", "–") }) : null,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
+  const selfPersona =
+    recipient === "self" && leadPersonas.length === 1 ? leadPersonas[0] : null;
 
-  // ===== Inspire: the page. Shelves with a reason, not a wall of products. =====
-    return (
-      <div className="mx-auto max-w-[1440px] px-4 pt-8 sm:px-6">
-        <header className="mb-6">
-          <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-            {t("title")}
+  return (
+    <div className="mx-auto max-w-[1440px] px-4 pt-6 sm:px-6 sm:pt-8">
+      {/* ---------- Header per state ---------- */}
+      {visitor.state === "1" ? (
+        <header className="mb-4">
+          <h1 className="font-heading text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+            {t("firstView.askTitle")}
           </h1>
-          <p className="mt-1 max-w-xl text-sm opacity-60">{t("subtitle")}</p>
+          <p className="mt-1 text-[15px] opacity-60">{t("firstView.askLead")}</p>
         </header>
+      ) : visitor.state === "2" ? (
+        <header className="mb-3">
+          <h1 className="font-heading text-3xl font-extrabold leading-tight tracking-tight">
+            {visitor.greetingName
+              ? t("firstView.greeting", { name: visitor.greetingName })
+              : t("firstView.greetingNoName")}
+          </h1>
+          <p className="mt-1 text-[15px] opacity-60">{t("firstView.todayPrompt")}</p>
+        </header>
+      ) : (
+        <h1 className="sr-only">{t("title")}</h1>
+      )}
 
-        {/* Search stays reachable from the inspire page: someone who arrives
-            already knowing what they want should not have to find "browse all"
-            first. Submitting carries the query straight into browse, which is
-            the only mode with a result grid. */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const q = searchInput.trim();
-            if (!q) return;
-            router.push(browseHref({ q }));
-          }}
-          className="mb-5"
-        >
-          <label className="input flex w-full items-center gap-2 rounded-full sm:max-w-md">
-            <LuSearch className="w-4 opacity-50" aria-hidden />
-            <input
-              type="search"
-              className="grow"
-              placeholder={t("searchPlaceholder")}
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              aria-label={t("searchPlaceholder")}
-            />
-          </label>
-        </form>
-
-        {/* Audience — the one control worth showing up front, because it
-            changes every shelf below it. Seeded from the profile. */}
-        <div className="mb-6 flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium opacity-70">
-            {t("audiencePrompt")}
-          </span>
-          {AUDIENCES.map((a) => (
-            <button
-              key={a}
-              onClick={() => setAudience(a)}
-              aria-pressed={audience === a}
-              className={`cursor-pointer rounded-full px-4 py-1.5 text-sm transition ${
-                audience === a
-                  ? "bg-neutral text-neutral-content"
-                  : "bg-base-200 hover:bg-base-300"
-              }`}
-            >
-              {t(`audience.${a}`)}
-            </button>
-          ))}
-        </div>
-
-        {/* Recipient personas. Distinct from the audience chips above: audience
-            is a broad her/him/everyone lens over every shelf, a persona is a
-            specific person ("Paaugliui") with a hand-curated shelf behind it.
-            Selecting one also sets the audience, so the themed shelves below
-            follow along rather than contradicting the choice. */}
-        {!!recipients.length && (
-          <div className="mb-6 flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium opacity-70">
-              {t("personaPrompt")}
-            </span>
-            {recipients.map((p) => {
-              const active = personaId === p.id;
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => {
-                    setPersonaId(active ? null : p.id);
-                    if (!active) {
-                      trackDiscover("recipient_selected", {
-                        page: "inspire",
-                        recipient: p.slug,
-                      });
-                    }
-                    if (!active && p.gender) {
-                      setAudience(p.gender === "female" ? "her" : "him");
-                    }
-                  }}
-                  aria-pressed={active}
-                  className={`cursor-pointer rounded-full px-4 py-1.5 text-sm transition ${
-                    active
-                      ? "bg-primary text-primary-content"
-                      : "bg-base-200 hover:bg-base-300"
-                  }`}
-                >
-                  {locale === "en" ? p.label_en : p.label_lt}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Direct routes into the catalogue. Someone arriving who already knows
-            the shape of what they want should not have to read the whole page
-            to find the way in. */}
-        <div
-          className="-mx-1 mb-6 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          style={{
-            maskImage:
-              "linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 28px), transparent 100%)",
-          }}
-        >
-          {CATEGORIES.map((c) => (
-            <Link
-              key={c.type}
-              href={browseHref({ type: c.type })}
-              className="flex shrink-0 items-center gap-1.5 rounded-full bg-base-200 px-3 py-1.5 text-sm transition hover:bg-base-300"
-            >
-              <c.Icon className="w-4 shrink-0" aria-hidden />
-              {t(`category.${c.key}`)}
-            </Link>
-          ))}
-        </div>
-
-        {/* Wait for the profile before rendering shelves, otherwise every shelf
-            loads for "everyone" and then visibly swaps. */}
-        {!audienceResolved || rankLoading ? (
-          <div className="space-y-6">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="nr-skeleton h-72 w-full rounded-3xl" />
-            ))}
-          </div>
+      {/* ---------- Recipients ---------- */}
+      <div className="mb-5">
+        {visitor.state === "1" ? (
+          <RecipientTiles selected={recipient} onSelect={chooseRecipient} />
         ) : (
-          <div className="space-y-6">
-            {/* Leads the page when chosen: the shopper just told us exactly who
-                this is for, so it outranks both the generic shelves and the
-                personal strip (which models the SHOPPER, not the recipient). */}
-            {activePersona && (
-              <PersonaShelf
-                persona={activePersona}
-                onOpen={(p) =>
-                  openProduct(p, { surface: "shelf", shelf: activePersona.slug })
-                }
-              />
-            )}
+          <RecipientChips
+            selected={recipient}
+            partner={partner}
+            onSelect={chooseRecipient}
+            onPartner={setPartner}
+          />
+        )}
+      </div>
 
-            {userId && (aiLoading || aiIdeas.length > 0) && (
-              <ProductStrip
-                title={t("collections.weSuggest")}
-                subtitle={t("collections.weSuggestSubtitle")}
-                Icon={LuSparkles}
-                items={aiIdeas}
-                isLoading={aiLoading}
-                onOpen={(p) => openProduct(p, { surface: "ai" })}
-              />
-            )}
-
-            {/* Curated shelves — every themed shelf on the page is now a
-                gift_personas row, LLM-curated or hand-picked. The keyword-query
-                shelves they replaced are gone. */}
-            {topShelves.map(({ persona, rank }) => (
-              <PersonaShelf
-                key={persona.id}
-                persona={persona}
-                reason={reasonText(rank)}
-                onOpen={(p) =>
-                  openProduct(p, { surface: "shelf", shelf: persona.slug })
-                }
-              />
+      {/* "Sau" with no gender known: the one place the question is obviously
+          useful (4.3). Inline, one tap, applies at once. */}
+      {recipient === "self" && !gender && !genderDeclined && (
+        <div className="mb-5 rounded-3xl bg-primary/20 p-4">
+          <p className="font-semibold">{t("firstView.selfGenderPrompt")}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {(["female", "male", null] as const).map((g) => (
+              <button
+                key={g ?? "none"}
+                type="button"
+                onClick={() => answerGender(g)}
+                className="inline-flex min-h-10 cursor-pointer items-center rounded-full border border-base-300 bg-base-100 px-4 text-sm font-semibold hover:border-base-content/30"
+              >
+                {t(g === "female" ? "firstView.genderFemale" : g === "male" ? "firstView.genderMale" : "firstView.genderNone")}
+              </button>
             ))}
-
-            {restShelves.length > 0 && (
-              <div className="flex justify-center">
-                <button
-                  onClick={() => setShowAllShelves((v) => !v)}
-                  aria-expanded={showAllShelves}
-                  className="btn btn-ghost btn-sm cursor-pointer rounded-full"
-                >
-                  {showAllShelves
-                    ? t("hideCollections")
-                    : t("allCollections", { count: restShelves.length })}
-                </button>
-              </div>
-            )}
-            {showAllShelves &&
-              restShelves.map(({ persona, rank }) => (
-                <PersonaShelf
-                  key={persona.id}
-                  persona={persona}
-                  reason={reasonText(rank)}
-                  onOpen={(p) =>
-                    openProduct(p, { surface: "shelf", shelf: persona.slug })
-                  }
-                />
-              ))}
           </div>
+          <p className="mt-2 text-xs opacity-60">{t("firstView.onlyYou")}</p>
+        </div>
+      )}
+
+      {/* Search stays reachable: someone who already knows what they want
+          should not have to scroll for it. Submitting goes to browse. */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const q = searchInput.trim();
+          if (!q) return;
+          router.push(browseHref({ q }));
+        }}
+        className="mb-5"
+      >
+        <label className="input flex w-full items-center gap-2 rounded-full sm:max-w-md">
+          <LuSearch className="w-4 opacity-50" aria-hidden />
+          <input
+            type="search"
+            className="grow"
+            placeholder={t("searchPlaceholder")}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            aria-label={t("searchPlaceholder")}
+          />
+        </label>
+      </form>
+
+      <div className="space-y-6">
+        {/* ---------- Lead block: who this is for ---------- */}
+        {selfPersona ? (
+          visitor.state === "3" ? (
+            <ForYouBlock
+              persona={selfPersona}
+              variant="grid4"
+              title={t("firstView.picked")}
+              subtitle={profileText ? t("firstView.pickedReason", { profile: profileText }) : undefined}
+              onOpen={openFromShelf(selfPersona.slug)}
+            />
+          ) : (
+            <ForYouBlock
+              persona={selfPersona}
+              variant="strip"
+              title={t("firstView.mayLike")}
+              onOpen={openFromShelf(selfPersona.slug)}
+            />
+          )
+        ) : (
+          leadPersonas.map((p) => (
+            <PersonaShelf key={p.id} persona={p} onOpen={openFromShelf(p.slug)} />
+          ))
         )}
 
-        <div className="mt-10 flex flex-col items-center gap-2">
-          <Link
-            href="/discover/browse"
-            className="btn btn-neutral btn-wide cursor-pointer rounded-full"
-          >
-            {t("browseAll")}
-          </Link>
-          <p className="text-xs opacity-50">{t("browseAllHint")}</p>
-        </div>
+        {recipient === "self" && accountId && (aiLoading || aiIdeas.length > 0) && (
+          <ProductStrip
+            title={t("collections.weSuggest")}
+            subtitle={t("collections.weSuggestSubtitle")}
+            Icon={LuSparkles}
+            items={aiIdeas}
+            isLoading={aiLoading}
+            onOpen={(p) => openProduct(p, { surface: "ai" })}
+          />
+        )}
 
-        <p className="mt-14 text-center text-xs opacity-50">
-          {t("affiliateDisclosure")}
-        </p>
+        {/* ---------- Categories ---------- */}
+        {visitor.state === "2" ? (
+          <section>
+            <h2 className="mb-2.5 font-heading text-lg font-bold">{t("firstView.categoriesTiles")}</h2>
+            <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-6">
+              {CATEGORIES.slice(0, 6).map((c) => (
+                <Link
+                  key={c.type}
+                  href={browseHref({ type: c.type })}
+                  className="flex flex-col items-center gap-1.5 rounded-2xl bg-base-200 px-2 py-4 text-center transition hover:bg-base-300"
+                >
+                  <c.Icon className="h-6 w-6 opacity-70" aria-hidden />
+                  <span className="text-[13px] font-semibold">{t(`category.${c.key}`)}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : (
+          <section>
+            <h2 className="mb-2.5 font-heading text-lg font-bold">
+              {visitor.state === "3" ? t("firstView.yourCategories") : t("firstView.categoriesChips")}
+            </h2>
+            <div
+              className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden"
+            >
+              {orderedCategories.map((c) => (
+                <Link
+                  key={c.type}
+                  href={browseHref({ type: c.type })}
+                  className="flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border border-base-300 bg-base-100 px-4 text-sm font-semibold transition hover:border-base-content/30"
+                >
+                  <c.Icon className="w-4 shrink-0" aria-hidden />
+                  {t(`category.${c.key}`)}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
-        <ProductModal
-          product={selected}
-          userId={userId}
-          onClose={() => setSelected(null)}
+        {/* ---------- Ranked collections (T0) ---------- */}
+        {rankLoading ? (
+          <div className="nr-skeleton h-72 w-full rounded-3xl" />
+        ) : (
+          topShelves.map(({ persona, rank }) => (
+            <PersonaShelf
+              key={persona.id}
+              persona={persona}
+              reason={reasonText(rank)}
+              onOpen={openFromShelf(persona.slug)}
+            />
+          ))
+        )}
+
+        {restShelves.length > 0 && (
+          <div className="flex justify-center">
+            <button
+              onClick={() => setShowAllShelves((v) => !v)}
+              aria-expanded={showAllShelves}
+              className="btn btn-ghost btn-sm cursor-pointer rounded-full"
+            >
+              {showAllShelves
+                ? t("hideCollections")
+                : t("allCollections", { count: restShelves.length })}
+            </button>
+          </div>
+        )}
+        {showAllShelves &&
+          restShelves.map(({ persona, rank }) => (
+            <PersonaShelf
+              key={persona.id}
+              persona={persona}
+              reason={reasonText(rank)}
+              onOpen={openFromShelf(persona.slug)}
+            />
+          ))}
+
+        {/* ---------- The grid ---------- */}
+        <IdeasGrid
+          title={visitor.state === "1" ? t("firstView.moreIdeas") : t("firstView.moreIdeasForYou")}
+          audience={lens.audience}
+          productType={lens.gridType}
+          onOpen={(p) => openProduct(p, { surface: "grid" })}
         />
       </div>
+
+      {visitor.state === "3" && profileText && (
+        <p className="mt-8 text-center text-[13px] opacity-60">
+          {t("firstView.shownFor", { profile: profileText })}{" "}
+          <Link href="/dashboard" className="font-semibold underline">
+            {t("firstView.change")}
+          </Link>
+        </p>
+      )}
+
+      <div className="mt-10 flex flex-col items-center gap-2">
+        <Link href="/discover/browse" className="btn btn-neutral btn-wide cursor-pointer rounded-full">
+          {t("browseAll")}
+        </Link>
+        <p className="text-xs opacity-50">{t("browseAllHint")}</p>
+      </div>
+
+      <p className="mt-14 text-center text-xs opacity-50">{t("affiliateDisclosure")}</p>
+
+      <ProductModal product={selected} userId={accountId} onClose={() => setSelected(null)} />
+    </div>
   );
 }
