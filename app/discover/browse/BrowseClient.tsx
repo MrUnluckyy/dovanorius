@@ -15,7 +15,7 @@ import { BrowseFilters } from "../_components/BrowseFilters";
 import { toCardProduct } from "../_components/CollectionRow";
 import { ProductModal } from "../_components/ProductModal";
 import { CATEGORIES, PRICE_BANDS, SORTS, AUDIENCES } from "../_components/filters";
-import { trackInspo } from "@/utils/trackInspo";
+import { trackInspo, trackDiscover } from "@/utils/trackInspo";
 import { isAccountUser } from "@/utils/auth/account";
 
 /**
@@ -149,10 +149,18 @@ export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
   };
   const products = useMemo(() => data?.pages.flat() ?? [], [data]);
 
+  const page = shop ? "shop" : "browse";
+
   const openProduct = (p: CardProduct) => {
     setSelected(p);
-    trackInspo("open", p.id);
+    trackInspo("open", p.id, { page, surface: search ? "search" : "grid" });
   };
+
+  // Once per mount: refining filters is the same visit, not a new view.
+  useEffect(() => {
+    trackDiscover("discover_view", { page, state: "legacy" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const hasFilters = !!productType || !!brand || bandKey !== "all" || onSaleOnly || !!search;
 

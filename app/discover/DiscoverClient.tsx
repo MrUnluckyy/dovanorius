@@ -15,7 +15,7 @@ import { PersonaShelf } from "./_components/PersonaShelf";
 import { usePersonas } from "@/hooks/usePersonas";
 import { ProductStrip } from "./_components/ProductStrip";
 import { ProductModal } from "./_components/ProductModal";
-import { trackInspo } from "@/utils/trackInspo";
+import { trackInspo, trackDiscover, type TrackContext } from "@/utils/trackInspo";
 import { isAccountUser } from "@/utils/auth/account";
 
 export function DiscoverClient() {
@@ -88,10 +88,17 @@ export function DiscoverClient() {
   }));
 
 
-  const openProduct = (p: CardProduct) => {
+  const openProduct = (p: CardProduct, context?: TrackContext) => {
     setSelected(p);
-    trackInspo("open", p.id);
+    trackInspo("open", p.id, { page: "inspire", ...context });
   };
+
+  // One view per visit, sent once the audience is known so it reflects what
+  // the visitor actually saw. "legacy" until the first-view states (T2) land.
+  useEffect(() => {
+    if (!audienceResolved) return;
+    trackDiscover("discover_view", { page: "inspire", state: "legacy" });
+  }, [audienceResolved]);
 
 
   // ===== Inspire: the page. Shelves with a reason, not a wall of products. =====
@@ -169,6 +176,12 @@ export function DiscoverClient() {
                   key={p.id}
                   onClick={() => {
                     setPersonaId(active ? null : p.id);
+                    if (!active) {
+                      trackDiscover("recipient_selected", {
+                        page: "inspire",
+                        recipient: p.slug,
+                      });
+                    }
                     if (!active && p.gender) {
                       setAudience(p.gender === "female" ? "her" : "him");
                     }
@@ -223,7 +236,12 @@ export function DiscoverClient() {
                 this is for, so it outranks both the generic shelves and the
                 personal strip (which models the SHOPPER, not the recipient). */}
             {activePersona && (
-              <PersonaShelf persona={activePersona} onOpen={openProduct} />
+              <PersonaShelf
+                persona={activePersona}
+                onOpen={(p) =>
+                  openProduct(p, { surface: "shelf", shelf: activePersona.slug })
+                }
+              />
             )}
 
             {userId && (aiLoading || aiIdeas.length > 0) && (
@@ -233,7 +251,7 @@ export function DiscoverClient() {
                 Icon={LuSparkles}
                 items={aiIdeas}
                 isLoading={aiLoading}
-                onOpen={openProduct}
+                onOpen={(p) => openProduct(p, { surface: "ai" })}
               />
             )}
 
@@ -241,7 +259,13 @@ export function DiscoverClient() {
                 gift_personas row, LLM-curated or hand-picked. The keyword-query
                 shelves they replaced are gone. */}
             {themes.map((theme) => (
-              <PersonaShelf key={theme.id} persona={theme} onOpen={openProduct} />
+              <PersonaShelf
+                key={theme.id}
+                persona={theme}
+                onOpen={(p) =>
+                  openProduct(p, { surface: "shelf", shelf: theme.slug })
+                }
+              />
             ))}
           </div>
         )}
