@@ -20,7 +20,7 @@ export default async function EditorialShelfPage({
   const { data } = await supabaseAdmin
     .from("gift_personas")
     .select(
-      "id, slug, label_lt, label_en, description, is_active, sort_order, starts_at, ends_at, created_at, kind"
+      "id, slug, label_lt, label_en, description, is_active, sort_order, starts_at, ends_at, created_at, kind, audience"
     )
     .eq("id", id)
     .maybeSingle();

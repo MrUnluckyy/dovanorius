@@ -15,6 +15,8 @@ import { createEditorialShelf, reorderShelves } from "../actions";
 import { useListDrag } from "@/app/admin/_components/useListDrag";
 import {
   MIN_ITEMS,
+  SHELF_AUDIENCES,
+  type ShelfAudience,
   type EditorialShelf,
   type ShelfHealth,
   type ScheduleState,
@@ -51,6 +53,9 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
   const [sortOrder, setSortOrder] = useState("100");
+  // No default on purpose: a shelf for kids saved as "adult" is the mistake
+  // this field exists to prevent, so it has to be chosen.
+  const [audience, setAudience] = useState<ShelfAudience | "">("");
 
   /**
    * `sort_order` used to be reachable only as a number typed into each shelf's
@@ -82,6 +87,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
         startsAt: fromLocalInput(startsAt),
         endsAt: fromLocalInput(endsAt),
         sortOrder: Number(sortOrder) || 100,
+        audience: audience || undefined,
       });
       if (!res.ok) {
         toast.error(res.error);
@@ -93,6 +99,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
       setSlug("");
       setStartsAt("");
       setEndsAt("");
+      setAudience("");
       createRef.current?.close();
       // Straight into the pick editor: an empty shelf is not useful yet.
       router.push(`/admin/editorial/${res.id}`);
@@ -295,9 +302,32 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
 
           <label className="form-control mt-3 w-full">
             <span className="label-text text-sm">
+              Kam skirta{" "}
+              <span className="text-base-content/40">
+                — vaikų ir paauglių lentynos pirmame ekrane rodomos tik tada, kai lankytojas parodo, kad ieško jiems
+              </span>
+            </span>
+            <select
+              className="select select-bordered w-full"
+              value={audience}
+              onChange={(e) => setAudience(e.target.value as ShelfAudience | "")}
+            >
+              <option value="" disabled>
+                Pasirinkite…
+              </option>
+              {SHELF_AUDIENCES.map((a) => (
+                <option key={a.value} value={a.value}>
+                  {a.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="form-control mt-3 w-full">
+            <span className="label-text text-sm">
               Eiliškumas{" "}
               <span className="text-base-content/40">
-                — mažesnis rodomas aukščiau
+                — lemia tvarką tik tada, kai lentynų reitingas lygus
               </span>
             </span>
             <input
@@ -320,7 +350,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
               type="button"
               className="btn btn-primary btn-sm"
               onClick={handleCreate}
-              disabled={pending || labelLt.trim().length < 2}
+              disabled={pending || labelLt.trim().length < 2 || !audience}
             >
               Sukurti
             </button>

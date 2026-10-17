@@ -7,6 +7,10 @@ import { LuSearch, LuSparkles } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
 import { useGiftIdeas } from "@/hooks/useGiftIdeas";
 import { useDiscoverAudience } from "@/hooks/useDiscoverAudience";
+import {
+  useRankedCollections,
+  type RankedCollection,
+} from "@/hooks/useRankedCollections";
 
 import { type CardProduct } from "./_components/ProductCard";
 import { CATEGORIES, AUDIENCES, browseHref } from "./_components/filters";
@@ -47,6 +51,46 @@ export function DiscoverClient() {
   // choice made here) instead of resetting to "everyone" on every visit.
   const { audience, setAudience, resolved: audienceResolved } =
     useDiscoverAudience(userId);
+
+  // Shelves ranked for this visitor; only the top few lead the page, the rest
+  // wait under "Visos kolekcijos". Re-ranks when a recipient is tapped.
+  const { data: ranked, isLoading: rankLoading } = useRankedCollections(
+    activePersona?.slug ?? null,
+    audience,
+    audienceResolved
+  );
+  const [showAllShelves, setShowAllShelves] = useState(false);
+  const themeById = new Map(themes.map((p) => [p.id, p]));
+  const rankedShelves = ranked
+    ? ranked.flatMap((r) => {
+        const persona = themeById.get(r.persona_id);
+        return persona ? [{ persona, rank: r }] : [];
+      })
+    : null;
+  // No ranking (RPC failed or not deployed yet): the old fixed order, all shown.
+  const topShelves = rankedShelves
+    ? rankedShelves.filter((s) => s.rank.is_top)
+    : themes.map((persona) => ({ persona, rank: null }));
+  const restShelves = rankedShelves
+    ? rankedShelves.filter((s) => !s.rank.is_top)
+    : [];
+
+  // Only personal reasons get a line; season and popularity keep the generic
+  // subtitle, which already says the shelf is hand-picked.
+  const reasonText = (r: RankedCollection | null): string | null => {
+    if (!r?.reason) return null;
+    if (r.reason === "behaviour") {
+      return CATEGORIES.some((c) => c.type === r.reason_detail)
+        ? t("collectionReason.behaviour", {
+            category: t(`category.${r.reason_detail}`),
+          })
+        : null;
+    }
+    if (r.reason === "recipient" || r.reason === "prior" || r.reason === "explore") {
+      return t(`collectionReason.${r.reason}`);
+    }
+    return null;
+  };
 
   const supabase = createClient();
 
@@ -224,7 +268,7 @@ export function DiscoverClient() {
 
         {/* Wait for the profile before rendering shelves, otherwise every shelf
             loads for "everyone" and then visibly swaps. */}
-        {!audienceResolved ? (
+        {!audienceResolved || rankLoading ? (
           <div className="space-y-6">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="nr-skeleton h-72 w-full rounded-3xl" />
@@ -258,15 +302,41 @@ export function DiscoverClient() {
             {/* Curated shelves — every themed shelf on the page is now a
                 gift_personas row, LLM-curated or hand-picked. The keyword-query
                 shelves they replaced are gone. */}
-            {themes.map((theme) => (
+            {topShelves.map(({ persona, rank }) => (
               <PersonaShelf
-                key={theme.id}
-                persona={theme}
+                key={persona.id}
+                persona={persona}
+                reason={reasonText(rank)}
                 onOpen={(p) =>
-                  openProduct(p, { surface: "shelf", shelf: theme.slug })
+                  openProduct(p, { surface: "shelf", shelf: persona.slug })
                 }
               />
             ))}
+
+            {restShelves.length > 0 && (
+              <div className="flex justify-center">
+                <button
+                  onClick={() => setShowAllShelves((v) => !v)}
+                  aria-expanded={showAllShelves}
+                  className="btn btn-ghost btn-sm cursor-pointer rounded-full"
+                >
+                  {showAllShelves
+                    ? t("hideCollections")
+                    : t("allCollections", { count: restShelves.length })}
+                </button>
+              </div>
+            )}
+            {showAllShelves &&
+              restShelves.map(({ persona, rank }) => (
+                <PersonaShelf
+                  key={persona.id}
+                  persona={persona}
+                  reason={reasonText(rank)}
+                  onOpen={(p) =>
+                    openProduct(p, { surface: "shelf", shelf: persona.slug })
+                  }
+                />
+              ))}
           </div>
         )}
 

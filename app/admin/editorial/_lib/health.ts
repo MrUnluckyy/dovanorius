@@ -102,7 +102,7 @@ export async function loadShelves(): Promise<EditorialShelf[]> {
   const { data } = await supabaseAdmin
     .from("gift_personas")
     .select(
-      "id, slug, label_lt, label_en, description, is_active, sort_order, starts_at, ends_at, created_at"
+      "id, slug, label_lt, label_en, description, is_active, sort_order, starts_at, ends_at, created_at, audience"
     )
     .eq("kind", "editorial")
     .order("sort_order")

@@ -33,6 +33,8 @@ import {
 } from "../../actions";
 import {
   MIN_ITEMS,
+  SHELF_AUDIENCES,
+  type ShelfAudience,
   type EditorialPick,
   type EditorialShelf,
   type ShelfHealth,
@@ -68,6 +70,7 @@ export function ShelfEditorClient({
   const [startsAt, setStartsAt] = useState(toLocalInput(shelf.starts_at));
   const [endsAt, setEndsAt] = useState(toLocalInput(shelf.ends_at));
   const [sortOrder, setSortOrder] = useState(String(shelf.sort_order));
+  const [audience, setAudience] = useState<ShelfAudience>(shelf.audience);
 
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<ProductHit[]>([]);
@@ -87,6 +90,7 @@ export function ShelfEditorClient({
         startsAt: fromLocalInput(startsAt),
         endsAt: fromLocalInput(endsAt),
         sortOrder: Number(sortOrder) || 100,
+        audience,
       });
       if (!res.ok) {
         toast.error(res.error);
@@ -392,6 +396,20 @@ export function ShelfEditorClient({
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value)}
               />
+            </label>
+            <label className="form-control w-full">
+              <span className="label-text text-sm">Kam skirta</span>
+              <select
+                className="select select-bordered w-full"
+                value={audience}
+                onChange={(e) => setAudience(e.target.value as ShelfAudience)}
+              >
+                {SHELF_AUDIENCES.map((a) => (
+                  <option key={a.value} value={a.value}>
+                    {a.label}
+                  </option>
+                ))}
+              </select>
             </label>
           </div>
 

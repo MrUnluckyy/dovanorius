@@ -778,6 +778,14 @@
     "themeShelfSubtitle": "Mūsų išrinktos dovanos",
     "priceDropped": "kaina krito {percent}%",
     "collapse": "Suskleisti",
+    "collectionReason": {
+      "recipient": "Pagal pasirinktą gavėją",
+      "behaviour": "Pagal peržiūrėtas prekes: {category}",
+      "prior": "Gali patikti",
+      "explore": "Kažkas naujo"
+    },
+    "allCollections": "Visos kolekcijos ({count})",
+    "hideCollections": "Slėpti kolekcijas",
     "moreFromCategory": "Daugiau iš šios srities",
     "moreFromCategoryNote": "Nebe atrinkta rankomis - rūšiuota pagal tinkamumą dovanai",
     "filters": "Filtrai",
