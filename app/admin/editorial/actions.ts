@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { supabaseAdmin } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { isShelfAudience, type ShelfAudience } from "./_lib/types";
 
 /**
  * Editorial shelves: hand-picked, scheduled shelves on /discover.
@@ -99,6 +100,8 @@ export type ShelfInput = {
   startsAt?: string | null;
   endsAt?: string | null;
   sortOrder?: number;
+  /** Required on create; see ShelfAudience for why there is no default. */
+  audience?: ShelfAudience;
 };
 
 function validateWindow(
@@ -122,6 +125,10 @@ export async function createEditorialShelf(
   const slug = slugify(input.slug?.trim() || labelLt);
   if (!slug) return { ok: false, error: "Nepavyko sugeneruoti nuorodos (slug)." };
 
+  if (!isShelfAudience(input.audience)) {
+    return { ok: false, error: "Pasirinkite, kam skirta lentyna." };
+  }
+
   const windowError = validateWindow(input.startsAt, input.endsAt);
   if (windowError) return { ok: false, error: windowError };
 
@@ -143,6 +150,7 @@ export async function createEditorialShelf(
       starts_at: input.startsAt || null,
       ends_at: input.endsAt || null,
       sort_order: input.sortOrder ?? 100,
+      audience: input.audience,
       // Deliberately left at defaults: product_types, include/exclude_keywords,
       // price bounds and examples are curator inputs for the LLM pipeline, and
       // nothing in an editorial shelf's path reads them.
@@ -179,6 +187,7 @@ export async function updateEditorialShelf(
       starts_at: input.startsAt || null,
       ends_at: input.endsAt || null,
       sort_order: input.sortOrder ?? 100,
+      ...(isShelfAudience(input.audience) ? { audience: input.audience } : {}),
     })
     .eq("id", personaId);
 

@@ -33,9 +33,12 @@ import { ProductStrip } from "./ProductStrip";
 export function PersonaShelf({
   persona,
   onOpen,
+  reason,
 }: {
   persona: GiftPersona;
   onOpen: (p: CardProduct) => void;
+  /** Why the ranking put this shelf here; replaces the generic subtitle. */
+  reason?: string | null;
 }) {
   const t = useTranslations("Discover");
   const locale = useLocale();
@@ -66,6 +69,8 @@ export function PersonaShelf({
   // Editorial shelves render exactly like themes — inline, sparkle icon, own
   // title. The difference is where the picks come from, not how they look.
   const isTheme = persona.kind === "theme" || isEditorial;
+  const subtitle =
+    reason ?? (isTheme ? t("themeShelfSubtitle") : t("personaShelfSubtitle"));
   const items: CardProduct[] = picks.map((p) => ({
     ...toCardProduct(p),
     reason: p.reason,
@@ -77,7 +82,7 @@ export function PersonaShelf({
     return (
       <ProductStrip
         title={isTheme ? label : t("personaShelfTitle", { persona: label })}
-        subtitle={isTheme ? t("themeShelfSubtitle") : t("personaShelfSubtitle")}
+        subtitle={subtitle}
         Icon={isTheme ? LuSparkles : LuUserRound}
         items={items.slice(0, SHELF_SIZE)}
         isLoading={isLoading}
@@ -108,7 +113,7 @@ export function PersonaShelf({
             {isTheme ? label : t("personaShelfTitle", { persona: label })}
           </h3>
           <p className="mt-0.5 text-sm opacity-60">
-            {isTheme ? t("themeShelfSubtitle") : t("personaShelfSubtitle")}
+            {subtitle}
           </p>
         </div>
         <button

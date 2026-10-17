@@ -46,6 +46,24 @@ export type ShelfHealth = {
   meetsMinimum: boolean;
 };
 
+/**
+ * Who a shelf is for. Discover ranking treats kid and teen shelves as
+ * sensitive: they only reach the first screen when the visitor shows a reason
+ * (tapped Vaikui, browsed toys). Left at the column default, every new shelf
+ * was "adult", which is how "Vaikai lauke" led the page for everyone.
+ */
+export type ShelfAudience = "adult" | "teen" | "kid";
+
+export const SHELF_AUDIENCES: { value: ShelfAudience; label: string }[] = [
+  { value: "adult", label: "Suaugusiems" },
+  { value: "teen", label: "Paaugliams" },
+  { value: "kid", label: "Vaikams" },
+];
+
+export function isShelfAudience(v: unknown): v is ShelfAudience {
+  return v === "adult" || v === "teen" || v === "kid";
+}
+
 export type EditorialShelf = {
   id: string;
   slug: string;
@@ -54,6 +72,7 @@ export type EditorialShelf = {
   description: string;
   is_active: boolean;
   sort_order: number;
+  audience: ShelfAudience;
   starts_at: string | null;
   ends_at: string | null;
   created_at: string;

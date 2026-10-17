@@ -778,6 +778,14 @@
     "themeShelfSubtitle": "Carefully hand-picked",
     "priceDropped": "{percent}% off",
     "collapse": "Collapse",
+    "collectionReason": {
+      "recipient": "For the recipient you picked",
+      "behaviour": "Based on what you viewed: {category}",
+      "prior": "You might like these",
+      "explore": "Something new"
+    },
+    "allCollections": "All collections ({count})",
+    "hideCollections": "Hide collections",
     "moreFromCategory": "More from this area",
     "moreFromCategoryNote": "No longer hand-picked – ranked by gift suitability",
     "filters": "Filters",
