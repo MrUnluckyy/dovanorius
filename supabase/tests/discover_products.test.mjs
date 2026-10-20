@@ -28,7 +28,9 @@ async function freshDb(rows = 1500) {
   `);
   await db.exec(read("../migrations/20261020100851_product_display_name.sql"));
   // the index drop at the end of the migration targets prod-only indexes
-  await db.exec(read("../migrations/20261020160000_discover_products.sql"));
+  await db.exec(read("../migrations/20261020123444_discover_products.sql"));
+  await db.exec(read("../migrations/20261020125616_discover_products_two_step.sql"));
+  await db.exec(read("../migrations/20261020130751_discover_page_display_name.sql"));
   await seed(db, rows);
   return db;
 }
@@ -99,6 +101,19 @@ test("rebuild copies only what discover shows and swaps the view", async () => {
   assert.equal((await db.query(`select count(*)::int as n from discover_products where id = 'p00001'`)).rows[0].n, 0);
 });
 
+test("two-step rebuild: load fills the spare table, publish swaps it in", async () => {
+  const db = await freshDb();
+  await assert.rejects(db.query(`select discover_products_publish()`), /nothing loaded/);
+  const n = (await db.query(`select discover_products_load() as n`)).rows[0].n;
+  assert.ok(n > 1000);
+  // readers still see the old (empty) table until publish
+  assert.equal((await db.query(`select count(*)::int as n from discover_products`)).rows[0].n, 0);
+  assert.equal((await db.query(`select discover_products_publish() as n`)).rows[0].n, n);
+  assert.equal((await db.query(`select count(*)::int as n from discover_products`)).rows[0].n, n);
+  const st = (await db.query(`select active, building from discover_products_state`)).rows[0];
+  assert.deepEqual(st, { active: "b", building: null });
+});
+
 test("a collapsed build never replaces a good one", async () => {
   const db = await freshDb();
   await db.query(`select rebuild_discover_products()`);
@@ -150,11 +165,17 @@ test("limit is capped at 60", async () => {
   assert.equal((await page(db, { limit: 500 })).length, 60);
 });
 
-test("display_name works through the view", async () => {
+test("discover_page returns display_name as a column, rows in order", async () => {
   const db = await freshDb();
   await db.query(`select rebuild_discover_products()`);
-  const { rows } = await db.query(`select p.display_name from discover_page() p limit 1`);
+  const { rows } = await db.query(`select display_name, pos from discover_page(p_limit => 5)`);
   assert.match(rows[0].display_name, /^Laikrodis Nr\d+ Auksinė$/);
+  assert.deepEqual(rows.map((r) => r.pos), [1, 2, 3, 4, 5]);
+  // the inner rows function is not callable by the public
+  const priv = await db.query(
+    `select has_function_privilege('anon', 'discover_page_rows(text, text[], text, text, text, numeric, numeric, boolean, text, text, text, integer)', 'execute') as can`
+  );
+  assert.equal(priv.rows[0].can, false);
 });
 
 test("tables are not reachable by API roles; only the functions are", async () => {

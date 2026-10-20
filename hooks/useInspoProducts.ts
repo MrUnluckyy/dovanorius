@@ -93,8 +93,9 @@ export function useInspoProducts(filters: InspoFilters) {
           p_sort: filters.sort,
           p_cursor: pageParam.cursor,
           p_limit: INSPO_PAGE_SIZE,
-        })
-        .select("*, display_name");
+        });
+      // discover_page returns display_name as a real column; no computed
+      // column lookup (that broke on PostgREST schema reloads).
       if (error) throw error;
       return (data ?? []) as InspoProduct[];
     },

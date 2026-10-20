@@ -157,9 +157,9 @@ revoke all on function public.rebuild_discover_products() from public, anon, aut
 grant execute on function public.rebuild_discover_products() to service_role;
 
 /**
- * One page of discover products. Keyset pagination: pass back the cursor of
- * the last row you got (discover_cursor()) to get the next page; no offsets,
- * so page 50 costs what page 1 costs.
+ * One page of discover products. Keyset pagination: build the cursor from the
+ * last row you got (format below) to get the next page; no offsets, so page
+ * 50 costs what page 1 costs.
  *
  *   p_sort  recommended | price_asc | price_desc | discount
  *   p_cursor  recommended: "<pos>"; the rest: "<value>|<id>"

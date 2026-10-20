@@ -95,7 +95,10 @@ async function main() {
   // rebuilt here as well as after the network import (this sync runs later).
   // Non-fatal: a failed rebuild must not turn a good sync red.
   try {
-    const { data: n, error: rebuildError } = await supabase.rpc("rebuild_discover_products");
+    // Two calls, each well inside service_role's 120 s statement timeout.
+    const load = await supabase.rpc("discover_products_load");
+    if (load.error) throw new Error(load.error.message);
+    const { data: n, error: rebuildError } = await supabase.rpc("discover_products_publish");
     if (rebuildError) throw new Error(rebuildError.message);
     console.log(`discover_products rebuilt: ${n} rows`);
   } catch (err) {
