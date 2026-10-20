@@ -140,29 +140,49 @@ export async function setPlacementActive(id: string, isActive: boolean): Promise
   return { ok: true };
 }
 
+/** The object path of an image in our bucket, or null for any other URL. */
+function bucketPath(url: string): string | null {
+  const marker = `/storage/v1/object/public/${BUCKET}/`;
+  const i = url.indexOf(marker);
+  return i === -1 ? null : url.slice(i + marker.length);
+}
+
 export async function deletePlacement(id: string): Promise<SimpleResult> {
   await requireAdminId();
+  const { data: row } = await supabaseAdmin
+    .from("discover_placements")
+    .select("image_url")
+    .eq("id", id)
+    .maybeSingle();
   const { error } = await supabaseAdmin.from("discover_placements").delete().eq("id", id);
   if (error) return { ok: false, error: "Nepavyko ištrinti." };
+  // Take the image with it, or the bucket fills with orphans. Best effort:
+  // the placement is already gone, a leftover file is harmless.
+  const path = row?.image_url ? bucketPath(row.image_url) : null;
+  if (path) await supabaseAdmin.storage.from(BUCKET).remove([path]);
   revalidate();
   return { ok: true };
 }
 
-/** Uploads the placement image to the public bucket; returns its URL. */
-export async function uploadPlacementImage(form: FormData): Promise<ActionResult<{ url: string }>> {
+/**
+ * A one-time signed URL for the browser to upload the placement image to
+ * straight into storage. Uploading through a server action would hit Next's
+ * 1 MB action body limit (and Vercel's 4.5 MB request cap); this way the file
+ * never passes through our function, which only checks type and size.
+ */
+export async function createPlacementUpload(
+  contentType: string,
+  size: number
+): Promise<ActionResult<{ path: string; token: string; publicUrl: string }>> {
   await requireAdminId();
-  const file = form.get("file");
-  if (!(file instanceof File)) return { ok: false, error: "Nepasirinktas failas." };
-  const ext = IMAGE_TYPES[file.type];
+  const ext = IMAGE_TYPES[contentType];
   if (!ext) return { ok: false, error: "Tinka JPG, PNG, WebP arba AVIF." };
-  if (file.size > MAX_IMAGE_BYTES) return { ok: false, error: "Failas per didelis (iki 3 MB)." };
+  if (!(size > 0) || size > MAX_IMAGE_BYTES) return { ok: false, error: "Failas per didelis (iki 3 MB)." };
 
   const path = `${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabaseAdmin.storage
-    .from(BUCKET)
-    .upload(path, file, { contentType: file.type, cacheControl: "31536000" });
-  if (error) return { ok: false, error: "Nepavyko įkelti paveikslėlio." };
+  const { data, error } = await supabaseAdmin.storage.from(BUCKET).createSignedUploadUrl(path);
+  if (error || !data) return { ok: false, error: "Nepavyko paruošti įkėlimo." };
 
-  const { data } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(path);
-  return { ok: true, url: data.publicUrl };
+  const { data: pub } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(path);
+  return { ok: true, path, token: data.token, publicUrl: pub.publicUrl };
 }

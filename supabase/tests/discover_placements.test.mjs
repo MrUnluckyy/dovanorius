@@ -20,7 +20,7 @@ async function freshDb() {
   `);
   await db.exec(read("../migrations/20260731100300_inspo_events_analytics.sql"));
   await db.exec(read("../migrations/20261017165811_discover_tracking.sql"));
-  await db.exec(read("../migrations/20261020120000_discover_placements.sql"));
+  await db.exec(read("../migrations/20261020075108_discover_placements.sql"));
   await db.exec(`grant select on public.discover_placements to anon`);
   return db;
 }

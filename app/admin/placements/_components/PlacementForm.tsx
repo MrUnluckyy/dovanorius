@@ -17,8 +17,9 @@ import {
   deletePlacement,
   setPlacementActive,
   updatePlacement,
-  uploadPlacementImage,
+  createPlacementUpload,
 } from "../actions";
+import { createClient } from "@/utils/supabase/client";
 import type { PlacementRow } from "../_lib/load";
 
 const toCard = (p: ProductHit): CardProduct => ({
@@ -69,12 +70,21 @@ export function PlacementForm({
 
   async function handleUpload(file: File) {
     setUploading(true);
-    const form = new FormData();
-    form.set("file", file);
-    const res = await uploadPlacementImage(form);
-    setUploading(false);
-    if (!res.ok) return toast.error(res.error);
-    setImageUrl(res.url);
+    try {
+      const ticket = await createPlacementUpload(file.type, file.size);
+      if (!ticket.ok) return void toast.error(ticket.error);
+      // Straight to storage with the one-time token; the file never goes
+      // through a server action (1 MB limit).
+      const { error } = await createClient()
+        .storage.from("discover-placements")
+        .uploadToSignedUrl(ticket.path, ticket.token, file, { contentType: file.type });
+      if (error) return void toast.error("Nepavyko įkelti paveikslėlio.");
+      setImageUrl(ticket.publicUrl);
+    } catch {
+      toast.error("Nepavyko įkelti paveikslėlio.");
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function runSearch() {
