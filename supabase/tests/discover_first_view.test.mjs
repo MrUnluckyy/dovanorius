@@ -22,7 +22,7 @@ async function freshDb() {
       created_at timestamptz not null default now()
     );
   `);
-  await db.exec(read("../migrations/20261017180000_discover_first_view.sql"));
+  await db.exec(read("../migrations/20261020052009_discover_first_view.sql"));
   await db.exec(`insert into profiles (id, display_name) values ('${uid(1)}', 'a'), ('${uid(2)}', 'b')`);
   return db;
 }
