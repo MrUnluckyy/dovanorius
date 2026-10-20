@@ -39,6 +39,9 @@ export type InspoFilters = {
   merchant: string | null;
   /** product_type bucket: beauty | shoes | clothing | bag | accessory. */
   productType: string | null;
+  /** Several buckets at once (a recipient's gift categories). Ignored when
+   *  productType is set. Browse only, not search. */
+  productTypes?: string[] | null;
   /** Exact brand_name to narrow to, or null for all brands. */
   brand: string | null;
   priceMin: number | null;

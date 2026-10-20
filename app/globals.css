@@ -317,6 +317,8 @@
   --nr-muted: #6b6357; /* secondary text */
   --nr-faint: #8f8779; /* captions, meta */
   --nr-yellow: #ffd166; /* brand accent */
+  --nr-stage: #efe9df; /* discover: one studio tone behind every packshot */
+  --nr-stage-2: #e6dfd2; /* discover: still-life tiles, a step deeper */
   --nr-yellow-hover: #ffc94d;
   --nr-yellow-soft: #ffdf99;
   --nr-yellow-deep: #e0b23f; /* pressed edge / stars */

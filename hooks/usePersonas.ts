@@ -216,3 +216,16 @@ export function useShelfContinuation(
     },
   });
 }
+
+/**
+ * Every persona's in-stock picks, keyed by persona id. Same single request and
+ * cache entry as usePersonaPicks, so still-life tiles and category matching
+ * read it for free.
+ */
+export function useAllPersonaPicks() {
+  return useQuery({
+    queryKey: ["persona-picks-all"],
+    staleTime: PICKS_STALE_MS,
+    queryFn: fetchAllPersonaPicks,
+  });
+}

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { createClient } from "@/utils/supabase/server";
-import { isAccountUser } from "@/utils/auth/account";
-import { resolveVisitor, type ProfileRow } from "@/lib/discover/visitorState";
-import { DiscoverClient } from "./DiscoverClient";
+import { redirect } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getVisitor } from "@/lib/discover/visitor.server";
+import { discoverHref } from "@/lib/discover/routes";
+import { storyArticleFor } from "@/lib/discover/articles";
+import { DiscoverHub } from "./_components/hub/DiscoverHub";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Discover");
@@ -14,27 +15,17 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * The visitor's state (4.1) is resolved here, on the server, so the first
- * paint already shows the right first view. Anonymous guests have a profile
- * row too; a visitor with no session at all is state 1.
+ * The discover home. Someone we know something about goes straight to their
+ * recipient (last choice, or "Sau" once the gender is known), the way Zalando
+ * reopens on the last department. Everyone else, crawlers included, gets
+ * "Kam ieškai dovanos?" with the recipient gallery.
  */
 export default async function DiscoverPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { visitor, userId } = await getVisitor();
+  if (visitor.recipient) redirect(discoverHref(visitor.recipient));
 
-  let profile: ProfileRow | null = null;
-  if (user) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("display_name, gender, date_of_birth, last_recipient")
-      .eq("id", user.id)
-      .maybeSingle();
-    profile = (data as ProfileRow | null) ?? null;
-  }
-
-  const visitor = resolveVisitor(profile, isAccountUser(user));
-
-  return <DiscoverClient visitor={visitor} userId={user?.id ?? null} />;
+  const article = await storyArticleFor(null, await getLocale());
+  return (
+    <DiscoverHub visitor={visitor} userId={userId} recipient={null} category={null} article={article} />
+  );
 }

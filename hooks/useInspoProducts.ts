@@ -108,6 +108,8 @@ export function useInspoProducts(filters: InspoFilters) {
       if (filters.brand) query = query.eq("brand_name", filters.brand);
       if (filters.productType)
         query = query.eq("product_type", filters.productType);
+      else if (filters.productTypes?.length)
+        query = query.in("product_type", filters.productTypes);
       if (filters.priceMax != null) query = query.lte("price", filters.priceMax);
       if (filters.onSaleOnly) query = query.gt("discount_pct", 0);
 

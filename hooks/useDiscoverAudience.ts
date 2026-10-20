@@ -61,10 +61,13 @@ export function useDiscoverAudience(userId: string | null) {
     (next: Audience) => {
       setAudienceState(next);
       if (!userId) return;
-      void supabase
+      // .then() is what sends it: supabase-js builders are lazy, so the bare
+      // `void builder` this used to be never wrote anything.
+      supabase
         .from("profiles")
         .update({ discover_audience: next })
-        .eq("id", userId);
+        .eq("id", userId)
+        .then(() => {});
     },
     [userId, supabase]
   );

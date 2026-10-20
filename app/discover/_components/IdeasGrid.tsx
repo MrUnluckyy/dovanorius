@@ -16,11 +16,14 @@ export function IdeasGrid({
   title,
   audience,
   productType,
+  productTypes,
   onOpen,
 }: {
   title: string;
   audience: Audience;
   productType: string | null;
+  /** A recipient's gift categories, when no single category is chosen. */
+  productTypes?: string[];
   onOpen: (p: CardProduct) => void;
 }) {
   const t = useTranslations("Discover");
@@ -28,6 +31,7 @@ export function IdeasGrid({
     useInspoProducts({
       merchant: null,
       productType,
+      productTypes: productType ? null : productTypes ?? null,
       brand: null,
       priceMin: null,
       priceMax: null,
@@ -42,23 +46,29 @@ export function IdeasGrid({
 
   return (
     <section>
-      <h2 className="mb-3 font-heading text-xl font-bold tracking-tight">{title}</h2>
-      <div className="grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+      <h2 className="mb-4 font-heading text-[22px] font-bold leading-tight tracking-[-0.02em] text-(--nr-ink) sm:text-[26px]">
+        {title}
+      </h2>
+      <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-3 sm:gap-x-4 lg:grid-cols-4 xl:grid-cols-5">
         {isLoading
-          ? Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="nr-skeleton aspect-[4/5] w-full rounded-2xl" />
+          ? Array.from({ length: 10 }).map((_, i) => (
+              <div key={i}>
+                <div className="nr-skeleton aspect-[4/5] w-full rounded-xl" />
+                <div className="nr-skeleton mt-2.5 h-3 w-2/3 rounded" />
+                <div className="nr-skeleton mt-2 h-3 w-1/2 rounded" />
+              </div>
             ))
           : products.map((p) => (
               <ProductCard key={p.id} product={p} onOpen={() => onOpen(p)} />
             ))}
       </div>
       {hasNextPage && (
-        <div className="mt-6 flex justify-center">
+        <div className="mt-10 flex justify-center">
           <button
             type="button"
             onClick={() => fetchNextPage()}
             disabled={isFetchingNextPage}
-            className="btn btn-ghost btn-sm cursor-pointer rounded-full"
+            className="min-h-11 cursor-pointer rounded-full border border-(--nr-ink)/15 px-7 text-[15px] font-semibold text-(--nr-ink) transition-colors hover:border-(--nr-ink) disabled:opacity-50"
           >
             {t("firstView.loadMore")}
           </button>
