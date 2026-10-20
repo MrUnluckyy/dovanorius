@@ -8,6 +8,7 @@ import {
   LuBuilding2,
   LuSparkles,
   LuLifeBuoy,
+  LuMegaphone,
 } from "react-icons/lu";
 
 type Page = {
@@ -20,7 +21,7 @@ type Page = {
 type Section = { label: string; icon: IconType; pages: Page[] };
 
 /**
- * Four sections instead of seven flat tabs. Pages keep their URLs; a section
+ * Five sections instead of eight flat tabs. Pages keep their URLs; a section
  * with more than one page shows them as a second row once you're in it.
  */
 const sections: Section[] = [
@@ -42,6 +43,7 @@ const sections: Section[] = [
     ],
   },
   { label: "Lentynos", icon: LuSparkles, pages: [{ href: "/admin/editorial", label: "Lentynos" }] },
+  { label: "Reklama", icon: LuMegaphone, pages: [{ href: "/admin/placements", label: "Reklama" }] },
   { label: "Pranešimai", icon: LuLifeBuoy, pages: [{ href: "/admin/reports", label: "Pranešimai" }] },
 ];
 

@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { getVisitor } from "@/lib/discover/visitor.server";
 import { CATEGORY_SLUGS, RECIPIENT_SLUGS, categoryFromSlug, recipientFromSlug } from "@/lib/discover/routes";
 import { storyArticleFor } from "@/lib/discover/articles";
+import { placementFor } from "@/lib/discover/placements";
 import { DiscoverHub } from "../../_components/hub/DiscoverHub";
 
 // Every recipient × category pair is known up front; anything else is a 404.
@@ -40,8 +41,11 @@ export default async function RecipientCategoryPage({ params }: Params) {
   if (!recipient || !category) notFound();
 
   const [{ visitor, userId }, locale] = await Promise.all([getVisitor(), getLocale()]);
-  const article = await storyArticleFor(recipient, locale);
+  const [article, ad] = await Promise.all([
+    storyArticleFor(recipient, locale),
+    placementFor(recipient, category),
+  ]);
   return (
-    <DiscoverHub visitor={visitor} userId={userId} recipient={recipient} category={category} article={article} />
+    <DiscoverHub visitor={visitor} userId={userId} recipient={recipient} category={category} article={article} ad={ad} />
   );
 }

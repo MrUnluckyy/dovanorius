@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { getVisitor } from "@/lib/discover/visitor.server";
 import { RECIPIENT_SLUGS, recipientFromSlug } from "@/lib/discover/routes";
 import { storyArticleFor } from "@/lib/discover/articles";
+import { placementFor } from "@/lib/discover/placements";
 import { DiscoverHub } from "../_components/hub/DiscoverHub";
 
 // Only real recipients exist; anything else is a hard 404, not a streamed
@@ -34,8 +35,11 @@ export default async function RecipientPage({ params }: Params) {
   if (!recipient) notFound();
 
   const [{ visitor, userId }, locale] = await Promise.all([getVisitor(), getLocale()]);
-  const article = await storyArticleFor(recipient, locale);
+  const [article, ad] = await Promise.all([
+    storyArticleFor(recipient, locale),
+    placementFor(recipient, null),
+  ]);
   return (
-    <DiscoverHub visitor={visitor} userId={userId} recipient={recipient} category={null} article={article} />
+    <DiscoverHub visitor={visitor} userId={userId} recipient={recipient} category={null} article={article} ad={ad} />
   );
 }

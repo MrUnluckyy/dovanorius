@@ -847,6 +847,7 @@
       "next": "Toliau",
       "guide": "Dovanų gidas",
       "readGuide": "Skaityti gidą",
+      "sponsored": "Remiama · {advertiser}",
       "collection": "Kolekcija",
       "pickCount": "{count, plural, one {# atrinkta dovana} few {# atrinktos dovanos} other {# atrinktų dovanų}}",
       "metaRecipientTitle": "Dovanos {recipient} - idėjos ir kolekcijos | Noriuto.lt",
