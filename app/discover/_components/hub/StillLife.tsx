@@ -21,14 +21,14 @@ function tileImage(url: string): string {
 const CARD_POS = [
   "left-0 z-30 group-hover:-translate-x-[4%] group-hover:-translate-y-[5%] group-hover:-rotate-[5deg]",
   "left-[26%] z-20 scale-[0.93] group-hover:translate-x-[6%] group-hover:-translate-y-[9%] group-hover:rotate-[1deg]",
-  "left-[49%] z-10 scale-[0.86] group-hover:translate-x-[16%] group-hover:-translate-y-[3%] group-hover:rotate-[7deg]",
+  "left-[49%] z-10 scale-[0.86] group-hover:translate-x-[10%] group-hover:-translate-y-[3%] group-hover:rotate-[6deg]",
 ];
 
-/** Card height per tile size; width follows from the 4:5 card ratio. */
-const CARD_SIZE = {
-  md: "top-[10%] h-[80%]",
-  sm: "top-[12%] h-[76%]",
-};
+/**
+ * Cards fill the tile down to its bottom edge, so the label sits right under
+ * them; the spare 8% is on top, where the hover lift goes.
+ */
+const CARD_BOX = "top-[8%] h-[92%]";
 
 /**
  * A navigation tile: three of the recipient's (or category's) real products
@@ -57,9 +57,11 @@ export function StillLife({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className="group block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-(--nr-ink) focus-visible:ring-offset-4 focus-visible:ring-offset-(--nr-cream)"
+      // z-index on hover/focus: a fanned stack spreads over its neighbours
+      // instead of sliding under them.
+      className="group relative z-0 block rounded-xl outline-none hover:z-20 focus-visible:z-20 focus-visible:ring-2 focus-visible:ring-(--nr-ink) focus-visible:ring-offset-4 focus-visible:ring-offset-(--nr-cream)"
     >
-      <div className={`relative ${size === "md" ? "aspect-[5/4]" : "aspect-[6/5]"}`}>
+      <div className="relative aspect-[13/9]">
         {photo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={photo} alt="" className="h-full w-full rounded-xl object-cover" loading="lazy" />
@@ -69,7 +71,7 @@ export function StillLife({
             return (
               <div
                 key={i}
-                className={`absolute aspect-[4/5] ${CARD_SIZE[size]} ${pos} motion-safe:transition-[translate,rotate] motion-safe:duration-500 motion-safe:ease-[cubic-bezier(.2,.8,.2,1)]`}
+                className={`absolute aspect-[4/5] ${CARD_BOX} ${pos} motion-safe:transition-[translate,rotate] motion-safe:duration-500 motion-safe:ease-[cubic-bezier(.2,.8,.2,1)]`}
               >
                 <div className="h-full w-full overflow-hidden rounded-[14px] bg-white shadow-[0_1px_2px_rgba(35,31,24,0.06),0_10px_28px_-14px_rgba(35,31,24,0.35)] ring-1 ring-(--nr-border)">
                   {src ? (
@@ -90,7 +92,7 @@ export function StillLife({
         )}
       </div>
       <span
-        className={`mt-3 block font-semibold text-(--nr-ink) ${size === "md" ? "text-[16px]" : "text-[14px]"}`}
+        className={`mt-2 block font-semibold text-(--nr-ink) ${size === "md" ? "text-[16px]" : "text-[14px]"}`}
       >
         <span className={active ? "border-b-2 border-(--nr-ink) pb-0.5" : ""}>{label}</span>
       </span>
