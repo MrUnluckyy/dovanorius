@@ -95,3 +95,27 @@ test("known shops get our display name and, for single-brand shops, a default br
   const notino = mapProduct({ ...base, advertiserId: "5835258", brand: null }, "lt")!;
   assert.equal(notino.brandName, null, "multi-brand shops get no guessed brand");
 });
+
+test("Notino keeps its giftable corner only", () => {
+  const notino = (google: string, price = 40) =>
+    mapProduct(
+      { ...base, advertiserId: "5835258", googleProductCategory: { name: google }, productType: [], price: { amount: price, currency: "EUR" } },
+      "lt"
+    );
+  assert.ok(notino("Health & Beauty > Personal Care > Cosmetics > Perfume & Cologne"));
+  assert.ok(notino("Health & Beauty > Personal Care > Cosmetics > Cosmetic Sets"));
+  assert.ok(notino("Home & Garden > Decor > Home Fragrances > Candles"));
+  assert.ok(notino("Health & Beauty > Personal Care > Hair Care > Hair Styling Tools > Hair Dryers"));
+  assert.ok(notino("Health & Beauty > Personal Care > Cosmetics > Skin Care", 45));
+  assert.equal(notino("Health & Beauty > Personal Care > Cosmetics > Skin Care", 12), null, "cheap skincare");
+  assert.equal(notino("Health & Beauty > Personal Care > Cosmetics > Skin Care > Lip Balms & Treatments", 45), null);
+  assert.equal(notino("Health & Beauty > Personal Care > Hair Care > Shampoo & Conditioner"), null);
+  assert.equal(notino("Health & Beauty > Personal Care > Oral Care > Toothpaste"), null);
+  assert.equal(notino("Health & Beauty"), null, "uncategorised");
+  // Notino's own (Czech) type is appended after Google's; it must not change the verdict
+  const withShopType = mapProduct(
+    { ...base, advertiserId: "5835258", googleProductCategory: { name: "Health & Beauty > Personal Care > Oral Care > Toothbrushes" }, productType: ["Zuby > Kartáčky"] },
+    "lt"
+  );
+  assert.ok(withShopType);
+});

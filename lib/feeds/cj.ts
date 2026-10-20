@@ -72,17 +72,43 @@ export type CjFeedInfo = {
  */
 export const CJ_CURATION: Record<string, Partial<CurationConfig>> = {};
 
+/** Notino's giftable corner, by Google category: fragrance, gift sets, candles,
+ *  hair and grooming devices, tools. Everyday refills (shampoo, deodorant, lip
+ *  balm, toothpaste) are 2/3 of its 59k products and would bury the rest. */
+const NOTINO_GIFTS =
+  /Perfume & Cologne|Cosmetic Sets|Candles|Hair Styling Tools|Hair Clippers|Electric Razors|Epilators|Makeup Tools|Toothbrushes/;
+
 /**
- * How each joined shop shows on Noriuto. CJ's advertiser names are programme
- * names ("JDsports Europe", "Philips Baltics"), and single-brand shops leave
- * `brand` empty on many rows, which curation's requireBrand would drop.
+ * How each joined shop shows on Noriuto:
+ *   name   CJ's advertiser names are programme names ("JDsports Europe").
+ *   brand  Single-brand shops leave `brand` empty on many rows, which
+ *          curation's requireBrand would drop.
+ *   keep   Optional filter on the mapped product, for shops whose catalogue is
+ *          mostly not gifts.
+ *   hold   Joined but not imported in the all-joined run, with the reason.
+ *          Listing the ID in CJ_ADVERTISER_IDS still imports it.
  * Unknown advertisers fall back to CJ's own name and the feed's brand.
  */
-export const CJ_MERCHANTS: Record<string, { name: string; brand?: string }> = {
-  "5835258": { name: "Notino.lt" },
-  "5896095": { name: "Bonami.lt" },
+export const CJ_MERCHANTS: Record<
+  string,
+  { name: string; brand?: string; keep?: (p: NormalizedProduct) => boolean; hold?: string }
+> = {
+  "5835258": {
+    name: "Notino.lt",
+    keep: (p) => {
+      const google = p.categoryName ?? "";
+      if (NOTINO_GIFTS.test(google.split(" > ").slice(0, 6).join(" > "))) return true;
+      // Face skincare (not masks, cleansers, balms) only from €30: serums and
+      // creams people give, not the €8 everyday tube.
+      return /> Skin Care($| > (?!Skin Care Masks|Lip Balms|Facial Cleansers|Makeup Removers|Tanning))/.test(google) && (p.price ?? 0) >= 30;
+    },
+  },
+  "5896095": {
+    name: "Bonami.lt",
+    hold: "57k products, mostly household (cleaning, laundry); wait for merchant tiers (T7)",
+  },
   "6728089": { name: "Sizeer.lt" },
-  "7120612": { name: "JD Sports LT" },
+  "7120612": { name: "JD Sports LT", hold: "same Nike/adidas catalogue as Sizeer; wait for merchant tiers (T7)" },
   "7341377": { name: "Zepter LT", brand: "Zepter" },
   "7336769": { name: "Philips LT", brand: "Philips" },
   "7469933": { name: "Electrolux LT", brand: "Electrolux" },
@@ -265,7 +291,7 @@ export function mapProduct(p: CjProduct, tld: string): NormalizedProduct | null 
       ? (g as "female" | "male" | "unisex")
       : classifyGender(categoryName, productName);
 
-  return {
+  const product: NormalizedProduct = {
     network: "cj",
     id: `cj-${advertiserId}-${sourceId}`,
     merchantId: advertiserId,
@@ -285,6 +311,7 @@ export function mapProduct(p: CjProduct, tld: string): NormalizedProduct | null 
     // Google feeds group sizes/colours under item_group_id: collapse on it.
     conceptKey: p.itemGroupId?.trim() ? `${advertiserId}:${p.itemGroupId.trim()}` : null,
   };
+  return !profile?.keep || profile.keep(product) ? product : null;
 }
 
 /**
@@ -380,8 +407,13 @@ export const cjAdapter: FeedAdapter = {
         url: CJ_API,
         compression: "none",
         download: async (log) => {
-          const feeds = await listJoinedFeeds(e.token, e.companyId);
-          log(`  cj: ${feeds.length} joined advertiser(s): ${feeds.map((f) => f.advertiserName).join(", ")}`);
+          const joined = await listJoinedFeeds(e.token, e.companyId);
+          const feeds = joined.filter((f) => !CJ_MERCHANTS[f.advertiserId]?.hold);
+          log(`  cj: importing ${feeds.map((f) => f.advertiserName).join(", ")}`);
+          for (const f of joined) {
+            const hold = CJ_MERCHANTS[f.advertiserId]?.hold;
+            if (hold) log(`  cj: holding ${f.advertiserName}: ${hold}`);
+          }
           async function* all() {
             for (const f of feeds) yield* fetchAdvertiser(e, f.advertiserId, log);
           }
