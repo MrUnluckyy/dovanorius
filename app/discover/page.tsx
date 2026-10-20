@@ -5,7 +5,9 @@ import { getVisitor } from "@/lib/discover/visitor.server";
 import { discoverHref } from "@/lib/discover/routes";
 import { storyArticleFor } from "@/lib/discover/articles";
 import { placementFor } from "@/lib/discover/placements";
+import { loadEventEntry } from "@/lib/discover/eventEntry.server";
 import { DiscoverHub } from "./_components/hub/DiscoverHub";
+import { EventHub } from "./_components/hub/EventHub";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Discover");
@@ -21,8 +23,21 @@ export async function generateMetadata(): Promise<Metadata> {
  * reopens on the last department. Everyone else, crawlers included, gets
  * "Kam ieškai dovanos?" with the recipient gallery.
  */
-export default async function DiscoverPage() {
+export default async function DiscoverPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ event?: string }>;
+}) {
   const { visitor, userId } = await getVisitor();
+
+  // From a Secret Santa reveal: the giver gets their recipient's page (4.6).
+  // Anyone else carrying the parameter falls through to normal discover.
+  const { event } = await searchParams;
+  if (event) {
+    const entry = await loadEventEntry(event);
+    if (entry) return <EventHub entry={entry} accountId={visitor.isAccount ? userId : null} />;
+  }
+
   if (visitor.recipient) redirect(discoverHref(visitor.recipient));
 
   const [article, ad] = await Promise.all([

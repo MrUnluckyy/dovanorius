@@ -853,6 +853,26 @@
       "metaRecipientTitle": "Gifts for {recipient} - ideas and collections | Noriuto.lt",
       "metaRecipientDescription": "Hand-picked gift ideas for {recipient}: collections, guides and thousands of products from trusted shops.",
       "metaCategoryTitle": "{category} - gifts for {recipient} | Noriuto.lt"
+    },
+    "event": {
+      "back": "Back to “{event}”",
+      "givingTo": "You're giving to {name}",
+      "givingToPlain": "You're giving to: {name}",
+      "budget": "up to €{budget}",
+      "wishesOf": "{name}'s wishes",
+      "wishes": "Wishes",
+      "reserve": "Reserve",
+      "interestsOf": "What is {name} into?",
+      "interests": "What are they into?",
+      "forHer": "Her",
+      "forHim": "Him",
+      "remove": "Remove",
+      "ideasForBudget": "Ideas for {name} up to €{budget}",
+      "ideasFor": "Ideas for {name}",
+      "ideasBudget": "Ideas up to €{budget}",
+      "ideas": "Ideas",
+      "forYourself": "Shopping for yourself?",
+      "forYourselfLink": "Open your ideas"
     }
   },
   "Inspo": {

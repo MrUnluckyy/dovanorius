@@ -19,6 +19,7 @@ export default function RevealCard({
   wants = null,
   hasWishlist = false,
   budget = null,
+  eventSlug,
   onRevealed,
 }: {
   eventId: string;
@@ -45,6 +46,8 @@ export default function RevealCard({
   hasWishlist?: boolean;
   /** The event's gift cap, for "ideas within budget". */
   budget?: number | null;
+  /** Leads to discover's page for this recipient (/discover?event=<slug>). */
+  eventSlug?: string;
 }) {
   const t = useTranslations("Events");
   // Only Secret Santa points to a wish list — Name Draw has no gifts.
@@ -180,7 +183,7 @@ export default function RevealCard({
             prominent={!wants && !hasWishlist}
             lead={!wants && !hasWishlist ? t("ideasLeadEmpty") : t("ideasLead")}
             cta={budget ? t("ideasCtaBudget", { budget }) : t("ideasCta")}
-            href={browseHref({ price: bandForBudget(budget) })}
+            href={eventSlug ? `/discover?event=${encodeURIComponent(eventSlug)}` : browseHref({ price: bandForBudget(budget) })}
           />
         )}
       </div>
