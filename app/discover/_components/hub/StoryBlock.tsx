@@ -83,9 +83,10 @@ export function StoryBlock({
               src={story.image}
               alt={story.imageAlt ?? ""}
               loading="lazy"
-              // Covers are often designed graphics with type on them, so they
-              // keep their own proportions; a crop would cut the words.
-              className="h-auto w-full transition-transform duration-700 ease-out motion-safe:group-hover:scale-[1.02]"
+              // Wide covers (guides, most ads) keep their own proportions; only
+              // an image taller than the cap is cropped, from the centre, so a
+              // tall upload cannot stretch the block down the page.
+              className="max-h-[520px] w-full object-cover transition-transform duration-700 ease-out motion-safe:group-hover:scale-[1.02] md:max-h-[440px]"
             />
           ) : (
             <div className="aspect-[16/10]" />
