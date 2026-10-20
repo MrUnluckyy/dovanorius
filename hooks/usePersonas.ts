@@ -92,7 +92,7 @@ const PICKS_STALE_MS = 1000 * 60 * 30;
 
 /** What a shelf card and the product modal read; see toCardProduct. */
 const PICK_COLUMNS =
-  "id, product_name, brand_name, price, rrp, discount_pct, image_url, deep_link, product_type, gender, merchant_name, partner_id, in_stock";
+  "id, product_name, display_name, brand_name, price, rrp, discount_pct, image_url, deep_link, product_type, gender, merchant_name, partner_id, in_stock";
 
 /**
  * Every persona's picks in ONE request, keyed by persona id.
@@ -188,7 +188,7 @@ export function useShelfContinuation(
     queryFn: async (): Promise<InspoProduct[]> => {
       const { data, error } = await supabase
         .from("inspo_products")
-        .select("*")
+        .select("*, display_name")
         .eq("in_stock", true)
         .eq("giftable", true)
         .not("image_url", "is", null)

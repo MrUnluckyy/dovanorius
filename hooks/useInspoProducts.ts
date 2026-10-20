@@ -54,14 +54,14 @@ export function useInspoProducts(filters: InspoFilters) {
           p_limit: INSPO_PAGE_SIZE,
           p_offset: from,
           p_source: "web",
-        });
+        }).select("*, display_name");
         if (error) throw error;
         return (data ?? []) as InspoProduct[];
       }
 
       let query = supabase
         .from("inspo_products")
-        .select("*")
+        .select("*, display_name")
         .eq("in_stock", true)
         // Excludes tyres, furniture, bedding, renovation, cleaning and
         // underwear — the rows that made browse feel like a liquidation sale.

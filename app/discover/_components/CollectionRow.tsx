@@ -22,7 +22,7 @@ export type CollectionDef = {
 export function toCardProduct(p: InspoProduct): CardProduct {
   return {
     id: p.id,
-    title: p.product_name,
+    title: p.display_name ?? p.product_name,
     brand: p.brand_name,
     price: p.price,
     rrp: p.rrp,

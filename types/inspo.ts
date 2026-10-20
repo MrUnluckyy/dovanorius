@@ -1,5 +1,9 @@
 /** A product row from the AWIN datafeed (`public.inspo_products`). */
 export type InspoProduct = {
+  /** Feed name without SKU codes, the repeated brand and merchant noise.
+   *  A computed column (clean_product_name): ask for it explicitly with
+   *  select("*, display_name"); product_name stays the raw feed name. */
+  display_name?: string | null;
   id: string;
   product_name: string;
   image_url: string | null;
