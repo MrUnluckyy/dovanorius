@@ -17,7 +17,7 @@ async function getDb() {
   await db.exec(read("fixtures/base_schema.sql"));
   await db.exec(`create table public.inspo_products (
     id text primary key, product_name text, brand_name text, merchant_name text)`);
-  await db.exec(read("../migrations/20261020140000_product_display_name.sql"));
+  await db.exec(read("../migrations/20261020100851_product_display_name.sql"));
   return db;
 }
 
