@@ -27,6 +27,7 @@ import {
 } from "@/lib/discover/routes";
 import type { Visitor } from "@/lib/discover/visitorState";
 import type { StoryArticle } from "@/lib/discover/articles";
+import type { Placement } from "@/lib/discover/placements";
 import { useMyCategories } from "@/hooks/useMyCategories";
 import { trackDiscover, trackInspo, type TrackContext } from "@/utils/trackInspo";
 import { toCardProduct } from "../CollectionRow";
@@ -35,7 +36,7 @@ import { ProductModal } from "../ProductModal";
 import { IdeasGrid } from "../IdeasGrid";
 import { Rail } from "./Rail";
 import { StillLife } from "./StillLife";
-import { StoryBlock } from "./StoryBlock";
+import { StoryBlock, type Story } from "./StoryBlock";
 
 const APPAREL = new Set(["clothing", "shoes", "bag"]);
 
@@ -52,7 +53,8 @@ const toCards = (picks: PersonaPick[]): CardProduct[] =>
  * picks (one request for every shelf), the ranked collections and the grid.
  *
  * Order, top to bottom: title → lead row → category tiles → ranked
- * collections, with the story block after the second → the grid.
+ * collections, with a sponsored placement (if any) after the second and the
+ * gift guide after the fourth → the grid.
  */
 export function DiscoverHub({
   visitor,
@@ -60,12 +62,15 @@ export function DiscoverHub({
   recipient,
   category,
   article,
+  ad,
 }: {
   visitor: Visitor;
   userId: string | null;
   recipient: RecipientKey | null;
   category: string | null;
   article: StoryArticle | null;
+  /** The one sponsored placement for this page, if any. */
+  ad: Placement | null;
 }) {
   const t = useTranslations("Discover");
   const supabase = createClient();
@@ -236,9 +241,39 @@ export function DiscoverHub({
       ? toCards(leadPicks.slice(12, 18))
       : (top[1]?.items ?? top[0]?.items ?? []).slice(6, 12);
 
-  const story = article && (
-    <StoryBlock article={article} products={storyProducts} onOpen={open({ surface: "story" })} />
+  const guide: Story | null = article && {
+    kind: "guide",
+    label: t("hub.guide"),
+    title: article.title,
+    excerpt: article.excerpt,
+    image: article.image,
+    imageAlt: article.imageAlt,
+    href: `/blog/${article.slug}`,
+    ctaLabel: t("hub.readGuide"),
+  };
+  const guideBlock = guide && (
+    <StoryBlock story={guide} products={storyProducts} onOpen={open({ surface: "story" })} />
   );
+  const adBlock = ad && (
+    <StoryBlock
+      story={{
+        kind: "sponsored",
+        label: t("hub.sponsored", { advertiser: ad.advertiser }),
+        title: ad.headline,
+        excerpt: ad.body,
+        image: ad.imageUrl,
+        imageAlt: null,
+        href: ad.ctaUrl,
+        ctaLabel: ad.ctaLabel,
+        placementId: ad.id,
+      }}
+      products={ad.products.map(toCardProduct)}
+      onOpen={open({ surface: "sponsored", placement: ad.id })}
+    />
+  );
+  // The ad, when there is one, takes the first slot; the guide moves down.
+  const slotA = adBlock ?? guideBlock;
+  const slotB = adBlock ? guideBlock : null;
 
   return (
     <div className="mx-auto max-w-[1440px] px-4 pb-6 sm:px-6">
@@ -346,11 +381,15 @@ export function DiscoverHub({
                 items={s.items.slice(0, 12)}
                 onOpen={open({ surface: "shelf", shelf: s.persona.slug })}
               />
-              {i === 1 && story}
+              {i === 1 && slotA}
+              {i === 3 && slotB}
             </div>
           ))
         )}
-        {top.length < 2 && story}
+        {/* Pages with fewer collections still get both slots, before the
+            grid; not while loading, or the blocks would jump once rails land. */}
+        {!rankLoading && !picksLoading && top.length < 2 && slotA}
+        {!rankLoading && !picksLoading && top.length < 4 && slotB}
 
         {rest.length > 0 && (
           <div>

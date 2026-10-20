@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { getVisitor } from "@/lib/discover/visitor.server";
 import { discoverHref } from "@/lib/discover/routes";
 import { storyArticleFor } from "@/lib/discover/articles";
+import { placementFor } from "@/lib/discover/placements";
 import { DiscoverHub } from "./_components/hub/DiscoverHub";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -24,8 +25,11 @@ export default async function DiscoverPage() {
   const { visitor, userId } = await getVisitor();
   if (visitor.recipient) redirect(discoverHref(visitor.recipient));
 
-  const article = await storyArticleFor(null, await getLocale());
+  const [article, ad] = await Promise.all([
+    storyArticleFor(null, await getLocale()),
+    placementFor(null, null),
+  ]);
   return (
-    <DiscoverHub visitor={visitor} userId={userId} recipient={null} category={null} article={article} />
+    <DiscoverHub visitor={visitor} userId={userId} recipient={null} category={null} article={article} ad={ad} />
   );
 }

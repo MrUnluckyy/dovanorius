@@ -847,6 +847,7 @@
       "next": "Next",
       "guide": "Gift guide",
       "readGuide": "Read the guide",
+      "sponsored": "Sponsored · {advertiser}",
       "collection": "Collection",
       "pickCount": "{count, plural, one {# hand-picked gift} other {# hand-picked gifts}}",
       "metaRecipientTitle": "Gifts for {recipient} - ideas and collections | Noriuto.lt",

@@ -8,6 +8,8 @@ export const PAGE_EVENT_TYPES = [
   "nudge_shown",
   "nudge_answered",
   "nudge_dismissed",
+  "ad_view",
+  "ad_click",
 ] as const;
 
 /**
@@ -20,6 +22,7 @@ export const PAGE_EVENT_TYPES = [
  *   answer    the chosen value
  *   surface   where a product was opened: shelf | grid | ai | search
  *   shelf     persona slug the product was opened from
+ *   placement sponsored placement id (ad_view / ad_click / products in an ad)
  */
 export const CONTEXT_KEYS = [
   "page",
@@ -29,6 +32,7 @@ export const CONTEXT_KEYS = [
   "answer",
   "surface",
   "shelf",
+  "placement",
 ] as const;
 
 export type InspoEventType = (typeof PRODUCT_EVENT_TYPES)[number];
