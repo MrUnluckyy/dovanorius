@@ -60,7 +60,7 @@ export async function placementFor(
     if (row.product_ids.length) {
       const { data: rows } = await supabase
         .from("inspo_products")
-        .select("*")
+        .select("*, display_name")
         .in("id", row.product_ids)
         .eq("in_stock", true)
         .not("image_url", "is", null);

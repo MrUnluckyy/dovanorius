@@ -35,7 +35,7 @@ export function useInspoCollection(key: string, q: CollectionQuery) {
     queryFn: async (): Promise<InspoProduct[]> => {
       let query = supabase
         .from("inspo_products")
-        .select("*")
+        .select("*, display_name")
         .eq("in_stock", true)
         .not("image_url", "is", null)
         .not("deep_link", "is", null)
