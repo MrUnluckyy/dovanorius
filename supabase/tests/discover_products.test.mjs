@@ -31,6 +31,7 @@ async function freshDb(rows = 1500) {
   await db.exec(read("../migrations/20261020123444_discover_products.sql"));
   await db.exec(read("../migrations/20261020125616_discover_products_two_step.sql"));
   await db.exec(read("../migrations/20261020130751_discover_page_display_name.sql"));
+  await db.exec(read("../migrations/20261020155856_discover_page_age_group.sql"));
   await seed(db, rows);
   return db;
 }
@@ -44,7 +45,8 @@ async function seed(db, rows) {
             10 + (g * 7 % 300), null,
             case when g % 4 = 0 then (g % 90) else null end,
             'https://img/' || g, 'https://shop/' || g,
-            ($1::text[])[1 + g % 4], ($2::text[])[1 + g % 3], 'adult',
+            ($1::text[])[1 + g % 4], ($2::text[])[1 + g % 3],
+            (array['adult', 'kid', 'teen', 'adult'])[1 + (g / 3) % 4],
             case when g % 10 = 0 then 'summer' else null end,
             50 + (g % 40), (g * 0.618) - floor(g * 0.618),
             g % 50 <> 0,          -- 2 % out of stock
@@ -56,12 +58,14 @@ async function seed(db, rows) {
 
 const page = (db, args) =>
   db.query(
-    `select id, pos, price, discount_pct, product_type, gender, season
+    `select id, pos, price, discount_pct, product_type, gender, season, audience
        from discover_page(p_product_type => $1, p_product_types => $2, p_audience => $3,
                           p_price_min => $4, p_price_max => $5, p_on_sale => $6,
-                          p_hide_season => $7, p_sort => $8, p_cursor => $9, p_limit => $10)`,
+                          p_hide_season => $7, p_sort => $8, p_cursor => $9, p_limit => $10,
+                          p_age_group => $11)`,
     [args.type ?? null, args.types ?? null, args.audience ?? null, args.min ?? null, args.max ?? null,
-     args.sale ?? false, args.hide ?? null, args.sort ?? "recommended", args.cursor ?? null, args.limit ?? 24]
+     args.sale ?? false, args.hide ?? null, args.sort ?? "recommended", args.cursor ?? null, args.limit ?? 24,
+     args.age ?? null]
   ).then((r) => r.rows);
 
 const cursorOf = (sort, row) =>
@@ -159,6 +163,24 @@ test("filters: type, types, audience, price, sale, season", async () => {
   assert.ok((await page(db, { hide: "summer", limit: 60 })).every((r) => r.season !== "summer"));
 });
 
+test("age groups: kid, adult, teen (teen keeps adult non-apparel)", async () => {
+  const db = await freshDb();
+  await db.query(`select rebuild_discover_products()`);
+  for (const sort of ["recommended", "price_asc", "discount"]) {
+    const kid = await walk(db, { age: "kid", sort });
+    assert.ok(kid.length > 0 && kid.every((r) => r.audience === "kid"), `kid ${sort}`);
+    const adult = await walk(db, { age: "adult", sort });
+    assert.ok(adult.length > 0 && adult.every((r) => r.audience === "adult"), `adult ${sort}`);
+  }
+  const teen = await walk(db, { age: "teen" });
+  assert.ok(teen.every((r) => r.audience === "teen" || r.audience === "adult"));
+  assert.ok(teen.every((r) => r.audience !== "adult" || !["clothing", "shoes", "sport"].includes(r.product_type)));
+  assert.ok(teen.some((r) => r.audience === "adult"), "teen pages keep adult tech/beauty");
+  // no age group: everything
+  const all = await walk(db, {});
+  assert.ok(all.some((r) => r.audience === "kid") && all.some((r) => r.audience === "adult"));
+});
+
 test("limit is capped at 60", async () => {
   const db = await freshDb();
   await db.query(`select rebuild_discover_products()`);
@@ -173,7 +195,7 @@ test("discover_page returns display_name as a column, rows in order", async () =
   assert.deepEqual(rows.map((r) => r.pos), [1, 2, 3, 4, 5]);
   // the inner rows function is not callable by the public
   const priv = await db.query(
-    `select has_function_privilege('anon', 'discover_page_rows(text, text[], text, text, text, numeric, numeric, boolean, text, text, text, integer)', 'execute') as can`
+    `select has_function_privilege('anon', 'discover_page_rows(text, text[], text, text, text, numeric, numeric, boolean, text, text, text, integer, text)', 'execute') as can`
   );
   assert.equal(priv.rows[0].can, false);
 });

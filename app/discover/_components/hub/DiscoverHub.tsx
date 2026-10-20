@@ -394,10 +394,12 @@ export function DiscoverHub({
             </div>
           ))
         )}
-        {/* Pages with fewer collections still get both slots, before the
-            grid; not while loading, or the blocks would jump once rails land. */}
+        {/* Pages with fewer collections: with under two rails there is
+            nothing to space two big blocks apart, so only the first (the ad
+            when there is one) shows; with two or three, the second follows
+            the rails. Not while loading, or the blocks would jump. */}
         {!rankLoading && !picksLoading && top.length < 2 && slotA}
-        {!rankLoading && !picksLoading && top.length < 4 && slotB}
+        {!rankLoading && !picksLoading && top.length >= 2 && top.length < 4 && slotB}
 
         {rest.length > 0 && (
           <div>
@@ -435,6 +437,7 @@ export function DiscoverHub({
           // categories, minus apparel: default browse is mostly fashion, and
           // a page called "Dovanos moteriai" should not open on cycling shorts.
           productTypes={recipient ? categoriesFor(recipient, gender).filter((c) => !APPAREL.has(c)) : undefined}
+          ageGroup={lens.ageGroup}
           onOpen={open({ surface: "grid" })}
         />
 
