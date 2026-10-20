@@ -16,122 +16,95 @@ function offSeasonToHide(month: number): "winter" | "summer" | null {
   return null; // spring / autumn: show everything
 }
 
+/** The keyset cursor for the row after `last`, per sort (see discover_page). */
+function nextCursor(sort: InspoFilters["sort"], last: InspoProduct & { pos?: number }): string {
+  switch (sort) {
+    case "price_asc":
+    case "price_desc":
+      return `${last.price}|${last.id}`;
+    case "discount":
+      return `${last.discount_pct}|${last.id}`;
+    default:
+      return String(last.pos);
+  }
+}
+
+type PageParam = { cursor: string | null; page: number };
+
 /**
- * Paginated, quality-gated read of the AWIN product feed for the discover page.
- * Only in-stock products with an image and a real deeplink surface.
+ * Paginated, quality-gated read of the product feed for discover.
+ *
+ * Browsing reads discover_page() (T9): a slim, pre-filtered copy of the feed
+ * with keyset pagination, so page 20 costs what page 1 costs and the nightly
+ * import no longer evicts it from cache. Search keeps search_products(), which
+ * ranks by relevance and pages by offset.
  */
 export function useInspoProducts(filters: InspoFilters) {
   const supabase = createClient();
 
   return useInfiniteQuery({
     queryKey: ["inspo", filters],
-    initialPageParam: 0,
+    initialPageParam: { cursor: null, page: 0 } as PageParam,
     // Keep the current grid on screen while the next query runs. Without this
     // every keystroke that settled blanked the results into skeletons, which
     // read as "search is slow" even when the query took 50ms.
     placeholderData: keepPreviousData,
     queryFn: async ({ pageParam }) => {
-      const from = pageParam * INSPO_PAGE_SIZE;
-      const to = from + INSPO_PAGE_SIZE - 1;
+      const priceMin = Math.max(PRICE_FLOOR, filters.priceMin ?? 0);
+      const hideSeason = filters.inSeason ? offSeasonToHide(new Date().getMonth()) : null;
 
       // Search goes through search_products (shared with noriuto-app): it folds
-      // diacritics, matches each word, and ranks by relevance. The plain query
-      // below is kept for browsing, where its gift_score index is what we want.
+      // diacritics, matches each word, and ranks by relevance.
       const term = filters.search.trim();
       if (term) {
-        const { data, error } = await supabase.rpc("search_products", {
-          p_q: term,
-          p_product_type: filters.productType,
-          p_brand: filters.brand,
-          p_merchant: filters.merchant,
-          p_price_min: Math.max(PRICE_FLOOR, filters.priceMin ?? 0),
-          p_price_max: filters.priceMax,
-          p_gender:
-            filters.audience === "him" ? "male" : filters.audience === "her" ? "female" : null,
-          p_hide_season: filters.inSeason ? offSeasonToHide(new Date().getMonth()) : null,
-          p_on_sale: filters.onSaleOnly,
-          p_sort: filters.sort,
-          p_limit: INSPO_PAGE_SIZE,
-          p_offset: from,
-          p_source: "web",
-        }).select("*, display_name");
+        const { data, error } = await supabase
+          .rpc("search_products", {
+            p_q: term,
+            p_product_type: filters.productType,
+            p_brand: filters.brand,
+            p_merchant: filters.merchant,
+            p_price_min: priceMin,
+            p_price_max: filters.priceMax,
+            p_gender:
+              filters.audience === "him" ? "male" : filters.audience === "her" ? "female" : null,
+            p_hide_season: hideSeason,
+            p_on_sale: filters.onSaleOnly,
+            p_sort: filters.sort,
+            p_limit: INSPO_PAGE_SIZE,
+            p_offset: pageParam.page * INSPO_PAGE_SIZE,
+            p_source: "web",
+          })
+          .select("*, display_name");
         if (error) throw error;
         return (data ?? []) as InspoProduct[];
       }
 
-      let query = supabase
-        .from("inspo_products")
-        .select("*, display_name")
-        .eq("in_stock", true)
-        // Excludes tyres, furniture, bedding, renovation, cleaning and
-        // underwear — the rows that made browse feel like a liquidation sale.
-        .eq("giftable", true)
-        .not("image_url", "is", null)
-        .not("deep_link", "is", null)
-        .gte("price", Math.max(PRICE_FLOOR, filters.priceMin ?? 0));
-
-      // Ordering. A stable secondary key (id) keeps pagination deterministic
-      // when the primary key ties (e.g. many items at the same price).
-      switch (filters.sort) {
-        case "price_asc":
-          query = query.order("price", { ascending: true }).order("id");
-          break;
-        case "price_desc":
-          query = query.order("price", { ascending: false }).order("id");
-          break;
-        case "discount":
-          // Cap at 85%: legit retail discounts rarely exceed it, and it
-          // structurally excludes the known feed-parsing glitches where rrp is
-          // 10×/100× the price (→ 90%/99% "off"). No nulls-ordering: the
-          // `discount_pct > 0` filter already excludes nulls, and plain DESC
-          // lets Postgres use the (discount_pct DESC, id) index over a sort.
-          query = query
-            .gt("discount_pct", 0)
-            .lte("discount_pct", 85)
-            .order("discount_pct", { ascending: false })
-            .order("id");
-          break;
-        default:
-          // "Recommended" used to be sort_key, whose column default is
-          // random() — a uniform draw over 328k rows. gift_score leads now;
-          // sort_key survives only to break the (many) ties, so equally good
-          // items still rotate between visits.
-          query = query
-            .order("gift_score", { ascending: false })
-            .order("sort_key", { ascending: true })
-            .order("id");
-      }
-
-      query = query.range(from, to);
-
-      if (filters.merchant) query = query.eq("merchant_name", filters.merchant);
-      if (filters.brand) query = query.eq("brand_name", filters.brand);
-      if (filters.productType)
-        query = query.eq("product_type", filters.productType);
-      else if (filters.productTypes?.length)
-        query = query.in("product_type", filters.productTypes);
-      if (filters.priceMax != null) query = query.lte("price", filters.priceMax);
-      if (filters.onSaleOnly) query = query.gt("discount_pct", 0);
-
-      // Audience: hide the opposite gender, but keep unisex + unknown (null),
-      // so a "For him" user stops seeing dresses/lipstick without losing the
-      // large unclassified (genuinely unisex) middle.
-      if (filters.audience === "him")
-        query = query.or("gender.neq.female,gender.is.null");
-      else if (filters.audience === "her")
-        query = query.or("gender.neq.male,gender.is.null");
-
-      // Season: hide clearly off-season items; keep 'all' and unknown.
-      if (filters.inSeason) {
-        const hide = offSeasonToHide(new Date().getMonth());
-        if (hide) query = query.or(`season.neq.${hide},season.is.null`);
-      }
-
-      const { data, error } = await query;
+      const { data, error } = await supabase
+        .rpc("discover_page", {
+          p_product_type: filters.productType,
+          p_product_types: filters.productTypes?.length ? filters.productTypes : null,
+          p_audience: filters.audience === "everyone" ? null : filters.audience,
+          p_brand: filters.brand,
+          p_merchant: filters.merchant,
+          p_price_min: priceMin,
+          p_price_max: filters.priceMax,
+          p_on_sale: filters.onSaleOnly,
+          p_hide_season: hideSeason,
+          p_sort: filters.sort,
+          p_cursor: pageParam.cursor,
+          p_limit: INSPO_PAGE_SIZE,
+        });
+      // discover_page returns display_name as a real column; no computed
+      // column lookup (that broke on PostgREST schema reloads).
       if (error) throw error;
       return (data ?? []) as InspoProduct[];
     },
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage.length === INSPO_PAGE_SIZE ? allPages.length : undefined,
+    getNextPageParam: (lastPage, allPages): PageParam | undefined => {
+      if (lastPage.length < INSPO_PAGE_SIZE) return undefined;
+      return {
+        cursor: nextCursor(filters.sort, lastPage[lastPage.length - 1] as InspoProduct & { pos?: number }),
+        page: allPages.length,
+      };
+    },
   });
 }

@@ -364,6 +364,24 @@ export async function runImport(
     }
   }
 
+  // Rebuild discover's slim copy (discover_products), which browse and the
+  // discover grid read instead of this table. Same reasoning as the brand
+  // filter: here, not in the workflow, so a local import keeps it in sync too.
+  // Non-fatal: a day-old discover copy beats a failed import.
+  // Two calls (load, then publish), each well inside service_role's 120 s
+  // statement timeout; one combined call took 80 s on the first run.
+  if (changed > 0 || pruned > 0 || markedOutOfStock > 0) {
+    try {
+      await withRetry("load discover_products", () => supabase.rpc("discover_products_load"));
+      const rows = await withRetry("publish discover_products", () =>
+        supabase.rpc("discover_products_publish")
+      );
+      log(`discover_products rebuilt: ${rows} rows`);
+    } catch (e) {
+      log(`⚠ discover_products rebuild failed: ${e instanceof Error ? e.message : e}`);
+    }
+  }
+
   return {
     network: adapter.network,
     feedsProcessed: feeds.length,
