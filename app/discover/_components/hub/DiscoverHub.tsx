@@ -147,11 +147,11 @@ export function DiscoverHub({
 
   // ---- category tiles: on "Sau", what the visitor actually opens comes first
   const { data: myTypes = [] } = useMyCategories(recipient === "self" && !!userId);
-  const tileCategories = useMemo(() => {
+  const orderedCategories = useMemo(() => {
     const base = recipient ? categoriesFor(recipient, gender) : [];
-    if (recipient !== "self" || !myTypes.length) return base.slice(0, 6);
+    if (recipient !== "self" || !myTypes.length) return base;
     const rank = (c: string) => (myTypes.includes(c) ? myTypes.indexOf(c) : 99);
-    return [...base].sort((a, b) => rank(a) - rank(b)).slice(0, 6);
+    return [...base].sort((a, b) => rank(a) - rank(b));
   }, [recipient, gender, myTypes]);
 
   // ---- still-life images ---------------------------------------------------
@@ -178,6 +178,12 @@ export function DiscoverHub({
       pool.filter((p) => p.product_type === cat && !seen.has(p.id) && seen.add(p.id))
     );
   };
+
+  // Categories with nothing curated yet are left out (an empty stack reads as
+  // broken), and the next ones move up so the row stays full.
+  const tileCategories = picksLoading
+    ? orderedCategories.slice(0, 6)
+    : orderedCategories.filter((c) => categoryImages(c).length > 0).slice(0, 6);
 
   // ---- side effects --------------------------------------------------------
   useEffect(() => {
@@ -309,6 +315,7 @@ export function DiscoverHub({
                   href={discoverHref(key)}
                   label={t(`recipient.${key}`)}
                   images={picksLoading ? [] : recipientImages(key)}
+                  loading={picksLoading}
                 />
               ))}
             </div>
@@ -349,7 +356,7 @@ export function DiscoverHub({
         )}
 
         {/* ---------- Category tiles (recipient root only) ---------- */}
-        {recipient && !category && (
+        {recipient && !category && tileCategories.length > 0 && (
           <section>
             <h2 className="mb-4 font-heading text-[22px] font-bold tracking-[-0.02em] text-(--nr-ink) sm:text-[26px]">
               {t("hub.categories")}
@@ -362,6 +369,7 @@ export function DiscoverHub({
                     href={discoverHref(recipient, c)}
                     label={t(`category.${c}`)}
                     images={picksLoading ? [] : categoryImages(c)}
+                    loading={picksLoading}
                   />
                 ))}
             </div>
