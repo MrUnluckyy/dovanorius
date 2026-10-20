@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { LuHeart, LuSparkles } from "react-icons/lu";
+import { cleanName, formatPrice } from "@/lib/discover/format";
 
 export type CardProduct = {
   id: string;
@@ -56,8 +57,15 @@ function cardImage(url: string): string {
 }
 
 /**
- * Premium, uniform product card (Zalando-style). The whole card is clickable
- * and opens the detail modal — save / view / report live there.
+ * The discover product card, "one studio" (20 Oct redesign).
+ *
+ * No frame, no shadow, no lift: the packshot IS the card. Every image sits on
+ * the same stone tone (--nr-stage) and is multiplied into it, so the white
+ * backgrounds of 15 different shops disappear and the catalogue reads as one
+ * shoot. That consistency is what makes a feed of affiliate products feel
+ * curated rather than scraped.
+ *
+ * The whole card opens the detail modal — save / view / report live there.
  */
 export function ProductCard({
   product,
@@ -85,18 +93,14 @@ export function ProductCard({
           onOpen();
         }
       }}
-      className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl bg-base-100 ring-1 ring-base-300/60 transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_50px_-18px_rgba(0,0,0,0.28)] hover:ring-base-300"
+      className="group flex h-full cursor-pointer flex-col rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-(--nr-ink) focus-visible:ring-offset-4 focus-visible:ring-offset-(--nr-cream)"
     >
-      {/* Image */}
-      <div className="relative aspect-[4/5] w-full overflow-hidden bg-white">
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-(--nr-stage)">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={
-            product.imageUrl
-              ? cardImage(product.imageUrl)
-              : "/assets/placeholder.jpg"
-          }
+          src={product.imageUrl ? cardImage(product.imageUrl) : "/assets/placeholder.jpg"}
           alt={product.title}
-          className="h-full w-full object-contain p-3 transition duration-500 group-hover:scale-105"
+          className="h-full w-full object-contain p-[9%] mix-blend-multiply transition-transform duration-500 ease-out motion-safe:group-hover:scale-[1.04]"
           loading="lazy"
           decoding="async"
           onError={(e) => {
@@ -104,44 +108,44 @@ export function ProductCard({
           }}
         />
 
-        {product.reason && (
-          <span className="absolute right-2.5 top-2.5 grid h-7 w-7 place-items-center rounded-full bg-primary text-primary-content shadow">
+        {product.reason ? (
+          <span
+            className="absolute left-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-(--nr-yellow) text-(--nr-ink)"
+            aria-hidden
+          >
             <LuSparkles className="w-3.5" />
           </span>
-        )}
+        ) : null}
 
-        {/* Wishlist affordance — opens the modal where boards are chosen. */}
-        {!product.reason && (
-          <button
-            type="button"
-            aria-label={t("addToBoard")}
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpen();
-            }}
-            className="absolute right-2.5 top-2.5 grid h-8 w-8 cursor-pointer place-items-center rounded-full bg-base-100/85 text-base-content opacity-0 shadow-sm backdrop-blur transition hover:bg-base-100 group-hover:opacity-100 max-md:opacity-100"
-          >
+        {/* Wishlist affordance — opens the modal where boards are chosen. The
+            visible circle is 32px; the padding makes the target 44px. */}
+        <button
+          type="button"
+          aria-label={t("addToBoard")}
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpen();
+          }}
+          className="absolute right-0 top-0 cursor-pointer p-1.5"
+        >
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-white/90 text-(--nr-ink) transition-colors hover:bg-(--nr-yellow)">
             <LuHeart className="w-4" />
-          </button>
-        )}
+          </span>
+        </button>
       </div>
 
-      {/* Body */}
-      <div className="flex flex-1 flex-col gap-1 p-3">
+      <div className="flex flex-1 flex-col pt-2.5">
         {product.brand && (
-          <span className="line-clamp-1 text-[10px] font-semibold uppercase tracking-[0.14em] opacity-55">
+          <span className="line-clamp-1 text-[13px] font-semibold text-(--nr-ink)">
             {product.brand}
           </span>
         )}
-        <h3 className="line-clamp-2 min-h-[2.5rem] text-sm leading-snug">
-          {product.title}
+        <h3 className="line-clamp-2 text-[13px] leading-[1.35] text-(--nr-muted)">
+          {cleanName(product.title, product.brand)}
         </h3>
-
-        <div className="mt-auto flex items-baseline gap-1.5 pt-1">
-          <span className="text-base font-bold tracking-tight">
-            {product.price != null ? `${product.price} €` : "—"}
-          </span>
-        </div>
+        <span className="mt-1 text-[14px] font-semibold tabular-nums text-(--nr-ink)">
+          {formatPrice(product.price)}
+        </span>
       </div>
     </div>
   );
