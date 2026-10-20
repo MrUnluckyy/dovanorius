@@ -327,7 +327,6 @@ export function DiscoverHub({
                     href={discoverHref(recipient, c)}
                     label={t(`category.${c}`)}
                     images={picksLoading ? [] : categoryImages(c)}
-                    single={APPAREL.has(c)}
                   />
                 ))}
             </div>
