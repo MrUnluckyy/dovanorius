@@ -9,6 +9,9 @@ name: Import product feeds
 #   TRADEDOUBLER_PRODUCTS_TOKEN   (also drives the bulk export; no separate token)
 #   TRADEDOUBLER_FEED_IDS         (optional — the adapter defaults to the four
 #                                  profiled feeds when unset)
+#   CJ_ACCESS_TOKEN, CJ_COMPANY_ID, CJ_WEBSITE_ID   (CJ; the step skips itself
+#                                  until these exist)
+#   CJ_ADVERTISER_IDS             (optional — blank = every joined advertiser)
 on:
   schedule:
     - cron: "17 3 * * *"
@@ -69,3 +72,21 @@ jobs:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           TRADEDOUBLER_PRODUCTS_TOKEN: ${{ secrets.TRADEDOUBLER_PRODUCTS_TOKEN }}
           TRADEDOUBLER_FEED_IDS: ${{ secrets.TRADEDOUBLER_FEED_IDS }}
+
+      # CJ: Notino, Sizer, Bonami, Zepter and any other joined programme. Skips
+      # cleanly until the CJ secrets are added, so the nightly run stays green.
+      - name: Import CJ
+        if: ${{ !cancelled() && (github.event.inputs.network == '' || github.event.inputs.network == 'cj') }}
+        run: |
+          if [ -z "$CJ_ACCESS_TOKEN" ] || [ -z "$CJ_COMPANY_ID" ] || [ -z "$CJ_WEBSITE_ID" ]; then
+            echo "CJ secrets not set; skipping the CJ import."
+            exit 0
+          fi
+          pnpm import:feed cj --curate
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          CJ_ACCESS_TOKEN: ${{ secrets.CJ_ACCESS_TOKEN }}
+          CJ_COMPANY_ID: ${{ secrets.CJ_COMPANY_ID }}
+          CJ_WEBSITE_ID: ${{ secrets.CJ_WEBSITE_ID }}
+          CJ_ADVERTISER_IDS: ${{ secrets.CJ_ADVERTISER_IDS }}

@@ -19,6 +19,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { awinAdapter } from "../lib/feeds/awin";
 import { tradedoublerAdapter } from "../lib/feeds/tradedoubler";
+import { cjAdapter } from "../lib/feeds/cj";
 import { runImport } from "../lib/feeds/importer";
 import { defaultCuration } from "../lib/feeds/curate";
 import type { FeedAdapter, FeedNetwork } from "../lib/feeds/types";
@@ -26,6 +27,7 @@ import type { FeedAdapter, FeedNetwork } from "../lib/feeds/types";
 const ADAPTERS: Partial<Record<FeedNetwork, FeedAdapter>> = {
   awin: awinAdapter,
   tradedoubler: tradedoublerAdapter,
+  cj: cjAdapter,
 };
 
 function makeClient() {

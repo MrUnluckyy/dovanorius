@@ -10,7 +10,7 @@ import type { Readable } from "node:stream";
 // compile time, so it costs nothing at runtime.
 import type { CurationConfig } from "./curate";
 
-export type FeedNetwork = "awin" | "tradedoubler";
+export type FeedNetwork = "awin" | "tradedoubler" | "cj";
 
 /** One product, mapped out of a network's own column names into our shape. */
 export type NormalizedProduct = {

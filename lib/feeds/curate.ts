@@ -104,6 +104,7 @@ function norm(s: string | null | undefined): string {
 const ID_PREFIX: Record<NormalizedProduct["network"], string> = {
   awin: "awc-",
   tradedoubler: "tdc-",
+  cj: "cjc-",
 };
 
 /** Stable id for a product concept — order-independent across feed runs. */
