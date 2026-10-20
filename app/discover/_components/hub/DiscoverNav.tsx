@@ -66,7 +66,7 @@ export function DiscoverNav({ gender }: { gender: VisitorGender }) {
                   key={key}
                   href={discoverHref(key)}
                   aria-current={on ? "page" : undefined}
-                  className={`whitespace-nowrap py-3.5 text-[15px] font-semibold transition-colors ${
+                  className={`whitespace-nowrap pb-1.5 pt-4 text-[15px] font-semibold transition-colors ${
                     on ? "text-(--nr-ink)" : "text-(--nr-muted) hover:text-(--nr-ink)"
                   }`}
                 >
@@ -96,7 +96,7 @@ export function DiscoverNav({ gender }: { gender: VisitorGender }) {
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6">
           <nav
             aria-label={t("hub.categoriesNav")}
-            className="-mx-4 flex gap-5 overflow-x-auto px-4 pb-3 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden"
+            className="-mx-4 flex gap-5 overflow-x-auto px-4 pb-3 pt-3 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden"
           >
             <Link
               href={discoverHref(recipient)}

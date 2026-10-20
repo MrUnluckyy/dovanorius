@@ -197,7 +197,7 @@ export function PlacementForm({
           </div>
 
           <div>
-            <span className="label-text text-sm">Paveikslėlis <span className="text-base-content/40">— rodomas savo proporcijomis; JPG, PNG, WebP, iki 3 MB</span></span>
+            <span className="label-text text-sm">Paveikslėlis <span className="text-base-content/40">— geriausia 16:9 (pvz. 1600×900); aukštesnis apkarpomas iki 440 px aukščio, žr. peržiūrą. JPG, PNG, WebP, iki 3 MB</span></span>
             <div className="mt-2 flex items-center gap-3">
               {imageUrl && (
                 // eslint-disable-next-line @next/next/no-img-element

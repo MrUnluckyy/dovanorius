@@ -45,6 +45,7 @@ export function StillLife({
   photo,
   active,
   size = "md",
+  loading = false,
 }: {
   href: string;
   label: string;
@@ -52,7 +53,15 @@ export function StillLife({
   photo?: string | null;
   active?: boolean;
   size?: "md" | "sm";
+  /** Data still loading: draw placeholder cards. Otherwise only real images
+   *  get a card, and a tile with none is not drawn at all (see below). */
+  loading?: boolean;
 }) {
+  // Nothing to show once loaded: hide the tile rather than leave empty cards.
+  if (!loading && !photo && images.length === 0) return null;
+  // One card per real image (up to three); placeholders only while loading.
+  const cards = loading ? CARD_POS : CARD_POS.slice(0, Math.min(images.length, 3));
+
   return (
     <Link
       href={href}
@@ -66,8 +75,8 @@ export function StillLife({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={photo} alt="" className="h-full w-full rounded-xl object-cover" loading="lazy" />
         ) : (
-          CARD_POS.map((pos, i) => {
-            const src = images[i];
+          cards.map((pos, i) => {
+            const src = loading ? undefined : images[i];
             return (
               <div
                 key={i}
