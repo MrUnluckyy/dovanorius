@@ -93,6 +93,7 @@ export function useInspoProducts(filters: InspoFilters) {
           p_sort: filters.sort,
           p_cursor: pageParam.cursor,
           p_limit: INSPO_PAGE_SIZE,
+          p_age_group: filters.ageGroup ?? null,
         });
       // discover_page returns display_name as a real column; no computed
       // column lookup (that broke on PostgREST schema reloads).

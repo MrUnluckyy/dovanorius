@@ -17,6 +17,7 @@ export function IdeasGrid({
   audience,
   productType,
   productTypes,
+  ageGroup,
   onOpen,
 }: {
   title: string;
@@ -24,6 +25,8 @@ export function IdeasGrid({
   productType: string | null;
   /** A recipient's gift categories, when no single category is chosen. */
   productTypes?: string[];
+  /** kid | teen | adult, from the recipient; null = every age. */
+  ageGroup?: "kid" | "teen" | "adult" | null;
   onOpen: (p: CardProduct) => void;
 }) {
   const t = useTranslations("Discover");
@@ -32,6 +35,7 @@ export function IdeasGrid({
       merchant: null,
       productType,
       productTypes: productType ? null : productTypes ?? null,
+      ageGroup: ageGroup ?? null,
       brand: null,
       priceMin: null,
       priceMax: null,

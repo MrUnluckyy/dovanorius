@@ -60,10 +60,17 @@ test("guests are never greeted by name", () => {
 });
 
 test("recipient lens", () => {
-  assert.deepEqual(recipientLens("self", "female"), { audience: "her", personas: ["woman-30plus"], gridType: null });
-  assert.deepEqual(recipientLens("self", null), { audience: "everyone", personas: [], gridType: null });
-  assert.deepEqual(recipientLens("partner", "female"), { audience: "everyone", personas: [], gridType: null });
-  assert.deepEqual(recipientLens("partner", "female", "male"), { audience: "him", personas: ["man-30plus"], gridType: null });
+  assert.deepEqual(recipientLens("self", "female"), { audience: "her", personas: ["woman-30plus"], gridType: null, ageGroup: "adult" });
+  assert.deepEqual(recipientLens("self", null), { audience: "everyone", personas: [], gridType: null, ageGroup: "adult" });
+  assert.deepEqual(recipientLens("partner", "female"), { audience: "everyone", personas: [], gridType: null, ageGroup: "adult" });
+  assert.deepEqual(recipientLens("partner", "female", "male"), { audience: "him", personas: ["man-30plus"], gridType: null, ageGroup: "adult" });
   assert.equal(recipientLens("kid", "male").gridType, "toys");
   assert.deepEqual(recipientLens("teen", null).personas, ["teen-girl", "teen-boy"]);
+  // age groups
+  assert.equal(recipientLens("kid", null).ageGroup, "kid");
+  assert.equal(recipientLens("baby", null).ageGroup, "kid");
+  assert.equal(recipientLens("teen", null).ageGroup, "teen");
+  assert.equal(recipientLens("woman", null).ageGroup, "adult");
+  assert.equal(recipientLens("home", null).ageGroup, null);
+  assert.equal(recipientLens(null, null).ageGroup, null);
 });

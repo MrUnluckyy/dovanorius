@@ -46,6 +46,8 @@ export type InspoFilters = {
   /** Several buckets at once (a recipient's gift categories). Ignored when
    *  productType is set. Browse only, not search. */
   productTypes?: string[] | null;
+  /** kid | teen | adult: discover_page's age filter. Browse only, not search. */
+  ageGroup?: "kid" | "teen" | "adult" | null;
   /** Exact brand_name to narrow to, or null for all brands. */
   brand: string | null;
   priceMin: number | null;

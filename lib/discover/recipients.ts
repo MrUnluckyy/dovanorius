@@ -42,7 +42,12 @@ export type RecipientLens = {
   personas: string[];
   /** product_type the ideas grid narrows to; null = no category filter. */
   gridType: string | null;
+  /** Age group the grid keeps (discover_page p_age_group): kid, teen, adult;
+   *  null = no age filter. */
+  ageGroup: AgeGroup;
 };
+
+export type AgeGroup = "kid" | "teen" | "adult" | null;
 
 const OWN_PERSONA: Record<"female" | "male", string> = {
   female: "woman-30plus",
@@ -58,31 +63,33 @@ export function recipientLens(
   switch (key) {
     case "self":
       return gender === "female" || gender === "male"
-        ? { audience: gender === "female" ? "her" : "him", personas: [OWN_PERSONA[gender]], gridType: null }
-        : { audience: "everyone", personas: [], gridType: null };
+        ? { audience: gender === "female" ? "her" : "him", personas: [OWN_PERSONA[gender]], gridType: null, ageGroup: "adult" }
+        : { audience: "everyone", personas: [], gridType: null, ageGroup: "adult" };
     case "woman":
     case "mom":
     case "friend":
-      return { audience: "her", personas: ["woman-30plus"], gridType: null };
+      return { audience: "her", personas: ["woman-30plus"], gridType: null, ageGroup: "adult" };
     case "man":
-      return { audience: "him", personas: ["man-30plus"], gridType: null };
+      return { audience: "him", personas: ["man-30plus"], gridType: null, ageGroup: "adult" };
     case "partner":
       return partner
-        ? { audience: partner === "female" ? "her" : "him", personas: [OWN_PERSONA[partner]], gridType: null }
-        : { audience: "everyone", personas: [], gridType: null };
+        ? { audience: partner === "female" ? "her" : "him", personas: [OWN_PERSONA[partner]], gridType: null, ageGroup: "adult" }
+        : { audience: "everyone", personas: [], gridType: null, ageGroup: "adult" };
     case "kid":
-      return { audience: "everyone", personas: ["child"], gridType: "toys" };
+      return { audience: "everyone", personas: ["child"], gridType: "toys", ageGroup: "kid" };
     case "teen":
-      return { audience: "everyone", personas: ["teen-girl", "teen-boy"], gridType: null };
+      return { audience: "everyone", personas: ["teen-girl", "teen-boy"], gridType: null, ageGroup: "teen" };
     case "baby":
-      return { audience: "everyone", personas: ["baby"], gridType: "toys" };
+      return { audience: "everyone", personas: ["baby"], gridType: "toys", ageGroup: "kid" };
     case "home":
-      return { audience: "everyone", personas: ["cosy-home"], gridType: "home" };
+      return { audience: "everyone", personas: ["cosy-home"], gridType: "home", ageGroup: null };
     // No persona yet; general products until tags exist (T8).
     case "couple":
+      return { audience: "everyone", personas: [], gridType: null, ageGroup: "adult" };
+    // no recipient (the discover home): no age filter
     case null:
     default:
-      return { audience: "everyone", personas: [], gridType: null };
+      return { audience: "everyone", personas: [], gridType: null, ageGroup: null };
   }
 }
 
