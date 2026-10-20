@@ -91,6 +91,17 @@ async function main() {
     }
   }
 
+  // Partner products reach discover through discover_products, which is
+  // rebuilt here as well as after the network import (this sync runs later).
+  // Non-fatal: a failed rebuild must not turn a good sync red.
+  try {
+    const { data: n, error: rebuildError } = await supabase.rpc("rebuild_discover_products");
+    if (rebuildError) throw new Error(rebuildError.message);
+    console.log(`discover_products rebuilt: ${n} rows`);
+  } catch (err) {
+    console.error(`⚠ discover_products rebuild failed: ${err instanceof Error ? err.message : err}`);
+  }
+
   summary([
     "### Partner feed sync",
     "",
