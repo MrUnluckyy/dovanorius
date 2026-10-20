@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
+import { categoryFromSlug, recipientFromSlug } from "@/lib/discover/routes";
 
 const PARTNER_HOSTNAMES = ["partner.noriuto.lt", "partner.localhost"];
 
@@ -29,6 +30,14 @@ export async function middleware(request: NextRequest) {
     url.port = "";
     url.protocol = "https:";
     return NextResponse.redirect(url, 308);
+  }
+
+  // Unknown /discover/<recipient>[/<category>] slugs: a real 404 status. The
+  // pages call notFound() too, but discover's loading.tsx streams a skeleton
+  // first, which commits a 200 before the page can say "not found". Rewriting
+  // to a path with no route renders the normal not-found page with a 404.
+  if (isUnknownDiscoverPath(request.nextUrl.pathname)) {
+    return NextResponse.rewrite(new URL("/_discover-not-found", request.url));
   }
 
   // API routes ran without this middleware before the apex rule needed them;
@@ -63,6 +72,17 @@ export async function middleware(request: NextRequest) {
   }
 
   return await updateSession(request);
+}
+
+/** Discover's own static segments; everything else must be a known slug. */
+const DISCOVER_STATIC = new Set(["browse", "shop", "kolekcija"]);
+
+function isUnknownDiscoverPath(pathname: string): boolean {
+  const [, root, recipient, category, ...rest] = pathname.split("/");
+  if (root !== "discover" || !recipient || DISCOVER_STATIC.has(recipient)) return false;
+  if (!recipientFromSlug(recipient)) return true;
+  if (category && !categoryFromSlug(category)) return true;
+  return rest.filter(Boolean).length > 0;
 }
 
 export const config = {
