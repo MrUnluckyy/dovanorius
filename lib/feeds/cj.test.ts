@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Readable } from "node:stream";
-import { mapProduct, parseCjFeed, productsQuery, feedsQuery, type CjProduct } from "./cj";
+import { mapProduct, parseCjFeed, productsQuery, joinedQuery, type CjProduct } from "./cj";
 
 const base: CjProduct = {
   id: "SKU-1",
@@ -15,7 +15,8 @@ const base: CjProduct = {
   availability: "in stock",
   price: { amount: "89.90", currency: "EUR" },
   salePrice: null,
-  productType: "Kvepalai > Moterims",
+  productType: ["Kvepalai > Moterims"],
+  googleProductCategory: { name: "Health & Beauty > Personal Care > Cosmetics > Perfume & Cologne" },
   gender: "female",
   itemGroupId: "G-77",
   linkCode: { clickUrl: "https://www.anrdoezrs.net/click-123-456?url=..." },
@@ -33,7 +34,17 @@ test("maps a CJ product to our shape, tracked link and namespaced id", () => {
   assert.equal(p.gender, "female");
   assert.equal(p.inStock, true);
   assert.equal(p.conceptKey, "5550001:G-77");
-  assert.equal(p.categoryName, "Kvepalai > Moterims");
+  assert.equal(p.categoryName, "Health & Beauty > Personal Care > Cosmetics > Perfume & Cologne > Kvepalai > Moterims");
+});
+
+test("category: shop type without Google's, HTML stripped, empty arrays ignored", () => {
+  const zepter = mapProduct(
+    { ...base, googleProductCategory: null, productType: ["Cookart<sup>&reg;<", "sup> > Healthy cooking"] },
+    "lt"
+  )!;
+  assert.equal(zepter.categoryName, "Cookart");
+  assert.equal(mapProduct({ ...base, productType: [] }, "lt")!.categoryName, base.googleProductCategory!.name);
+  assert.equal(mapProduct({ ...base, productType: [], googleProductCategory: null }, "lt")!.categoryName, null);
 });
 
 test("a sale price below the listed one becomes the price; the listed one the rrp", () => {
@@ -65,10 +76,22 @@ test("parses newline-delimited rows and ignores junk lines", async () => {
 });
 
 test("queries embed arguments as JSON string literals (no injection, no type guessing)", () => {
-  const q = productsQuery('12"34', "999", "777", 1000);
-  assert.ok(q.includes('companyId: "12\\"34"'));
-  assert.ok(q.includes('partnerIds: ["999"]'));
-  assert.ok(q.includes("offset: 1000"));
-  assert.ok(q.includes('linkCode(pid: "777")'));
-  assert.ok(feedsQuery("1234567").includes('shoppingProductFeeds(companyId: "1234567")'));
+  const first = productsQuery('12"34', "999", "777", null);
+  assert.ok(first.includes('companyId: "12\\"34"'));
+  assert.ok(first.includes('partnerIds: ["999"]'));
+  assert.ok(!first.includes("page:"), "no cursor on the first page");
+  assert.ok(!first.includes("offset"), "offset paging stops at 10k, never use it");
+  assert.ok(first.includes('linkCode(pid: "777")'));
+  assert.ok(first.includes("... on Shopping"));
+  assert.ok(productsQuery("1", "2", "3", "abc==").includes('page: "abc=="'));
+  assert.ok(joinedQuery("1", ["5", "6"]).includes('partnerStatus: JOINED, excludePartnerIds: ["5", "6"]'));
+  assert.ok(joinedQuery("1", []).includes("excludePartnerIds: []"));
+});
+
+test("known shops get our display name and, for single-brand shops, a default brand", () => {
+  const philips = mapProduct({ ...base, advertiserId: "7336769", advertiserName: "Philips Baltics", brand: null }, "lt")!;
+  assert.equal(philips.merchantName, "Philips LT");
+  assert.equal(philips.brandName, "Philips");
+  const notino = mapProduct({ ...base, advertiserId: "5835258", brand: null }, "lt")!;
+  assert.equal(notino.brandName, null, "multi-brand shops get no guessed brand");
 });
