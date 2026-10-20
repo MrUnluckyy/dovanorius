@@ -229,12 +229,12 @@ export function DiscoverHub({
     : t("hub.ourPicks");
   const leadReason = isSelf && profileText ? t("firstView.pickedReason", { profile: profileText }) : null;
 
-  // Four products under the guide: deeper picks for this recipient when there
+  // Six products under the guide: deeper picks for this recipient when there
   // are enough, otherwise the second half of a collection already on the page.
   const storyProducts =
-    leadPicks.length >= 16
-      ? toCards(leadPicks.slice(12, 16))
-      : (top[1]?.items ?? top[0]?.items ?? []).slice(4, 8);
+    leadPicks.length >= 18
+      ? toCards(leadPicks.slice(12, 18))
+      : (top[1]?.items ?? top[0]?.items ?? []).slice(6, 12);
 
   const story = article && (
     <StoryBlock article={article} products={storyProducts} onOpen={open({ surface: "story" })} />
