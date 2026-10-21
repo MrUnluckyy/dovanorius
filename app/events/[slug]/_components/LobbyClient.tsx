@@ -281,6 +281,7 @@ export default function LobbyClient({
               wants={mine.receiver.wants}
               hasWishlist={mine.receiver.hasWishlist}
               budget={event.budget}
+              eventSlug={slug}
             />
             </>
           ) : (

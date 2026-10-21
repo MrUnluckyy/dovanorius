@@ -18,6 +18,7 @@ export function IdeasGrid({
   productType,
   productTypes,
   ageGroup,
+  priceMax,
   onOpen,
 }: {
   title: string;
@@ -27,6 +28,8 @@ export function IdeasGrid({
   productTypes?: string[];
   /** kid | teen | adult, from the recipient; null = every age. */
   ageGroup?: "kid" | "teen" | "adult" | null;
+  /** Upper price bound, e.g. a Secret Santa budget. */
+  priceMax?: number | null;
   onOpen: (p: CardProduct) => void;
 }) {
   const t = useTranslations("Discover");
@@ -38,7 +41,7 @@ export function IdeasGrid({
       ageGroup: ageGroup ?? null,
       brand: null,
       priceMin: null,
-      priceMax: null,
+      priceMax: priceMax ?? null,
       search: "",
       audience,
       inSeason: true,

@@ -853,6 +853,26 @@
       "metaRecipientTitle": "Dovanos {recipient} - idėjos ir kolekcijos | Noriuto.lt",
       "metaRecipientDescription": "Atrinktos dovanų idėjos {recipient}: kolekcijos, gidai ir tūkstančiai prekių iš patikimų parduotuvių.",
       "metaCategoryTitle": "{category} - dovanos {recipient} | Noriuto.lt"
+    },
+    "event": {
+      "back": "Atgal į „{event}“",
+      "givingTo": "Tu dovanoji {name}",
+      "givingToPlain": "Tu dovanoji: {name}",
+      "budget": "iki {budget} €",
+      "wishesOf": "{name} norai",
+      "wishes": "Norai",
+      "reserve": "Rezervuoti",
+      "interestsOf": "Kuo domisi {name}?",
+      "interests": "Kuo domisi?",
+      "forHer": "Jai",
+      "forHim": "Jam",
+      "remove": "Pašalinti",
+      "ideasForBudget": "Idėjos {name} iki {budget} €",
+      "ideasFor": "Idėjos {name}",
+      "ideasBudget": "Idėjos iki {budget} €",
+      "ideas": "Idėjos",
+      "forYourself": "Ieškai sau?",
+      "forYourselfLink": "Atidaryk savo idėjas"
     }
   },
   "Inspo": {

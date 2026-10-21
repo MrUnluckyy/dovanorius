@@ -59,6 +59,7 @@ export default function MyRecipientClient({ slug }: { slug: string }) {
           wants={mine.receiver.wants}
           hasWishlist={mine.receiver.hasWishlist}
           budget={ev.budget}
+          eventSlug={slug}
         />
       ) : (
         <p className="nr-card w-full px-5 py-6 text-center text-[15px] text-(--nr-muted)">
