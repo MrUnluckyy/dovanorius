@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Readable } from "node:stream";
-import { mapProduct, parseCjFeed, productsQuery, joinedQuery, type CjProduct } from "./cj";
+import { cjGraphql, mapProduct, parseCjFeed, productsQuery, joinedQuery, type CjProduct } from "./cj";
 
 const base: CjProduct = {
   id: "SKU-1",
@@ -118,4 +118,26 @@ test("Notino keeps its giftable corner only", () => {
     "lt"
   );
   assert.ok(withShopType);
+});
+
+test("cjGraphql retries a dropped connection, then succeeds", async () => {
+  const real = globalThis.fetch;
+  let calls = 0;
+  let alwaysFail = false;
+  globalThis.fetch = (async () => {
+    calls++;
+    if (calls === 1 || alwaysFail) throw new TypeError("fetch failed", { cause: new Error("read ECONNRESET") });
+    return new Response(JSON.stringify({ data: { ok: 1 } }), { status: 200 });
+  }) as typeof fetch;
+  const realTimeout = globalThis.setTimeout;
+  globalThis.setTimeout = ((fn: () => void) => realTimeout(fn, 0)) as typeof setTimeout;
+  try {
+    assert.deepEqual(await cjGraphql("t", "{ x }"), { ok: 1 });
+    assert.equal(calls, 2);
+    alwaysFail = true;
+    await assert.rejects(cjGraphql("t", "{ x }", 2), /gave up after 2 attempts: fetch failed \(read ECONNRESET\)/);
+  } finally {
+    globalThis.fetch = real;
+    globalThis.setTimeout = realTimeout;
+  }
 });

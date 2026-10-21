@@ -183,17 +183,30 @@ function env(): Env {
   return { token, companyId, websiteId, tld: (process.env.CJ_COUNTRY_TLD ?? "lt").trim().toLowerCase() };
 }
 
-/** POST one GraphQL query, retrying rate limits and server errors. */
-export async function cjGraphql<T>(token: string, query: string): Promise<T> {
-  for (let attempt = 1; attempt <= 4; attempt++) {
-    const res = await fetch(CJ_API, {
-      method: "POST",
-      headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
-      body: JSON.stringify({ query }),
-    });
+/** POST one GraphQL query, retrying rate limits, server errors and dropped
+ *  connections (CJ resets the odd TLS connection mid-run: ECONNRESET). */
+export async function cjGraphql<T>(token: string, query: string, attempts = 5): Promise<T> {
+  let last = "";
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    if (attempt > 1) await new Promise((r) => setTimeout(r, 2000 * attempt));
+    let res: Response;
+    try {
+      res = await fetch(CJ_API, {
+        method: "POST",
+        headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+        body: JSON.stringify({ query }),
+        signal: AbortSignal.timeout(60_000),
+      });
+    } catch (e) {
+      // Network-level failure (reset, timeout, DNS): the request may never have
+      // arrived, and a read query is safe to repeat.
+      const cause = e instanceof Error && e.cause instanceof Error ? e.cause.message : "";
+      last = `${e instanceof Error ? e.message : e}${cause ? ` (${cause})` : ""}`;
+      continue;
+    }
     if (res.status === 429 || res.status >= 500) {
-      await res.text();
-      await new Promise((r) => setTimeout(r, 2000 * attempt));
+      await res.text().catch(() => "");
+      last = `${res.status} ${res.statusText}`;
       continue;
     }
     const body = (await res.json().catch(() => null)) as { data?: T; errors?: { message?: string }[] } | null;
@@ -203,7 +216,7 @@ export async function cjGraphql<T>(token: string, query: string): Promise<T> {
     }
     return body.data as T;
   }
-  throw new Error("CJ API: still rate limited after 4 attempts");
+  throw new Error(`CJ API: gave up after ${attempts} attempts: ${last}`);
 }
 
 /**
