@@ -7,7 +7,7 @@ import { useBoardMembersMap } from "@/hooks/useMemberMap";
 import { AvatarGroup } from "./AvatarGroup";
 import { LinkPendingRibbon } from "@/components/ui/LinkPending";
 import { Hero3D } from "@/components/ui/Hero3D";
-import { LuArrowRight, LuLock } from "react-icons/lu";
+import { LuLock } from "react-icons/lu";
 
 function cn(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -16,13 +16,10 @@ function cn(...classes: Array<string | false | undefined>) {
 export function CategoryMosaicGrid({
   items,
   aboveTheFoldCount = 4,
-  trailing,
 }: {
   items: BoardWithPreview[];
   /** how many cards should load images with priority */
   aboveTheFoldCount?: number;
-  /** A last grid cell, e.g. the "New board" tile. */
-  trailing?: React.ReactNode;
 }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
@@ -33,7 +30,6 @@ export function CategoryMosaicGrid({
           priority={idx < aboveTheFoldCount}
         />
       ))}
-      {trailing}
     </div>
   );
 }
@@ -157,10 +153,6 @@ export function BoardCard({
             </>
           )}
         </p>
-        <span className="mt-1 flex items-center gap-1 text-sm font-semibold text-base-content opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
-          {t("ctaView")}
-          <LuArrowRight className="w-3.5" />
-        </span>
       </div>
     </Link>
   );

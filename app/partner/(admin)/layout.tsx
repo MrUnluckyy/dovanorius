@@ -21,7 +21,7 @@ export default async function PartnerAdminLayout({
   // Resolves every membership and picks the active one (cookie, validated).
   const ctx = await getPartnerContext();
   if (!ctx) {
-    redirect("/skydelis");
+    redirect("/mano");
   }
 
   return (

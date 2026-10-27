@@ -444,7 +444,7 @@ export function DiscoverHub({
         {isSelf && profileText && (
           <p className="text-center text-[13px] text-(--nr-muted)">
             {t("firstView.shownFor", { profile: profileText })}{" "}
-            <Link href="/skydelis" className="font-semibold text-(--nr-ink) underline underline-offset-4">
+            <Link href="/mano" className="font-semibold text-(--nr-ink) underline underline-offset-4">
               {t("firstView.change")}
             </Link>
           </p>

@@ -18,7 +18,9 @@ const SHOP_SLUG = env.SHOP_SLUG || "parduotuve";
 
 // [old URL, where it must end up]. Query strings must survive the redirect.
 const CASES = [
-  ["/dashboard", "/skydelis"],
+  ["/dashboard", "/mano"],
+  ["/skydelis", "/mano"],
+  ["/skydelis?claimed=1", "/mano?claimed=1"],
   ["/boards", "/lentos"],
   [`/boards/${BOARD_ID}`, `/lentos/${BOARD_ID}`],
   ["/boards/join/tok123", "/lentos/prisijungti/tok123"],
@@ -83,7 +85,7 @@ for (const path of DIRECT) {
 
 // System links: auth emails already sitting in inboxes carry the OLD landing
 // path in `next`; it must survive the hand-over to the confirm button page.
-for (const old of ["/reset-password", "/dashboard", "/account"]) {
+for (const old of ["/reset-password", "/dashboard", "/skydelis", "/account"]) {
   const q = new URLSearchParams({ token_hash: "x", type: "recovery", next: old });
   const res = await fetch(`${base}/api/auth/confirm?${q}`, { redirect: "manual" });
   const loc = new URL(res.headers.get("location") || "/", base);

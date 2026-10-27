@@ -22,7 +22,7 @@ export default async function Login() {
   // not "logged in" in any sense they'd recognise. Bouncing them to /dashboard
   // meant that once you had reserved a gift you could never reach this page.
   if (user && !user.is_anonymous) {
-    redirect("/skydelis");
+    redirect("/mano");
   }
 
   return (

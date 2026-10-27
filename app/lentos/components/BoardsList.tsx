@@ -22,7 +22,14 @@ export type BoardWithPreview = {
   is_public: boolean;
 };
 
-export function BoardsList({ user }: { user: User }) {
+export function BoardsList({
+  user,
+  createHere = true,
+}: {
+  user: User;
+  /** Off where the page already offers "New board" (the dashboard's band). */
+  createHere?: boolean;
+}) {
   const supabase = createClient();
   const t = useTranslations("Dashboard");
 
@@ -43,7 +50,7 @@ export function BoardsList({ user }: { user: User }) {
   // would vanish with their cookies. Creating one needs an account.
   // Contributing to a board they were INVITED to is a different thing and
   // stays open — that is what the invite was for.
-  const canCreate = isAccountUser(user);
+  const canCreate = createHere && isAccountUser(user);
 
   if (boards.length === 0) {
     // Was `{boards.length && …}`, which rendered a bare "0" and nothing else.
@@ -59,18 +66,16 @@ export function BoardsList({ user }: { user: User }) {
 
   return (
     <section>
-      <div className="mb-4 flex items-baseline justify-between gap-3">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="font-heading text-2xl font-bold">
           {t("boardsTitle")}
           <span className="ml-2 text-base font-semibold text-(--nr-muted)">
             {boards.length}
           </span>
         </h2>
+        {canCreate && <CreateBoard user={user} small />}
       </div>
-      <CategoryMosaicGrid
-        items={boards}
-        trailing={canCreate ? <CreateBoard user={user} variant="tile" /> : null}
-      />
+      <CategoryMosaicGrid items={boards} />
     </section>
   );
 }

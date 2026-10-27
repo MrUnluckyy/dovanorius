@@ -98,7 +98,7 @@ function destinationFor(
     case "email_change":
       return "/paskyra";
     default:
-      return "/skydelis";
+      return "/mano";
   }
 }
 

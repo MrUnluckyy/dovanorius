@@ -60,7 +60,11 @@ function addDismissed(id: string) {
   } catch {}
 }
 
-export default function NotificationsBell() {
+export default function NotificationsBell({
+  triggerClassName = "btn btn-ghost",
+}: {
+  triggerClassName?: string;
+} = {}) {
   const t = useTranslations("Notifications");
   const sb = createClient();
   const qc = useQueryClient();
@@ -132,9 +136,9 @@ export default function NotificationsBell() {
 
   return (
     <div className="dropdown dropdown-end">
-      <div tabIndex={0} role="button" className="btn btn-ghost">
+      <div tabIndex={0} role="button" aria-label="Pranešimai" className={triggerClassName}>
         <div className="indicator px-1">
-          <LuBell className="w-4 h-4" />
+          <LuBell className="h-5 w-5" />
           {totalCount > 0 && (
             <span className="badge badge-xs indicator-item text-xs">
               {totalCount}

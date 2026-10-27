@@ -13,7 +13,10 @@
 export const LEGACY_ROUTES: ReadonlyArray<readonly [from: string, to: string]> = [
   ["/boards/join", "/lentos/prisijungti"],
   ["/boards", "/lentos"],
-  ["/dashboard", "/skydelis"],
+  ["/dashboard", "/mano"],
+  // The dashboard was /skydelis for a few hours on 2026-10-27; auth emails
+  // sent that day land there.
+  ["/skydelis", "/mano"],
   ["/account", "/paskyra"],
   ["/users", "/zmones"],
   ["/events/new", "/renginiai/naujas"],

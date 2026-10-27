@@ -39,7 +39,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   // Only allow relative paths to avoid open-redirects.
-  const next = nextParam?.startsWith("/") ? nextParam : "/skydelis";
+  const next = nextParam?.startsWith("/") ? nextParam : "/mano";
 
   // Either way out of this page locks both ways out of it.
   const busy = loading || oauthLoading;

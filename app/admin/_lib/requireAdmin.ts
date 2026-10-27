@@ -27,7 +27,7 @@ export const requireAdmin = cache(async (): Promise<string> => {
     .select("is_admin")
     .eq("id", user.id)
     .single();
-  if (!profile?.is_admin) redirect("/skydelis");
+  if (!profile?.is_admin) redirect("/mano");
 
   return user.id;
 });

@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function StorePage() {
   const ctx = await getPartnerContext();
-  if (!ctx) redirect("/skydelis");
+  if (!ctx) redirect("/mano");
 
   const partnerId = ctx.active.partnerId;
 

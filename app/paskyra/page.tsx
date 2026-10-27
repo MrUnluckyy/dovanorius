@@ -77,7 +77,7 @@ export default async function AccountSettings() {
                 </p>
               </div>
               <Link
-                href="/skydelis"
+                href="/mano"
                 className="nr-btn nr-btn-outline shrink-0 gap-2"
               >
                 <LuUserPen size={16} />

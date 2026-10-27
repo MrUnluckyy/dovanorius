@@ -114,7 +114,7 @@
     "board": "Wish Board",
     "boards": "Wish Boards",
     "createEvent": "Create Event",
-    "dashboard": "Dashboard",
+    "dashboard": "My wishes",
     "discover": "Gift ideas",
     "events": "Events",
     "guestMode": "Guest",
@@ -129,7 +129,13 @@
     "user": "User",
     "userBoards": "User's Boards",
     "users": "Users",
-    "wishBoards": "Wish Boards"
+    "wishBoards": "Wish Boards",
+    "search": "Search people",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "mainMenu": "Main menu",
+    "drawerPitch": "Make a wish list and share it with the people close to you",
+    "viewProfile": "My profile"
   },
   "Boards": {
     "public": "Public",
@@ -198,7 +204,7 @@
     "successMarkAsBought": "🎉 Success!",
     "errorMarkAsBought": "😵 Oops!",
     "boardsCount": "{count, plural, one {# Board} other {# Boards}}",
-    "itemsCount": "{count, plural, one {# Wish} other {# Wishes}}",
+    "itemsCount": "{count, plural, one {# wish} other {# wishes}}",
     "urlValidError": "Please enter a valid URL.",
     "maxImageSizeLabel": "Maximum image size is 2MB.",
     "getMetadata": "Autofill",
@@ -386,7 +392,8 @@
     "followingTitle": "Following",
     "followingEmptyTitle": "You're not following anyone yet",
     "followingEmptyHint": "Find your friends and you'll always know what they wish for.",
-    "followingCta": "Find friends"
+    "followingCta": "Find friends",
+    "quickAddBoard": "New board"
   },
   "Events": {
     "addCover": "Add cover photo",

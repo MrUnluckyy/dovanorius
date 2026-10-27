@@ -114,7 +114,7 @@
     "board": "Norų lenta",
     "boards": "Norų lentos",
     "createEvent": "Sukurti renginį",
-    "dashboard": "Pagrindinis",
+    "dashboard": "Mano norai",
     "discover": "Dovanų idėjos",
     "events": "Renginiai",
     "guestMode": "Svečias",
@@ -129,7 +129,13 @@
     "user": "Vartotojas",
     "userBoards": "Vartotojo lentos",
     "users": "Vartotojai",
-    "wishBoards": "Norų lentos"
+    "wishBoards": "Norų lentos",
+    "search": "Ieškoti žmonių",
+    "openMenu": "Atidaryti meniu",
+    "closeMenu": "Uždaryti meniu",
+    "mainMenu": "Pagrindinis meniu",
+    "drawerPitch": "Susikurk norų sąrašą ir pasidalink juo su artimaisiais",
+    "viewProfile": "Mano profilis"
   },
   "Boards": {
     "public": "Vieša",
@@ -198,7 +204,7 @@
     "successMarkAsBought": "🎉 Smagaus naudojimo!",
     "errorMarkAsBought": "😵 Įvyko pažymint kaip nupirką. Bandykite dar kartą vėliau.!",
     "boardsCount": "{count, plural, one {# Lenta} other {# Lentos}}",
-    "itemsCount": "{count, plural, one {# Noras} other {# Norai}}",
+    "itemsCount": "{count, plural, one {# noras} few {# norai} other {# norų}}",
     "urlValidError": "Prašome įvesti galiojantį URL.",
     "maxImageSizeLabel": "Maximalus paveikslėlio dydis - 2MB.",
     "getMetadata": "Gauti info",
@@ -386,7 +392,8 @@
     "followingTitle": "Seku",
     "followingEmptyTitle": "Dar nieko neseki",
     "followingEmptyHint": "Rask draugus ir visada matysi, ko jie nori.",
-    "followingCta": "Ieškoti draugų"
+    "followingCta": "Ieškoti draugų",
+    "quickAddBoard": "Nauja lenta"
   },
   "Events": {
     "addCover": "Pridėti viršelio nuotrauką",

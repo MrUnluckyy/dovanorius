@@ -40,8 +40,8 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
   if (!isOpen) return null;
 
   return (
-    <dialog className="modal modal-open">
-      <div className="modal-box max-w-lg p-6 sm:p-8">
+    <dialog className="modal modal-open modal-bottom sm:modal-middle">
+      <div className="modal-box max-w-lg p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8">
         <button
           type="button"
           className="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 z-10"
