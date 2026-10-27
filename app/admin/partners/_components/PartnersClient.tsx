@@ -217,11 +217,11 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
         <div>
           <h1 className="font-heading text-2xl font-bold">
             Partneriai{" "}
-            <span className="text-lg font-normal text-base-content/40">
+            <span className="text-lg font-normal text-base-content/65">
               ({partners.length})
             </span>
           </h1>
-          <p className="mt-1 text-sm text-base-content/60">
+          <p className="mt-1 text-sm text-base-content/70">
             Partnerių portalo paskyros. Paskyrą sukuria Noriuto komanda, vėliau
             ji perduodama partneriui kvietimu.
           </p>
@@ -253,7 +253,7 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
               <tbody>
                 {partners.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center text-base-content/40">
+                    <td colSpan={7} className="text-center text-base-content/65">
                       Kol kas nėra partnerių.
                     </td>
                   </tr>
@@ -274,14 +274,14 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
                             href={p.website_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs text-base-content/50 hover:underline"
+                            className="text-xs text-base-content/65 hover:underline"
                           >
                             {p.website_url.replace(/^https?:\/\//, "")}
                           </a>
                         )}
                         {p.storeDomain && (
                           <div className="mt-1 flex items-center gap-2 text-xs">
-                            <span className="flex items-center gap-1 text-base-content/50">
+                            <span className="flex items-center gap-1 text-base-content/65">
                               <LuStore size={11} /> {p.storeDomain}
                             </span>
                             {p.feedPlatform && (
@@ -321,7 +321,7 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
                                 </span>
                               </div>
                             ) : p.feedLastSyncedAt ? (
-                              <span className="flex items-center gap-1 text-base-content/50">
+                              <span className="flex items-center gap-1 text-base-content/65">
                                 <LuClock size={11} />
                                 {new Date(p.feedLastSyncedAt).toLocaleString(
                                   "lt-LT"
@@ -341,13 +341,13 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
                             {p.invites.map((inv) => (
                               <div
                                 key={inv.id}
-                                className="flex items-center gap-2 text-xs text-base-content/60"
+                                className="flex items-center gap-2 text-xs text-base-content/70"
                               >
                                 <span className="badge badge-ghost badge-xs">
                                   kvietimas
                                 </span>
                                 <span>{inv.email}</span>
-                                <span className="opacity-60">({inv.role})</span>
+                                <span className="opacity-75">({inv.role})</span>
                                 <button
                                   className="btn btn-ghost btn-xs gap-1"
                                   onClick={() => copyInvite(inv.token)}
@@ -384,7 +384,7 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
                       <td className="text-right tabular-nums">
                         {p.memberCount}
                       </td>
-                      <td className="text-sm text-base-content/60">
+                      <td className="text-sm text-base-content/70">
                         {new Date(p.created_at).toLocaleDateString("lt-LT")}
                       </td>
                       <td className="text-xs">
@@ -424,13 +424,13 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
                                 >
                                   {c.email}
                                 </a>
-                                <span className="opacity-50">({c.role})</span>
+                                <span className="opacity-75">({c.role})</span>
                               </div>
                             ))}
                           {!p.contact.email &&
                             !p.contact.phone &&
                             p.contacts.length === 0 && (
-                              <span className="text-base-content/40">Nėra kontakto</span>
+                              <span className="text-base-content/65">Nėra kontakto</span>
                             )}
                           <button
                             className="btn btn-ghost btn-xs gap-1 px-1"
@@ -487,7 +487,7 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
       <dialog ref={createRef} className="modal">
         <div className="modal-box max-w-md">
           <h3 className="font-heading text-lg font-bold">Naujas partneris</h3>
-          <p className="mt-1 text-sm text-base-content/60">
+          <p className="mt-1 text-sm text-base-content/70">
             Sukūrę paskyrą, prisijunkite prie jos kaip narys, paruoškite
             produktus, o tada perduokite partneriui kvietimu.
           </p>
@@ -505,7 +505,7 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
           <label className="form-control mt-3 w-full">
             <span className="label-text text-sm">
               Nuoroda (slug){" "}
-              <span className="text-base-content/40">— nebūtina</span>
+              <span className="text-base-content/65">— nebūtina</span>
             </span>
             <input
               className="input input-bordered w-full"
@@ -517,7 +517,7 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
 
           <label className="form-control mt-3 w-full">
             <span className="label-text text-sm">
-              Svetainė <span className="text-base-content/40">— nebūtina</span>
+              Svetainė <span className="text-base-content/65">— nebūtina</span>
             </span>
             <input
               className="input input-bordered w-full"
@@ -556,7 +556,7 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
           <h3 className="font-heading text-lg font-bold">
             Kontaktas{contactFor ? ` — ${contactFor.name}` : ""}
           </h3>
-          <p className="mt-1 text-sm text-base-content/60">
+          <p className="mt-1 text-sm text-base-content/70">
             Kam rašyti ar skambinti dėl šio partnerio. Partneris mato tik savo
             duomenis.
           </p>
@@ -617,7 +617,7 @@ export function PartnersClient({ partners }: { partners: AdminPartnerRow[] }) {
           <h3 className="font-heading text-lg font-bold">
             Kviesti savininką{inviteFor ? ` — ${inviteFor.name}` : ""}
           </h3>
-          <p className="mt-1 text-sm text-base-content/60">
+          <p className="mt-1 text-sm text-base-content/70">
             Kvietimą galės priimti tik šis el. paštas. Nuoroda galioja 7 dienas
             ir bus nukopijuota į iškarpinę — nusiųskite ją patys.
           </p>

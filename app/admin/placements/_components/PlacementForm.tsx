@@ -10,8 +10,8 @@ import { searchProducts, type ProductHit } from "@/app/admin/editorial/actions";
 import { fromLocalInput, toLocalInput } from "@/app/admin/editorial/_lib/dates";
 import { RECIPIENT_KEYS } from "@/lib/discover/recipients";
 import { CATEGORY_SLUGS } from "@/lib/discover/routes";
-import { StoryBlock } from "@/app/discover/_components/hub/StoryBlock";
-import type { CardProduct } from "@/app/discover/_components/ProductCard";
+import { StoryBlock } from "@/app/idejos/_components/hub/StoryBlock";
+import type { CardProduct } from "@/app/idejos/_components/ProductCard";
 import {
   createPlacement,
   deletePlacement,
@@ -150,7 +150,7 @@ export function PlacementForm({
 
   return (
     <>
-      <Link href="/admin/placements" className="mb-3 inline-flex items-center gap-1 text-sm text-base-content/60 hover:text-base-content">
+      <Link href="/admin/placements" className="mb-3 inline-flex items-center gap-1 text-sm text-base-content/70 hover:text-base-content">
         <LuArrowLeft size={14} /> Visos reklamos
       </Link>
       <div className="flex items-start justify-between gap-4">
@@ -171,7 +171,7 @@ export function PlacementForm({
         <div className="card-body gap-4">
           <div className="grid gap-4 md:grid-cols-2">
             <label className="form-control">
-              <span className="label-text text-sm">Reklamuotojas <span className="text-base-content/40">— rodoma „Remiama · …“</span></span>
+              <span className="label-text text-sm">Reklamuotojas <span className="text-base-content/65">— rodoma „Remiama · …“</span></span>
               <input className={field} value={advertiser} maxLength={60} onChange={(e) => setAdvertiser(e.target.value)} placeholder="pvz. Mideer" />
             </label>
             <label className="form-control">
@@ -181,7 +181,7 @@ export function PlacementForm({
           </div>
 
           <label className="form-control">
-            <span className="label-text text-sm">Tekstas <span className="text-base-content/40">({body.length}/280)</span></span>
+            <span className="label-text text-sm">Tekstas <span className="text-base-content/65">({body.length}/280)</span></span>
             <textarea className="textarea textarea-bordered w-full" rows={2} maxLength={280} value={body} onChange={(e) => setBody(e.target.value)} />
           </label>
 
@@ -191,13 +191,13 @@ export function PlacementForm({
               <input className={field} value={ctaLabel} maxLength={30} onChange={(e) => setCtaLabel(e.target.value)} />
             </label>
             <label className="form-control">
-              <span className="label-text text-sm">Nuoroda <span className="text-base-content/40">— https://, atsidaro naujame lange</span></span>
+              <span className="label-text text-sm">Nuoroda <span className="text-base-content/65">— https://, atsidaro naujame lange</span></span>
               <input className={field} value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} inputMode="url" />
             </label>
           </div>
 
           <div>
-            <span className="label-text text-sm">Paveikslėlis <span className="text-base-content/40">— geriausia 16:9 (pvz. 1600×900); aukštesnis apkarpomas iki 440 px aukščio, žr. peržiūrą. JPG, PNG, WebP, iki 3 MB</span></span>
+            <span className="label-text text-sm">Paveikslėlis <span className="text-base-content/65">— geriausia 16:9 (pvz. 1600×900); aukštesnis apkarpomas iki 440 px aukščio, žr. peržiūrą. JPG, PNG, WebP, iki 3 MB</span></span>
             <div className="mt-2 flex items-center gap-3">
               {imageUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -220,7 +220,7 @@ export function PlacementForm({
           </div>
 
           <div>
-            <span className="label-text text-sm">Produktai <span className="text-base-content/40">({products.length}/6 — eilutė rodoma nuo 4)</span></span>
+            <span className="label-text text-sm">Produktai <span className="text-base-content/65">({products.length}/6 — eilutė rodoma nuo 4)</span></span>
             {products.length > 0 && (
               <ul className="mt-2 flex flex-wrap gap-2">
                 {products.map((p) => (
@@ -257,7 +257,7 @@ export function PlacementForm({
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       {h.image_url && <img src={h.image_url} alt="" className="h-9 w-9 rounded object-contain" />}
                       <span className="min-w-0 flex-1 truncate">
-                        {h.product_name} <span className="text-base-content/40">· {h.merchant_name} · {h.price} €</span>
+                        {h.product_name} <span className="text-base-content/65">· {h.merchant_name} · {h.price} €</span>
                       </span>
                       <button
                         className="btn btn-xs"
@@ -274,7 +274,7 @@ export function PlacementForm({
           </div>
 
           <div>
-            <span className="label-text text-sm">Gavėjai <span className="text-base-content/40">— nieko nepažymėjus, rodoma visur</span></span>
+            <span className="label-text text-sm">Gavėjai <span className="text-base-content/65">— nieko nepažymėjus, rodoma visur</span></span>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {RECIPIENT_KEYS.map((r) => (
                 <button key={r} type="button" className={chip(recipients.includes(r))} onClick={() => toggle(recipients, setRecipients, r)}>
@@ -285,7 +285,7 @@ export function PlacementForm({
           </div>
 
           <div>
-            <span className="label-text text-sm">Kategorijos <span className="text-base-content/40">— pažymėjus, rodoma tik tų kategorijų puslapiuose</span></span>
+            <span className="label-text text-sm">Kategorijos <span className="text-base-content/65">— pažymėjus, rodoma tik tų kategorijų puslapiuose</span></span>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {Object.keys(CATEGORY_SLUGS).map((c) => (
                 <button key={c} type="button" className={chip(categories.includes(c))} onClick={() => toggle(categories, setCategories, c)}>
@@ -305,7 +305,7 @@ export function PlacementForm({
               <input type="datetime-local" className={field} value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
             </label>
             <label className="form-control">
-              <span className="label-text text-sm">Prioritetas <span className="text-base-content/40">— didesnis laimi</span></span>
+              <span className="label-text text-sm">Prioritetas <span className="text-base-content/65">— didesnis laimi</span></span>
               <input type="number" className={field} value={priority} onChange={(e) => setPriority(e.target.value)} />
             </label>
           </div>
@@ -319,7 +319,7 @@ export function PlacementForm({
       </div>
 
       <h2 className="mt-10 font-heading text-lg font-bold">Peržiūra</h2>
-      <p className="text-sm text-base-content/60">Taip blokas atrodys Discover puslapyje.</p>
+      <p className="text-sm text-base-content/70">Taip blokas atrodys Discover puslapyje.</p>
       <div className="mt-4 rounded-2xl bg-(--nr-cream) p-6">
         <StoryBlock
           story={{

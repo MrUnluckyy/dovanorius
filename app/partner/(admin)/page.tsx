@@ -4,7 +4,7 @@ import { fmtEur, loadTracking, TRACKING_DAYS } from "@/lib/partner/tracking";
 
 export default async function PartnerDashboardPage() {
   const ctx = await getPartnerContext();
-  if (!ctx) redirect("/dashboard");
+  if (!ctx) redirect("/skydelis");
 
   const { supabase } = ctx;
   const partnerId = ctx.active.partnerId;
@@ -28,7 +28,7 @@ export default async function PartnerDashboardPage() {
       <h1 className="text-2xl font-bold font-heading">Apžvalga</h1>
 
       <section>
-        <h2 className="mb-2 text-sm font-semibold text-base-content/60">
+        <h2 className="mb-2 text-sm font-semibold text-base-content/70">
           Iš Noriuto per paskutines {TRACKING_DAYS} dienų
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -37,7 +37,7 @@ export default async function PartnerDashboardPage() {
           <Stat label="Pardavimai" value={fmtEur(tracking.sales)} />
         </div>
         {tracking.clicks > 0 && tracking.orders === 0 && (
-          <p className="mt-2 text-xs text-base-content/50">
+          <p className="mt-2 text-xs text-base-content/65">
             Užsakymai rodomi, kai jūsų Shopify prijungta prie Noriuto. Norėdami
             įjungti, susisiekite su mumis.
           </p>
@@ -46,13 +46,13 @@ export default async function PartnerDashboardPage() {
       <div className="grid grid-cols-2 gap-4">
         <div className="card bg-base-100 card-border">
           <div className="card-body">
-            <p className="text-sm text-base-content/60">Produktai</p>
+            <p className="text-sm text-base-content/70">Produktai</p>
             <p className="text-4xl font-bold font-heading">{productCount ?? 0}</p>
           </div>
         </div>
         <div className="card bg-base-100 card-border">
           <div className="card-body">
-            <p className="text-sm text-base-content/60">Nariai</p>
+            <p className="text-sm text-base-content/70">Nariai</p>
             <p className="text-4xl font-bold font-heading">{memberCount ?? 0}</p>
           </div>
         </div>
@@ -65,7 +65,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="card bg-base-100 card-border">
       <div className="card-body">
-        <p className="text-sm text-base-content/60">{label}</p>
+        <p className="text-sm text-base-content/70">{label}</p>
         <p className="text-4xl font-bold font-heading tabular-nums">{value}</p>
       </div>
     </div>

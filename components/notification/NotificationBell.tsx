@@ -8,7 +8,7 @@ import { createClient } from "@/utils/supabase/client";
 import {
   acceptInvite,
   declineInvite,
-} from "@/app/events/[slug]/invites/action";
+} from "@/app/renginiai/[slug]/invites/action";
 import { LuBell, LuMegaphone } from "react-icons/lu";
 import { markNotificationsRead } from "@/app/notifications/actions";
 import Link from "next/link";
@@ -157,7 +157,7 @@ export default function NotificationsBell() {
             <li key={n.id} className="p-2 w-full">
               <div className="flex flex-col gap-3 w-full">
                 <div className="flex gap-2 items-start">
-                  <LuMegaphone size={15} className="shrink-0 mt-0.5 text-primary" />
+                  <LuMegaphone size={15} className="shrink-0 mt-0.5 text-(--nr-gold-strong)" />
                   <p className="text-sm leading-snug">{p.message}</p>
                 </div>
                 <div className="flex justify-end gap-2">
@@ -226,7 +226,7 @@ export default function NotificationsBell() {
                     </div>
                     <div className="flex justify-end gap-2 w-full">
                       <Link
-                        href={`/events/${p.slug}/my`}
+                        href={`/renginiai/${p.slug}/mano`}
                         className="btn btn-primary btn-sm"
                         onClick={() => onDismiss(n.id)}
                       >
@@ -249,7 +249,7 @@ export default function NotificationsBell() {
                     </div>
                     <div className="flex justify-end gap-2 w-full">
                       <Link
-                        href={`/events/${p.slug}`}
+                        href={`/renginiai/${p.slug}`}
                         className="btn btn-primary btn-sm"
                       >
                         Atidaryti

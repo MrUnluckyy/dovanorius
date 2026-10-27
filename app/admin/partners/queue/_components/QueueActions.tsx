@@ -56,7 +56,7 @@ export function QueueActions({ productId }: { productId: string }) {
       <dialog ref={dialogRef} className="modal">
         <div className="modal-box max-w-md">
           <h3 className="font-heading text-lg font-bold">Atmesti produktą</h3>
-          <p className="mt-1 text-sm text-base-content/60">
+          <p className="mt-1 text-sm text-base-content/70">
             Priežastis bus matoma partneriui.
           </p>
           <textarea

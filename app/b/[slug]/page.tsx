@@ -1,12 +1,12 @@
 import { createClient } from "@/utils/supabase/server";
 import { isRecipientSide } from "@/utils/boards/viewerSide";
-import { BoardBar } from "@/app/boards/[boardId]/components/BoardBar";
+import { BoardBar } from "@/app/lentos/[boardId]/components/BoardBar";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import BreadCrumbsManual from "@/components/navigation/BreadCrumbsManual";
-import { WishList } from "@/app/boards/[boardId]/components/WishList";
+import { WishList } from "@/app/lentos/[boardId]/components/WishList";
 import Footer from "@/components/footer/Footer";
 
 export async function generateMetadata({
@@ -97,9 +97,9 @@ export default async function SharedBoardView({
             crumbs={[
               {
                 label: "userBoards",
-                href: `/users/${userId || board?.owner_id}`,
+                href: `/zmones/${userId || board?.owner_id}`,
               },
-              { label: "board", href: `/users/boards/${board.slug}` },
+              { label: "board", href: `/b/${board.slug}` },
             ]}
           />
 

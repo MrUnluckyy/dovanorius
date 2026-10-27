@@ -49,7 +49,7 @@ export default function ShareBar({ url, title, labels }: Props) {
 
   return (
     <div className="border-base-300/60 mt-12 flex flex-wrap items-center gap-2 border-t pt-6">
-      <span className="text-base-content/60 mr-1 text-sm font-medium">
+      <span className="text-base-content/70 mr-1 text-sm font-medium">
         {labels.share}
       </span>
 

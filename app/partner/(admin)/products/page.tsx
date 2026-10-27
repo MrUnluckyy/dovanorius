@@ -5,7 +5,7 @@ import type { PartnerProduct } from "@/types/partner";
 
 export default async function ProductsPage() {
   const ctx = await getPartnerContext();
-  if (!ctx) redirect("/dashboard");
+  if (!ctx) redirect("/skydelis");
 
   const { supabase } = ctx;
   const partnerId = ctx.active.partnerId;

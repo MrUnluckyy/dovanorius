@@ -18,10 +18,10 @@ test("every recipient slug round-trips", () => {
 });
 
 test("hrefs are Lithuanian and nest category under recipient", () => {
-  assert.equal(discoverHref(null), "/discover");
-  assert.equal(discoverHref("woman"), "/discover/moteriai");
-  assert.equal(discoverHref("kid", "toys"), "/discover/vaikui/zaislai");
-  assert.equal(discoverHref("woman", "unknown"), "/discover/moteriai");
+  assert.equal(discoverHref(null), "/idejos");
+  assert.equal(discoverHref("woman"), "/idejos/moteriai");
+  assert.equal(discoverHref("kid", "toys"), "/idejos/vaikui/zaislai");
+  assert.equal(discoverHref("woman", "unknown"), "/idejos/moteriai");
   assert.equal(categoryFromSlug("grozis"), "beauty");
 });
 

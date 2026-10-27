@@ -28,7 +28,7 @@ export default async function Home() {
   // have no dashboard worth showing. Sending them there meant reserving one
   // gift permanently replaced the landing page for that visitor.
   if (user && !user.is_anonymous) {
-    redirect("/dashboard");
+    redirect("/skydelis");
   }
 
   return (

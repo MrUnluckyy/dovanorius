@@ -6,14 +6,18 @@ import { usePathname } from "next/navigation";
 
 const PLURAL_LABEL: Record<string, string> = {
   boards: "wishBoards",
+  lentos: "wishBoards",
   "wish-boards": "wishBoards",
   users: "users",
+  zmones: "users",
 };
 
 const SINGULAR_LABEL: Record<string, string> = {
   boards: "board",
+  lentos: "board",
   "wish-boards": "wishBoard",
   users: "userBoards",
+  zmones: "userBoards",
 };
 
 const isLikelyId = (seg: string) =>

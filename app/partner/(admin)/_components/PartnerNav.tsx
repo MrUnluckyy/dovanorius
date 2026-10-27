@@ -72,7 +72,7 @@ export function PartnerNav({
                   >
                     <span className="truncate">{m.name}</span>
                     {m.partnerId === partner.id && (
-                      <LuCheck size={14} className="shrink-0 text-primary" />
+                      <LuCheck size={14} className="shrink-0 text-(--nr-gold-strong)" />
                     )}
                   </button>
                 </li>

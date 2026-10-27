@@ -117,7 +117,7 @@ export function ProductFormModal({
         <h3 className="font-heading font-bold text-lg mb-1">
           {product ? "Redaguoti produktą" : "Naujas produktas"}
         </h3>
-        <p className="text-xs text-base-content/50 mb-4">
+        <p className="text-xs text-base-content/65 mb-4">
           {product
             ? "Pakeitus produktą jis bus iš naujo peržiūrimas prieš rodant sraute."
             : "Naujas produktas bus peržiūrimas prieš rodant Discover sraute."}
@@ -206,7 +206,7 @@ export function ProductFormModal({
             </label>
           </div>
 
-          <div className="divider text-xs text-base-content/40 my-1">Tikslinė auditorija</div>
+          <div className="divider text-xs text-base-content/65 my-1">Tikslinė auditorija</div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -256,7 +256,7 @@ export function ProductFormModal({
               value={form.categories}
               onChange={(e) => set("categories", e.target.value)}
             />
-            <p className="text-xs text-base-content/40 mt-1">Atskirkite kableliu</p>
+            <p className="text-xs text-base-content/65 mt-1">Atskirkite kableliu</p>
           </div>
 
           <div className="modal-action mt-6">

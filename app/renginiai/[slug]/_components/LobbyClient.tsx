@@ -1,0 +1,454 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { User } from "@supabase/supabase-js";
+import toast from "react-hot-toast";
+import { LuRepeat, LuUserPlus } from "react-icons/lu";
+import type {
+  Participant,
+  SsEvent,
+  SsMember,
+} from "@/types/secret-santa";
+import { createClient } from "@/utils/supabase/client";
+import { qq } from "@/utils/qq";
+import { getEventTypeMeta } from "@/utils/events/typeMeta";
+import { setEventStatus } from "@/app/actions/events/manage";
+import { previewRepeatEvent, repeatEvent } from "@/app/actions/events/repeat";
+import RepeatEventSheet from "./RepeatEventSheet";
+import { todayInVilnius } from "@/lib/events/formatEventDate";
+import { fetchRecipient } from "@/utils/events/recipient";
+import LobbyHeader from "./LobbyHeader";
+import Participants from "./Participants";
+import DrawButton from "./DrawButton";
+import RevealCard from "./RevealCard";
+import DrawRules from "./DrawRules";
+import RedrawPanel from "./RedrawPanel";
+import InvitePeopleSheet from "./InvitePeopleSheet";
+import EventSettingsSheet from "./EventSettingsSheet";
+import MyWishNote from "./MyWishNote";
+import SecureSeatNotice from "./SecureSeatNotice";
+import { EventLobbySkeleton } from "@/components/loaders/EventLobbySkeleton";
+
+export default function LobbyClient({
+  slug,
+  user,
+}: {
+  slug: string;
+  user: User;
+}) {
+  const sb = createClient();
+  const qc = useQueryClient();
+  const t = useTranslations("Events");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // A freshly created event arrives with ?invite=1 so the organiser's next
+  // step — getting people in — is already on screen.
+  useEffect(() => {
+    if (searchParams.get("invite") === "1") setInviteOpen(true);
+  }, [searchParams]);
+
+  const { data: event, isLoading } = useQuery<SsEvent>({
+    queryKey: qq.event(slug),
+    queryFn: async () => {
+      const { data, error } = await sb
+        .from("ss_events")
+        .select("*")
+        .eq("slug", slug)
+        .single<SsEvent>();
+      if (error || !data) throw error ?? new Error("Event not found");
+      return data;
+    },
+  });
+
+  const { data: members } = useQuery<SsMember[]>({
+    enabled: !!event?.id,
+    queryKey: qq.members(event?.id ?? "none"),
+    queryFn: async () => {
+      const { data, error } = await sb
+        .from("ss_members")
+        .select("*, profile:profiles(*)")
+        .eq("event_id", event!.id);
+      if (error) throw error;
+      return (data as unknown as SsMember[]) ?? [];
+    },
+  });
+
+  const { data: participants } = useQuery<Participant[]>({
+    enabled: !!event?.id,
+    queryKey: qq.participants(event?.id ?? "none"),
+    queryFn: async () => {
+      const { data, error } = await sb
+        .from("ss_participants")
+        .select(
+          "event_id, user_id, display_name, avatar_url, role, status, joined_at"
+        )
+        .eq("event_id", event!.id);
+      if (error) throw error;
+      return (data as unknown as Participant[]) ?? [];
+    },
+  });
+
+  const { data: mine } = useQuery({
+    enabled: !!event?.id,
+    queryKey: qq.myAssignment(event?.id ?? "none", user.id),
+    queryFn: async () => {
+      const { data } = await sb
+        .from("ss_my_assignment")
+        .select("*")
+        .eq("event_id", event!.id)
+        .maybeSingle();
+      if (!data) return null;
+      return {
+        receiver: await fetchRecipient(sb, event!.id, data.receiver),
+        revealed: !!data.revealed,
+      };
+    },
+  });
+
+  const lockMutation = useMutation({
+    mutationFn: async (next: "open" | "locked") => {
+      const res = await setEventStatus(slug, next);
+      if (!res.ok) throw new Error(res.error);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: qq.event(slug) }),
+    onError: () => toast.error(t("lockFailed")),
+  });
+
+  // Repeat this event: preview -> RepeatEventSheet (name, date, invite count)
+  // -> create. Busy from the first tap until we navigate away, so a double tap
+  // can't open two sheets or create two events; the ref closes the gap before
+  // React re-renders. repeatEvent itself also returns the existing event if
+  // the same repeat arrives twice.
+  const [repeating, setRepeating] = useState(false);
+  const repeatingRef = useRef(false);
+  const [repeatPlan, setRepeatPlan] = useState<{
+    name: string;
+    invitees: number;
+    suggestedDate: string | null;
+  } | null>(null);
+  const [submittingRepeat, setSubmittingRepeat] = useState(false);
+  const submittingRef = useRef(false);
+  const releaseRepeat = () => {
+    repeatingRef.current = false;
+    setRepeating(false);
+  };
+  const startRepeat = async () => {
+    if (repeatingRef.current) return;
+    repeatingRef.current = true;
+    setRepeating(true);
+    const preview = await previewRepeatEvent(slug);
+    if (!preview.ok) {
+      toast.error(t("repeatEventFailed"));
+      releaseRepeat();
+      return;
+    }
+    setRepeatPlan(preview);
+  };
+  const confirmRepeat = async (input: { name: string; eventDate: string }) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setSubmittingRepeat(true);
+    const res = await repeatEvent(slug, input);
+    if (!res.ok) {
+      submittingRef.current = false;
+      setSubmittingRepeat(false);
+      toast.error(
+        res.error === "date_in_past"
+          ? t("dateInPast")
+          : res.error === "date_too_far"
+          ? t("dateTooFar")
+          : t("repeatEventFailed")
+      );
+      setRepeatPlan(null);
+      releaseRepeat();
+      return;
+    }
+    qc.invalidateQueries({ queryKey: qq.myEventsAll() });
+    // Stay busy while the new event loads; this page unmounts anyway.
+    router.push(`/renginiai/${res.slug}`);
+  };
+
+  const isOwner = event?.owner_id === user.id;
+  const isAdmin =
+    isOwner ||
+    (members ?? []).some(
+      (m) => m.user_id === user.id && (m.role === "owner" || m.role === "admin")
+    );
+
+  const myMembership = (members ?? []).find((m) => m.user_id === user.id);
+
+  // Only used to word the prompt: somebody with a wish list is adding a note
+  // beside it, somebody without one is writing the only thing their giver gets.
+  const { data: iHaveAWishlist = false } = useQuery({
+    queryKey: ["ss:iHaveAWishlist", user.id],
+    queryFn: async () => {
+      const { count } = await sb
+        .from("boards")
+        .select("id", { count: "exact", head: true })
+        .eq("owner_id", user.id)
+        .eq("is_public", true);
+      return (count ?? 0) > 0;
+    },
+  });
+
+  const meta = getEventTypeMeta(event?.type);
+  const joinedCount = (participants ?? []).filter(
+    (p) => p.status === "joined"
+  ).length;
+  const notEnoughMembers = joinedCount < meta.minMembers;
+  const isGroup = meta.type === "group";
+
+  // A redraw is allowed until anyone (the organiser included) has looked at
+  // their result; see ss_redraw. Only the count is read, never the pairs.
+  // Polled while the window is open, so it closes when a member reveals.
+  const redrawWindow =
+    !!event && isAdmin && !isGroup && event.status === "drawn" && !mine?.revealed;
+  const { data: revealedCount } = useQuery({
+    enabled: redrawWindow,
+    queryKey: ["ss:revealedCount", event?.id ?? "none"],
+    refetchInterval: 20_000,
+    queryFn: async () => {
+      const { count, error } = await sb
+        .from("ss_assignments")
+        .select("id", { count: "exact", head: true })
+        .eq("event_id", event!.id)
+        .eq("revealed", true);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+  const canRedraw = redrawWindow && revealedCount === 0;
+  const scrollToRules = () =>
+    document.getElementById("draw-rules")?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  if (isLoading || !event) {
+    return (
+      <div className="px-4 py-6 md:py-10">
+        <EventLobbySkeleton />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-[720px] px-4 py-6 pb-20 md:py-10">
+      <LobbyHeader
+        ev={event}
+        joinedCount={joinedCount}
+        canManage={isAdmin || !isOwner}
+        onOpenSettings={() => setSettingsOpen(true)}
+      />
+
+      {/* A guest's seat only exists in this browser until they confirm an
+          address, so the offer to fix that sits above everything else. */}
+      {user.is_anonymous && (
+        <section className="mt-4">
+          <SecureSeatNotice
+            knownEmail={user.email ?? null}
+            pendingEmail={user.new_email ?? null}
+          />
+        </section>
+      )}
+
+      {/* One clear next step, chosen by where the event actually is. */}
+      <section className="mt-4">
+        {isGroup ? (
+          <p className="nr-card px-5 py-4 text-[15px] text-(--nr-muted)">
+            {t("groupManageInApp")}
+          </p>
+        ) : event.status === "drawn" ? (
+          mine?.receiver ? (
+            <>
+            {canRedraw && (
+              <RedrawPanel slug={slug} eventId={event.id} onEditRules={scrollToRules} />
+            )}
+            <RevealCard
+              key={mine.receiver.id}
+              eventId={event.id}
+              revealed={mine.revealed}
+              onRevealed={() => {
+                qc.invalidateQueries({ queryKey: qq.myAssignment(event.id, user.id) });
+                qc.invalidateQueries({ queryKey: ["ss:revealedCount", event.id] });
+              }}
+              person={mine.receiver}
+              type={meta.type}
+              wants={mine.receiver.wants}
+              hasWishlist={mine.receiver.hasWishlist}
+              budget={event.budget}
+              eventSlug={slug}
+            />
+            </>
+          ) : (
+            <p className="nr-card px-5 py-4 text-[15px] text-(--nr-muted)">
+              {t("drawnNoAssignment")}
+            </p>
+          )
+        ) : isAdmin ? (
+          <div className="nr-card p-5">
+            <p className="mb-4 text-[15px] leading-relaxed text-(--nr-muted)">
+              {notEnoughMembers
+                ? t("needMoreToDraw", {
+                    count: Math.max(meta.minMembers - joinedCount, 0),
+                  })
+                : t("readyToDraw", { count: joinedCount })}
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              {/* Registration closed means accept_ss_join refuses the link, so
+                  inviting here would hand somebody an invitation that bounces
+                  them. Reopening is the action, and it is right below. */}
+              <button
+                onClick={() => setInviteOpen(true)}
+                disabled={event.status === "locked"}
+                className="nr-btn nr-btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <LuUserPlus className="w-4" />
+                {t("inviteMembers")}
+              </button>
+              {/* Not disabled for too few people: tapping explains why there
+                  is no draw yet, with an Invite button, instead of a dead
+                  button. ss_check_draw counts confirmed members itself. */}
+              <DrawButton
+                slug={slug}
+                eventId={event.id}
+                participants={participants ?? []}
+                disabled={event.status === "archived"}
+                onInvite={() => setInviteOpen(true)}
+                onEditRules={() =>
+                  document
+                    .getElementById("draw-rules")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
+              />
+            </div>
+            {event.status === "locked" && (
+              <p className="mt-3 text-[14px] leading-relaxed text-(--nr-muted)">
+                {t("lockedNoInvites")}
+              </p>
+            )}
+            {event.status === "locked" && (
+              <button
+                onClick={() => lockMutation.mutate("open")}
+                disabled={lockMutation.isPending}
+                className="mt-3 text-[14px] font-semibold text-(--nr-gold-strong) underline underline-offset-2 disabled:opacity-50"
+              >
+                {t("reopenEvent")}
+              </button>
+            )}
+          </div>
+        ) : (
+          <p className="nr-card px-5 py-4 text-[15px] text-(--nr-muted)">
+            {t("drawWaiting")}
+          </p>
+        )}
+      </section>
+
+      {/* Next year's edition, once this one is over: drawn and its date has
+          passed (Vilnius), or archived. Same rule as repeatEvent on the server.
+          The draw avoids this year's pairs where it can. */}
+      {!isGroup &&
+        isAdmin &&
+        (event.status === "archived" ||
+          (event.status === "drawn" && !!event.event_date && event.event_date < todayInVilnius())) && (
+        <section className="nr-card mt-4 p-5">
+          <p className="text-[14px] leading-relaxed text-(--nr-muted)">{t("repeatEventBody")}</p>
+          <button
+            onClick={startRepeat}
+            disabled={repeating}
+            aria-busy={repeating || undefined}
+            className="nr-btn nr-btn-outline mt-3 cursor-pointer disabled:opacity-50"
+          >
+            <LuRepeat className="w-4" />
+            {t("repeatEvent")}
+          </button>
+        </section>
+      )}
+
+      {myMembership && !isGroup && (
+        <section className="mt-4">
+          <MyWishNote
+            eventId={event.id}
+            userId={user.id}
+            initial={myMembership.wants}
+            hasWishlist={iHaveAWishlist}
+          />
+        </section>
+      )}
+
+      <section className="mt-4">
+        <Participants
+          event={event}
+          participants={participants ?? []}
+          isAdmin={isAdmin}
+          currentUserId={user.id}
+          onInvite={() => setInviteOpen(true)}
+        />
+      </section>
+
+      {event.notes && (
+        <section className="nr-card mt-4 p-5">
+          <h2 className="nr-h3 mb-3 text-[16px]">{t("detailsTitle")}</h2>
+          <p className="whitespace-pre-line text-[15px] leading-relaxed text-(--nr-ink-2)">
+            {event.notes}
+          </p>
+        </section>
+      )}
+
+      {/* An organiser's tool, and only meaningful before the draw (or while a
+          redraw is still possible) and once there are two people to keep apart. */}
+      {!isGroup &&
+        isAdmin &&
+        (event.status !== "drawn" || canRedraw) &&
+        (participants?.length ?? 0) >= 2 && (
+          <section id="draw-rules" className="mt-4 scroll-mt-4">
+            <DrawRules
+              slug={slug}
+              event={event}
+              participants={participants ?? []}
+              currentUserId={user.id}
+            />
+          </section>
+        )}
+
+      {repeatPlan && (
+        <RepeatEventSheet
+          initialName={repeatPlan.name}
+          initialDate={repeatPlan.suggestedDate}
+          invitees={repeatPlan.invitees}
+          busy={submittingRepeat}
+          onCancel={() => {
+            setRepeatPlan(null);
+            releaseRepeat();
+          }}
+          onConfirm={confirmRepeat}
+        />
+      )}
+
+      <InvitePeopleSheet
+        slug={slug}
+        eventId={event.id}
+        joinToken={event.join_token}
+        participants={participants ?? []}
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+      />
+
+      <EventSettingsSheet
+        event={event}
+        isOwner={isOwner}
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
+
+      {/* Snowfall is off outside the season. The component is still there and
+          `EVENT_TYPE_META.secret_santa.theme === "christmas"` is still the
+          flag to gate it on, so bringing it back in winter is this one line:
+          {meta.theme === "christmas" && <Snowfall />} */}
+    </div>
+  );
+}

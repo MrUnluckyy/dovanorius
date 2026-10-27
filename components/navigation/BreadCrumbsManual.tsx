@@ -13,7 +13,7 @@ export default function BreadCrumbsManual({ crumbs }: { crumbs: Crumb[] }) {
     <div className="breadcrumbs font-heading my-4">
       <ul>
         <li>
-          <Link href="/dashboard">{t("dashboard")}</Link>
+          <Link href="/skydelis">{t("dashboard")}</Link>
         </li>
         {crumbs.map(({ label, href }) => (
           <li key={href}>

@@ -47,7 +47,7 @@ export function ProductTable({
   if (products.length === 0) {
     return (
       <div className="card card-border bg-base-100">
-        <div className="card-body items-center text-center text-base-content/50 py-16">
+        <div className="card-body items-center text-center text-base-content/65 py-16">
           <p>Produktų dar nėra.</p>
           <p className="text-sm">Pridėkite produktą arba importuokite CSV.</p>
         </div>
@@ -88,7 +88,7 @@ export function ProductTable({
                         href={p.product_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-primary flex items-center gap-0.5 hover:underline"
+                        className="text-xs text-(--nr-gold-strong) flex items-center gap-0.5 hover:underline"
                       >
                         Nuoroda <LuExternalLink size={10} />
                       </a>
@@ -96,7 +96,7 @@ export function ProductTable({
                   </div>
                 </div>
               </td>
-              <td className="text-sm text-base-content/60">{p.sku ?? "—"}</td>
+              <td className="text-sm text-base-content/70">{p.sku ?? "—"}</td>
               <td className="text-sm">
                 {p.price != null
                   ? `${Number(p.price).toFixed(2)} ${p.currency}`
@@ -116,7 +116,7 @@ export function ProductTable({
                     </span>
                   )}
                   {!p.is_active && (
-                    <span className="text-xs text-base-content/40">Neaktyvus</span>
+                    <span className="text-xs text-base-content/65">Neaktyvus</span>
                   )}
                 </div>
               </td>

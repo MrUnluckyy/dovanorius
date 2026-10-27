@@ -19,7 +19,7 @@ export async function IdeasStrip() {
             <p className="text-[15px] text-(--nr-muted)">{t("body")}</p>
           </div>
           <Link
-            href="/discover"
+            href="/idejos"
             className="nr-btn nr-btn-outline shrink-0"
           >
             {t("cta")}

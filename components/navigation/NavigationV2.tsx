@@ -41,9 +41,9 @@ export function NavigationV2({ user }: { user?: User | null }) {
   // Signing in from a board should come back to that board, not dump the
   // giver on the dashboard with the gift still unreserved.
   const loginHref =
-    pathnames && !pathnames.startsWith("/login") && !pathnames.startsWith("/register")
-      ? `/login?next=${encodeURIComponent(pathnames)}`
-      : "/login";
+    pathnames && !pathnames.startsWith("/prisijungti") && !pathnames.startsWith("/registracija")
+      ? `/prisijungti?next=${encodeURIComponent(pathnames)}`
+      : "/prisijungti";
 
   return (
     <div className="drawer drawer-end font-heading">
@@ -65,7 +65,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                     they already use. This is also what makes the separate
                     "Pagrindinis" link redundant, so it is gone. */}
                 <Link
-                  href={signedIn ? "/dashboard" : "/"}
+                  href={signedIn ? "/skydelis" : "/"}
                   className="text-xl font-bold flex gap-2 items-center"
                 >
                   <Image
@@ -85,7 +85,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                     menu-tap away from everyone who never opens the menu. It
                     needs no account, so it shows signed in or out. */}
                 <Link
-                  href="/discover"
+                  href="/idejos"
                   aria-label={t("discover")}
                   title={t("discover")}
                   aria-current={pathnames.includes("discover") ? "page" : undefined}
@@ -117,7 +117,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   main reason to visit without one — so it sits outside the
                   auth branch rather than beside Dashboard. */}
               <Link
-                href="/discover"
+                href="/idejos"
                 className={`btn btn-ghost ${
                   pathnames.includes("discover") ? "font-bold" : "font-normal"
                 }`}
@@ -147,19 +147,19 @@ export function NavigationV2({ user }: { user?: User | null }) {
                       className="dropdown-content menu z-50 mt-2 w-56 rounded-box bg-base-100 p-2 shadow-lg ring-1 ring-base-300"
                     >
                       <li>
-                        <Link href="/dashboard">
+                        <Link href="/skydelis">
                           <LuHouse />
                           {t("dashboard")}
                         </Link>
                       </li>
                       <li>
-                        <Link href="/events">
+                        <Link href="/renginiai">
                           <LuCalendar />
                           {t("events")}
                         </Link>
                       </li>
                       <li>
-                        <Link href="/account">
+                        <Link href="/paskyra">
                           <LuSettings />
                           {t("accountSettings")}
                         </Link>
@@ -177,7 +177,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
               ) : (
                 <>
                   {isGuest && (
-                    <span className="hidden xl:flex items-center gap-1.5 self-center pr-1 text-sm text-base-content/60">
+                    <span className="hidden xl:flex items-center gap-1.5 self-center pr-1 text-sm text-base-content/70">
                       <LuCircleUser className="text-base" />
                       {t("guestMode")}
                     </span>
@@ -190,7 +190,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   >
                     {t("login")}
                   </Link>
-                  <Link href="/register" className="btn btn-ghost">
+                  <Link href="/registracija" className="btn btn-ghost">
                     {t("register")}
                   </Link>
                 </>
@@ -217,7 +217,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
               whole row should be tappable, not just the text. */}
           <div className="flex w-full flex-col gap-1 text-xl">
             <Link
-              href="/discover"
+              href="/idejos"
               className={`btn btn-ghost w-full justify-start gap-3 text-xl ${
                 pathnames.includes("discover") ? "font-bold" : "font-normal"
               }`}
@@ -229,7 +229,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
             {signedIn ? (
               <>
                 <Link
-                  href="/dashboard"
+                  href="/skydelis"
                   className={`btn btn-ghost w-full justify-start gap-3 text-xl ${
                     pathnames.includes("dashboard") ? "font-bold" : "font-normal"
                   }`}
@@ -239,7 +239,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   {t("dashboard")}
                 </Link>
                 <Link
-                  href="/events"
+                  href="/renginiai"
                   className={`btn btn-ghost w-full justify-start gap-3 text-xl ${
                     pathnames.includes("events") ? "font-bold" : "font-normal"
                   }`}
@@ -249,7 +249,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   {t("events")}
                 </Link>
                 <Link
-                  href="/account"
+                  href="/paskyra"
                   className={`btn btn-ghost w-full justify-start gap-3 text-xl ${
                     pathnames.includes("account") ? "font-bold" : "font-normal"
                   }`}
@@ -270,7 +270,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
               <>
                 <div className="divider my-2" />
                 {isGuest && (
-                  <p className="flex items-start gap-2 px-4 pb-3 text-base leading-snug text-base-content/60">
+                  <p className="flex items-start gap-2 px-4 pb-3 text-base leading-snug text-base-content/70">
                     <LuCircleUser className="mt-0.5 shrink-0 text-lg" />
                     {t("guestModeHint")}
                   </p>
@@ -285,7 +285,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                   {t("login")}
                 </Link>
                 <Link
-                  href="/register"
+                  href="/registracija"
                   className={`btn w-full justify-start text-xl ${
                     isGuest ? "btn-ghost" : "btn-primary"
                   }`}

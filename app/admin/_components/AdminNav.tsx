@@ -93,7 +93,7 @@ export function AdminNav() {
                   className={`shrink-0 cursor-pointer border-b-2 px-3 py-2 text-sm transition-colors ${
                     active
                       ? "border-primary font-semibold text-base-content"
-                      : "border-transparent text-base-content/60 hover:text-base-content"
+                      : "border-transparent text-base-content/70 hover:text-base-content"
                   }`}
                 >
                   {page.label}

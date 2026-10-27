@@ -186,7 +186,7 @@ export async function sendJoinedEmail(
       subject: `Tu dalyvauji: ${event.name} 🎉`,
       react: EventJoinedEmail({
         eventName: event.name,
-        eventUrl: `${INVITE_BASE_URL}/events/${event.slug}`,
+        eventUrl: `${INVITE_BASE_URL}/renginiai/${event.slug}`,
         displayName: displayName ?? null,
         eventDate: event.event_date,
       }),

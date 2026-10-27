@@ -1,0 +1,53 @@
+"use client";
+import { useState } from "react";
+import { User } from "@supabase/supabase-js";
+import { useTranslations } from "next-intl";
+import { BoardsList } from "@/app/lentos/components/BoardsList";
+import { ReservedItems } from "./ReservedItems";
+import { FollowingList } from "./FollowingList";
+import MyEvents from "./MyEvents";
+import { ArchiveList } from "./ArchiveList";
+import { QuickAddWish } from "./QuickAddWish";
+import { isAccountUser } from "@/utils/auth/account";
+
+type Tab = "wishes" | "events" | "friends" | "archive";
+
+export function DashboardTabs({ user }: { user: User }) {
+  const t = useTranslations("Dashboard");
+  const [active, setActive] = useState<Tab>("wishes");
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: "wishes", label: t("tabWishes") },
+    { key: "events", label: t("tabEvents") },
+    { key: "friends", label: t("tabFriends") },
+    { key: "archive", label: t("tabArchive") },
+  ];
+
+  return (
+    <div>
+      <div role="tablist" className="tabs tabs-border mb-8 flex-nowrap overflow-x-auto">
+        {tabs.map(({ key, label }) => (
+          <button
+            key={key}
+            role="tab"
+            className={`tab text-base font-semibold${active === key ? " tab-active" : ""}`}
+            onClick={() => setActive(key)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {active === "wishes" && (
+        <div className="flex flex-col gap-10">
+          {isAccountUser(user) && <QuickAddWish />}
+          <BoardsList user={user} />
+          <ReservedItems user={user} />
+        </div>
+      )}
+      {active === "events" && <MyEvents user={user} />}
+      {active === "friends" && <FollowingList userId={user.id} />}
+      {active === "archive" && <ArchiveList user={user} />}
+    </div>
+  );
+}

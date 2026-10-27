@@ -133,7 +133,7 @@ export function TeamClient({
 
             {invites.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs text-base-content/50">Laukiantys kvietimai</p>
+                <p className="text-xs text-base-content/65">Laukiantys kvietimai</p>
                 {invites.map((inv) => (
                   <div
                     key={inv.id}

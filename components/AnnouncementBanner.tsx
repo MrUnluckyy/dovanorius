@@ -46,7 +46,7 @@ export function AnnouncementBanner() {
 
   return (
     <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/8 px-4 py-3 mb-6">
-      <LuMegaphone className="mt-0.5 shrink-0 text-primary" size={16} />
+      <LuMegaphone className="mt-0.5 shrink-0 text-(--nr-gold-strong)" size={16} />
       <p className="flex-1 text-sm leading-relaxed">{announcement.message}</p>
       <div className="flex items-center gap-2 shrink-0">
         {announcement.cta_url && announcement.cta_label && (

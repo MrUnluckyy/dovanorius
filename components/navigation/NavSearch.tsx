@@ -152,7 +152,7 @@ export function NavSearch({
             title: p.display_name,
             subtitle: p.about,
             avatarUrl: p.avatar_url ?? undefined,
-            href: `/users/${p.id}`,
+            href: `/zmones/${p.id}`,
             isPublic: p.public,
           })) ?? [];
 
@@ -320,7 +320,7 @@ export function NavSearch({
             </div>
           )}
 
-        <div className="px-4 py-2 border-t border-base-200 text-[10px] opacity-60">
+        <div className="px-4 py-2 border-t border-base-200 text-[10px] opacity-75">
           Rezultatai rodo tik viešus profilius.
         </div>
       </div>

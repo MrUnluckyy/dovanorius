@@ -1,3 +1,4 @@
+import { shareLinks } from "@/lib/appLinks";
 import { Resend } from "resend";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { EventInviteEmail } from "@/emails/EventInviteEmail";
@@ -19,7 +20,7 @@ export const INVITE_BASE_URL =
 
 /** Where an invitation token sends whoever opens it. */
 export function joinUrlFor(token: string): string {
-  return `${INVITE_BASE_URL}/events/join/${token}`;
+  return `${INVITE_BASE_URL}${shareLinks.eventJoin(token)}`;
 }
 
 export type AdminEvent = {

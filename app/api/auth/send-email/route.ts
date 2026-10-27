@@ -94,11 +94,11 @@ function destinationFor(
 
   switch (action) {
     case "recovery":
-      return "/reset-password";
+      return "/naujas-slaptazodis";
     case "email_change":
-      return "/account";
+      return "/paskyra";
     default:
-      return "/dashboard";
+      return "/skydelis";
   }
 }
 

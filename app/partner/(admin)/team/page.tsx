@@ -12,7 +12,7 @@ type MemberRow = {
 
 export default async function TeamPage() {
   const ctx = await getPartnerContext();
-  if (!ctx) redirect("/dashboard");
+  if (!ctx) redirect("/skydelis");
 
   const { supabase } = ctx;
   const partnerId = ctx.active.partnerId;

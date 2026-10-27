@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
-  // Unknown /discover/<recipient>[/<category>] slugs: a real 404 status. The
+  // Unknown /idejos/<recipient>[/<category>] slugs: a real 404 status. The
   // pages call notFound() too, but discover's loading.tsx streams a skeleton
   // first, which commits a 200 before the page can say "not found". Rewriting
   // to a path with no route renders the normal not-found page with a 404.
@@ -75,11 +75,11 @@ export async function middleware(request: NextRequest) {
 }
 
 /** Discover's own static segments; everything else must be a known slug. */
-const DISCOVER_STATIC = new Set(["browse", "shop", "kolekcija"]);
+const DISCOVER_STATIC = new Set(["visos", "parduotuve", "kolekcija"]);
 
 function isUnknownDiscoverPath(pathname: string): boolean {
   const [, root, recipient, category, ...rest] = pathname.split("/");
-  if (root !== "discover" || !recipient || DISCOVER_STATIC.has(recipient)) return false;
+  if (root !== "idejos" || !recipient || DISCOVER_STATIC.has(recipient)) return false;
   if (!recipientFromSlug(recipient)) return true;
   if (category && !categoryFromSlug(category)) return true;
   return rest.filter(Boolean).length > 0;

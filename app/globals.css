@@ -140,7 +140,7 @@
    * SECONDARY — soft yellow tile
    * ------------------------------------------------------------------ */
   --color-secondary: #fff4d6;
-  --color-secondary-content: #8a6d1f;
+  --color-secondary-content: #806519; /* 5.05 on its tile */
 
   /* ------------------------------------------------------------------
    * ACCENT — dark ink (dark CTAs, App Store button)
@@ -298,6 +298,33 @@
   color: var(--nr-warning-ink);
 }
 
+/* --------------------------------------------------------------------
+ * Links: ink text, yellow underline.
+ *
+ * Yellow is a FILL colour here (1.35:1 as text on cream), so `link-primary`
+ * and `text-primary` painted article links and labels nearly invisible. The
+ * brand yellow lives in the underline instead, where it reads as a
+ * highlighter stroke and the words keep full ink contrast. `.link-primary`
+ * is redirected too, so a stray use can't bring the problem back.
+ * Unlayered for the same reason as the alerts above.
+ * ------------------------------------------------------------------ */
+.nr-link,
+.link.link-primary {
+  color: var(--nr-ink);
+  font-weight: 500;
+  text-decoration-line: underline;
+  text-decoration-color: var(--nr-yellow-deep);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s, background-color 0.15s;
+}
+.nr-link:hover,
+.link.link-primary:hover {
+  color: var(--nr-ink);
+  text-decoration-color: var(--nr-ink);
+  background-color: var(--nr-tile);
+}
+
 /* ====================================================================
  * NORIUTO DESIGN SYSTEM — raw tokens
  * The single source of truth for the brand look. DaisyUI (above) mirrors
@@ -315,15 +342,15 @@
   --nr-ink-2: #3d372d; /* long-form body on white */
   --nr-ink-soft: #3a342a; /* dark button hover */
   --nr-muted: #6b6357; /* secondary text */
-  --nr-faint: #8f8779; /* captions, meta */
+  --nr-faint: #726a5d; /* captions, meta — 4.99 on cream, 4.74 on base-200 (was #8f8779 at 3.3) */
   --nr-yellow: #ffd166; /* brand accent */
   --nr-stage: #efe9df; /* discover: one studio tone behind every packshot */
   --nr-stage-2: #e6dfd2; /* discover: still-life tiles, a step deeper */
   --nr-yellow-hover: #ffc94d;
   --nr-yellow-soft: #ffdf99;
   --nr-yellow-deep: #e0b23f; /* pressed edge / stars */
-  --nr-gold-text: #8a7a52; /* small labels on white */
-  --nr-gold-strong: #8a6d1f; /* labels on --nr-tile */
+  --nr-gold-text: #7a6a45; /* small labels — 5.28 on white, 4.94 on cream */
+  --nr-gold-strong: #806519; /* labels on --nr-tile — 5.05 */
   --nr-on-yellow-muted: #5c4a1a;
 
   /* Feedback tints — the old pastel semantic values, kept for the job they
@@ -454,9 +481,36 @@
   }
 }
 
+/* Hero3D: spring in, then a slow float; the shadow tightens as it rises.
+   Same timings as the mobile app's Reanimated version. */
+@keyframes nr-hero3d-in {
+  0% { opacity: 0; transform: scale(0.6) rotate(-12deg); }
+  60% { opacity: 1; transform: scale(1.06) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes nr-hero3d-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -6px; }
+}
+@keyframes nr-hero3d-shadow {
+  0%, 100% { opacity: 0.08; transform: scaleX(1); }
+  50% { opacity: 0.05; transform: scaleX(0.85); }
+}
+.nr-hero3d-object {
+  animation:
+    nr-hero3d-in 0.6s var(--nr-ease-spring) both,
+    nr-hero3d-float 3.6s ease-in-out 0.6s infinite;
+}
+.nr-hero3d-shadow {
+  opacity: 0.08;
+  animation: nr-hero3d-shadow 3.6s ease-in-out 0.6s infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [class*="nr-anim"],
-  .nr-marquee {
+  .nr-marquee,
+  .nr-hero3d-object,
+  .nr-hero3d-shadow {
     animation: none !important;
   }
   /* The band stops rather than disappearing: a still segment still reads as

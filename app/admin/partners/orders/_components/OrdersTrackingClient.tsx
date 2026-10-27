@@ -105,7 +105,7 @@ export function OrdersTrackingClient({ rows }: { rows: TrackingRow[] }) {
                     <td>
                       <div className="font-medium">{r.name}</div>
                       {r.storeDomain && (
-                        <div className="text-xs text-base-content/50">{r.storeDomain}</div>
+                        <div className="text-xs text-base-content/65">{r.storeDomain}</div>
                       )}
                     </td>
                     <td className="text-xs">
@@ -128,7 +128,7 @@ export function OrdersTrackingClient({ rows }: { rows: TrackingRow[] }) {
                         </button>
                       ) : (
                         <span
-                          className="text-xs text-base-content/40"
+                          className="text-xs text-base-content/65"
                           title="Užsakymų sekimas kol kas tik Shopify parduotuvėms"
                         >
                           {r.platform ?? "be srauto"}
@@ -240,7 +240,7 @@ export function OrdersTrackingClient({ rows }: { rows: TrackingRow[] }) {
 }
 
 function Status({ row }: { row: TrackingRow }) {
-  if (!row.hasSecret) return <span className="text-base-content/40">Neprijungta</span>;
+  if (!row.hasSecret) return <span className="text-base-content/65">Neprijungta</span>;
   if (!row.lastDeliveryAt)
     return <span className="badge badge-warning badge-sm">Laukiama pirmo pranešimo</span>;
   return (

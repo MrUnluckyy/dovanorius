@@ -5,7 +5,7 @@ import { Resend } from "resend";
 
 export const dynamic = "force-dynamic";
 
-const AREAS = new Set(["reserve", "auth", "board", "contact", "other"]);
+const AREAS = new Set(["reserve", "auth", "board", "contact", "not_found", "other"]);
 const KINDS = new Set(["error", "report"]);
 
 const MAX_MESSAGE = 2000;

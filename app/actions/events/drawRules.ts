@@ -94,6 +94,6 @@ export async function setPairRule(
     if (error) return { ok: false, error: error.message };
   }
 
-  revalidatePath(`/events/${slug}`);
+  revalidatePath(`/renginiai/${slug}`);
   return { ok: true };
 }

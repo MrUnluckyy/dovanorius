@@ -13,7 +13,10 @@ export type Board = {
 
 export function useBoards() {
   return useQuery({
-    queryKey: ["boards"],
+    // Its own key under "boards": BoardsList caches get_boards_v3 rows (with
+    // previews) at ["boards"], and sharing the key handed one the other's
+    // shape. Invalidating ["boards"] still refreshes both.
+    queryKey: ["boards", "mine-with-stats"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("my_boards_with_stats")

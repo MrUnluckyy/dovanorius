@@ -23,9 +23,9 @@ export const brand = {
   /** Secondary text. */
   muted: "#6b6357",
   /** Captions, footer, legal. */
-  faint: "#8f8779",
+  faint: "#726a5d",
   /** Small strong labels sitting on `tile`. */
-  goldStrong: "#8a6d1f",
+  goldStrong: "#806519",
 
   /** The one accent: buttons and highlights. */
   yellow: "#ffd166",

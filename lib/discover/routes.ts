@@ -61,13 +61,13 @@ export function categoryFromSlug(slug: string): string | null {
 }
 
 export function discoverHref(recipient?: RecipientKey | null, category?: string | null): string {
-  if (!recipient) return "/discover";
-  const base = `/discover/${RECIPIENT_SLUGS[recipient]}`;
+  if (!recipient) return "/idejos";
+  const base = `/idejos/${RECIPIENT_SLUGS[recipient]}`;
   return category && CATEGORY_SLUGS[category] ? `${base}/${CATEGORY_SLUGS[category]}` : base;
 }
 
 export function collectionHref(slug: string): string {
-  return `/discover/kolekcija/${slug}`;
+  return `/idejos/kolekcija/${slug}`;
 }
 
 /** The tabs in the sticky bar, in order. Mamai/Draugei/Partneriui stay chips. */

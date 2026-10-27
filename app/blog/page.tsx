@@ -70,7 +70,7 @@ export default async function BlogIndexPage({
       {/* Masthead */}
       <header className="border-base-300/60 border-b pt-10 pb-10 md:pt-14 md:pb-12">
         <div className="max-w-3xl">
-          <p className="text-primary mb-3 text-xs font-semibold tracking-[0.18em] uppercase">
+          <p className="text-(--nr-gold-strong) mb-3 text-xs font-semibold tracking-[0.18em] uppercase">
             {t("eyebrow")}
           </p>
           <h1 className="font-heading text-4xl leading-[1.05] font-bold text-balance md:text-6xl">
@@ -90,7 +90,7 @@ export default async function BlogIndexPage({
 
       {posts.length === 0 ? (
         <div className="border-base-300 rounded-2xl border border-dashed py-24 text-center">
-          <p className="text-base-content/60">{t("empty")}</p>
+          <p className="text-base-content/70">{t("empty")}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-8 pb-4">

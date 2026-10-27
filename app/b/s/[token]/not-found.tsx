@@ -55,7 +55,7 @@ export default async function MagicLinkNotFound() {
                 {t("deadLinkHome")}
               </Link>
               <Link
-                href="/discover"
+                href="/idejos"
                 className="nr-btn nr-btn-outline w-full sm:w-auto"
               >
                 {t("deadLinkDiscover")}

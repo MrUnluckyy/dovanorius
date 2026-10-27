@@ -54,7 +54,7 @@ export const ArticleDialog = forwardRef<HTMLDialogElement, { shelf: EditorialShe
       <dialog ref={ref} className="modal">
         <div className="modal-box max-w-3xl">
           <h3 className="font-heading text-lg font-bold">Straipsnis tinklaraščiui</h3>
-          <p className="text-sm text-base-content/60">
+          <p className="text-sm text-base-content/70">
             Dovanų gidas iš šios lentynos prekių. Išsaugomas kaip juodraštis –
             publikuojate patys Sanity Studio.
           </p>
@@ -94,7 +94,7 @@ export const ArticleDialog = forwardRef<HTMLDialogElement, { shelf: EditorialShe
 
           {draft && (
             <article className="mt-5 max-h-[50vh] space-y-3 overflow-y-auto rounded-xl border border-base-300 bg-base-100 p-5">
-              <p className="text-xs text-base-content/50">
+              <p className="text-xs text-base-content/65">
                 /blog/{draft.slug} · SEO: {draft.metaTitle}
               </p>
               <h2 className="font-heading text-2xl font-bold">{draft.title}</h2>

@@ -31,7 +31,7 @@ export function ForgotPasswordForm() {
     // comes back with a `code` that has to be exchanged for a session before
     // the form can update anything. Landing on the form directly left it
     // holding an unexchanged code.
-    const redirectTo = `${process.env.NEXT_PUBLIC_WEB_URL}/api/auth/callback?next=${encodeURIComponent("/reset-password")}`;
+    const redirectTo = `${process.env.NEXT_PUBLIC_WEB_URL}/api/auth/callback?next=${encodeURIComponent("/naujas-slaptazodis")}`;
 
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo,
@@ -70,7 +70,7 @@ export function ForgotPasswordForm() {
             {t("resetSentBody", { email: email.trim() })}
           </p>
         </div>
-        <Link href="/login" className="btn btn-neutral w-full">
+        <Link href="/prisijungti" className="btn btn-neutral w-full">
           {t("backToLogin")}
         </Link>
       </div>
@@ -123,7 +123,7 @@ export function ForgotPasswordForm() {
             {t("ctaSendResetLink")}
           </button>
 
-          <Link href="/login" className="link link-hover text-center">
+          <Link href="/prisijungti" className="link link-hover text-center">
             {t("backToLogin")}
           </Link>
         </fieldset>

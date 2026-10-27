@@ -57,7 +57,7 @@ export function StoreClient({ state }: { state: StoreState }) {
     <div className="space-y-6">
       <div>
         <h1 className="font-heading text-2xl font-bold">Parduotuvė</h1>
-        <p className="mt-1 text-sm text-base-content/60">
+        <p className="mt-1 text-sm text-base-content/70">
           Prijunkite savo internetinę parduotuvę — produktai bus atnaujinami
           kasdien: kainos, nuotraukos ir prekių likutis. Palaikomos Shopify ir
           WooCommerce parduotuvės.
@@ -84,7 +84,7 @@ export function StoreClient({ state }: { state: StoreState }) {
                 <LuSave size={15} /> Išsaugoti
               </button>
             </div>
-            <span className="label-text-alt mt-1 text-base-content/50">
+            <span className="label-text-alt mt-1 text-base-content/65">
               Įveskite tik domeną — platformą atpažinsime patys. Naudojame viešą
               produktų sąrašą, slaptažodžių ar API raktų nereikia.
             </span>
@@ -106,12 +106,12 @@ export function StoreClient({ state }: { state: StoreState }) {
                 Atnaujinti dabar
               </button>
 
-              <span className="text-sm text-base-content/60">
+              <span className="text-sm text-base-content/70">
                 Susietų produktų: <b>{state.syncedProductCount}</b>
               </span>
 
               {state.lastSyncedAt && (
-                <span className="flex items-center gap-1 text-sm text-base-content/60">
+                <span className="flex items-center gap-1 text-sm text-base-content/70">
                   {state.lastStatus === "ok" ? (
                     <LuCircleCheck size={14} className="text-success" />
                   ) : (

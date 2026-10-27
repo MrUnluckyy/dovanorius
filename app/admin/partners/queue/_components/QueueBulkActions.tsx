@@ -58,7 +58,7 @@ export function QueueBulkActions({
           <h3 className="font-heading text-lg font-bold">
             Patvirtinti visus produktus
           </h3>
-          <p className="mt-1 text-sm text-base-content/60">
+          <p className="mt-1 text-sm text-base-content/70">
             Patvirtinti produktai iškart įtraukiami į Discover srautą. Šio
             veiksmo atšaukti negalima — kiekvieną produktą tektų atmesti atskirai.
           </p>

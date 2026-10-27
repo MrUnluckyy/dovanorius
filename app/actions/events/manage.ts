@@ -67,7 +67,7 @@ export async function updateEvent(
   if (error) return { ok: false, error: error.message };
   if (!data) return { ok: false, error: "not_allowed" };
 
-  revalidatePath(`/events/${slug}`);
+  revalidatePath(`/renginiai/${slug}`);
   return { ok: true };
 }
 
@@ -95,7 +95,7 @@ export async function deleteEvent(slug: string): Promise<ManageResult> {
   if (error) return { ok: false, error: error.message };
   if (!data) return { ok: false, error: "not_allowed" };
 
-  revalidatePath("/events");
+  revalidatePath("/renginiai");
   return { ok: true };
 }
 
@@ -136,7 +136,7 @@ export async function removeMember(
     .eq("event_id", event.id)
     .eq("to_user", userId);
 
-  revalidatePath(`/events/${slug}`);
+  revalidatePath(`/renginiai/${slug}`);
   return { ok: true };
 }
 
@@ -170,7 +170,7 @@ export async function leaveEvent(slug: string): Promise<ManageResult> {
     .eq("event_id", event.id)
     .eq("to_user", user.id);
 
-  revalidatePath("/events");
+  revalidatePath("/renginiai");
   return { ok: true };
 }
 
@@ -196,6 +196,6 @@ export async function setEventStatus(
   if (error) return { ok: false, error: error.message };
   if (!data) return { ok: false, error: "not_allowed" };
 
-  revalidatePath(`/events/${slug}`);
+  revalidatePath(`/renginiai/${slug}`);
   return { ok: true };
 }

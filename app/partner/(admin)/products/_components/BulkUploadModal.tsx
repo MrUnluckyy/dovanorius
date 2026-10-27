@@ -315,7 +315,7 @@ export function BulkUploadModal({
     <dialog ref={dialogRef} className="modal" onClose={onClose}>
       <div className="modal-box max-w-lg">
         <h3 className="font-heading font-bold text-lg mb-1">Importuoti produktus</h3>
-        <p className="text-sm text-base-content/60 mb-4">
+        <p className="text-sm text-base-content/70 mb-4">
           Palaikomas standartinis CSV,{" "}
           <span className="font-medium text-base-content">Shopify</span> eksportas ir XML (Google Shopping).
         </p>
@@ -338,11 +338,11 @@ export function BulkUploadModal({
             }}
             onClick={() => document.getElementById("csv-file-input")?.click()}
           >
-            <LuUpload size={28} className="text-base-content/40" />
-            <p className="text-sm text-base-content/60">
-              Nutempkite CSV arba XML failą čia arba <span className="text-primary underline">pasirinkite</span>
+            <LuUpload size={28} className="text-base-content/60" />
+            <p className="text-sm text-base-content/70">
+              Nutempkite CSV arba XML failą čia arba <span className="text-(--nr-gold-strong) underline">pasirinkite</span>
             </p>
-            <p className="text-xs text-base-content/40">
+            <p className="text-xs text-base-content/65">
               Shopify CSV · Google Shopping XML · Standartinis CSV/XML
             </p>
             <input
@@ -397,7 +397,7 @@ export function BulkUploadModal({
                     <tr>
                       <td
                         colSpan={3}
-                        className="text-center text-base-content/40 text-xs"
+                        className="text-center text-base-content/65 text-xs"
                       >
                         ... ir dar {parsed.length - 8} produktų
                       </td>
@@ -408,7 +408,7 @@ export function BulkUploadModal({
             </div>
 
             <button
-              className="btn btn-ghost btn-xs text-base-content/50"
+              className="btn btn-ghost btn-xs text-base-content/65"
               onClick={() => { setParsed(null); setFileName(""); setError(null); }}
             >
               Pasirinkti kitą failą

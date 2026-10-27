@@ -79,7 +79,7 @@ export function StatTable({
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <h2 className="font-heading text-lg font-bold">{title}</h2>
-            <p className="mb-2 text-xs text-base-content/50">{hint}</p>
+            <p className="mb-2 text-xs text-base-content/65">{hint}</p>
           </div>
           {selected.size > 0 && (
             <button
@@ -118,7 +118,7 @@ export function StatTable({
             <tbody>
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center text-base-content/40">
+                  <td colSpan={7} className="text-center text-base-content/65">
                     —
                   </td>
                 </tr>
@@ -136,7 +136,7 @@ export function StatTable({
                     </td>
                     <td className="font-medium">
                       <Link
-                        href={`/discover/browse?q=${encodeURIComponent(r.term)}`}
+                        href={`/idejos/visos?q=${encodeURIComponent(r.term)}`}
                         target="_blank"
                         className="link-hover cursor-pointer"
                       >
@@ -151,12 +151,12 @@ export function StatTable({
                       {/* results are capped at 601 in search_products */}
                       {r.avg_results >= 600 ? "600+" : r.avg_results}
                     </td>
-                    <td className="text-right text-xs text-base-content/60">
+                    <td className="text-right text-xs text-base-content/70">
                       {new Date(r.last_at).toLocaleDateString("lt-LT")}
                     </td>
                     <td className="w-px text-right">
                       <button
-                        className="btn btn-ghost btn-xs text-base-content/40 hover:text-error"
+                        className="btn btn-ghost btn-xs text-base-content/65 hover:text-error"
                         onClick={() => remove([r.term])}
                         disabled={pending}
                         title="Pašalinti iš statistikos"

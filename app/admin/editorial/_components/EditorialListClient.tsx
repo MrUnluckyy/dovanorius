@@ -112,11 +112,11 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
         <div>
           <h1 className="font-heading text-2xl font-bold">
             Redakcijos lentynos{" "}
-            <span className="text-lg font-normal text-base-content/40">
+            <span className="text-lg font-normal text-base-content/65">
               ({shelves.length})
             </span>
           </h1>
-          <p className="mt-1 max-w-2xl text-sm text-base-content/60">
+          <p className="mt-1 max-w-2xl text-sm text-base-content/70">
             Rankomis atrinktos lentynos Discover puslapyje. Savaitinis LLM
             kuratorius jų neliečia, o rodymo laikotarpį nustatote čia — be
             diegimo. Eiliškumą keiskite tempdami eilutes.
@@ -148,7 +148,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
               <tbody {...drag.containerProps}>
                 {shelves.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center text-base-content/40">
+                    <td colSpan={6} className="text-center text-base-content/65">
                       Kol kas nėra redakcijos lentynų.
                     </td>
                   </tr>
@@ -161,7 +161,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
                     >
                       <td>
                         <span
-                          className="mr-2 inline-block cursor-grab align-middle text-base-content/30 active:cursor-grabbing"
+                          className="mr-2 inline-block cursor-grab align-middle text-base-content/65 active:cursor-grabbing"
                           aria-hidden="true"
                         >
                           <LuGripVertical size={14} />
@@ -172,7 +172,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
                         >
                           {s.label_lt}
                         </Link>
-                        <div className="text-xs text-base-content/50">
+                        <div className="text-xs text-base-content/65">
                           {s.slug}
                         </div>
                       </td>
@@ -183,7 +183,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
                           {SCHEDULE_LABEL[s.schedule]}
                         </span>
                       </td>
-                      <td className="text-xs text-base-content/60">
+                      <td className="text-xs text-base-content/70">
                         <div className="flex items-center gap-1">
                           <LuClock size={11} className="shrink-0" />
                           {fmtDate(s.starts_at)} → {fmtDate(s.ends_at)}
@@ -191,7 +191,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
                       </td>
                       <td className="text-right">
                         <span className="tabular-nums">{s.health.live}</span>
-                        <span className="text-base-content/40">
+                        <span className="text-base-content/65">
                           {" "}
                           / {s.health.total}
                         </span>
@@ -209,12 +209,12 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
                           </div>
                         )}
                         {s.health.outOfStock > 0 && (
-                          <div className="text-xs text-base-content/50">
+                          <div className="text-xs text-base-content/65">
                             {s.health.outOfStock} neturima
                           </div>
                         )}
                       </td>
-                      <td className="text-right tabular-nums text-base-content/60">
+                      <td className="text-right tabular-nums text-base-content/70">
                         {s.sort_order}
                       </td>
                       <td>
@@ -239,7 +239,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
       <dialog ref={createRef} className="modal">
         <div className="modal-box max-w-lg">
           <h3 className="font-heading text-lg font-bold">Nauja lentyna</h3>
-          <p className="mt-1 text-sm text-base-content/60">
+          <p className="mt-1 text-sm text-base-content/70">
             Palikus datas tuščias, lentyna rodoma iš karto ir neribotai.
           </p>
 
@@ -256,7 +256,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
           <label className="form-control mt-3 w-full">
             <span className="label-text text-sm">
               Pavadinimas (EN){" "}
-              <span className="text-base-content/40">— nebūtina</span>
+              <span className="text-base-content/65">— nebūtina</span>
             </span>
             <input
               className="input input-bordered w-full"
@@ -269,7 +269,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
           <label className="form-control mt-3 w-full">
             <span className="label-text text-sm">
               Nuoroda (slug){" "}
-              <span className="text-base-content/40">— nebūtina</span>
+              <span className="text-base-content/65">— nebūtina</span>
             </span>
             <input
               className="input input-bordered w-full"
@@ -303,7 +303,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
           <label className="form-control mt-3 w-full">
             <span className="label-text text-sm">
               Kam skirta{" "}
-              <span className="text-base-content/40">
+              <span className="text-base-content/65">
                 — vaikų ir paauglių lentynos pirmame ekrane rodomos tik tada, kai lankytojas parodo, kad ieško jiems
               </span>
             </span>
@@ -326,7 +326,7 @@ export function EditorialListClient({ shelves }: { shelves: ShelfRow[] }) {
           <label className="form-control mt-3 w-full">
             <span className="label-text text-sm">
               Eiliškumas{" "}
-              <span className="text-base-content/40">
+              <span className="text-base-content/65">
                 — lemia tvarką tik tada, kai lentynų reitingas lygus
               </span>
             </span>

@@ -5,11 +5,11 @@ import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { LuCheck, LuLock, LuPlus, LuSearch, LuX } from "react-icons/lu";
+import { LuCheck, LuGlobe, LuLock, LuPlus, LuSearch, LuX } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
 import { useBoards } from "@/hooks/useBoards";
 import { foldForSearch } from "@/utils/helpers/search";
-import { generateSlug } from "@/utils/helpers/slugify";
+import { newBoardCode } from "@/utils/helpers/slugify";
 import { PendingPips } from "@/components/ui/Pending";
 
 export type PickedBoard = { id: string; name: string };
@@ -68,6 +68,7 @@ export function BoardPickerSheet({
   const [filter, setFilter] = useState("");
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
+  const [newPrivate, setNewPrivate] = useState(false);
   const newNameRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => setMounted(true), []);
@@ -93,6 +94,7 @@ export function BoardPickerSheet({
     setFilter("");
     setCreating(false);
     setNewName("");
+    setNewPrivate(false);
   }, [open]);
 
   useEffect(() => {
@@ -138,8 +140,8 @@ export function BoardPickerSheet({
           owner_id: user.id,
           name,
           description: "",
-          is_public: true,
-          slug: generateSlug(name),
+          is_public: !newPrivate,
+          slug: newBoardCode(),
         })
         .select("id, name")
         .single();
@@ -150,6 +152,7 @@ export function BoardPickerSheet({
       queryClient.invalidateQueries({ queryKey: ["boards"] });
       setCreating(false);
       setNewName("");
+      setNewPrivate(false);
       // Creating a board here is never the goal in itself — the user is midway
       // through saving something, so drop it straight in.
       onPick(board);
@@ -309,6 +312,22 @@ export function BoardPickerSheet({
                 maxLength={60}
                 className="min-w-0 flex-1 rounded-[var(--nr-radius-input)] border border-(--nr-border) bg-(--nr-cream) px-3 py-2 text-sm outline-none transition focus:border-(--nr-yellow-deep) placeholder:text-(--nr-faint)"
               />
+              {/* Same choice the full board form offers; public stays the default. */}
+              <button
+                type="button"
+                onClick={() => setNewPrivate((v) => !v)}
+                aria-pressed={newPrivate}
+                aria-label={tb("privateBoardLabel")}
+                title={newPrivate ? tb("privateBoardHintOn") : tb("privateBoardHintOff")}
+                className={`flex h-9 shrink-0 cursor-pointer items-center gap-1 rounded-full border px-2.5 text-xs font-semibold transition ${
+                  newPrivate
+                    ? "border-(--nr-ink) bg-(--nr-ink) text-white"
+                    : "border-(--nr-border) text-(--nr-muted) hover:bg-(--nr-tile)"
+                }`}
+              >
+                {newPrivate ? <LuLock className="w-3.5" /> : <LuGlobe className="w-3.5" />}
+                {newPrivate ? tb("makePrivateShort") : tb("public")}
+              </button>
               <button
                 type="submit"
                 disabled={!newName.trim() || createBoard.isPending}

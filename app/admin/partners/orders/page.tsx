@@ -45,7 +45,7 @@ export default async function PartnerOrdersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-heading text-2xl font-bold">Partnerių užsakymai</h1>
-        <p className="text-sm text-base-content/60">
+        <p className="text-sm text-base-content/70">
           Paspaudimai į partnerių parduotuves ir užsakymai, kuriuos jų Shopify
           atsiuntė atgal. Paskutinės {TRACKING_DAYS} dienų.
         </p>
@@ -57,7 +57,7 @@ export default async function PartnerOrdersPage() {
         <div className="card-body">
           <h2 className="font-heading text-lg font-bold">Naujausi užsakymai</h2>
           {(recent ?? []).length === 0 ? (
-            <p className="text-sm text-base-content/50">
+            <p className="text-sm text-base-content/65">
               Dar nėra užsakymų iš Noriuto nuorodų.
             </p>
           ) : (
@@ -87,10 +87,10 @@ export default async function PartnerOrdersPage() {
                           ? fmtEur(Number(o.total))
                           : `${o.total} ${o.currency}`}
                       </td>
-                      <td className="text-sm text-base-content/60">
+                      <td className="text-sm text-base-content/70">
                         {new Date(o.ordered_at).toLocaleString("lt-LT")}
                       </td>
-                      <td className="text-xs text-base-content/60">
+                      <td className="text-xs text-base-content/70">
                         {o.attributed_by === "nr_click" ? "paspaudimą" : "UTM žymą"}
                       </td>
                     </tr>

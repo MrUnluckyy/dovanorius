@@ -1,4 +1,5 @@
 "use client";
+import { AUTH_EMAIL_LANDING } from "@/lib/appLinks";
 import { createClient } from "@/utils/supabase/client";
 import {
   claimGuestReservations,
@@ -38,7 +39,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   // Only allow relative paths to avoid open-redirects.
-  const next = nextParam?.startsWith("/") ? nextParam : "/dashboard";
+  const next = nextParam?.startsWith("/") ? nextParam : "/skydelis";
 
   // Either way out of this page locks both ways out of it.
   const busy = loading || oauthLoading;
@@ -49,7 +50,7 @@ export function LoginForm() {
       type: "signup",
       email,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_WEB_URL}/dashboard`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_WEB_URL}${AUTH_EMAIL_LANDING}`,
       },
     });
     setResending(false);
@@ -220,10 +221,10 @@ export function LoginForm() {
             </div>
           )}
           <div className="flex flex-col gap-2">
-            <Link href="/forgot-password" className="link link-hover">
+            <Link href="/pamirsau-slaptazodi" className="link link-hover">
               {t("forgotPasswordLink")}
             </Link>
-            <Link href="/register" className="link link-hover">
+            <Link href="/registracija" className="link link-hover">
               {t("doNotHaveAccountLink")}
             </Link>
           </div>

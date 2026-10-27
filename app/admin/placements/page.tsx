@@ -24,9 +24,9 @@ export default async function AdminPlacementsPage() {
         <div>
           <h1 className="font-heading text-2xl font-bold">
             Reklama Discover puslapyje{" "}
-            <span className="text-lg font-normal text-base-content/40">({placements.length})</span>
+            <span className="text-lg font-normal text-base-content/65">({placements.length})</span>
           </h1>
-          <p className="mt-1 max-w-2xl text-sm text-base-content/60">
+          <p className="mt-1 max-w-2xl text-sm text-base-content/70">
             Remiami blokai rodomi po antros kolekcijos, pažymėti „Remiama“. Viename puslapyje rodoma
             tik viena reklama: tinkanti pagal gavėją ir kategoriją, su didžiausiu prioritetu.
           </p>
@@ -54,7 +54,7 @@ export default async function AdminPlacementsPage() {
               <tbody>
                 {placements.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center text-base-content/40">
+                    <td colSpan={7} className="text-center text-base-content/65">
                       Kol kas nėra reklamų.
                     </td>
                   </tr>
@@ -67,12 +67,12 @@ export default async function AdminPlacementsPage() {
                           <Link href={`/admin/placements/${p.id}`} className="font-medium hover:underline">
                             {p.headline}
                           </Link>
-                          <div className="text-xs text-base-content/50">{p.advertiser}</div>
+                          <div className="text-xs text-base-content/65">{p.advertiser}</div>
                         </td>
                         <td>
                           <span className={`badge badge-sm ${s.badge}`}>{s.label}</span>
                         </td>
-                        <td className="text-xs text-base-content/60">
+                        <td className="text-xs text-base-content/70">
                           {p.recipients.length
                             ? p.recipients.map((r) => t(`recipient.${r}`)).join(", ")
                             : "Visi gavėjai"}
@@ -80,7 +80,7 @@ export default async function AdminPlacementsPage() {
                             ? ` · ${p.categories.map((c) => t(`category.${c}`)).join(", ")}`
                             : ""}
                         </td>
-                        <td className="text-xs text-base-content/60">
+                        <td className="text-xs text-base-content/70">
                           {fmtDate(p.starts_at)} → {fmtDate(p.ends_at)}
                         </td>
                         <td className="text-right tabular-nums">{p.views}</td>
@@ -95,7 +95,7 @@ export default async function AdminPlacementsPage() {
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-base-content/40">
+          <p className="text-xs text-base-content/65">
             Peržiūros ir paspaudimai skaičiuojami unikaliais lankytojais per dieną.
           </p>
         </div>

@@ -48,7 +48,7 @@ export default async function AdminAnalyticsPage() {
     <div className="space-y-8">
       <div>
         <h1 className="font-heading text-2xl font-bold">Analitika</h1>
-        <p className="mt-1 text-sm text-base-content/60">
+        <p className="mt-1 text-sm text-base-content/70">
           Discover srauto įtraukimas (peržiūros → išsaugojimai → paspaudimai).
         </p>
       </div>
@@ -75,7 +75,7 @@ export default async function AdminAnalyticsPage() {
       <section className="card bg-base-100 card-border">
         <div className="card-body">
           <h2 className="font-heading text-lg font-bold">Pardavėjai</h2>
-          <p className="-mt-1 mb-2 text-xs text-base-content/50">
+          <p className="-mt-1 mb-2 text-xs text-base-content/65">
             Įtraukimo dalis vs. katalogo dalis — rodo, kurie pardavėjai viršija
             arba nepasiekia savo katalogo dydžio.
           </p>
@@ -95,7 +95,7 @@ export default async function AdminAnalyticsPage() {
               <tbody>
                 {merchantRows.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center text-base-content/40">
+                    <td colSpan={7} className="text-center text-base-content/65">
                       —
                     </td>
                   </tr>
@@ -185,7 +185,7 @@ function Kpi({
   return (
     <div className="card bg-base-100 card-border">
       <div className="card-body p-4">
-        <p className="flex items-center gap-1.5 text-xs text-base-content/60">
+        <p className="flex items-center gap-1.5 text-xs text-base-content/70">
           {icon}
           {label}
         </p>
@@ -221,7 +221,7 @@ function FunnelTable({
             <tbody>
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="text-center text-base-content/40">
+                  <td colSpan={4} className="text-center text-base-content/65">
                     —
                   </td>
                 </tr>

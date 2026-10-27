@@ -1,4 +1,5 @@
 "use client";
+import { AUTH_EMAIL_LANDING } from "@/lib/appLinks";
 import { createClient } from "@/utils/supabase/client";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
@@ -44,7 +45,7 @@ export function RegisterForm() {
           data: { display_name: values.displayName, locale },
           // Where the confirmation link lands, not an OAuth callback: that
           // route wants a `?code=` a confirmation link never has.
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_WEB_URL}/dashboard`,
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_WEB_URL}${AUTH_EMAIL_LANDING}`,
         },
       });
 
@@ -83,7 +84,7 @@ export function RegisterForm() {
           {t("registerCompleteTitle")}
         </h2>
         <p className="text-center">{t("registerCompleteBody")}</p>
-        <Link href="/login" className="btn">
+        <Link href="/prisijungti" className="btn">
           {t("ctaDone")}
         </Link>
       </div>
@@ -194,11 +195,11 @@ export function RegisterForm() {
           )}
 
           <div className="flex flex-col gap-1">
-            <Link href="/forgot-password" className="link link-hover">
+            <Link href="/pamirsau-slaptazodi" className="link link-hover">
               {t("forgotPasswordLink")}
             </Link>
 
-            <Link href="/login" className="link link-hover">
+            <Link href="/prisijungti" className="link link-hover">
               {t("haveAccountLoginLink")}
             </Link>
           </div>

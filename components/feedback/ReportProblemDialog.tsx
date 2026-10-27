@@ -92,7 +92,7 @@ export function ReportProblemDialog() {
         ) : (
           <form onSubmit={submit}>
             <h3 className="text-lg font-semibold">{t("title")}</h3>
-            <p className="mt-1 text-sm text-base-content/60 leading-relaxed">
+            <p className="mt-1 text-sm text-base-content/70 leading-relaxed">
               {t("lead")}
             </p>
 
@@ -125,7 +125,7 @@ export function ReportProblemDialog() {
               onChange={(e) => setEmail(e.target.value)}
               aria-describedby="report-email-why"
             />
-            <p id="report-email-why" className="mt-1.5 text-xs text-base-content/50">
+            <p id="report-email-why" className="mt-1.5 text-xs text-base-content/65">
               {t("emailWhy")}
             </p>
 
