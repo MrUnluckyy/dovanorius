@@ -53,7 +53,7 @@ export default async function JoinPartnerPage({
           <p className="text-sm text-base-content/70">
             Susisiekite su partneriu, kuris jus pakvietė, ir paprašykite naujo kvietimo.
           </p>
-          <Link href="/skydelis" className="btn btn-primary btn-sm">
+          <Link href="/mano" className="btn btn-primary btn-sm">
             Į pagrindinį
           </Link>
         </div>

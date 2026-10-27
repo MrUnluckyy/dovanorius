@@ -59,18 +59,16 @@ export function BoardsList({ user }: { user: User }) {
 
   return (
     <section>
-      <div className="mb-4 flex items-baseline justify-between gap-3">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="font-heading text-2xl font-bold">
           {t("boardsTitle")}
           <span className="ml-2 text-base font-semibold text-(--nr-muted)">
             {boards.length}
           </span>
         </h2>
+        {canCreate && <CreateBoard user={user} small />}
       </div>
-      <CategoryMosaicGrid
-        items={boards}
-        trailing={canCreate ? <CreateBoard user={user} variant="tile" /> : null}
-      />
+      <CategoryMosaicGrid items={boards} />
     </section>
   );
 }

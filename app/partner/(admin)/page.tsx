@@ -4,7 +4,7 @@ import { fmtEur, loadTracking, TRACKING_DAYS } from "@/lib/partner/tracking";
 
 export default async function PartnerDashboardPage() {
   const ctx = await getPartnerContext();
-  if (!ctx) redirect("/skydelis");
+  if (!ctx) redirect("/mano");
 
   const { supabase } = ctx;
   const partnerId = ctx.active.partnerId;

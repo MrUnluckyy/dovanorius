@@ -30,7 +30,7 @@ export async function PreFooterCTA() {
               decisions, and on yellow the store pill needs its own white
               ground to stay readable. */}
           <div className="relative flex w-full flex-none flex-col items-stretch gap-3.5 md:w-auto">
-            <Link href="/skydelis" className="nr-btn nr-btn-dark">
+            <Link href="/mano" className="nr-btn nr-btn-dark">
               {t("start")}
             </Link>
             <StoreLinks platform={platform} tone="yellow" />

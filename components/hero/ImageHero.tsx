@@ -47,7 +47,7 @@ export async function ImageHero() {
           style={{ animationDelay: "0.34s" }}
         >
           <Link
-            href="/skydelis"
+            href="/mano"
             className="nr-btn nr-btn-primary w-full sm:w-auto"
             style={{ animation: "nrPulse 3.2s ease-out 1.6s infinite" }}
           >

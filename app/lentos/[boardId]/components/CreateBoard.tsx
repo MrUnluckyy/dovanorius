@@ -11,11 +11,11 @@ import { BoardForm } from "@/components/create/Forms/BoardForm";
  */
 export function CreateBoard({
   user,
-  variant = "button",
+  small = false,
 }: {
   user: User | null;
-  /** "tile" is the dashed card that sits in the boards grid. */
-  variant?: "button" | "tile";
+  /** Compact, for sitting beside a heading. */
+  small?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const t = useTranslations("Boards");
@@ -24,30 +24,18 @@ export function CreateBoard({
 
   return (
     <>
-      {variant === "tile" ? (
-        <button
-          type="button"
-          onClick={() => setIsOpen(true)}
-          className="group flex min-h-[140px] w-full flex-col sm:min-h-[260px] items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-(--nr-border) p-6 text-center transition hover:border-(--nr-yellow-deep) hover:bg-(--nr-tile)/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--nr-yellow-deep)"
-        >
-          <span className="grid h-12 w-12 place-items-center rounded-full bg-(--nr-yellow) text-(--nr-ink) shadow-[var(--nr-shadow-btn)] transition group-hover:scale-105">
-            <LuPlus className="w-5" />
-          </span>
-          <span className="font-heading text-lg font-bold">{t("ctaCreateBoard")}</span>
-          <span className="max-w-[16rem] text-sm text-(--nr-muted)">
-            {t("boardTitlePlaceholder")}
-          </span>
-        </button>
-      ) : (
-        <button className="btn btn-primary" onClick={() => setIsOpen(true)}>
-          <LuPlus />
-          {t("ctaCreateBoard")}
-        </button>
-      )}
+      <button
+        type="button"
+        className={`btn btn-primary shrink-0${small ? " btn-sm" : ""}`}
+        onClick={() => setIsOpen(true)}
+      >
+        <LuPlus />
+        {t("ctaCreateBoard")}
+      </button>
 
       {isOpen && (
-        <dialog open className="modal modal-open">
-          <div className="modal-box max-w-lg p-6 sm:p-8">
+        <dialog open className="modal modal-open modal-bottom sm:modal-middle">
+          <div className="modal-box max-w-lg p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8">
             <button
               type="button"
               className="btn btn-sm btn-circle btn-ghost absolute right-3 top-3"

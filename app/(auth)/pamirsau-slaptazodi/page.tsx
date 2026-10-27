@@ -17,7 +17,7 @@ export default async function ForgotPassword() {
   // "logged in" in any sense they'd recognise, and bouncing them meant someone
   // who had ever reserved could never reach this page. Same fix /login uses.
   if (user && !user.is_anonymous) {
-    redirect("/skydelis");
+    redirect("/mano");
   }
 
   return (

@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       disallow: [
-        "/skydelis/",
+        "/mano/",
         "/lentos/",
         "/renginiai/",
         "/prisijungti/",

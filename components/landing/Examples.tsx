@@ -114,7 +114,7 @@ export function Examples() {
       </h2>
       <CategoryMosaicGrid items={items} aboveTheFoldCount={4} />
       <Link
-        href="/skydelis"
+        href="/mano"
         className="btn btn-primary font-heading btn-md md:btn-lg mt-8 mx-auto"
       >
         {t("ctaBuildYourWishList")}

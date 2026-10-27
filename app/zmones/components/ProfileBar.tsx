@@ -2,7 +2,7 @@
 import { shareLinks } from "@/lib/appLinks";
 import useProfile from "@/hooks/useProfile";
 import { isWithinInterval, subWeeks } from "date-fns";
-import { UserAvatar } from "@/app/skydelis/components/user/UserAvatar";
+import { UserAvatar } from "@/app/mano/components/user/UserAvatar";
 import { useFollow } from "@/hooks/useFollow";
 import { LuShare, LuUserMinus, LuUserPlus } from "react-icons/lu";
 import { useTranslations } from "next-intl";

@@ -1,12 +1,12 @@
 "use client";
 import { shareLinks } from "@/lib/appLinks";
 import useProfile from "@/hooks/useProfile";
-import { UserAvatar } from "@/app/skydelis/components/user/UserAvatar";
+import { UserAvatar } from "@/app/mano/components/user/UserAvatar";
 import { UserLoadingSkeleton } from "@/components/loaders/UserLoadingSkeleton";
 import { LuShare } from "react-icons/lu";
 import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
-import { UserEditModal } from "@/app/skydelis/components/user/UserEditModal";
+import { UserEditModal } from "@/app/mano/components/user/UserEditModal";
 
 /**
  * Who you are, compactly — the dashboard is for your boards, so the header

@@ -26,8 +26,8 @@ export function AddItemModal({
         {children}
       </button>
       {isOpen && (
-        <dialog open className="modal modal-open">
-          <div className="modal-box max-w-lg p-6 sm:p-8">
+        <dialog open className="modal modal-open modal-bottom sm:modal-middle">
+          <div className="modal-box max-w-lg p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8">
             <button
               className="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 z-10"
               onClick={() => setIsOpen(false)}

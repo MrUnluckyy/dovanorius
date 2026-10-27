@@ -65,7 +65,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                     they already use. This is also what makes the separate
                     "Pagrindinis" link redundant, so it is gone. */}
                 <Link
-                  href={signedIn ? "/skydelis" : "/"}
+                  href={signedIn ? "/mano" : "/"}
                   className="text-xl font-bold flex gap-2 items-center"
                 >
                   <Image
@@ -147,7 +147,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                       className="dropdown-content menu z-50 mt-2 w-56 rounded-box bg-base-100 p-2 shadow-lg ring-1 ring-base-300"
                     >
                       <li>
-                        <Link href="/skydelis">
+                        <Link href="/mano">
                           <LuHouse />
                           {t("dashboard")}
                         </Link>
@@ -229,7 +229,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
             {signedIn ? (
               <>
                 <Link
-                  href="/skydelis"
+                  href="/mano"
                   className={`btn btn-ghost w-full justify-start gap-3 text-xl ${
                     pathnames.includes("dashboard") ? "font-bold" : "font-normal"
                   }`}

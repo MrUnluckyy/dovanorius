@@ -198,7 +198,7 @@
     "successMarkAsBought": "🎉 Smagaus naudojimo!",
     "errorMarkAsBought": "😵 Įvyko pažymint kaip nupirką. Bandykite dar kartą vėliau.!",
     "boardsCount": "{count, plural, one {# Lenta} other {# Lentos}}",
-    "itemsCount": "{count, plural, one {# Noras} other {# Norai}}",
+    "itemsCount": "{count, plural, one {# noras} few {# norai} other {# norų}}",
     "urlValidError": "Prašome įvesti galiojantį URL.",
     "maxImageSizeLabel": "Maximalus paveikslėlio dydis - 2MB.",
     "getMetadata": "Gauti info",

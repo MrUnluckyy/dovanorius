@@ -198,7 +198,7 @@
     "successMarkAsBought": "🎉 Success!",
     "errorMarkAsBought": "😵 Oops!",
     "boardsCount": "{count, plural, one {# Board} other {# Boards}}",
-    "itemsCount": "{count, plural, one {# Wish} other {# Wishes}}",
+    "itemsCount": "{count, plural, one {# wish} other {# wishes}}",
     "urlValidError": "Please enter a valid URL.",
     "maxImageSizeLabel": "Maximum image size is 2MB.",
     "getMetadata": "Autofill",
