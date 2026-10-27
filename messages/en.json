@@ -114,7 +114,7 @@
     "board": "Wish Board",
     "boards": "Wish Boards",
     "createEvent": "Create Event",
-    "dashboard": "Dashboard",
+    "dashboard": "My wishes",
     "discover": "Gift ideas",
     "events": "Events",
     "guestMode": "Guest",
@@ -129,7 +129,13 @@
     "user": "User",
     "userBoards": "User's Boards",
     "users": "Users",
-    "wishBoards": "Wish Boards"
+    "wishBoards": "Wish Boards",
+    "search": "Search people",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "mainMenu": "Main menu",
+    "drawerPitch": "Make a wish list and share it with the people close to you",
+    "viewProfile": "My profile"
   },
   "Boards": {
     "public": "Public",

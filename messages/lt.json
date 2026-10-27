@@ -114,7 +114,7 @@
     "board": "Norų lenta",
     "boards": "Norų lentos",
     "createEvent": "Sukurti renginį",
-    "dashboard": "Pagrindinis",
+    "dashboard": "Mano norai",
     "discover": "Dovanų idėjos",
     "events": "Renginiai",
     "guestMode": "Svečias",
@@ -129,7 +129,13 @@
     "user": "Vartotojas",
     "userBoards": "Vartotojo lentos",
     "users": "Vartotojai",
-    "wishBoards": "Norų lentos"
+    "wishBoards": "Norų lentos",
+    "search": "Ieškoti žmonių",
+    "openMenu": "Atidaryti meniu",
+    "closeMenu": "Uždaryti meniu",
+    "mainMenu": "Pagrindinis meniu",
+    "drawerPitch": "Susikurk norų sąrašą ir pasidalink juo su artimaisiais",
+    "viewProfile": "Mano profilis"
   },
   "Boards": {
     "public": "Vieša",

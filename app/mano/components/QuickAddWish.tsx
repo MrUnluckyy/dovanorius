@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { LuArrowRight, LuLink, LuX } from "react-icons/lu";
 import { WishForm } from "@/components/create/Forms/WishForm";
@@ -20,8 +20,13 @@ export function QuickAddWish({ user }: { user: User }) {
   const [link, setLink] = useState("");
   const [open, setOpen] = useState<null | { url?: string; manual?: boolean }>(null);
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const start = (url: string) => {
-    if (!url.trim()) return;
+    if (!url.trim()) {
+      inputRef.current?.focus();
+      return;
+    }
     setOpen({ url: url.trim() });
     setLink("");
   };
@@ -57,6 +62,7 @@ export function QuickAddWish({ user }: { user: User }) {
         >
           <LuLink className="w-4 shrink-0 text-(--nr-muted)" aria-hidden />
           <input
+            ref={inputRef}
             type="text"
             inputMode="url"
             autoComplete="off"
@@ -75,8 +81,13 @@ export function QuickAddWish({ user }: { user: User }) {
           />
           <button
             type="submit"
-            disabled={!link.trim()}
-            className="btn btn-primary btn-sm h-10 shrink-0 rounded-xl px-4"
+            // Never disabled: a solid grey block read as "broken". Empty, it
+            // is outlined and a tap puts the cursor in the field instead.
+            className={`btn btn-sm h-10 shrink-0 rounded-xl px-4 ${
+              link.trim()
+                ? "btn-primary"
+                : "border-(--nr-border) bg-transparent text-(--nr-muted) shadow-none hover:border-(--nr-ink) hover:bg-transparent hover:text-(--nr-ink)"
+            }`}
           >
             <span className="hidden sm:inline">{tw("linkCta")}</span>
             <LuArrowRight className="w-4" />

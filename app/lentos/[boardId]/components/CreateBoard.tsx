@@ -34,7 +34,7 @@ export function CreateBoard({
         type="button"
         className={
           quiet
-            ? "btn btn-sm shrink-0 gap-2 rounded-xl border-(--nr-border) sm:btn-md bg-(--nr-surface) font-semibold text-(--nr-ink) shadow-sm hover:border-(--nr-ink) hover:bg-(--nr-surface)"
+            ? "btn btn-sm relative shrink-0 gap-2 rounded-xl border-(--nr-border) before:absolute before:-inset-1.5 before:content-[''] sm:btn-md sm:before:hidden bg-(--nr-surface) font-semibold text-(--nr-ink) shadow-sm hover:border-(--nr-ink) hover:bg-(--nr-surface)"
             : `btn btn-primary shrink-0${small ? " btn-sm" : ""}`
         }
         onClick={() => setIsOpen(true)}
