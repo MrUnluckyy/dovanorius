@@ -386,7 +386,8 @@
     "followingTitle": "Following",
     "followingEmptyTitle": "You're not following anyone yet",
     "followingEmptyHint": "Find your friends and you'll always know what they wish for.",
-    "followingCta": "Find friends"
+    "followingCta": "Find friends",
+    "quickAddBoard": "New board"
   },
   "Events": {
     "addCover": "Add cover photo",

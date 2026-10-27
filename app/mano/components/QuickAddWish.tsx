@@ -5,12 +5,16 @@ import { useTranslations } from "next-intl";
 import { LuArrowRight, LuLink, LuX } from "react-icons/lu";
 import { WishForm } from "@/components/create/Forms/WishForm";
 import { Hero3D } from "@/components/ui/Hero3D";
+import { CreateBoard } from "@/app/lentos/[boardId]/components/CreateBoard";
+import type { User } from "@supabase/supabase-js";
 
 /**
- * The dashboard's main action, in reach without a menu: paste a link here
- * and the wish flow opens already fetching it, or go "by hand".
+ * The dashboard's create area, in reach without a menu. The main action is a
+ * wish: paste a link and the wish flow opens already fetching it, or go "by
+ * hand". A new board sits beside it as the quieter second action — on phones
+ * in the title row, on wide screens after a divider at the end of the row.
  */
-export function QuickAddWish() {
+export function QuickAddWish({ user }: { user: User }) {
   const t = useTranslations("Dashboard");
   const tw = useTranslations("Wish");
   const [link, setLink] = useState("");
@@ -24,20 +28,23 @@ export function QuickAddWish() {
 
   return (
     <>
-      <section className="flex flex-col gap-4 rounded-3xl bg-(--nr-tile) p-4 sm:flex-row sm:items-center sm:gap-5 sm:p-5">
-        <div className="flex items-center gap-3 sm:w-56 sm:shrink-0">
+      <section className="flex flex-col gap-4 rounded-3xl bg-(--nr-tile) p-4 sm:p-5 lg:flex-row lg:items-center lg:gap-5">
+        <div className="flex items-center gap-3 lg:w-56 lg:shrink-0">
           <Hero3D name="gift" size={48} still />
-          <div>
-            <h2 className="font-heading text-lg font-bold leading-tight">
+          <div className="min-w-0 flex-1">
+            <h2 className="font-heading whitespace-nowrap text-lg font-bold leading-tight">
               {t("quickAddTitle")}
             </h2>
             <button
               type="button"
               onClick={() => setOpen({ manual: true })}
-              className="text-sm text-(--nr-gold-strong) underline decoration-(--nr-yellow-deep) underline-offset-2 hover:text-base-content"
+              className="whitespace-nowrap text-sm text-(--nr-gold-strong) underline decoration-(--nr-yellow-deep) underline-offset-2 hover:text-base-content"
             >
               {t("quickAddManual")}
             </button>
+          </div>
+          <div className="lg:hidden">
+            <CreateBoard user={user} quiet label={t("quickAddBoard")} />
           </div>
         </div>
 
@@ -75,6 +82,11 @@ export function QuickAddWish() {
             <LuArrowRight className="w-4" />
           </button>
         </form>
+
+        <div className="hidden items-center gap-5 lg:flex">
+          <span className="h-10 w-px bg-(--nr-border)" aria-hidden />
+          <CreateBoard user={user} quiet label={t("quickAddBoard")} />
+        </div>
       </section>
 
       {open && (

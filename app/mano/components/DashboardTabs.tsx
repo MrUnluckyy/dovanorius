@@ -40,8 +40,8 @@ export function DashboardTabs({ user }: { user: User }) {
 
       {active === "wishes" && (
         <div className="flex flex-col gap-10">
-          {isAccountUser(user) && <QuickAddWish />}
-          <BoardsList user={user} />
+          {isAccountUser(user) && <QuickAddWish user={user} />}
+          <BoardsList user={user} createHere={false} />
           <ReservedItems user={user} />
         </div>
       )}

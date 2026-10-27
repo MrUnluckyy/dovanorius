@@ -386,7 +386,8 @@
     "followingTitle": "Seku",
     "followingEmptyTitle": "Dar nieko neseki",
     "followingEmptyHint": "Rask draugus ir visada matysi, ko jie nori.",
-    "followingCta": "Ieškoti draugų"
+    "followingCta": "Ieškoti draugų",
+    "quickAddBoard": "Nauja lenta"
   },
   "Events": {
     "addCover": "Pridėti viršelio nuotrauką",

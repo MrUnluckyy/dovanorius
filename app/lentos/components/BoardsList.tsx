@@ -22,7 +22,14 @@ export type BoardWithPreview = {
   is_public: boolean;
 };
 
-export function BoardsList({ user }: { user: User }) {
+export function BoardsList({
+  user,
+  createHere = true,
+}: {
+  user: User;
+  /** Off where the page already offers "New board" (the dashboard's band). */
+  createHere?: boolean;
+}) {
   const supabase = createClient();
   const t = useTranslations("Dashboard");
 
@@ -43,7 +50,7 @@ export function BoardsList({ user }: { user: User }) {
   // would vanish with their cookies. Creating one needs an account.
   // Contributing to a board they were INVITED to is a different thing and
   // stays open — that is what the invite was for.
-  const canCreate = isAccountUser(user);
+  const canCreate = createHere && isAccountUser(user);
 
   if (boards.length === 0) {
     // Was `{boards.length && …}`, which rendered a bare "0" and nothing else.

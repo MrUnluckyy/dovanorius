@@ -2,7 +2,7 @@
 import { User } from "@supabase/supabase-js";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { LuPlus, LuX } from "react-icons/lu";
+import { LuClipboardPlus, LuPlus, LuX } from "react-icons/lu";
 import { BoardForm } from "@/components/create/Forms/BoardForm";
 
 /**
@@ -12,10 +12,16 @@ import { BoardForm } from "@/components/create/Forms/BoardForm";
 export function CreateBoard({
   user,
   small = false,
+  quiet = false,
+  label,
 }: {
   user: User | null;
   /** Compact, for sitting beside a heading. */
   small?: boolean;
+  /** White, secondary — for sitting next to a yellow primary action. */
+  quiet?: boolean;
+  /** Button text; defaults to "Sukurti naują lentą". */
+  label?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const t = useTranslations("Boards");
@@ -26,11 +32,21 @@ export function CreateBoard({
     <>
       <button
         type="button"
-        className={`btn btn-primary shrink-0${small ? " btn-sm" : ""}`}
+        className={
+          quiet
+            ? "btn btn-sm shrink-0 gap-2 rounded-xl border-(--nr-border) sm:btn-md bg-(--nr-surface) font-semibold text-(--nr-ink) shadow-sm hover:border-(--nr-ink) hover:bg-(--nr-surface)"
+            : `btn btn-primary shrink-0${small ? " btn-sm" : ""}`
+        }
         onClick={() => setIsOpen(true)}
       >
-        <LuPlus />
-        {t("ctaCreateBoard")}
+        {quiet ? <LuClipboardPlus className="w-4" aria-hidden /> : <LuPlus />}
+        {quiet ? (
+          // Icon-only on the narrowest phones, where the label would overlap
+          // the title beside it; still read out by screen readers.
+          <span className="max-[359px]:sr-only">{label ?? t("ctaCreateBoard")}</span>
+        ) : (
+          (label ?? t("ctaCreateBoard"))
+        )}
       </button>
 
       {isOpen && (
