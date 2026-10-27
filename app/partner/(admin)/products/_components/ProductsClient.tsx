@@ -37,7 +37,7 @@ export function ProductsClient({
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold font-heading">
           Produktai{" "}
-          <span className="text-base-content/40 font-normal text-lg">
+          <span className="text-base-content/65 font-normal text-lg">
             ({products.length})
           </span>
         </h1>

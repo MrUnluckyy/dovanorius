@@ -139,8 +139,8 @@ export default async function BlogPostPage({
 
       <article className="mx-auto max-w-3xl px-4 sm:px-8">
         <header className="pt-10 pb-8 md:pt-14">
-          <nav className="text-base-content/55 mb-6 flex items-center gap-2 text-sm">
-            <Link href="/blog" className="hover:text-primary transition-colors">
+          <nav className="text-base-content/70 mb-6 flex items-center gap-2 text-sm">
+            <Link href="/blog" className="hover:text-base-content hover:underline transition-colors">
               {t("title")}
             </Link>
             <span aria-hidden>/</span>
@@ -152,7 +152,7 @@ export default async function BlogPostPage({
               {post.categories.map((category) => (
                 <span
                   key={category.slug}
-                  className="bg-primary/10 text-primary rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase"
+                  className="bg-(--nr-tile) text-(--nr-gold-strong) rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase"
                 >
                   {category.title}
                 </span>
@@ -170,7 +170,7 @@ export default async function BlogPostPage({
             </p>
           )}
 
-          <div className="text-base-content/55 border-base-300/60 mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 border-t pt-5 text-sm">
+          <div className="text-base-content/70 border-base-300/60 mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 border-t pt-5 text-sm">
             {post.author?.image?.asset && (
               <SanityImage
                 value={post.author.image}

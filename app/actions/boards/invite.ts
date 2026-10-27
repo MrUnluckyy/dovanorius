@@ -65,7 +65,7 @@ export async function createBoardInvite(
       subject: "Kvietimas bendradarbiauti Noriuto lentoje 🎁",
       react: BoardInviteEmail({
         boardName: board?.name ?? "norų lenta",
-        joinUrl: `${baseUrl}/boards/join/${invite.token}`,
+        joinUrl: `${baseUrl}/lentos/prisijungti/${invite.token}`,
       }),
     });
 

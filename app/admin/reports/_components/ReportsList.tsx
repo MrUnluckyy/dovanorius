@@ -45,7 +45,7 @@ export function ReportsList({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-heading text-2xl font-bold">Pranešimai</h1>
-          <p className="text-sm text-base-content/60">
+          <p className="text-sm text-base-content/70">
             {rows.length} {showAll ? "iš viso" : "neperžiūrėtų"}
             {pendingMessages > 0 && ` · ${pendingMessages} su žinute`}
           </p>
@@ -71,7 +71,7 @@ export function ReportsList({
       {rows.length === 0 && (
         <div className="rounded-xl border border-base-300 bg-base-100 p-8 text-center">
           <p className="font-medium">Tylu.</p>
-          <p className="mt-1 text-sm text-base-content/60">
+          <p className="mt-1 text-sm text-base-content/70">
             Nieko naujo nuo paskutinio karto — tai gera žinia.
           </p>
         </div>
@@ -86,7 +86,7 @@ export function ReportsList({
         >
           <div className="flex flex-wrap items-start gap-3">
             {r.kind === "report" ? (
-              <LuMessageSquare className="mt-0.5 shrink-0 text-lg text-primary" />
+              <LuMessageSquare className="mt-0.5 shrink-0 text-lg text-(--nr-gold-strong)" />
             ) : (
               <LuTriangleAlert className="mt-0.5 shrink-0 text-lg text-warning" />
             )}
@@ -94,7 +94,7 @@ export function ReportsList({
               <p className="font-medium">
                 {r.area}
                 {r.reason && (
-                  <span className="font-normal text-base-content/60">
+                  <span className="font-normal text-base-content/70">
                     {" "}
                     · {r.reason}
                   </span>
@@ -108,7 +108,7 @@ export function ReportsList({
                 </p>
               )}
 
-              <p className="mt-2 text-xs text-base-content/50">
+              <p className="mt-2 text-xs text-base-content/65">
                 {new Date(r.created_at).toLocaleString("lt-LT")}
                 {r.path && ` · ${r.path}`}
                 {r.is_guest === true && " · svečias"}
@@ -128,14 +128,14 @@ export function ReportsList({
 
               {r.detail && Object.keys(r.detail).length > 0 && (
                 <details className="mt-2">
-                  <summary className="cursor-pointer text-xs text-base-content/50">
+                  <summary className="cursor-pointer text-xs text-base-content/65">
                     Detalės
                   </summary>
                   <pre className="mt-1 overflow-x-auto rounded bg-base-200 p-2 text-xs">
                     {JSON.stringify(r.detail, null, 2)}
                   </pre>
                   {r.user_agent && (
-                    <p className="mt-1 break-all text-xs text-base-content/40">
+                    <p className="mt-1 break-all text-xs text-base-content/65">
                       {r.user_agent}
                     </p>
                   )}

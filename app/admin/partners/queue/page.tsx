@@ -58,11 +58,11 @@ export default async function PartnerModerationPage() {
         <div>
           <h1 className="font-heading text-2xl font-bold">
             Moderavimas{" "}
-            <span className="text-lg font-normal text-base-content/40">
+            <span className="text-lg font-normal text-base-content/65">
               ({rows.length})
             </span>
           </h1>
-          <p className="mt-1 text-sm text-base-content/60">
+          <p className="mt-1 text-sm text-base-content/70">
             Partnerių įkelti produktai, laukiantys peržiūros. Patvirtinti
             produktai iškart įtraukiami į Discover srautą.
           </p>
@@ -72,7 +72,7 @@ export default async function PartnerModerationPage() {
 
       {rows.length === 0 ? (
         <div className="card bg-base-100 card-border">
-          <div className="card-body items-center py-16 text-center text-base-content/50">
+          <div className="card-body items-center py-16 text-center text-base-content/65">
             <p>Peržiūros eilė tuščia. 🎉</p>
           </div>
         </div>
@@ -116,7 +116,7 @@ export default async function PartnerModerationPage() {
                                   href={p.product_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-xs text-primary hover:underline"
+                                  className="text-xs text-(--nr-gold-strong) hover:underline"
                                 >
                                   {p.product_url.replace(/^https?:\/\//, "").slice(0, 40)}
                                 </a>
@@ -136,13 +136,13 @@ export default async function PartnerModerationPage() {
                             ? `${Number(p.price).toFixed(2)} ${p.currency}`
                             : "—"}
                         </td>
-                        <td className="text-sm text-base-content/60">
+                        <td className="text-sm text-base-content/70">
                           {new Date(p.created_at).toLocaleDateString("lt-LT")}
                         </td>
                         <td>
                           <QueueActions productId={p.id} />
                           {missingUrl && (
-                            <p className="mt-1 text-right text-[10px] text-base-content/40">
+                            <p className="mt-1 text-right text-[10px] text-base-content/65">
                               Patvirtinus vis tiek nebus rodomas be nuorodos
                             </p>
                           )}

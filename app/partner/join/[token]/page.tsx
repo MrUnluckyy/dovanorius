@@ -15,7 +15,7 @@ export default async function JoinPartnerPage({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`/login?redirect=/partner/join/${token}`);
+    redirect(`/prisijungti?redirect=/partner/join/${token}`);
   }
 
   const { data: result } = await supabase.rpc("accept_partner_invite", {
@@ -50,10 +50,10 @@ export default async function JoinPartnerPage({
       <div className="card card-border bg-base-100 max-w-sm w-full">
         <div className="card-body text-center gap-4">
           <h1 className="text-xl font-bold font-heading text-error">{message}</h1>
-          <p className="text-sm text-base-content/60">
+          <p className="text-sm text-base-content/70">
             Susisiekite su partneriu, kuris jus pakvietė, ir paprašykite naujo kvietimo.
           </p>
-          <Link href="/dashboard" className="btn btn-primary btn-sm">
+          <Link href="/skydelis" className="btn btn-primary btn-sm">
             Į pagrindinį
           </Link>
         </div>

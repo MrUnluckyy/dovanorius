@@ -1,5 +1,11 @@
 /** Which flow a failure came from. Coarse on purpose — useful for grouping. */
-export type ReportArea = "reserve" | "auth" | "board" | "contact" | "other";
+export type ReportArea =
+  | "reserve"
+  | "auth"
+  | "board"
+  | "contact"
+  | "not_found"
+  | "other";
 
 type ErrorBeacon = {
   area: ReportArea;

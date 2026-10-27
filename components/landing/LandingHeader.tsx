@@ -92,12 +92,12 @@ export function LandingHeader() {
             </Link>
 
             <Link
-              href="/login"
+              href="/prisijungti"
               className="rounded-full px-3 py-1.5 text-(--nr-ink) transition-colors hover:text-(--nr-muted)"
             >
               {t("login")}
             </Link>
-            <Link href="/register" className="nr-btn nr-btn-dark nr-btn-sm ml-1">
+            <Link href="/registracija" className="nr-btn nr-btn-dark nr-btn-sm ml-1">
               {t("register")}
             </Link>
           </nav>
@@ -159,14 +159,14 @@ export function LandingHeader() {
               matched pair rather than a de-emphasised nav link. */}
           <div className="mt-auto flex flex-col gap-3">
             <Link
-              href="/login"
+              href="/prisijungti"
               onClick={() => setMenuOpen(false)}
               className="nr-btn nr-btn-outline w-full"
             >
               {t("login")}
             </Link>
             <Link
-              href="/register"
+              href="/registracija"
               onClick={() => setMenuOpen(false)}
               className="nr-btn nr-btn-dark w-full"
             >

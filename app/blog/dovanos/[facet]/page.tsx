@@ -104,8 +104,8 @@ export default async function FacetPage({
   return (
     <div className="mx-auto max-w-[1440px] px-4 sm:px-8">
       <header className="border-base-300/60 border-b pt-10 pb-10 md:pt-14 md:pb-12">
-        <nav className="text-base-content/55 mb-4 flex items-center gap-2 text-sm">
-          <Link href="/blog" className="hover:text-primary transition-colors">
+        <nav className="text-base-content/70 mb-4 flex items-center gap-2 text-sm">
+          <Link href="/blog" className="hover:text-base-content hover:underline transition-colors">
             {t("title")}
           </Link>
           <span aria-hidden>/</span>
@@ -124,7 +124,7 @@ export default async function FacetPage({
               />
             </div>
           )}
-          <p className="text-base-content/45 mt-4 text-sm">
+          <p className="text-base-content/65 mt-4 text-sm">
             {total} {total === 1 ? t("postSingular") : t("postPlural")}
           </p>
         </div>
@@ -142,7 +142,7 @@ export default async function FacetPage({
 
       {posts.length === 0 ? (
         <div className="border-base-300 rounded-2xl border border-dashed py-24 text-center">
-          <p className="text-base-content/60">{t("empty")}</p>
+          <p className="text-base-content/70">{t("empty")}</p>
           <Link href="/blog" className="btn btn-primary btn-sm mt-4">
             {t("allPosts")}
           </Link>

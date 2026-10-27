@@ -223,7 +223,7 @@ export function LandingSearch() {
               {results.map((p) => (
                 <Link
                   key={p.id}
-                  href={`/users/${p.id}`}
+                  href={`/zmones/${p.id}`}
                   onClick={closeModal}
                   className="group flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-(--nr-tile)/70"
                 >

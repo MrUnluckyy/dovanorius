@@ -60,7 +60,7 @@ export const CarouselDialog = forwardRef<
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="font-heading text-lg font-bold">Instagram karuselė</h3>
-            <p className="text-sm text-base-content/60">
+            <p className="text-sm text-base-content/70">
               {total} {ltPlural(total, "skaidrė", "skaidrės", "skaidrių")}, 1080×1350. Įkelkite jas į Instagram tokia tvarka.
             </p>
           </div>
@@ -112,7 +112,7 @@ export const CarouselDialog = forwardRef<
                       loading="lazy"
                       className="aspect-[4/5] w-full rounded-lg border border-base-300 bg-base-200 object-cover"
                     />
-                    <span className="mt-1 block text-center text-xs text-base-content/50">
+                    <span className="mt-1 block text-center text-xs text-base-content/65">
                       {i + 1}
                     </span>
                   </a>

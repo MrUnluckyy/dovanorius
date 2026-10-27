@@ -100,7 +100,7 @@ export default function GiftPicks({
                       </a>
                     )}
                     {item.price && (
-                      <span className="text-base-content/60 text-sm">
+                      <span className="text-base-content/70 text-sm">
                         {item.price}
                       </span>
                     )}

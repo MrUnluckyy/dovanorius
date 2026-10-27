@@ -18,5 +18,5 @@ export function isAccountUser(user: User | null | undefined): user is User {
 
 /** Where to send a guest so they come back to what they were doing. */
 export function loginRedirect(next?: string): string {
-  return next ? `/login?next=${encodeURIComponent(next)}` : "/login";
+  return next ? `/prisijungti?next=${encodeURIComponent(next)}` : "/prisijungti";
 }

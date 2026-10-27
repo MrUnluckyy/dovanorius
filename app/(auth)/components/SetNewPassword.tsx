@@ -141,7 +141,7 @@ export default function SetNewPassword() {
             {t("passwordUpdatedBody")}
           </p>
         </div>
-        <Link href="/login" className="btn btn-neutral w-full">
+        <Link href="/prisijungti" className="btn btn-neutral w-full">
           {t("ctaLogin")}
         </Link>
       </div>
@@ -181,7 +181,7 @@ export default function SetNewPassword() {
             {t("linkErrorLead")}
           </p>
         </div>
-        <Link href="/forgot-password" className="btn btn-neutral w-full">
+        <Link href="/pamirsau-slaptazodi" className="btn btn-neutral w-full">
           {t("linkErrorRetry")}
         </Link>
       </div>

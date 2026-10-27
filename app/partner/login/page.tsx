@@ -22,7 +22,7 @@ export default async function PartnerLoginPage() {
     <div className="min-h-screen bg-base-200 flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <p className="text-xs uppercase tracking-widest text-base-content/40 mb-1">
+          <p className="text-xs uppercase tracking-widest text-base-content/65 mb-1">
             Partnerių portalas
           </p>
           <h1 className="text-3xl font-bold font-heading">Prisijungimas</h1>
@@ -32,7 +32,7 @@ export default async function PartnerLoginPage() {
             <PartnerLoginForm />
           </div>
         </div>
-        <p className="text-center text-xs text-base-content/40">
+        <p className="text-center text-xs text-base-content/65">
           Neturite paskyros? Susisiekite su Noriuto komanda.
         </p>
       </div>

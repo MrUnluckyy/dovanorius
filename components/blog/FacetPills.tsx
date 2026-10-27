@@ -33,7 +33,7 @@ export default function FacetPills({
     <div className="flex flex-col gap-4">
       {groups.map(({ kind, items }) => (
         <div key={kind} className="flex flex-wrap items-center gap-2">
-          <span className="text-base-content/45 mr-1 text-[11px] font-semibold tracking-[0.14em] uppercase">
+          <span className="text-base-content/65 mr-1 text-[11px] font-semibold tracking-[0.14em] uppercase">
             {labels[kind] ?? kind}
           </span>
           {items.map((facet) => {
@@ -46,7 +46,7 @@ export default function FacetPills({
                 className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all duration-200 ${
                   isActive
                     ? "border-primary bg-primary text-primary-content shadow-sm"
-                    : "border-base-300 hover:border-primary hover:text-primary hover:-translate-y-0.5"
+                    : "border-base-300 hover:border-(--nr-yellow-deep) hover:bg-(--nr-tile) hover:-translate-y-0.5"
                 }`}
               >
                 {facet.title}

@@ -39,3 +39,19 @@ export function generateSlug(
 
   return `${collapsed}-${randomPart}`;
 }
+
+// No 0/o, 1/l/i: codes get read out loud and typed from screenshots.
+const BOARD_CODE_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
+
+/**
+ * A board's share code: /b/k7x2m9pq. Deliberately carries no name, so renaming
+ * a board can never leave a stale "/b/dovanos-kaledoms-…" link behind.
+ *
+ * The database assigns the real one (boards_assign_slug trigger) and ignores
+ * what a client sends; this is only the value to send so a board inserted
+ * before that migration runs still gets a working link.
+ */
+export function newBoardCode(length = 8): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(length));
+  return Array.from(bytes, (b) => BOARD_CODE_ALPHABET[b % BOARD_CODE_ALPHABET.length]).join("");
+}

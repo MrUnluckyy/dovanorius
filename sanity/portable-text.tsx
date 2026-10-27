@@ -44,7 +44,7 @@ export function getPortableTextComponents(
 
         if (href.startsWith("/")) {
           return (
-            <Link href={href} className="link link-primary">
+            <Link href={href} className="nr-link">
               {children}
             </Link>
           );
@@ -53,7 +53,7 @@ export function getPortableTextComponents(
         return (
           <a
             href={href}
-            className="link link-primary"
+            className="nr-link"
             target={value?.openInNewTab ? "_blank" : undefined}
             rel="noopener noreferrer"
           >

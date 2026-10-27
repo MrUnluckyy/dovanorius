@@ -70,7 +70,7 @@ export function ImageUploadGrid({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={processing}
-            className="w-20 h-20 flex items-center justify-center rounded-md border-2 border-dashed border-base-300 hover:border-primary transition-colors text-base-content/50 hover:text-primary disabled:opacity-60"
+            className="w-20 h-20 flex items-center justify-center rounded-md border-2 border-dashed border-base-300 hover:border-(--nr-yellow-deep) transition-colors text-base-content/70 hover:text-base-content disabled:opacity-60"
             aria-label="Add image"
           >
             {processing ? (

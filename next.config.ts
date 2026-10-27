@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { LEGACY_ROUTES } from "./lib/legacyRoutes";
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -33,19 +34,28 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
-    // The events area moved from /secret-santa to /events (it now hosts all
-    // event types, not just Secret Santa). Keep old links/bookmarks working.
+    // The partner panel lives on its own host, where middleware rewrites
+    // /login to /partner/login. Sending that /login to /prisijungti would
+    // break partner sign-in, so the site's renames stay off that host.
+    const notPartner = [{ type: "host" as const, value: "partner\\..*" }];
+
     return [
+      // /events/<slug>/my is the one rename inside a dynamic segment.
       {
-        source: "/secret-santa",
-        destination: "/events",
+        source: "/events/:slug/my",
+        destination: "/renginiai/:slug/mano",
         permanent: true,
+        missing: notPartner,
       },
-      {
-        source: "/secret-santa/:path*",
-        destination: "/events/:path*",
-        permanent: true,
-      },
+      ...LEGACY_ROUTES.flatMap(([from, to]) => [
+        { source: from, destination: to, permanent: true, missing: notPartner },
+        {
+          source: `${from}/:path*`,
+          destination: `${to}/:path*`,
+          permanent: true,
+          missing: notPartner,
+        },
+      ]),
     ];
   },
 };

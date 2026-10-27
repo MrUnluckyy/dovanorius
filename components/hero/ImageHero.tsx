@@ -47,7 +47,7 @@ export async function ImageHero() {
           style={{ animationDelay: "0.34s" }}
         >
           <Link
-            href="/dashboard"
+            href="/skydelis"
             className="nr-btn nr-btn-primary w-full sm:w-auto"
             style={{ animation: "nrPulse 3.2s ease-out 1.6s infinite" }}
           >
@@ -59,7 +59,7 @@ export async function ImageHero() {
               about who it is for. Outline weight so it reads as an alternative
               rather than competing with the primary. */}
           <Link
-            href="/discover"
+            href="/idejos"
             className="nr-btn nr-btn-outline w-full sm:w-auto"
           >
             {t("ctaDiscover")}

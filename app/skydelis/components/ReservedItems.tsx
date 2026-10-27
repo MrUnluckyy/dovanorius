@@ -1,0 +1,69 @@
+"use client";
+import { Item } from "@/app/lentos/[boardId]/components/WishList";
+import { createClient } from "@/utils/supabase/client";
+import { User } from "@supabase/supabase-js";
+import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
+import React from "react";
+import { ReservedItemsList } from "./ReservedItemsList";
+import { BoardsLoadingSkeleton } from "@/components/loaders/BoardsLoadingSkeleton";
+
+export type ReservedWishlistItem = {
+  id: string;
+  board_id: string;
+  title: string;
+  notes: string | null;
+  price: number | null;
+  image_url: string | null;
+  url: string | null;
+  status: string;
+  reserved_by: string | null;
+  reserved_at: string | null; // or Date if you prefer
+  priority: number | null;
+  created_at: string; // or Date
+  created_by: {
+    display_name: string;
+    avatar_url: string | null;
+    id: string;
+  };
+};
+
+export function ReservedItems({ user }: { user: User }) {
+  const supabase = createClient();
+  const t = useTranslations("Dashboard");
+
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ["reservedItems", user.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("items")
+        .select(
+          "id, board_id, title, notes, price, image_url, url, status, reserved_by, reserved_at, priority, created_at, created_by(display_name, avatar_url, id)"
+        )
+        .eq("reserved_by", user.id)
+        .neq("status", "purchased")
+        .is("archived_at", null)
+        .order("reserved_at", { ascending: false });
+      if (error) throw error;
+
+      const reserved: ReservedWishlistItem[] = data.map((item) => ({
+        ...item,
+        created_by: Array.isArray(item.created_by)
+          ? item.created_by[0] // take first if it’s array
+          : item.created_by, // or if it’s already object
+      }));
+      return reserved;
+    },
+  });
+
+  return (
+    <section>
+      <h2 className="font-heading mb-4 text-2xl font-bold">{t("reservedTitle")}</h2>
+      {isLoading ? (
+        <BoardsLoadingSkeleton />
+      ) : (
+        <ReservedItemsList items={items} />
+      )}
+    </section>
+  );
+}

@@ -54,10 +54,14 @@ export async function GET(request: Request) {
 
   const counts = new Map<string, ReportGroup>();
   for (const r of rows) {
-    const key = `${r.area}:${r.reason ?? ""}`;
+    // A 404 is only fixable with its address, so those group per path
+    // ("internal_link /renginiai/x/my") rather than all under one count.
+    const reason =
+      r.area === "not_found" ? `${r.reason ?? ""} ${r.path ?? "?"}`.trim() : r.reason;
+    const key = `${r.area}:${reason ?? ""}`;
     const g = counts.get(key);
     if (g) g.count += 1;
-    else counts.set(key, { area: r.area, reason: r.reason, count: 1 });
+    else counts.set(key, { area: r.area, reason, count: 1 });
   }
 
   const messages: ReportMessage[] = rows

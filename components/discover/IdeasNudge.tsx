@@ -13,7 +13,7 @@ import { LuSparkles } from "react-icons/lu";
 export function IdeasNudge({
   lead,
   cta,
-  href = "/discover",
+  href = "/idejos",
   prominent = false,
   className = "",
 }: {

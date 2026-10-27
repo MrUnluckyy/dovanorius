@@ -52,13 +52,13 @@ export default async function AuthCodeError() {
 
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link
-                href="/forgot-password"
+                href="/pamirsau-slaptazodi"
                 className="nr-btn nr-btn-primary w-full sm:w-auto"
               >
                 {t("linkErrorRetry")}
               </Link>
               <Link
-                href="/login"
+                href="/prisijungti"
                 className="nr-btn nr-btn-outline w-full sm:w-auto"
               >
                 {t("ctaLogin")}

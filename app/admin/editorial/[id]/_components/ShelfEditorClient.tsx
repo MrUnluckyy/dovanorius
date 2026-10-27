@@ -235,14 +235,14 @@ export function ShelfEditorClient({
       <div>
         <Link
           href="/admin/editorial"
-          className="flex items-center gap-1 text-sm text-base-content/60 hover:underline"
+          className="flex items-center gap-1 text-sm text-base-content/70 hover:underline"
         >
           <LuArrowLeft size={14} /> Visos lentynos
         </Link>
         <div className="mt-2 flex items-start justify-between gap-4">
           <div>
             <h1 className="font-heading text-2xl font-bold">{shelf.label_lt}</h1>
-            <p className="text-sm text-base-content/50">{shelf.slug}</p>
+            <p className="text-sm text-base-content/65">{shelf.slug}</p>
           </div>
           <div className="flex gap-2">
             <button
@@ -359,7 +359,7 @@ export function ShelfEditorClient({
           <label className="form-control mt-1 w-full">
             <span className="label-text text-sm">
               Vidinis aprašymas{" "}
-              <span className="text-base-content/40">— nerodomas viešai</span>
+              <span className="text-base-content/65">— nerodomas viešai</span>
             </span>
             <textarea
               className="textarea textarea-bordered w-full"
@@ -413,7 +413,7 @@ export function ShelfEditorClient({
             </label>
           </div>
 
-          <p className="mt-1 text-xs text-base-content/50">
+          <p className="mt-1 text-xs text-base-content/65">
             Naršyklės talpykla atnaujinama iki valandos, todėl lentyna gali
             pasirodyti šiek tiek vėliau nei nurodytas laikas.
           </p>
@@ -436,7 +436,7 @@ export function ShelfEditorClient({
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-heading text-lg font-bold">
               Produktai{" "}
-              <span className="text-base font-normal text-base-content/40">
+              <span className="text-base font-normal text-base-content/65">
                 ({picks.length})
               </span>
             </h2>
@@ -449,14 +449,14 @@ export function ShelfEditorClient({
             </button>
           </div>
 
-          <p className="text-sm text-base-content/60">
+          <p className="text-sm text-base-content/70">
             Eiliškumas čia yra eiliškumas Discover puslapyje — rankomis
             sudėliotos lentynos nesukamos kasdien. Tempkite už rankenėlės arba
             naudokite rodykles.
           </p>
 
           {picks.length === 0 ? (
-            <div className="py-8 text-center text-sm text-base-content/40">
+            <div className="py-8 text-center text-sm text-base-content/65">
               Kol kas nieko neatrinkta.
             </div>
           ) : (
@@ -551,7 +551,7 @@ export function ShelfEditorClient({
 
           <div className="mt-4 max-h-[50vh] space-y-2 overflow-y-auto">
             {searching && (
-              <div className="py-6 text-center text-sm text-base-content/50">
+              <div className="py-6 text-center text-sm text-base-content/65">
                 Ieškoma…
               </div>
             )}
@@ -585,13 +585,13 @@ export function ShelfEditorClient({
                       <div className="truncate text-sm font-medium">
                         {h.product_name}
                       </div>
-                      <div className="text-xs text-base-content/50">
+                      <div className="text-xs text-base-content/65">
                         {[h.brand_name, h.merchant_name].filter(Boolean).join(" · ")}
                         {h.price != null && ` · ${h.price} €`}
                       </div>
                     </div>
                     {already && (
-                      <span className="shrink-0 text-xs text-base-content/50">
+                      <span className="shrink-0 text-xs text-base-content/65">
                         Jau atrinkta
                       </span>
                     )}
@@ -602,7 +602,7 @@ export function ShelfEditorClient({
 
           <div className="modal-action items-center">
             {selected.length > 0 && (
-              <span className="mr-auto text-sm text-base-content/60">
+              <span className="mr-auto text-sm text-base-content/70">
                 Pažymėta: {selected.length}
               </span>
             )}
@@ -647,16 +647,16 @@ function Stat({
       : tone === "warning"
         ? value > 0
           ? "text-warning"
-          : "text-base-content/40"
+          : "text-base-content/65"
         : tone === "muted"
-          ? "text-base-content/40"
+          ? "text-base-content/65"
           : "";
   return (
     <div>
       <div className={`font-heading text-xl font-bold tabular-nums ${color}`}>
         {value}
       </div>
-      <div className="text-xs text-base-content/50">{label}</div>
+      <div className="text-xs text-base-content/65">{label}</div>
     </div>
   );
 }
@@ -702,7 +702,7 @@ function PickRow({
             grabbing a row by its image is the reflex, and refusing that reads
             as the drag being broken. */}
         <span
-          className="cursor-grab text-base-content/30 active:cursor-grabbing"
+          className="cursor-grab text-base-content/65 active:cursor-grabbing"
           aria-hidden="true"
         >
           <LuGripVertical size={14} />
@@ -746,7 +746,7 @@ function PickRow({
             <span className="badge badge-ghost badge-xs shrink-0">neturima</span>
           )}
         </div>
-        <div className="text-xs text-base-content/50">
+        <div className="text-xs text-base-content/65">
           {[pick.brand_name, pick.merchant_name].filter(Boolean).join(" · ")}
           {pick.price != null && ` · ${pick.price} €`}
           {dropped && "nebėra kataloge"}

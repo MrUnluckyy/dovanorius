@@ -42,7 +42,7 @@ export default function PostCard({
   index?: number;
 }) {
   const meta = (
-    <div className="text-base-content/55 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+    <div className="text-base-content/70 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
       <time dateTime={post.publishedAt}>
         {formatDate(post.publishedAt, locale)}
       </time>
@@ -113,7 +113,7 @@ export default function PostCard({
               {post.categories.slice(0, 2).map((category) => (
                 <span
                   key={category.slug}
-                  className="bg-primary/10 text-primary rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase"
+                  className="bg-(--nr-tile) text-(--nr-gold-strong) rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase"
                 >
                   {category.title}
                 </span>
@@ -122,7 +122,7 @@ export default function PostCard({
           )}
 
           <h3
-            className={`font-heading group-hover:text-primary leading-tight font-bold text-balance transition-colors ${
+            className={`font-heading group-hover:underline decoration-(--nr-yellow-deep) decoration-2 underline-offset-4 leading-tight font-bold text-balance transition-colors ${
               featured ? "text-2xl sm:text-3xl" : "text-lg"
             }`}
           >

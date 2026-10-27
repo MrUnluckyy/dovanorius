@@ -20,7 +20,7 @@ export default async function LegalLayout({
         <div className="mx-auto flex max-w-4xl flex-col px-4 py-10 lg:py-16">
           <header className="mb-8 flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-(--nr-gold-strong)">
                 noriuto.lt
               </p>
               <p className="text-sm text-base-content/70">

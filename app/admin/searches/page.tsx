@@ -59,7 +59,7 @@ export default async function AdminSearchesPage({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-heading text-2xl font-bold">Paieškos</h1>
-          <p className="text-sm text-base-content/60">
+          <p className="text-sm text-base-content/70">
             Ko ieško naudotojai (svetainė ir programėlė). Be naudotojų ID — tik sumos.
           </p>
         </div>
@@ -110,7 +110,7 @@ function Kpi({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="card bg-base-100 card-border">
       <div className="card-body p-4">
-        <span className="text-xs text-base-content/60">{label}</span>
+        <span className="text-xs text-base-content/70">{label}</span>
         <span className="font-heading text-2xl font-bold tabular-nums">{value}</span>
       </div>
     </div>

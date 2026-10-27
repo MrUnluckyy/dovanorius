@@ -12,11 +12,11 @@ export function SimpleHero({ user }: { user: User | null }) {
           <h1 className="text-5xl font-bold">{t("title")}</h1>
           <p className="py-6">{t("description")}</p>
           {user?.id ? (
-            <Link href={`/boards`} className="btn btn-primary">
+            <Link href={`/lentos`} className="btn btn-primary">
               {t("buttonText")}
             </Link>
           ) : (
-            <Link href={`/boards`} className="btn btn-primary">
+            <Link href={`/lentos`} className="btn btn-primary">
               {t("buttonText")}
             </Link>
           )}
