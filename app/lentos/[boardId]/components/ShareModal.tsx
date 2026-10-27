@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
 import { useConfirm } from "@/components/ConfirmDialogProvider";
 import { Board } from "./BoardBar";
+import { trackListShared } from "@/lib/analytics";
 
 type Props = {
   board: Board;
@@ -74,10 +75,20 @@ export function ShareModal({ board }: Props) {
     },
   });
 
-  const copyLink = async (build: () => Promise<string> | string) => {
+  const copyLink = async (
+    build: () => Promise<string> | string,
+    channel: "public_link" | "magic_link"
+  ) => {
     try {
       await navigator.clipboard.writeText(await build());
       toast.success(t("copied"));
+      // The list WishList already loaded for this board; no extra query.
+      const items = queryClient.getQueryData<unknown[]>(["items", board.id]);
+      trackListShared({
+        boardId: board.id,
+        channel,
+        itemsCount: Array.isArray(items) ? items.length : null,
+      });
     } catch (err) {
       toast.error(t("copyFailed"));
       console.error("Failed to copy:", err);
@@ -86,7 +97,7 @@ export function ShareModal({ board }: Props) {
 
   const copyPublic = async () => {
     if (!board.slug) return;
-    await copyLink(() => `${origin}/b/${board.slug}`);
+    await copyLink(() => `${origin}/b/${board.slug}`, "public_link");
   };
 
   const copyPrivate = async () =>
@@ -94,7 +105,7 @@ export function ShareModal({ board }: Props) {
       const token =
         board.share_token ?? (await generateTokenMutation.mutateAsync());
       return `${origin}/b/s/${token}`;
-    });
+    }, "magic_link");
 
   const handleRevoke = async () => {
     // Without confirmText the shared dialog labels its confirm button "Ištrinti"

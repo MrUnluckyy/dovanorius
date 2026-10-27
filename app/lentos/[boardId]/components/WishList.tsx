@@ -35,8 +35,11 @@ export function WishList({
   user,
   boardName,
   shareToken,
+  ownerId,
 }: {
   boardId: string;
+  /** The board's owner, for analytics (item_reserved). */
+  ownerId?: string | null;
   isPublic?: boolean;
   user?: User | null;
   /** Shown in the reserve dialog so a giver knows whose list they're on. */
@@ -147,6 +150,7 @@ export function WishList({
                 user={user}
                 boardName={boardName}
                 shareToken={shareToken}
+                ownerId={ownerId}
                 getCaptchaToken={getCaptchaToken}
                 resetCaptcha={resetCaptcha}
               />

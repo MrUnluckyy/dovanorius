@@ -20,6 +20,7 @@ export function ViewItemModal({
   user,
   boardName,
   shareToken,
+  ownerId,
   getCaptchaToken,
   resetCaptcha,
   triggerClassName = "btn btn-sm btn-primary",
@@ -32,6 +33,7 @@ export function ViewItemModal({
   user?: User | null;
   boardName?: string | null;
   shareToken?: string | null;
+  ownerId?: string | null;
   getCaptchaToken?: () => Promise<string | undefined>;
   resetCaptcha?: () => void;
   triggerClassName?: string;
@@ -83,6 +85,7 @@ export function ViewItemModal({
     getCaptchaToken,
     resetCaptcha,
     shareToken,
+    ownerId,
   });
 
   const revertPurchase = useRevertPurchase(item.board_id);

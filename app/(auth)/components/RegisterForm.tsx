@@ -1,4 +1,5 @@
 "use client";
+import { trackSignUp } from "@/lib/analytics";
 import { AUTH_EMAIL_LANDING } from "@/lib/appLinks";
 import { createClient } from "@/utils/supabase/client";
 import { useLocale, useTranslations } from "next-intl";
@@ -38,7 +39,7 @@ export function RegisterForm() {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
@@ -63,6 +64,13 @@ export function RegisterForm() {
         });
         toast.error(t("registerGenericErrorToast"));
         return;
+      }
+
+      // An address that already has an account also comes back as success
+      // (Supabase hides which addresses exist), with a stand-in user that has
+      // no identities. That is not a sign-up, so it isn't counted as one.
+      if (data.user && (data.user.identities?.length ?? 0) > 0) {
+        trackSignUp("email", data.user.id, values.email);
       }
 
       // Not "welcome aboard" — they cannot sign in yet. The screen behind this
