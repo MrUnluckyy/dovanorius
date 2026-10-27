@@ -7,6 +7,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import BreadCrumbsManual from "@/components/navigation/BreadCrumbsManual";
 import { WishList } from "@/app/lentos/[boardId]/components/WishList";
+import { BoardViewBeacon } from "@/components/boards/BoardViewBeacon";
 import Footer from "@/components/footer/Footer";
 
 export async function generateMetadata({
@@ -106,7 +107,14 @@ export default async function SharedBoardView({
           <div className="py-8 mb-10">
             <BoardBar userId={user?.id} boardId={board.id} inPublicView />
           </div>
+          <BoardViewBeacon
+            boardId={board.id}
+            ownerId={board.owner_id}
+            userId={user?.id}
+            isGuest={user?.is_anonymous === true}
+          />
           <WishList
+            ownerId={board.owner_id}
             boardId={board.id}
             user={user}
             isPublic={!recipientSide}

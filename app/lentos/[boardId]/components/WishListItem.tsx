@@ -18,6 +18,7 @@ type Props = {
   user?: User | null;
   boardName?: string | null;
   shareToken?: string | null;
+  ownerId?: string | null;
   getCaptchaToken?: () => Promise<string | undefined>;
   resetCaptcha?: () => void;
 };
@@ -28,6 +29,7 @@ export function WishListItem({
   user,
   boardName,
   shareToken,
+  ownerId,
   getCaptchaToken,
   resetCaptcha,
 }: Props) {
@@ -51,6 +53,7 @@ export function WishListItem({
     getCaptchaToken,
     resetCaptcha,
     shareToken,
+    ownerId,
   });
 
   // Reserving from the card is one tap for signed-in givers, whose address we
@@ -238,6 +241,7 @@ export function WishListItem({
         user={user}
         boardName={boardName}
         shareToken={shareToken}
+        ownerId={ownerId}
         getCaptchaToken={getCaptchaToken}
         resetCaptcha={resetCaptcha}
         hideTrigger

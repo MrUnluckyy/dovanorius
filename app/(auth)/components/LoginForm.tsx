@@ -1,5 +1,6 @@
 "use client";
 import { AUTH_EMAIL_LANDING } from "@/lib/appLinks";
+import { trackSignIn } from "@/lib/analytics";
 import { createClient } from "@/utils/supabase/client";
 import {
   claimGuestReservations,
@@ -112,6 +113,7 @@ export function LoginForm() {
       }
 
       if (data.user) {
+        trackSignIn("email", data.user.id);
         // Anything this account reserved as a guest — with this same address —
         // follows them in now. Signing in is the only moment the two identities
         // are both provable.

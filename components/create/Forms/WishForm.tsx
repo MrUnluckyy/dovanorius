@@ -16,6 +16,7 @@ import { ImageUploadGrid, ImageSlot } from "@/components/ui/ImageUploadGrid";
 import { Hero3D } from "@/components/ui/Hero3D";
 import { BoardForm } from "./BoardForm";
 import { reportError } from "@/lib/report";
+import { trackWishCreated } from "@/lib/analytics";
 import {
   LuArrowLeft,
   LuArrowRight,
@@ -71,6 +72,8 @@ export function WishForm({
   const [showMore, setShowMore] = useState(false);
   const [creatingBoard, setCreatingBoard] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  /** Whether this wish started from a pasted link (vs. typed by hand). */
+  const fromLinkRef = useRef(false);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const titleRef = useRef<HTMLInputElement | null>(null);
 
@@ -148,6 +151,7 @@ export function WishForm({
   const fetchFromLink = async (raw?: string) => {
     const link = (raw ?? getValues("url") ?? "").trim();
     if (!link) return;
+    fromLinkRef.current = true;
     setValue("url", link);
     setFetchFailed(false);
     setStep("fetching");
@@ -195,6 +199,7 @@ export function WishForm({
     reset({ ...getValues(), title: "", notes: "", image_url: "", price: undefined });
     setPendingFiles([]);
     setFetchFailed(false);
+    fromLinkRef.current = false;
     setStep("start");
   };
 
@@ -237,6 +242,14 @@ export function WishForm({
         ...uploadedUrls,
       ].slice(0, 5);
 
+      trackWishCreated({
+        source: fromLinkRef.current ? "link" : "manual",
+        boardId: payload.boardId,
+        hasUrl: !!payload.url,
+        hasImage: finalUrls.length > 0 || !!payload.image_url,
+        hasPrice: !!payload.price,
+      });
+
       if (finalUrls.length > 0) {
         const { error: updateError } = await supabase
           .from("items")
@@ -258,6 +271,7 @@ export function WishForm({
       queryClient.invalidateQueries({ queryKey: ["boards"] });
       reset();
       setPendingFiles([]);
+      fromLinkRef.current = false;
       onSuccess?.();
     },
     onError: (error) => {

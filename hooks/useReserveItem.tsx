@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { reportError } from "@/lib/report";
+import { trackItemReserved } from "@/lib/analytics";
 import { errorToast } from "@/components/feedback/errorToast";
 
 /** Where we remember a guest's address so their second reserve is one tap. */
@@ -33,6 +34,8 @@ function rememberGuestEmail(email: string) {
 type UseReserveItemArgs = {
   itemId: string;
   boardId: string;
+  /** The board's owner, for analytics (item_reserved). */
+  ownerId?: string | null;
   user?: User | null;
   /**
    * Returns a Turnstile token for the (invisible) captcha. Required when
@@ -73,6 +76,7 @@ export type ReserveResult = {
 export function useReserveItem({
   itemId,
   boardId,
+  ownerId,
   user,
   getCaptchaToken,
   resetCaptcha,
@@ -242,6 +246,11 @@ export function useReserveItem({
       }
 
       if (trimmedEmail) rememberGuestEmail(trimmedEmail);
+      trackItemReserved({
+        boardId,
+        ownerId: ownerId ?? null,
+        isGuest: !user || user.is_anonymous === true,
+      });
 
       toast.success(t("successReserve"));
       queryClient.invalidateQueries({ queryKey: ["items", boardId] });

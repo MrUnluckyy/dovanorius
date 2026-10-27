@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { isRecipientSide } from "@/utils/boards/viewerSide";
 import { BoardBar } from "@/app/lentos/[boardId]/components/BoardBar";
 import { WishList } from "@/app/lentos/[boardId]/components/WishList";
+import { BoardViewBeacon } from "@/components/boards/BoardViewBeacon";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import { notFound } from "next/navigation";
 import Footer from "@/components/footer/Footer";
@@ -64,7 +65,14 @@ export default async function PublicUserBoardPage({
           <div className="py-8 mb-10">
             <BoardBar userId={user?.id} boardId={board.id} inPublicView />
           </div>
+          <BoardViewBeacon
+            boardId={board.id}
+            ownerId={board.owner_id}
+            userId={user?.id}
+            isGuest={user?.is_anonymous === true}
+          />
           <WishList
+            ownerId={board.owner_id}
             boardId={board.id}
             user={user}
             isPublic={!recipientSide}

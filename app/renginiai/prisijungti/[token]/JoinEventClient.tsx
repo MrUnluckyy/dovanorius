@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -11,6 +11,7 @@ import { createClient } from "@/utils/supabase/client";
 import { getEventTypeMeta } from "@/utils/events/typeMeta";
 import { sendJoinedEmail } from "@/app/actions/events/invite";
 import { reportError } from "@/lib/report";
+import { rememberSignupContext } from "@/lib/analytics";
 import type { SsJoinInfo } from "@/types/secret-santa";
 
 type AcceptResult = {
@@ -46,6 +47,11 @@ export function JoinEventClient({
   // Set when the address they typed already belongs to a real account. Not a
   // toast: it needs a button, and it must not scroll away.
   const [emailHasAccount, setEmailHasAccount] = useState<string | null>(null);
+
+  // An invite is a reason to make an account; remember it in case they do.
+  useEffect(() => {
+    if (!isRealUser) rememberSignupContext("ss_invite");
+  }, [isRealUser]);
 
   const meta = getEventTypeMeta(info.event_type);
   const closed = ["locked", "drawn", "archived"].includes(info.status);

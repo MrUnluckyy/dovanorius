@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
+import { trackWishCreated } from "@/lib/analytics";
 
 export type AddIdeaInput = {
   boardId: string;
@@ -41,8 +42,17 @@ export function useAddIdeaToBoard() {
         is_reservable: true,
         status: "wanted",
         priority: "medium",
+        // Same label the app writes for a saved idea.
+        source: "inspo",
       });
       if (error) throw error;
+      trackWishCreated({
+        source: "inspo",
+        boardId: input.boardId,
+        hasUrl: !!input.url,
+        hasImage: !!input.imageUrl,
+        hasPrice: input.price != null,
+      });
     },
     onSuccess: (_data, input) => {
       queryClient.invalidateQueries({ queryKey: ["items", input.boardId] });
