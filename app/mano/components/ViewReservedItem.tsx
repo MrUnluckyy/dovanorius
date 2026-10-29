@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { unwrapOwnOut, wishOutHref } from "@/utils/affiliate/outHref";
 import { useState } from "react";
 import { LuExternalLink, LuX } from "react-icons/lu";
 import { User } from "@supabase/supabase-js";
@@ -37,7 +38,8 @@ export function ViewReservedItem({
   const getDomain = (urlString: string | null) => {
     if (!urlString) return "-";
     try {
-      const url = new URL(urlString);
+      // The shop's own domain, not ours, for a wish that stores an /out link.
+      const url = new URL(unwrapOwnOut(urlString).url);
       return url.hostname.replace("www.", "");
     } catch (error) {
       return "-";
@@ -143,9 +145,11 @@ export function ViewReservedItem({
                       <p className="text-end">{t("notProvided")}</p>
                     ) : (
                       <a
-                        href={url || ""}
+                        // Through /out like the board view: the click is logged
+                        // and the shop link tracked. It went straight to the shop.
+                        href={wishOutHref({ id, url })}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="noopener noreferrer sponsored"
                         className="text-end flex gap-1 items-center link"
                         data-clarity-mask="true"
                       >

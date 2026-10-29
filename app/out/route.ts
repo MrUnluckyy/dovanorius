@@ -5,6 +5,7 @@ import { resolveMerchant } from "@/utils/affiliate/resolveMerchant";
 import { buildDeeplink } from "@/utils/affiliate/buildDeeplink";
 import { resolvePartner, tagPartnerUrl } from "@/utils/affiliate/partnerLink";
 import type { AffiliateCredentials } from "@/types/affiliate";
+import { unwrapOwnOut } from "@/utils/affiliate/outHref";
 
 export const dynamic = "force-dynamic";
 
@@ -30,10 +31,13 @@ function credentials(): AffiliateCredentials {
  */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const raw = searchParams.get("u");
+  // A wish can store one of our own /out links (the app saves Discover ideas
+  // that way); follow it to the shop here instead of redirecting to ourselves.
+  const unwrapped = searchParams.get("u") ? unwrapOwnOut(searchParams.get("u")!) : null;
+  const raw = unwrapped?.url ?? null;
   const itemId = searchParams.get("item");
   // Only served partner rows; anything else is ignored rather than stored.
-  const rawProduct = searchParams.get("p");
+  const rawProduct = searchParams.get("p") ?? unwrapped?.productId ?? null;
   const productId =
     rawProduct && /^partner:[0-9a-f-]{36}$/i.test(rawProduct) ? rawProduct : null;
 
