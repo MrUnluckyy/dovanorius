@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { unwrapOwnOut, wishOutHref } from "@/utils/affiliate/outHref";
 import { useEffect, useRef, useState } from "react";
 import { LuExternalLink, LuPencil, LuTrash2, LuX } from "react-icons/lu";
 import { Item } from "./WishList";
@@ -149,7 +150,8 @@ export function ViewItemModal({
   const getDomain = (urlString: string | null) => {
     if (!urlString) return "-";
     try {
-      const url = new URL(urlString);
+      // The shop's own domain, not ours, for a wish that stores an /out link.
+      const url = new URL(unwrapOwnOut(urlString).url);
       return url.hostname.replace("www.", "");
     } catch (error) {
       return "-";
@@ -333,7 +335,7 @@ export function ViewItemModal({
                         <p className="text-end">{t("notProvided")}</p>
                       ) : (
                         <a
-                          href={`/out?u=${encodeURIComponent(url)}&item=${id}`}
+                          href={wishOutHref({ id, url })}
                           target="_blank"
                           rel="noopener noreferrer sponsored"
                           className="text-end flex gap-1 items-center link"
