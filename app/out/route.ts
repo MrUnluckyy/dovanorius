@@ -13,6 +13,7 @@ function credentials(): AffiliateCredentials {
   return {
     awinPublisherId: process.env.AWIN_PUBLISHER_ID,
     tradedoublerAffiliateId: process.env.TRADEDOUBLER_AFFILIATE_ID,
+    cjWebsiteId: process.env.CJ_WEBSITE_ID,
     sovrnKey: process.env.SOVRN_KEY,
   };
 }
