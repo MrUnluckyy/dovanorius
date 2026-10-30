@@ -1,4 +1,4 @@
-export type AffiliateNetwork = "awin" | "tradedoubler" | "sovrn" | "direct";
+export type AffiliateNetwork = "awin" | "tradedoubler" | "cj" | "sovrn" | "direct";
 
 export type AffiliateMerchant = {
   id: string;
@@ -35,5 +35,6 @@ export type AffiliateClick = {
 export type AffiliateCredentials = {
   awinPublisherId?: string;
   tradedoublerAffiliateId?: string;
+  cjWebsiteId?: string;
   sovrnKey?: string;
 };

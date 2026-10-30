@@ -14,6 +14,9 @@ function publisherId(
       return creds.awinPublisherId;
     case "tradedoubler":
       return creds.tradedoublerAffiliateId;
+    case "cj":
+      // CJ attributes by website id (PID), not the company id.
+      return creds.cjWebsiteId;
     case "sovrn":
       // Sovrn identifies the publisher by key, injected via {SOVRN_KEY}.
       return creds.sovrnKey;
