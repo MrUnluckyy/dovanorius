@@ -1,7 +1,8 @@
 import { createClient } from "@/utils/supabase/server";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import { redirect } from "next/navigation";
-import { loginRedirect } from "@/utils/auth/account";
+import { isAccountUser, loginRedirect } from "@/utils/auth/account";
+import { claimGuestEventSeats } from "@/lib/claimGuestReservations";
 import SsHomeScreen from "./_components/SsHomeScreen";
 
 export default async function SecretSantaHome() {
@@ -13,6 +14,8 @@ export default async function SecretSantaHome() {
   // Guests belong here: a link-joined participant has an anonymous
   // session and still needs to find the event they joined.
   if (!user) redirect(loginRedirect("/renginiai"));
+
+  if (isAccountUser(user)) await claimGuestEventSeats(supabase);
 
   return (
     <main className="min-h-screen bg-(--nr-cream) pb-20">

@@ -28,6 +28,28 @@ export async function claimGuestReservations(
 }
 
 /**
+ * Moves event seats taken as a guest into the account owning that address.
+ * Same rule as above: bookkeeping that can never get in the way of signing in.
+ * New sign-ups are also caught by a trigger on auth.users; this covers accounts
+ * that existed already. Returns how many seats moved.
+ */
+export async function claimGuestEventSeats(
+  supabase: SupabaseClient
+): Promise<number> {
+  try {
+    const { data, error } = await supabase.rpc("claim_guest_event_seats");
+    if (error) {
+      console.error("Claiming guest event seats failed:", error);
+      return 0;
+    }
+    return typeof data === "number" ? data : 0;
+  } catch (error) {
+    console.error("Claiming guest event seats threw:", error);
+    return 0;
+  }
+}
+
+/**
  * Carries the claim count to whatever page the sign-in was headed for, so the
  * gifts don't just silently appear. Preserves any params `next` already has
  * (the reserve flow sends `?wish=<id>`).

@@ -10,6 +10,11 @@ import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/client";
 import { getEventTypeMeta } from "@/utils/events/typeMeta";
 import { sendJoinedEmail } from "@/app/actions/events/invite";
+import {
+  AccessSent,
+  EventAccessGate,
+  requestAccessLink,
+} from "@/app/renginiai/_components/EventAccessGate";
 import { reportError } from "@/lib/report";
 import { rememberSignupContext } from "@/lib/analytics";
 import type { SsJoinInfo } from "@/types/secret-santa";
@@ -29,11 +34,13 @@ export function JoinEventClient({
   info,
   isRealUser,
   knownName,
+  signedInEmail,
 }: {
   token: string;
   info: SsJoinInfo;
   isRealUser: boolean;
   knownName: string | null;
+  signedInEmail: string | null;
 }) {
   const supabase = createClient();
   const router = useRouter();
@@ -47,6 +54,8 @@ export function JoinEventClient({
   // Set when the address they typed already belongs to a real account. Not a
   // toast: it needs a button, and it must not scroll away.
   const [emailHasAccount, setEmailHasAccount] = useState<string | null>(null);
+  // Set when the address already holds a seat: no second joining, just the link.
+  const [seatEmail, setSeatEmail] = useState<string | null>(null);
 
   // An invite is a reason to make an account; remember it in case they do.
   useEffect(() => {
@@ -72,6 +81,12 @@ export function JoinEventClient({
         });
         if (status === "account") {
           setEmailHasAccount(email.trim());
+          setJoining(false);
+          return;
+        }
+        if (status === "member") {
+          await requestAccessLink({ token }, email.trim());
+          setSeatEmail(email.trim());
           setJoining(false);
           return;
         }
@@ -121,36 +136,21 @@ export function JoinEventClient({
       }
 
       if (!isRealUser && email.trim() && res.slug) {
-        // Attach the address to the anonymous account. Confirming it turns the
-        // guest into a permanent user on the SAME uid, so the membership and
-        // the name they draw survive a cleared browser or a different device —
-        // an anonymous session cannot be resumed anywhere else on its own.
-        const {
-          data: { user: current },
-        } = await supabase.auth.getUser();
-        const alreadyMine =
-          current?.email === email.trim() ||
-          current?.new_email === email.trim();
-
-        if (!alreadyMine) {
-          const { error: linkError } = await supabase.auth.updateUser({
-            email: email.trim(),
-            data: { display_name: name.trim() },
+        // The address is how they get back from another device, so it has to
+        // be on record. An emailed invite stores the address it was sent to,
+        // which is not necessarily the one they just typed.
+        const { error: linkError } = await supabase.rpc("ss_set_my_guest_email", {
+          p_event_id: info.event_id,
+          p_email: email.trim(),
+        });
+        // They are in the event regardless, so this never blocks the join.
+        if (linkError) {
+          reportError({
+            area: "auth",
+            reason: "guest_email_link_failed",
+            detail: { code: linkError.code, message: linkError.message },
+            contactEmail: email.trim(),
           });
-          // They are in the event regardless; this only affects whether the
-          // seat can be recovered later, so it never blocks the join. It does
-          // get reported, though — a console.warn on someone else's phone is
-          // how this stayed invisible while every guest's seat was going
-          // unrecoverable.
-          if (linkError) {
-            console.warn("Could not attach email to guest session:", linkError);
-            reportError({
-              area: "auth",
-              reason: "guest_email_link_failed",
-              detail: { code: linkError.code, message: linkError.message },
-              contactEmail: email.trim(),
-            });
-          }
         }
 
         // Awaited, not fired and forgotten: this is a POST that navigating away
@@ -236,13 +236,34 @@ export function JoinEventClient({
           </dl>
         </section>
 
-        {closed ? (
-          <div className="nr-card mt-4 p-6 text-center">
-            <p className="nr-lead text-[16px]">
-              {info.status === "drawn"
-                ? t("joinClosedDrawn")
-                : t("joinClosedLocked")}
+        {seatEmail ? (
+          <div className="nr-card mt-4 p-7">
+            <p className="mb-5 text-center text-[15px] font-semibold text-(--nr-ink)">
+              {t("accessAlreadyIn")}
             </p>
+            <AccessSent
+              known
+              email={seatEmail}
+              onChange={() => {
+                setSeatEmail(null);
+                setEmail("");
+              }}
+              onResend={() => requestAccessLink({ token }, seatEmail)}
+            />
+          </div>
+        ) : closed ? (
+          <div className="mt-4">
+            <EventAccessGate
+              target={{ token }}
+              loginNext={`/renginiai/${info.event_slug}`}
+              title={t("accessClosedTitle")}
+              body={
+                info.status === "drawn"
+                  ? t("accessClosedDrawn")
+                  : t("accessClosedLocked")
+              }
+              signedInAs={isRealUser ? signedInEmail : null}
+            />
           </div>
         ) : (
           <section className="nr-card mt-4 p-6">

@@ -7,9 +7,7 @@ import { formatEventDate } from "@/lib/events/formatEventDate";
  * Sent to a guest the moment they join an event through a link.
  *
  * A guest has no account and no dashboard, so this mail is the only durable
- * copy of where their event lives. It also explains the Supabase confirmation
- * mail arriving beside it — two messages at once reads as broken unless the
- * one they expected says why.
+ * copy of where their event lives.
  */
 export function EventJoinedEmail({
   eventName,
@@ -50,9 +48,8 @@ export function EventJoinedEmail({
       </Section>
 
       <Text style={{ ...text, margin: "20px 0 0" }}>
-        Atsiuntėme ir atskirą laišką el. pašto patvirtinimui. Paspaudęs jame
-        esančią nuorodą galėsi grįžti į renginį iš bet kurio įrenginio — be jos
-        tavo vieta liks tik šioje naršyklėje.
+        Atsidarysi kitame įrenginyje? Įvesk šį el. paštą renginio puslapyje ir
+        atsiųsime prisijungimo nuorodą. Paskyros kurti nereikia.
       </Text>
 
       <Text style={{ ...textMuted, margin: "16px 0 0", color: brand.faint }}>

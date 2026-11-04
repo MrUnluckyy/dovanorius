@@ -5,6 +5,7 @@ import { SIGNUP_CONTEXT_COOKIE, parseSignupContext } from "@/lib/signupContext";
 // The client you created from the Server-Side Auth instructions
 import { createClient } from "@/utils/supabase/server";
 import {
+  claimGuestEventSeats,
   claimGuestReservations,
   withClaimedParam,
 } from "@/lib/claimGuestReservations";
@@ -46,6 +47,7 @@ export async function GET(request: Request) {
       // Same as the password path: guest holds carrying this address come home.
       const claimed = await claimGuestReservations(supabase);
       next = withClaimedParam(next, claimed);
+      await claimGuestEventSeats(supabase);
 
       const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
       const isLocalEnv = process.env.NODE_ENV === "development";

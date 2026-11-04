@@ -29,7 +29,7 @@ import RedrawPanel from "./RedrawPanel";
 import InvitePeopleSheet from "./InvitePeopleSheet";
 import EventSettingsSheet from "./EventSettingsSheet";
 import MyWishNote from "./MyWishNote";
-import SecureSeatNotice from "./SecureSeatNotice";
+import GuestSeatCard from "./GuestSeatCard";
 import { EventLobbySkeleton } from "@/components/loaders/EventLobbySkeleton";
 
 export default function LobbyClient({
@@ -245,16 +245,9 @@ export default function LobbyClient({
         onOpenSettings={() => setSettingsOpen(true)}
       />
 
-      {/* A guest's seat only exists in this browser until they confirm an
-          address, so the offer to fix that sits above everything else. */}
-      {user.is_anonymous && (
-        <section className="mt-4">
-          <SecureSeatNotice
-            knownEmail={user.email ?? null}
-            pendingEmail={user.new_email ?? null}
-          />
-        </section>
-      )}
+      <section className="mt-4 empty:hidden">
+        <GuestSeatCard user={user} slug={slug} eventId={event.id} />
+      </section>
 
       {/* One clear next step, chosen by where the event actually is. */}
       <section className="mt-4">
