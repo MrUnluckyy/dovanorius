@@ -111,6 +111,9 @@ export default function SetNewPassword() {
   const onSubmit = async (values: FormValues) => {
     const { error } = await supabase.auth.updateUser({
       password: values.password,
+      // Someone who came in by emailed link now has an account proper, so the
+      // lobby stops offering them one.
+      data: { guest_link: false },
     });
 
     if (error) {

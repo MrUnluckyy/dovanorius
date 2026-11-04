@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { claimGuestEventSeats } from "@/lib/claimGuestReservations";
 import { createClient } from "@/utils/supabase/server";
 import { getTranslations } from "next-intl/server";
 import type { SsJoinInfo } from "@/types/secret-santa";
@@ -55,11 +57,25 @@ export default async function JoinEventPage({
     );
   }
 
+  // Already in, whatever the status: after a draw this page has nothing else
+  // for them, and their seat may have only just come home from a guest session.
+  if (user) {
+    if (isRealUser) await claimGuestEventSeats(supabase);
+    const { data: seat } = await supabase
+      .from("ss_members")
+      .select("id")
+      .eq("event_id", info.event_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (seat) redirect(`/renginiai/${info.event_slug}`);
+  }
+
   return (
     <JoinEventClient
       token={token}
       info={info}
       isRealUser={isRealUser}
+      signedInEmail={isRealUser ? user?.email ?? null : null}
       knownName={
         isRealUser
           ? (user?.user_metadata?.display_name as string | undefined) ?? null

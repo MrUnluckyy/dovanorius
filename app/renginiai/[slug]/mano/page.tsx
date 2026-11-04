@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { NavigationV2 } from "@/components/navigation/NavigationV2";
 import { createClient } from "@/utils/supabase/server";
-import { loginRedirect } from "@/utils/auth/account";
 import MyRecipientClient from "../_components/MyRecipientClient";
 
 export default async function MyRecipientPage({
@@ -19,7 +18,7 @@ export default async function MyRecipientPage({
 
   // Guests belong here too: a link-joined participant gets drawn like anyone
   // else and this is where they come to see who they got.
-  if (!user) redirect(loginRedirect(`/renginiai/${slug}/mano`));
+  if (!user) redirect(`/renginiai/${slug}`);
 
   // Without this the client query returned null for an event RLS hides, and
   // the page sat on its skeleton forever — a hang rather than an answer.

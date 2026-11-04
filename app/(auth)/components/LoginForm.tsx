@@ -3,6 +3,7 @@ import { AUTH_EMAIL_LANDING } from "@/lib/appLinks";
 import { trackSignIn } from "@/lib/analytics";
 import { createClient } from "@/utils/supabase/client";
 import {
+  claimGuestEventSeats,
   claimGuestReservations,
   withClaimedParam,
 } from "@/lib/claimGuestReservations";
@@ -118,6 +119,7 @@ export function LoginForm() {
         // follows them in now. Signing in is the only moment the two identities
         // are both provable.
         const claimed = await claimGuestReservations(supabase);
+        await claimGuestEventSeats(supabase);
         navigatingRef.current = true;
         window.location.href = withClaimedParam(next, claimed);
         return;

@@ -7,6 +7,7 @@ import { ReservationReminderEmail } from "@/emails/ReservationReminderEmail";
 import { BoardInviteEmail } from "@/emails/BoardInviteEmail";
 import { EventInviteEmail } from "@/emails/EventInviteEmail";
 import { EventJoinedEmail } from "@/emails/EventJoinedEmail";
+import { EventAccessEmail } from "@/emails/EventAccessEmail";
 
 /**
  * Every email in one scrollable page, for local development only.
@@ -93,6 +94,15 @@ export default async function DevEmailPreview() {
         eventUrl: "https://noriuto.lt/events/seimos-kaledos-a1b2c3",
         displayName: "Justas",
         eventDate: "2026-12-24",
+      }),
+    ],
+    [
+      "Event access link (guest)",
+      EventAccessEmail({
+        eventName: "Šeimos Kalėdos",
+        accessUrl: "https://noriuto.lt/renginiai/prieiga/pavyzdys",
+        eventDate: "2026-12-24",
+        minutes: 30,
       }),
     ],
   ];
