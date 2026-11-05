@@ -51,22 +51,38 @@ export function normalizeShopUrl(raw: string | null | undefined): string | null 
   if (!value) return null;
 
   let candidate = value;
-  if (!/^[a-z][a-z0-9+.-]*:/i.test(candidate)) {
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(candidate)) {
     // Scheme-less: accept only something that starts like a hostname with a
     // short TLD, so free text such as "Galima.pirkti.Akropolyje" is not
     // turned into a link to a host that does not exist.
-    if (!/^[^\s/?#]+\.[a-z]{2,6}(?:[:/?#]|$)/i.test(candidate)) return null;
+    if (!/^[^\s/?#:@]+\.[a-z]{2,6}(?:[:/?#]|$)/i.test(candidate)) return null;
     candidate = `https://${candidate}`;
   }
 
   try {
     const url = new URL(candidate);
     if (url.protocol !== "http:" && url.protocol !== "https:") return null;
-    if (!url.hostname.includes(".")) return null;
+    if (url.username || url.password) return null;
+    if (!isPublicHostname(url.hostname)) return null;
     return url.toString();
   } catch {
     return null;
   }
+}
+
+/**
+ * A hostname a shop could live on: at least two non-empty labels and a real
+ * looking TLD (letters only, 2+, or punycode). Rejects "noriu", "noriu.",
+ * "noriu.l", ".lt", "localhost" and IP addresses.
+ */
+function isPublicHostname(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  if (host.length > 253) return false;
+  const labels = host.split(".");
+  if (labels.length < 2) return false;
+  if (labels.some((l) => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(l))) return false;
+  const tld = labels[labels.length - 1];
+  return /^[a-z]{2,63}$/.test(tld) || /^xn--[a-z0-9-]{2,59}$/.test(tld);
 }
 
 /**

@@ -1,31 +1,16 @@
 import { z } from "zod";
+import { normalizeShopUrl } from "@/utils/affiliate/outHref";
 
+// Same rule as /out uses to open a wish link, so nothing that saves here can
+// fail there. Adds https:// when missing; "noriu", "noriu.l", "https://noriu"
+// and free text are rejected with a message instead of being saved.
 const UrlSchema = z
   .string()
   .trim()
-  .transform<string | "">((val) => {
-    // Allow empty string (no URL)
-    if (!val) return "";
-
-    // If it already has http/https – leave it
-    if (/^https?:\/\//i.test(val)) return val;
-
-    // Otherwise prepend https://
-    return `https://${val}`;
+  .refine((val) => val === "" || normalizeShopUrl(val) !== null, {
+    message: "Netinkama nuoroda. Įklijuokite visą parduotuvės nuorodą, pvz. https://www.knygos.lt/...",
   })
-  .refine(
-    (val) => {
-      if (val === "") return true; // empty is allowed
-      try {
-        // Runtime URL validation
-        new URL(val);
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    { message: "Netinkamas URL" }
-  );
+  .transform<string | "">((val) => (val === "" ? "" : (normalizeShopUrl(val) ?? "")));
 
 export const ItemSchema = z.object({
   title: z.string().min(1, "Reikia pavadinimo"),
