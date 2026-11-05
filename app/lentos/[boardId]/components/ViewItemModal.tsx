@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { unwrapOwnOut, wishOutHref } from "@/utils/affiliate/outHref";
+import { normalizeShopUrl, wishOutHref } from "@/utils/affiliate/outHref";
 import { useEffect, useRef, useState } from "react";
 import { LuExternalLink, LuPencil, LuTrash2, LuX } from "react-icons/lu";
 import { Item } from "./WishList";
@@ -151,8 +151,9 @@ export function ViewItemModal({
     if (!urlString) return "-";
     try {
       // The shop's own domain, not ours, for a wish that stores an /out link.
-      const url = new URL(unwrapOwnOut(urlString).url);
-      return url.hostname.replace("www.", "");
+      const shopUrl = normalizeShopUrl(urlString);
+      if (!shopUrl) return "-";
+      return new URL(shopUrl).hostname.replace("www.", "");
     } catch (error) {
       return "-";
     }
@@ -333,9 +334,15 @@ export function ViewItemModal({
                       <p className="text-start">{t("shop")}</p>
                       {!url ? (
                         <p className="text-end">{t("notProvided")}</p>
+                      ) : !wishOutHref({ id, url }) ? (
+                        // Not a usable link (free text, relative path): show
+                        // what the owner wrote instead of a broken link.
+                        <p className="text-end break-all" data-clarity-mask="true">
+                          {url}
+                        </p>
                       ) : (
                         <a
-                          href={wishOutHref({ id, url })}
+                          href={wishOutHref({ id, url })!}
                           target="_blank"
                           rel="noopener noreferrer sponsored"
                           className="text-end flex gap-1 items-center link"

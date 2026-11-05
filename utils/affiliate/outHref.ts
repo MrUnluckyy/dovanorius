@@ -37,7 +37,44 @@ export function unwrapOwnOut(url: string): { url: string; productId: string | nu
   return { url: current, productId };
 }
 
-/** A board wish's shop link: through /out, so the click is logged and tracked. */
-export function wishOutHref(item: { id: string; url: string }): string {
-  return `/out?u=${encodeURIComponent(unwrapOwnOut(item.url).url)}&item=${encodeURIComponent(item.id)}`;
+/**
+ * A stored wish URL as an absolute http(s) shop URL, or null when it is not a
+ * usable link.
+ *
+ * The web forms add "https://" through ItemSchema, but other clients (the
+ * mobile app, the share extension) have stored "www.shop.lt/...", bare
+ * domains, relative paths ("/product.html") and free text. Those made /out
+ * answer {"error":"Invalid url"} to whoever opened the wish.
+ */
+export function normalizeShopUrl(raw: string | null | undefined): string | null {
+  const value = unwrapOwnOut((raw ?? "").trim()).url.trim();
+  if (!value) return null;
+
+  let candidate = value;
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(candidate)) {
+    // Scheme-less: accept only something that starts like a hostname with a
+    // short TLD, so free text such as "Galima.pirkti.Akropolyje" is not
+    // turned into a link to a host that does not exist.
+    if (!/^[^\s/?#]+\.[a-z]{2,6}(?:[:/?#]|$)/i.test(candidate)) return null;
+    candidate = `https://${candidate}`;
+  }
+
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    if (!url.hostname.includes(".")) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A board wish's shop link: through /out, so the click is logged and tracked.
+ * Null when the stored URL is not a usable link; show it as text instead.
+ */
+export function wishOutHref(item: { id: string; url: string }): string | null {
+  const shopUrl = normalizeShopUrl(item.url);
+  if (!shopUrl) return null;
+  return `/out?u=${encodeURIComponent(shopUrl)}&item=${encodeURIComponent(item.id)}`;
 }
