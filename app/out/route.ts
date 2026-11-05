@@ -5,9 +5,35 @@ import { resolveMerchant } from "@/utils/affiliate/resolveMerchant";
 import { buildDeeplink } from "@/utils/affiliate/buildDeeplink";
 import { resolvePartner, tagPartnerUrl } from "@/utils/affiliate/partnerLink";
 import type { AffiliateCredentials } from "@/types/affiliate";
-import { unwrapOwnOut } from "@/utils/affiliate/outHref";
+import { normalizeShopUrl, unwrapOwnOut } from "@/utils/affiliate/outHref";
 
 export const dynamic = "force-dynamic";
+
+function invalidLinkPage(): string {
+  return `<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Nuoroda neveikia - Noriuto</title>
+<style>
+  body{font-family:system-ui,-apple-system,sans-serif;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#faf7f5;color:#222}
+  main{max-width:420px;padding:32px 24px;text-align:center}
+  h1{font-size:22px;margin:0 0 12px}
+  p{line-height:1.5;margin:0 0 20px;color:#555}
+  a{display:inline-block;padding:12px 20px;border-radius:999px;background:#222;color:#fff;text-decoration:none}
+</style>
+</head>
+<body>
+<main>
+  <h1>Ši nuoroda neveikia</h1>
+  <p>Prie šio noro išsaugota nuoroda nėra tinkamas parduotuvės adresas. Paklauskite sąrašo savininko, kur šį daiktą galima rasti.</p>
+  <a href="/">Į Noriuto</a>
+</main>
+</body>
+</html>`;
+}
 
 function credentials(): AffiliateCredentials {
   return {
@@ -47,16 +73,16 @@ export async function GET(req: Request) {
   }
 
   // Only ever redirect to absolute http(s) URLs (block javascript:, data:, …).
-  let target: URL;
-  try {
-    target = new URL(raw);
-    if (target.protocol !== "http:" && target.protocol !== "https:") {
-      throw new Error("bad protocol");
-    }
-  } catch {
-    return NextResponse.json({ error: "Invalid url" }, { status: 400 });
+  // Scheme-less links ("www.shop.lt/...") get https:// added.
+  const normalized = normalizeShopUrl(raw);
+  if (!normalized) {
+    // A person opened this from a wishlist: show a page, not raw JSON.
+    return new NextResponse(invalidLinkPage(), {
+      status: 400,
+      headers: { "content-type": "text/html; charset=utf-8" },
+    });
   }
-  const targetUrl = target.toString();
+  const targetUrl = normalized;
 
   const creds = credentials();
   const subId = crypto.randomUUID();
