@@ -8,7 +8,7 @@
  */
 
 /** Supported catalogue sources. Mirrors partners.feed_platform in the DB. */
-export type FeedPlatform = "shopify" | "woocommerce";
+export type FeedPlatform = "shopify" | "woocommerce" | "hostinger";
 
 export type NormalizedProduct = {
   /** Stable id in the upstream shop. Half of partner_products' unique key. */

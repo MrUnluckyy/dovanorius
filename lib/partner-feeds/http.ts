@@ -64,6 +64,22 @@ export async function getJson(url: string): Promise<JsonResponse> {
   return { body: await res.json(), headers: res.headers };
 }
 
+/**
+ * GET an HTML page as text. Hostinger keeps its store id in the page itself,
+ * not at a well-known JSON path, so that adapter has to read markup.
+ */
+export async function getText(url: string): Promise<string> {
+  const res = await fetch(url, {
+    headers: { accept: "text/html", "user-agent": "NoriutoBot/1.0" },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    redirect: "follow",
+  });
+  if (!res.ok) {
+    throw new FeedError(`${url} grąžino ${res.status}.`);
+  }
+  return res.text();
+}
+
 const NAMED: Record<string, string> = {
   amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ",
   ndash: "–", mdash: "—", hellip: "…", laquo: "«", raquo: "»",

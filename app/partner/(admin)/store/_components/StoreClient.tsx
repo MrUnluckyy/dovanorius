@@ -59,8 +59,8 @@ export function StoreClient({ state }: { state: StoreState }) {
         <h1 className="font-heading text-2xl font-bold">Parduotuvė</h1>
         <p className="mt-1 text-sm text-base-content/70">
           Prijunkite savo internetinę parduotuvę — produktai bus atnaujinami
-          kasdien: kainos, nuotraukos ir prekių likutis. Palaikomos Shopify ir
-          WooCommerce parduotuvės.
+          kasdien: kainos, nuotraukos ir prekių likutis. Palaikomos Shopify,
+          WooCommerce ir Hostinger parduotuvės.
         </p>
       </div>
 

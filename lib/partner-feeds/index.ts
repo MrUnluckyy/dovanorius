@@ -1,6 +1,7 @@
 import { FeedError, type FeedAdapter, type FeedPlatform, type StoreCatalog } from "./types";
 import { shopifyAdapter } from "./shopify";
 import { wooCommerceAdapter } from "./woocommerce";
+import { hostingerAdapter } from "./hostinger";
 
 export { FeedError } from "./types";
 export type { FeedPlatform, NormalizedProduct, StoreCatalog } from "./types";
@@ -16,6 +17,7 @@ export { normalizeShopDomain } from "./http";
 export const ADAPTERS: Record<FeedPlatform, FeedAdapter> = {
   shopify: shopifyAdapter,
   woocommerce: wooCommerceAdapter,
+  hostinger: hostingerAdapter,
 };
 
 export function getAdapter(platform: string): FeedAdapter {
@@ -41,13 +43,14 @@ export function fetchCatalog(
  * WooCommerce or Shopify is a question many cannot answer, and getting it wrong
  * would produce a confusing "no products found" instead of a working feed.
  *
- * Both adapters are probed at once because the endpoints are mutually
- * exclusive in practice — a Shopify store has no /wp-json, a WooCommerce store
- * has no /products.json. Shopify wins a tie only so that existing partners keep
- * the platform they already had.
+ * All adapters are probed at once because the signals are mutually exclusive
+ * in practice — a Shopify store has no /wp-json, a WooCommerce store has no
+ * /products.json, and only a Hostinger-built page carries a "scha_" channel id.
+ * Earlier entries win a tie only so that existing partners keep the platform
+ * they already had.
  */
 export async function detectPlatform(domain: string): Promise<FeedPlatform> {
-  const order: FeedPlatform[] = ["shopify", "woocommerce"];
+  const order: FeedPlatform[] = ["shopify", "woocommerce", "hostinger"];
   const results = await Promise.all(
     order.map((platform) => ADAPTERS[platform].probe(domain))
   );
@@ -55,8 +58,8 @@ export async function detectPlatform(domain: string): Promise<FeedPlatform> {
   const index = results.findIndex(Boolean);
   if (index === -1) {
     throw new FeedError(
-      `Nepavyko atpažinti parduotuvės „${domain}". Palaikomos Shopify ir ` +
-        `WooCommerce parduotuvės su viešu produktų sąrašu.`
+      `Nepavyko atpažinti parduotuvės „${domain}". Palaikomos Shopify, ` +
+        `WooCommerce ir Hostinger parduotuvės su viešu produktų sąrašu.`
     );
   }
   return order[index];
