@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Controller, useForm, type FieldErrors } from "react-hook-form";
 import DatePicker from "@/components/DatePicker";
 import { maxEventDate, todayInVilnius } from "@/lib/events/formatEventDate";
@@ -58,6 +58,12 @@ export default function SsCreateEvent() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverProcessing, setCoverProcessing] = useState(false);
+  // isSubmitting goes false the moment onSubmit returns, which is right after
+  // router.replace() starts — not when the event page is on screen. In that gap
+  // the button came back to life and a second tap made a second event. Stay
+  // busy until we leave; the ref also stops two taps in the same instant.
+  const [navigating, setNavigating] = useState(false);
+  const submittingRef = useRef(false);
 
   const {
     register,
@@ -95,6 +101,9 @@ export default function SsCreateEvent() {
       toast.error(t("errorMissingName"));
       return;
     }
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    let leaving = false;
     try {
       const {
         data: { user },
@@ -140,6 +149,8 @@ export default function SsCreateEvent() {
       // Land on the event with the invite sheet already open: an event with
       // nobody in it is the one state that is never what the organiser wanted,
       // and the old flow left them on a silent page to work that out.
+      leaving = true;
+      setNavigating(true);
       router.replace(`/renginiai/${event.slug}?invite=1`);
     } catch (err) {
       console.error("Error creating event:", err);
@@ -152,6 +163,9 @@ export default function SsCreateEvent() {
           ? t("dateTooFar")
           : t("errorCreateFailed")
       );
+    } finally {
+      // Only a failure (or a refused date) hands the button back.
+      if (!leaving) submittingRef.current = false;
     }
   };
 
@@ -353,10 +367,11 @@ export default function SsCreateEvent() {
 
         <button
           type="submit"
-          disabled={isSubmitting || uploading || coverProcessing}
+          disabled={isSubmitting || navigating || uploading || coverProcessing}
+          aria-busy={isSubmitting || navigating || undefined}
           className="nr-btn nr-btn-primary w-full disabled:opacity-50"
         >
-          {isSubmitting || uploading ? t("savingEvent") : t("createEventBtn")}
+          {isSubmitting || navigating || uploading ? t("savingEvent") : t("createEventBtn")}
         </button>
         <p className="mt-3 text-center text-[13px] text-(--nr-faint)">
           {t("createThenInvite")}

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { LuShuffle, LuUsers, LuShieldBan, LuX } from "react-icons/lu";
+import { PendingPips } from "@/components/ui/Pending";
 
 /**
  * The last look before names are drawn.
@@ -90,9 +91,17 @@ export default function DrawConfirmSheet({
           <button
             onClick={onConfirm}
             disabled={busy}
-            className="nr-btn nr-btn-dark flex-1 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-busy={busy || undefined}
+            className={`nr-btn nr-btn-dark flex-1 ${busy ? "cursor-wait" : ""}`}
           >
-            {t("drawNames")}
+            {busy ? (
+              <>
+                <PendingPips />
+                {t("drawing")}
+              </>
+            ) : (
+              t("drawNames")
+            )}
           </button>
           <button
             onClick={onClose}

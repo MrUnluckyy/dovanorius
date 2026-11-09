@@ -18,6 +18,7 @@ export type Board = {
   created_at: string;
   is_public: boolean;
   share_token?: string | null;
+  owner_id?: string;
 };
 
 type Props = {
@@ -35,7 +36,7 @@ export function BoardBar({ boardId, inPublicView, userId }: Props) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("boards")
-        .select("id, name, description, created_at, is_public, slug, share_token")
+        .select("id, name, description, created_at, is_public, slug, share_token, owner_id")
         .eq("id", boardId)
         .single();
       if (error) throw error;
