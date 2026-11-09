@@ -1253,5 +1253,22 @@
     "eventSubtitle": "Vardų traukimas ar dovanų mainai su draugais.",
     "newBoard": "Nauja lenta",
     "close": "Uždaryti"
+  },
+  "Consent": {
+    "title": "Ar galime naudoti slapukus?",
+    "body": "Būtinieji slapukai palaiko prisijungimą. Su tavo leidimu dar naudosime analitinius – kad matytume, kas svetainėje veikia, o kas ne. Plačiau – <policy>slapukų politikoje</policy>.",
+    "necessaryOnly": "Tik būtini",
+    "allowAll": "Leisti visus",
+    "choose": "Pasirinkti, kuriuos leisti",
+    "settingsTitle": "Slapukų nustatymai",
+    "close": "Uždaryti",
+    "necessaryTitle": "Būtini",
+    "necessaryBody": "Prisijungimas, tavo pasirinkimai ir saugumas. Be jų svetainė neveiktų.",
+    "alwaysOn": "Visada įjungti",
+    "analyticsTitle": "Analitiniai",
+    "analyticsBody": "Rodo, kaip naudojamasi svetaine, kad galėtume ją tobulinti (PostHog, Microsoft Clarity).",
+    "settingsFoot": "Pasirinkimą gali pakeisti bet kada – nuoroda „Slapukų nustatymai“ yra puslapio apačioje. Plačiau – <policy>slapukų politikoje</policy>.",
+    "save": "Išsaugoti",
+    "settingsLink": "Slapukų nustatymai"
   }
 }

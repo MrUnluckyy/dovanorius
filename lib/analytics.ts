@@ -5,9 +5,21 @@ export { rememberSignupContext } from "@/lib/signupContext";
 
 let _initialized = false;
 
+/**
+ * Start PostHog. Only called once the visitor has allowed analytics
+ * (lib/consent.ts): until then PostHog is never loaded, so it stores nothing
+ * on the device, and every capture below is a silent no-op.
+ */
 export function initAnalytics() {
   if (typeof window === "undefined") return;
-  if (_initialized) return;
+  if (_initialized) {
+    // Allowed again after withdrawing, in the same visit.
+    if (posthog.has_opted_out_capturing()) {
+      posthog.set_config({ disable_persistence: false });
+      posthog.opt_in_capturing({ captureEventName: false });
+    }
+    return;
+  }
   _initialized = true;
 
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
@@ -18,16 +30,62 @@ export function initAnalytics() {
   });
 }
 
+/** Analytics consent withdrawn: stop, and remove what analytics stored. */
+export function disableAnalytics() {
+  if (typeof window === "undefined") return;
+  if (_initialized) {
+    // Order matters: reset() rebuilds persistence and fetches flags, so it
+    // goes first; then stop capturing and stop writing to the device.
+    posthog.reset();
+    posthog.opt_out_capturing();
+    posthog.set_config({ disable_persistence: true });
+  }
+  for (const c of document.cookie.split("; ")) {
+    const name = c.split("=")[0];
+    // PostHog's, and Microsoft Clarity's first-party ones (its CLID cookie
+    // lives on clarity.ms, out of our reach).
+    if (name.startsWith("ph_") || name === "_clck" || name === "_clsk") {
+      document.cookie = `${name}=; Max-Age=0; Path=/`;
+      document.cookie = `${name}=; Max-Age=0; Path=/; Domain=.${location.hostname.replace(/^www\./, "")}`;
+    }
+  }
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith("ph_") || key.startsWith("__ph_")) localStorage.removeItem(key);
+    }
+  } catch {
+    // Storage can be blocked; nothing was stored then either.
+  }
+}
+
+/** Whether PostHog is running; event helpers stay quiet when it is not. */
+export function analyticsActive() {
+  return _initialized && !posthog.has_opted_out_capturing();
+}
+
+/** PostHog, but silent until the visitor has allowed analytics. */
+const ph = {
+  capture: (...args: Parameters<typeof posthog.capture>) => {
+    if (analyticsActive()) posthog.capture(...args);
+  },
+  identify: (...args: Parameters<typeof posthog.identify>) => {
+    if (analyticsActive()) posthog.identify(...args);
+  },
+  reset: () => {
+    if (analyticsActive()) posthog.reset();
+  },
+};
+
 export function identifyUser(
   userId: string,
   props?: Record<string, string | null>,
   setOnce?: Record<string, string | null>
 ) {
-  posthog.identify(userId, props ?? undefined, setOnce ?? undefined);
+  ph.identify(userId, props ?? undefined, setOnce ?? undefined);
 }
 
 export function resetUser() {
-  posthog.reset();
+  ph.reset();
 }
 
 // ── Typed event helpers (mirrors noriuto-app/lib/analytics.ts) ───────────────
@@ -44,14 +102,14 @@ export function trackSignUp(
 ) {
   const ctx = readSignupContext();
   if (userId) identifyUser(userId, { email: email ?? null }, ctx);
-  posthog.capture("sign_up", { method, ...ctx, $set_once: ctx });
+  ph.capture("sign_up", { method, ...ctx, $set_once: ctx });
 }
 
 export function trackSignIn(method: "google" | "email", userId?: string | null) {
   if (userId) identifyUser(userId);
   // Sent right away: sign-in is followed by a full page navigation, which can
   // drop a batched event.
-  posthog.capture("sign_in", { method }, { send_instantly: true });
+  ph.capture("sign_in", { method }, { send_instantly: true });
 }
 
 export type WishSource = "link" | "manual" | "inspo" | "share";
@@ -63,7 +121,7 @@ export function trackWishCreated(props: {
   hasImage: boolean;
   hasPrice: boolean;
 }) {
-  posthog.capture("wish_created", {
+  ph.capture("wish_created", {
     source: props.source,
     board_id: props.boardId,
     hasUrl: props.hasUrl,
@@ -78,7 +136,7 @@ export function trackListShared(props: {
   channel: "public_link" | "magic_link";
   itemsCount: number | null;
 }) {
-  posthog.capture("list_shared", {
+  ph.capture("list_shared", {
     board_id: props.boardId,
     channel: props.channel,
     items_count: props.itemsCount,
@@ -89,7 +147,7 @@ export type ViewerRole = "owner" | "signed_in" | "anonymous";
 
 /** A shared list was opened (/b/<slug>, /b/s/<token>, a profile's board). */
 export function trackListViewed(props: { boardId: string; viewerRole: ViewerRole }) {
-  posthog.capture("list_viewed", {
+  ph.capture("list_viewed", {
     board_id: props.boardId,
     viewer_role: props.viewerRole,
   });
@@ -101,7 +159,7 @@ export function trackItemReserved(props: {
   ownerId: string | null;
   isGuest: boolean;
 }) {
-  posthog.capture("item_reserved", {
+  ph.capture("item_reserved", {
     board_id: props.boardId,
     owner_id: props.ownerId,
     is_guest: props.isGuest,
@@ -109,17 +167,17 @@ export function trackItemReserved(props: {
 }
 
 export function trackEventCreated(type: string) {
-  posthog.capture("event_created", { type });
+  ph.capture("event_created", { type });
 }
 
 export function trackInviteSent() {
-  posthog.capture("invite_sent");
+  ph.capture("invite_sent");
 }
 
 export function trackDrawCompleted(memberCount: number) {
-  posthog.capture("draw_completed", { member_count: memberCount });
+  ph.capture("draw_completed", { member_count: memberCount });
 }
 
 export function trackProfileUpdated() {
-  posthog.capture("profile_updated");
+  ph.capture("profile_updated");
 }

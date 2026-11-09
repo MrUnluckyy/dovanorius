@@ -3,7 +3,7 @@ export default async function PrivacyPage() {
     <>
       <h1>Privatumo politika</h1>
       <p>
-        <strong>Paskutinį kartą atnaujinta: 2026 m. kovo mėn.</strong>
+        <strong>Paskutinį kartą atnaujinta: 2026 m. lapkričio mėn.</strong>
       </p>
 
       <p>
@@ -63,7 +63,7 @@ export default async function PrivacyPage() {
           įrašai);
         </li>
         <li>
-          CookieYes - slapukų sutikimų valdymui ir slapukų kategorijų kontrolei.
+          PostHog - svetainės naudojimo analizei, tik gavus sutikimą;
         </li>
         <li>
           Sentry - mobiliosios programėlės klaidų ir gedimų stebėjimui (techninė
@@ -112,7 +112,7 @@ export default async function PrivacyPage() {
         </li>
         <li>
           <strong>Sutikimas</strong> - kai pritariate analitiniams ir
-          nebūtiniems slapukams per CookieYes slapukų valdymo įrankį.
+          nebūtiniems slapukams svetainės slapukų pranešime arba nustatymuose.
         </li>
         <li>
           <strong>Teisinė prievolė</strong> - kai duomenų tvarkymas būtinas
@@ -167,7 +167,8 @@ export default async function PrivacyPage() {
       <p>
         Svetainėje naudojami būtini ir, gavus jūsų sutikimą, analitiniai
         slapukai. Slapukų sutikimus galite bet kada peržiūrėti ar pakeisti
-        naudodamiesi CookieYes slapukų nustatymų funkcija, pateikta svetainėje.
+        per nuorodą „Slapukų nustatymai“ puslapio apačioje. Plačiau -
+        slapukų politikoje.
       </p>
 
       <h2>9. Privatumo politikos pakeitimai</h2>

@@ -1253,5 +1253,22 @@
     "eventSubtitle": "A name draw or gift exchange with friends.",
     "newBoard": "New board",
     "close": "Close"
+  },
+  "Consent": {
+    "title": "Can we use cookies?",
+    "body": "Necessary cookies keep you signed in. With your permission we also use analytics cookies – to see what works on the site and what doesn't. More in the <policy>cookie policy</policy>.",
+    "necessaryOnly": "Necessary only",
+    "allowAll": "Allow all",
+    "choose": "Choose which to allow",
+    "settingsTitle": "Cookie settings",
+    "close": "Close",
+    "necessaryTitle": "Necessary",
+    "necessaryBody": "Signing in, your choices and security. The site doesn't work without them.",
+    "alwaysOn": "Always on",
+    "analyticsTitle": "Analytics",
+    "analyticsBody": "Show how the site is used so we can improve it (PostHog, Microsoft Clarity).",
+    "settingsFoot": "You can change this any time – the “Cookie settings” link is at the bottom of the page. More in the <policy>cookie policy</policy>.",
+    "save": "Save",
+    "settingsLink": "Cookie settings"
   }
 }

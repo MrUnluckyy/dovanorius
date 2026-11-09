@@ -16,6 +16,8 @@ import { Analytics } from "@vercel/analytics/next";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { GtmPageView } from "@/components/GtmPageView";
 import { PostHogProvider } from "@/components/providers/PostHogProvider";
+import { ConsentBanner } from "@/components/consent/ConsentBanner";
+import { CONSENT_COOKIE, consentDefaultsScript, parseConsent } from "@/lib/consent";
 import { createClient } from "@/utils/supabase/server";
 import { SITE_URL } from "@/lib/siteUrl";
 
@@ -95,6 +97,8 @@ export default async function RootLayout({
 }>) {
   const store = await cookies();
   const locale = store.get("locale")?.value || "lt";
+  // Read here so a returning visitor's choice applies before any tag loads.
+  const consent = parseConsent(store.get(CONSENT_COOKIE)?.value);
   const supabase = await createClient();
   const {
     data: { user },
@@ -133,6 +137,8 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
+        {/* Consent Mode v2 defaults (denied) must be in the dataLayer before GTM. */}
+        <script dangerouslySetInnerHTML={{ __html: consentDefaultsScript(consent) }} />
         <NextIntlClientProvider>
           <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID!} />
           <GtmPageView />
@@ -141,12 +147,17 @@ export default async function RootLayout({
           <ReportProblemDialog />
           <ContactChat />
           <Providers>
-            <PostHogProvider userId={user?.id} userEmail={user?.email} />
+            <PostHogProvider
+              userId={user?.id}
+              userEmail={user?.email}
+              analyticsAllowed={!!consent?.analytics}
+            />
             <div className="bg-(--nr-cream) text-(--nr-ink) font-body min-h-screen">
               {children}
             </div>
             <Analytics mode="production" />
-            {/* <ClarityProvider /> */}
+            {/* <ClarityProvider /> — if it comes back, render it only with consent?.analytics. */}
+            <ConsentBanner initial={consent} />
           </Providers>
         </NextIntlClientProvider>
       </body>
