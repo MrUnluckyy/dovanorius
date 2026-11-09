@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
 import { LuRotateCcw } from "react-icons/lu";
+import { PendingPips } from "@/components/ui/Pending";
 import { useConfirm } from "@/components/ConfirmDialogProvider";
 import { qq } from "@/utils/qq";
 import { redraw } from "../draw/actions";
@@ -74,9 +75,10 @@ export default function RedrawPanel({
         <button
           onClick={go}
           disabled={pending}
-          className="nr-btn nr-btn-dark flex-1 disabled:opacity-50"
+          aria-busy={pending || undefined}
+          className={`nr-btn nr-btn-dark flex-1 ${pending ? "cursor-wait" : ""}`}
         >
-          <LuRotateCcw className="w-4" aria-hidden />
+          {pending ? <PendingPips /> : <LuRotateCcw className="w-4" aria-hidden />}
           {pending ? t("drawing") : t("redrawCta")}
         </button>
       </div>

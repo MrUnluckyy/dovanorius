@@ -76,7 +76,8 @@ export async function updateEvent(
  *
  * Members, invitations, exclusions, draws and assignments all cascade at the
  * FK level, so this is a single statement — and it is irreversible, which is
- * why the caller confirms first.
+ * why the caller confirms first. People the organiser added by name go too,
+ * with their wish lists (ss_members_cleanup_managed trigger).
  */
 export async function deleteEvent(slug: string): Promise<ManageResult> {
   const supabase = await createClient();
@@ -135,6 +136,9 @@ export async function removeMember(
     .delete()
     .eq("event_id", event.id)
     .eq("to_user", userId);
+
+  // Somebody the organiser added by name is deleted with their wish list by
+  // the ss_members_cleanup_managed trigger once they are in no event.
 
   revalidatePath(`/renginiai/${slug}`);
   return { ok: true };

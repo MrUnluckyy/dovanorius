@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { motion, useAnimationControls } from "framer-motion";
+import { PendingPips } from "@/components/ui/Pending";
 import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/client";
 import { qq } from "@/utils/qq";
@@ -40,7 +40,6 @@ export default function DrawButton({
 }) {
   const sb = createClient();
   const [pending, start] = useTransition();
-  const [spinning, setSpinning] = useState(false);
   const [check, setCheck] = useState<DrawCheck | null>(null);
   // Checking (and confirming) is not drawing: the label stays "Draw names".
   const [checking, setChecking] = useState(false);
@@ -48,7 +47,6 @@ export default function DrawButton({
   const [summary, setSummary] = useState<{ count: number; rules: number } | null>(null);
   const qc = useQueryClient();
   const t = useTranslations("Events");
-  const ctrl = useAnimationControls();
 
   const nameOf = (id: string) =>
     participants.find((p) => p.user_id === id)?.display_name || t("invitePersonUnnamed");
@@ -64,8 +62,6 @@ export default function DrawButton({
 
   const draw = () =>
     start(async () => {
-      setSpinning(true);
-      await ctrl.start({ rotate: 360, transition: { duration: 0.6, ease: "easeInOut" } });
       try {
         const res = await runDraw(slug);
         if (!res.ok) {
@@ -87,7 +83,6 @@ export default function DrawButton({
         }
         setCheck(null);
         setSummary(null);
-        await ctrl.start({ scale: [1, 1.1, 1], transition: { duration: 0.4 } });
         qc.invalidateQueries({ queryKey: qq.event(slug) });
         qc.invalidateQueries({ queryKey: qq.participants(eventId) });
         qc.invalidateQueries({ queryKey: qq.members(eventId) });
@@ -95,8 +90,6 @@ export default function DrawButton({
       } catch (err) {
         console.error("Draw failed:", err);
         toast.error(t("drawFailed"));
-      } finally {
-        setSpinning(false);
       }
     });
 
@@ -138,16 +131,25 @@ export default function DrawButton({
 
   return (
     <>
-      <motion.button
-        animate={ctrl}
-        whileHover={{ scale: disabled ? 1 : 1.02 }}
-        whileTap={{ scale: disabled ? 1 : 0.98 }}
+      {/* Drawing takes a moment and happens once: the label says so, quietly.
+          Full opacity while busy — a faded button reads as "not allowed". */}
+      <button
         onClick={go}
         disabled={disabled || pending || checking}
-        className="nr-btn nr-btn-dark flex-1 disabled:cursor-not-allowed disabled:opacity-50"
+        aria-busy={pending || undefined}
+        className={`nr-btn nr-btn-dark flex-1 ${
+          pending ? "cursor-wait" : "disabled:cursor-not-allowed disabled:opacity-50"
+        }`}
       >
-        {pending || spinning ? t("drawing") : t("drawNames")}
-      </motion.button>
+        {pending ? (
+          <>
+            <PendingPips />
+            {t("drawing")}
+          </>
+        ) : (
+          t("drawNames")
+        )}
+      </button>
 
       {summary && (
         <DrawConfirmSheet

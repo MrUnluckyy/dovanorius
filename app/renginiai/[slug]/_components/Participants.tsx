@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
-import { LuCheck, LuClock, LuCrown, LuUserMinus, LuUserPlus, LuX } from "react-icons/lu";
+import { LuCheck, LuClock, LuCrown, LuHeartHandshake, LuListChecks, LuUserMinus, LuUserPlus, LuX } from "react-icons/lu";
 import { Avatar } from "@/components/Avatar";
 import { useConfirm } from "@/components/ConfirmDialogProvider";
 import { removeMember } from "@/app/actions/events/manage";
@@ -25,12 +25,21 @@ export default function Participants({
   isAdmin,
   currentUserId,
   onInvite,
+  managed,
+  justJoined,
+  onAddManaged,
 }: {
   event: SsEvent;
   participants: Participant[];
   isAdmin: boolean;
   currentUserId: string;
   onInvite: () => void;
+  /** People this organiser looks after → their wish list board, if any. */
+  managed?: Map<string, string | null>;
+  /** Joined seconds ago (live update): briefly highlighted. */
+  justJoined?: Set<string>;
+  /** Organisers before the draw: add somebody who will not sign in. */
+  onAddManaged?: () => void;
 }) {
   const t = useTranslations("Events");
   const qc = useQueryClient();
@@ -42,7 +51,9 @@ export default function Participants({
   const remove = async (p: Participant) => {
     const ok = await confirm({
       title: t("removeConfirmTitle"),
-      message: t("removeConfirmBody", { name: p.display_name || "" }),
+      message: managed?.has(p.user_id)
+        ? t("removeManagedConfirmBody", { name: p.display_name || "" })
+        : t("removeConfirmBody", { name: p.display_name || "" }),
       confirmText: t("removeConfirmCta"),
     });
     if (!ok) return;
@@ -60,6 +71,7 @@ export default function Participants({
     }
     qc.invalidateQueries({ queryKey: qq.participants(event.id) });
     qc.invalidateQueries({ queryKey: qq.members(event.id) });
+    qc.invalidateQueries({ queryKey: ["ss:managed", event.id] });
   };
 
   return (
@@ -95,9 +107,15 @@ export default function Participants({
         <ul className="space-y-1">
           {participants.map((p) => {
             const isLead = p.role === "owner" || p.role === "admin";
+            const isManaged = !!managed?.has(p.user_id);
+            const managedBoard = managed?.get(p.user_id) ?? null;
             return (
               <li key={p.user_id}>
-                <div className="flex items-center gap-3 rounded-2xl px-2 py-2">
+                <div
+                  className={`flex items-center gap-3 rounded-2xl px-2 py-2 transition-colors duration-700 ${
+                    justJoined?.has(p.user_id) ? "bg-(--nr-success-soft)" : ""
+                  }`}
+                >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <Avatar
                       avatar_url={p.avatar_url}
@@ -123,6 +141,12 @@ export default function Participants({
                           />
                         )}
                       </span>
+                      {isManaged && (
+                        <span className="mt-0.5 flex items-center gap-1 text-[12px] font-medium text-(--nr-muted)">
+                          <LuHeartHandshake size={12} className="shrink-0" />
+                          {t("managedBadge")}
+                        </span>
+                      )}
                     </span>
                   </div>
 
@@ -147,7 +171,15 @@ export default function Participants({
                     </span>
                   </span>
 
-                  {drawn && (
+                  {isManaged && managedBoard ? (
+                    <Link
+                      href={`/lentos/${managedBoard}`}
+                      className="flex shrink-0 items-center gap-1 text-[13px] font-semibold text-(--nr-gold-strong)"
+                    >
+                      <LuListChecks size={13} />
+                      {t("managedWishlistLink")}
+                    </Link>
+                  ) : drawn && (
                     <Link
                       href={`/zmones/${p.user_id}`}
                       className="shrink-0 text-[13px] font-semibold text-(--nr-gold-strong)"
@@ -174,6 +206,20 @@ export default function Participants({
             );
           })}
         </ul>
+      )}
+
+      {isAdmin && !drawn && onAddManaged && (
+        <button
+          onClick={onAddManaged}
+          className="mt-4 flex w-full items-center gap-2.5 rounded-2xl border border-dashed border-(--nr-border) px-3.5 py-3 text-left text-[14px] text-(--nr-muted) transition hover:border-(--nr-yellow-deep) hover:text-(--nr-ink)"
+          data-testid="add-managed"
+        >
+          <LuHeartHandshake className="w-4 shrink-0 text-(--nr-gold-strong)" />
+          <span>
+            <span className="font-semibold text-(--nr-ink)">{t("managedAddEntry")}</span>{" "}
+            {t("managedAddEntryHint")}
+          </span>
+        </button>
       )}
     </div>
   );

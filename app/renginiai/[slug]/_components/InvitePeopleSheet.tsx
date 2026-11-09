@@ -49,6 +49,7 @@ export default function InvitePeopleSheet({
   participants,
   open,
   onClose,
+  onAddManaged,
 }: {
   slug: string;
   eventId: string;
@@ -56,6 +57,8 @@ export default function InvitePeopleSheet({
   participants: Participant[];
   open: boolean;
   onClose: () => void;
+  /** Somebody who won't sign in at all: hand over to AddManagedSheet. */
+  onAddManaged?: () => void;
 }) {
   const sb = createClient();
   const qc = useQueryClient();
@@ -373,9 +376,17 @@ export default function InvitePeopleSheet({
               </div>
 
               {debounced.trim().length < 2 ? (
-                <p className="px-1 py-8 text-center text-[14px] text-(--nr-muted)">
-                  {t("invitePeopleHint")}
-                </p>
+                <div className="px-1 py-8 text-center">
+                  <p className="text-[14px] text-(--nr-muted)">{t("invitePeopleHint")}</p>
+                  {onAddManaged && (
+                    <button
+                      onClick={onAddManaged}
+                      className="mt-4 text-[14px] font-semibold text-(--nr-gold-strong) underline underline-offset-2"
+                    >
+                      {t("managedAddFromInvite")}
+                    </button>
+                  )}
+                </div>
               ) : isFetching ? (
                 <div className="space-y-2 py-4">
                   <div className="nr-skeleton h-12 w-full rounded-2xl" />

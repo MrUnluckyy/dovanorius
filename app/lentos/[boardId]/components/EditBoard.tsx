@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { LuClipboardPen, LuTrash2, LuX } from "react-icons/lu";
+import { LuClipboardPen, LuLogOut, LuTrash2, LuX } from "react-icons/lu";
 import { Board } from "./BoardBar";
 import { useRouter } from "next/navigation";
 import { useConfirm } from "@/components/ConfirmDialogProvider";
@@ -24,6 +24,10 @@ export function EditBoard({ userId, board }: { userId: string; board: Board }) {
   const t = useTranslations("Boards");
   const router = useRouter();
   const confirm = useConfirm();
+  // Only the owner may delete a board (boards_delete_owner). Somebody it was
+  // shared with (e.g. an organiser keeping a managed person's wish list)
+  // leaves it instead.
+  const isOwner = !board.owner_id || board.owner_id === userId;
 
   const { register, handleSubmit, reset } = useForm({
     defaultValues: {
@@ -44,7 +48,8 @@ export function EditBoard({ userId, board }: { userId: string; board: Board }) {
     mutationFn: async ({ name, description, isPrivate }: FormData) => {
       const { error } = await supabase
         .from("boards")
-        .update({ owner_id: userId, is_public: !isPrivate, name, description })
+        // Never owner_id: an editor saving this form used to take the board over.
+        .update({ is_public: !isPrivate, name, description })
         .eq("id", board.id)
         .single();
       if (error) throw error;
@@ -70,9 +75,39 @@ export function EditBoard({ userId, board }: { userId: string; board: Board }) {
     },
   });
 
-  // Either mutation locks both controls — saving a board mid-delete, or
+  const leaveBoard = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase
+        .from("board_members")
+        .delete()
+        .eq("board_id", board.id)
+        .eq("user_id", userId)
+        .select("board_id");
+      if (error) throw error;
+      // RLS hides a refused delete as zero rows; say so instead of "done".
+      if (!data?.length) throw new Error("not_allowed");
+    },
+    onSuccess: () => {
+      toast.success(t("toastLeftBoard", { item: board.name }));
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      router.push("/lentos");
+    },
+    onError: () => toast.error(t("toastLeaveBoardError")),
+  });
+
+  // Any mutation locks every control — saving a board mid-delete, or
   // deleting one mid-save, is a race nobody meant to start.
-  const boardBusy = updateBoard.isPending || deleteBoard.isPending;
+  const boardBusy =
+    updateBoard.isPending || deleteBoard.isPending || leaveBoard.isPending;
+
+  const handleLeave = async () => {
+    const ok = await confirm({
+      title: t("confirmLeaveTitle"),
+      message: t("confirmLeaveMessage", { title: board.name || "" }),
+      confirmText: t("confirmLeaveButton"),
+    });
+    if (ok) leaveBoard.mutate();
+  };
 
   const handleDelete = async () => {
     // items.board_id cascades on delete, so the wishes go with the board —
@@ -228,16 +263,29 @@ export function EditBoard({ userId, board }: { userId: string; board: Board }) {
                 >
                   {t("ctaSave")}
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-error whitespace-nowrap"
-                  onClick={handleDelete}
-                  disabled={boardBusy}
-                  data-busy={deleteBoard.isPending || undefined}
-                >
-                  <LuTrash2 />
-                  {t("delete")}
-                </button>
+                {isOwner ? (
+                  <button
+                    type="button"
+                    className="btn btn-error whitespace-nowrap"
+                    onClick={handleDelete}
+                    disabled={boardBusy}
+                    data-busy={deleteBoard.isPending || undefined}
+                  >
+                    <LuTrash2 />
+                    {t("delete")}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-error whitespace-nowrap"
+                    onClick={handleLeave}
+                    disabled={boardBusy}
+                    data-busy={leaveBoard.isPending || undefined}
+                  >
+                    <LuLogOut />
+                    {t("leaveBoard")}
+                  </button>
+                )}
               </div>
             </form>
           </div>

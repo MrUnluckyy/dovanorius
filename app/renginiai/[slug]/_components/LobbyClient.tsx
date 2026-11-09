@@ -30,6 +30,10 @@ import InvitePeopleSheet from "./InvitePeopleSheet";
 import EventSettingsSheet from "./EventSettingsSheet";
 import MyWishNote from "./MyWishNote";
 import GuestSeatCard from "./GuestSeatCard";
+import AddManagedSheet from "./AddManagedSheet";
+import ManagedReveals from "./ManagedReveals";
+import { useManagedMembers } from "./useManagedMembers";
+import { useEventLive } from "./useEventLive";
 import { EventLobbySkeleton } from "@/components/loaders/EventLobbySkeleton";
 
 export default function LobbyClient({
@@ -47,6 +51,7 @@ export default function LobbyClient({
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [addManagedOpen, setAddManagedOpen] = useState(false);
 
   // A freshly created event arrives with ?invite=1 so the organiser's next
   // step — getting people in — is already on screen.
@@ -198,6 +203,16 @@ export default function LobbyClient({
     },
   });
 
+  // People this organiser added by name and looks after (empty for others).
+  const { data: managed } = useManagedMembers(
+    event?.id,
+    (participants ?? []).map((p) => p.user_id)
+  );
+  const managedPeople = (participants ?? []).filter((p) => managed?.has(p.user_id));
+
+  // Joins, invitation answers and the draw show up without a reload.
+  const justJoined = useEventLive({ eventId: event?.id, slug, userId: user.id });
+
   const meta = getEventTypeMeta(event?.type);
   const joinedCount = (participants ?? []).filter(
     (p) => p.status === "joined"
@@ -341,6 +356,18 @@ export default function LobbyClient({
         )}
       </section>
 
+      {!isGroup && event.status === "drawn" && managedPeople.length > 0 && (
+        <section className="mt-4">
+          <ManagedReveals
+            eventId={event.id}
+            eventSlug={slug}
+            type={meta.type}
+            budget={event.budget}
+            people={managedPeople}
+          />
+        </section>
+      )}
+
       {/* Next year's edition, once this one is over: drawn and its date has
           passed (Vilnius), or archived. Same rule as repeatEvent on the server.
           The draw avoids this year's pairs where it can. */}
@@ -380,6 +407,13 @@ export default function LobbyClient({
           isAdmin={isAdmin}
           currentUserId={user.id}
           onInvite={() => setInviteOpen(true)}
+          managed={managed}
+          justJoined={justJoined}
+          onAddManaged={
+            !isGroup && (event.status === "draft" || event.status === "open")
+              ? () => setAddManagedOpen(true)
+              : undefined
+          }
         />
       </section>
 
@@ -429,7 +463,24 @@ export default function LobbyClient({
         participants={participants ?? []}
         open={inviteOpen}
         onClose={() => setInviteOpen(false)}
+        onAddManaged={
+          !isGroup && (event.status === "draft" || event.status === "open")
+            ? () => {
+                setInviteOpen(false);
+                setAddManagedOpen(true);
+              }
+            : undefined
+        }
       />
+
+      {addManagedOpen && (
+        <AddManagedSheet
+          slug={slug}
+          eventId={event.id}
+          hasWishlists={meta.type === "secret_santa"}
+          onClose={() => setAddManagedOpen(false)}
+        />
+      )}
 
       <EventSettingsSheet
         event={event}
