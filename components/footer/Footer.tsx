@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { LocaleToggle } from "@/components/LocaleToggle";
+import { ConsentSettingsLink } from "@/components/consent/ConsentSettingsLink";
 
 export default function Footer() {
   const t = useTranslations("Landing.footer");
@@ -39,6 +40,7 @@ export default function Footer() {
           >
             {t("cookies")}
           </Link>
+          <ConsentSettingsLink className="cursor-pointer transition-colors hover:text-(--nr-ink)" />
           <Link
             href="/naudojimo-politika"
             className="transition-colors hover:text-(--nr-ink)"

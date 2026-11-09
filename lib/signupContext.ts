@@ -1,5 +1,6 @@
 // No posthog-js import here: the Google sign-in callback (a server route)
 // reads this cookie too.
+import { readConsentClient } from "@/lib/consent";
 
 // ── Why someone signed up ────────────────────────────────────────────────────
 //
@@ -21,6 +22,8 @@ export function rememberSignupContext(
   boardId?: string | null
 ) {
   if (typeof document === "undefined") return;
+  // Only for analytics (why people sign up), so it needs analytics consent.
+  if (!readConsentClient()?.analytics) return;
   const value = encodeURIComponent(JSON.stringify({ c: context, b: boardId ?? null }));
   document.cookie = `${SIGNUP_CONTEXT_COOKIE}=${value}; Max-Age=${60 * 60 * 24 * 30}; Path=/; SameSite=Lax`;
 }
