@@ -17,7 +17,60 @@
 import { parse } from "csv-parse";
 import type { Readable } from "node:stream";
 import { classifyGender, classifyProductType, classifySeason } from "./classify";
+import type { CurationConfig } from "./curate";
 import type { FeedAdapter, FeedSource, NormalizedProduct } from "./types";
+
+/**
+ * Per-feed overrides, keyed by fid. Most AWIN feeds map cleanly with the
+ * generic mapper; these are the ones that don't.
+ */
+type AwinFeedProfile = {
+  /** Display name, when AWIN's programme name is not the shop's name. */
+  merchantName?: string;
+  /**
+   * "name-prefix": the feed leaves brand_name empty but every title starts
+   * "<Brand>, <product>" (iHerb: "NOW Foods, Eteriniai aliejai, …").
+   */
+  brandFrom?: "name-prefix";
+  /** Fixed product_type, when the feed's categories don't classify. */
+  productType?: string;
+  /** Filter on the mapped product, for feeds that are mostly not gifts. */
+  keep?: (p: NormalizedProduct) => boolean;
+  curate?: Partial<CurationConfig>;
+};
+
+/**
+ * iHerb's everyday consumables. Even inside Beauty and Bath & Personal Care a
+ * lot of the catalogue is a refill, not a present.
+ */
+const IHERB_NOT_GIFTS =
+  /dezodorant|dant(ų|u) pasta|burnos skalav|plauk(ų|u) daž|tampon|įklotai|higienin|tualetin|skalbim|valikl|muil(as|o) papild|sauskelnės|kapsul|tablet|guminuk|miltel/i;
+
+export const AWIN_FEED_PROFILES: Record<string, AwinFeedProfile> = {
+  // iHerb EUR — Lithuania feed (programme 76734). Assessed 2026-11-12: 29.9k
+  // rows, Lithuanian titles, links to the LT/EUR store. Half of it is
+  // supplements and another fifth groceries, sports nutrition and pet food, so
+  // only the Beauty and Bath & Personal Care departments (~6k rows: K-beauty
+  // skincare, makeup palettes, body butters, essential oils) are imported.
+  "116278": {
+    merchantName: "iHerb",
+    brandFrom: "name-prefix",
+    // "Bath & Personal Care" classifies as "other"; everything kept is beauty.
+    productType: "beauty",
+    keep: (p) =>
+      /^(Beauty|Bath & Personal Care)$/.test(p.categoryName ?? "") &&
+      !IHERB_NOT_GIFTS.test(p.productName),
+    // Under €15 is the everyday tube, not a gift.
+    curate: { minPrice: 15 },
+  },
+};
+
+/** "NOW Foods, Eteriniai aliejai, …" → "NOW Foods". */
+function brandFromNamePrefix(name: string): string | null {
+  const i = name.indexOf(",");
+  if (i <= 0 || i > 40) return null;
+  return name.slice(0, i).trim() || null;
+}
 
 /** Columns requested in the feed URL (order/content must match AWIN setup). */
 export const AWIN_COLUMNS = [
@@ -121,30 +174,59 @@ export const awinAdapter: FeedAdapter = {
     if (!apiKey) throw new Error("AWIN_DATAFEED_KEY is not set");
     if (!feedIds.length) throw new Error("AWIN_FEED_IDS is not set");
 
-    return feedIds.map((fid) => ({
-      label: `awin:fid=${fid}`,
-      url: buildFeedUrl(apiKey, fid),
-    }));
+    return feedIds.map((fid) => {
+      const profile = AWIN_FEED_PROFILES[fid];
+      return {
+        label: `awin:fid=${fid}`,
+        url: buildFeedUrl(apiKey, fid),
+        curate: profile?.curate,
+        parse: profile ? (body) => parseCsv(body, profile) : undefined,
+      };
+    });
   },
 
-  async *parse(body: Readable): AsyncIterable<NormalizedProduct> {
-    const parser = parse({
-      columns: true,
-      delimiter: ",",
-      relax_quotes: true,
-      relax_column_count: true,
-      skip_records_with_error: true,
-      trim: true,
-    });
-    // .pipe() does not forward source errors, so a mid-download reset on `body`
-    // would otherwise surface as an unhandled 'error' event and crash the
-    // process. Forward it so the `for await` below rejects and the caller can
-    // retry the feed.
-    body.on("error", (err) => parser.destroy(err));
-    body.pipe(parser);
-    for await (const row of parser) {
-      const product = mapRow(row as Record<string, string>);
-      if (product) yield product;
-    }
+  parse(body: Readable): AsyncIterable<NormalizedProduct> {
+    return parseCsv(body);
   },
 };
+
+async function* parseCsv(
+  body: Readable,
+  profile?: AwinFeedProfile
+): AsyncIterable<NormalizedProduct> {
+  const parser = parse({
+    columns: true,
+    delimiter: ",",
+    relax_quotes: true,
+    relax_column_count: true,
+    skip_records_with_error: true,
+    trim: true,
+  });
+  // .pipe() does not forward source errors, so a mid-download reset on `body`
+  // would otherwise surface as an unhandled 'error' event and crash the
+  // process. Forward it so the `for await` below rejects and the caller can
+  // retry the feed.
+  body.on("error", (err) => parser.destroy(err));
+  body.pipe(parser);
+  for await (const row of parser) {
+    const mapped = mapRow(row as Record<string, string>);
+    if (!mapped) continue;
+    const product = profile ? applyProfile(mapped, profile) : mapped;
+    if (!profile?.keep || profile.keep(product)) yield product;
+  }
+}
+
+function applyProfile(p: NormalizedProduct, profile: AwinFeedProfile): NormalizedProduct {
+  const brandName =
+    p.brandName ??
+    (profile.brandFrom === "name-prefix" ? brandFromNamePrefix(p.productName) : null);
+  const merchantName = profile.merchantName ?? p.merchantName;
+  return {
+    ...p,
+    brandName,
+    merchantName,
+    productType:
+      profile.productType ??
+      classifyProductType(p.categoryName, merchantName, p.productName),
+  };
+}
