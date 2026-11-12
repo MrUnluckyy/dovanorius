@@ -115,7 +115,21 @@ type FeedProfile = {
   variantKey?: "url-product-id" | "name";
   /** Per-feed curation overrides, merged over the run's config. */
   curate?: Partial<CurationConfig>;
+  /**
+   * Optional filter on the mapped product, for feeds whose catalogue is partly
+   * not gifts (DJI publishes cables, transmission kits and €8k cinema rigs
+   * alongside the cameras people actually give).
+   */
+  keep?: (p: NormalizedProduct) => boolean;
 };
+
+/**
+ * DJI rows that are spare parts, pro/enterprise kit or consumables — not
+ * something you'd put on a wish list for someone. The camera, mic, drone and
+ * gimbal combos (and the nicer accessories, bags, cases) stay.
+ */
+const DJI_NOT_GIFTS =
+  /\b(transmission|transceiver|cable|connector|breakout|adapter|cage|replacement|deodorizer|cleaning solution|detergent|filter|mop|dust bag|roller brush|side brush|propellers?|care refresh|ronin|zenmuse|matrice|agras|avia|dock|enterprise|screw|bracket|refurbished)\b/i;
 
 /** Assessed 2026-08-07 against the real exports, one profile per fid. */
 export const TD_FEED_PROFILES: Record<string, FeedProfile> = {
@@ -210,11 +224,26 @@ export const TD_FEED_PROFILES: Record<string, FeedProfile> = {
       perMerchantCap: 80_000,
     },
   },
+  "259716": {
+    fid: "259716",
+    label: "DJI LT",
+    // Programme 407899 — the affiliate_merchants row from PR #91.
+    merchantId: "407899",
+    merchantName: "DJI LT",
+    brand: { from: "top" }, // constant "DJI"
+    // Assessed 2026-11-12 (833 rows): names are English, categories are just
+    // "<Series> > <product name>", no stock or was-price field. Median price is
+    // ~€400 (€9–€8,699), so like Dyson it carries its own cap: drones, Osmo
+    // cameras and gimbal combos sit at €300–1,500; the cinema rigs above that
+    // are not gifts.
+    curate: { requireInStock: false, maxPrice: 1500 },
+    keep: (p) => !DJI_NOT_GIFTS.test(p.productName),
+  },
 };
 
 // 258113 replaces 118239 for Pigu — same programme, different export: general
 // merchandise instead of furniture and car parts. See its profile above.
-const DEFAULT_FIDS = ["109344", "256919", "258113", "259263"];
+const DEFAULT_FIDS = ["109344", "256919", "258113", "259263", "259716"];
 
 /** Latest price from the offer's price history (feeds may carry several). */
 function latestPrice(offer: TdOffer): { value: number; currency: string } | null {
@@ -365,7 +394,9 @@ function mapProduct(p: TdProduct, profile: FeedProfile): NormalizedProduct | nul
     price,
     rrp,
     currency: priced.currency,
-    imageUrl: p.productImage?.url?.trim() || null,
+    // DJI's feed links the `@small` thumbnail (~7 KB, blurry on a card); its CDN
+    // serves the same image at `@large` (~20 KB), which is the card size.
+    imageUrl: p.productImage?.url?.trim().replace("@small.", "@large.") || null,
     deepLink,
     inStock,
     // TD category paths name the audience outright ("Moterims - …", "Vyrai > …"),
@@ -500,7 +531,7 @@ export async function* parseFeed(
       continue; // a single malformed row must not abort a 674k-row feed
     }
     const product = mapProduct(raw, profile);
-    if (product) yield product;
+    if (product && (!profile.keep || profile.keep(product))) yield product;
   }
 
   if (failure) throw failure;
