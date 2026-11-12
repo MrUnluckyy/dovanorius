@@ -962,6 +962,14 @@
       "ideas": "Ideas",
       "forYourself": "Shopping for yourself?",
       "forYourselfLink": "Open your ideas"
+    },
+    "fallback": {
+      "corrected": "Nothing for {typed}, so here is {q}.",
+      "relaxed": "We couldn't find {typed}. Here are similar products for {q}.",
+      "popular": "We couldn't find {typed}. Maybe one of our most popular gifts?",
+      "searchFor": "Search {q}",
+      "nothing": "Nothing matches these filters.",
+      "more": "Show more"
     }
   },
   "Inspo": {

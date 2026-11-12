@@ -53,6 +53,9 @@ export type InspoFilters = {
   priceMin: number | null;
   priceMax: number | null;
   search: string;
+  /** search_log source. "fallback" = the page's own retry after a search
+   *  found nothing, which is not logged as something the visitor typed. */
+  searchSource?: "web" | "fallback";
   audience: Audience;
   /** When true, hide products for the opposite season to now. */
   inSeason: boolean;

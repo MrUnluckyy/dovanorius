@@ -962,6 +962,14 @@
       "ideas": "Idėjos",
       "forYourself": "Ieškai sau?",
       "forYourselfLink": "Atidaryk savo idėjas"
+    },
+    "fallback": {
+      "corrected": "{typed} nieko nerado, todėl rodome {q}.",
+      "relaxed": "Neradome {typed}. Štai panašios prekės pagal {q}.",
+      "popular": "Neradome {typed}. Gal patiks populiariausios dovanos?",
+      "searchFor": "Ieškoti {q}",
+      "nothing": "Su šiais filtrais nieko neradome.",
+      "more": "Rodyti daugiau"
     }
   },
   "Inspo": {
