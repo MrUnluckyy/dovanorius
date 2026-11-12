@@ -940,7 +940,8 @@
       "pickCount": "{count, plural, one {# hand-picked gift} other {# hand-picked gifts}}",
       "metaRecipientTitle": "Gifts for {recipient} - ideas and collections | Noriuto.lt",
       "metaRecipientDescription": "Hand-picked gift ideas for {recipient}: collections, guides and thousands of products from trusted shops.",
-      "metaCategoryTitle": "{category} - gifts for {recipient} | Noriuto.lt"
+      "metaCategoryTitle": "{category} - gifts for {recipient} | Noriuto.lt",
+      "searchPlaceholder": "Search gifts, e.g. drone, perfume"
     },
     "event": {
       "back": "Back to “{event}”",

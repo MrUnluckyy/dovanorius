@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LuSearch } from "react-icons/lu";
 import type { VisitorGender } from "@/lib/discover/recipients";
@@ -26,7 +26,10 @@ export function DiscoverNav({ gender }: { gender: VisitorGender }) {
   const pathname = usePathname() ?? "";
   const [, root, seg1, seg2] = pathname.split("/");
 
-  const hidden = root !== "discover" || seg1 === "browse" || seg1 === "shop";
+  // Browse (/idejos/visos) and shop pages carry their own search + filter bar.
+  // NB these are the Lithuanian routes: this check still said "discover" after
+  // the route rename, which hid the whole bar — tabs and search — everywhere.
+  const hidden = root !== "idejos" || seg1 === "visos" || seg1 === "parduotuve";
   const recipient = seg1 ? recipientFromSlug(seg1) : null;
   const category = recipient && seg2 ? categoryFromSlug(seg2) : null;
 
@@ -47,10 +50,13 @@ export function DiscoverNav({ gender }: { gender: VisitorGender }) {
 
   if (hidden) return null;
 
+  const search = <SearchBox placeholder={t("hub.searchPlaceholder")} />;
   const cats = recipient ? categoriesFor(recipient, gender) : [];
 
   return (
     <div className="sticky top-0 z-30 border-b border-(--nr-border) bg-(--nr-cream)/92 backdrop-blur-md">
+      {/* Phones: search gets its own full-width row, above the tabs. */}
+      <div className="px-4 pt-3 sm:hidden">{search}</div>
       <div className="mx-auto flex max-w-[1440px] items-center gap-4 px-4 sm:px-6">
         <nav
           aria-label={t("hub.recipientsNav")}
@@ -83,13 +89,7 @@ export function DiscoverNav({ gender }: { gender: VisitorGender }) {
             )}
           </div>
         </nav>
-        <Link
-          href="/idejos/visos"
-          aria-label={t("searchPlaceholder")}
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-(--nr-ink) transition-colors hover:bg-(--nr-stage)"
-        >
-          <LuSearch className="w-[18px]" />
-        </Link>
+        <div className="hidden w-72 shrink-0 pt-2 sm:block lg:w-80">{search}</div>
       </div>
 
       {recipient && (
@@ -126,5 +126,38 @@ export function DiscoverNav({ gender }: { gender: VisitorGender }) {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Always-visible search. Enter goes to the full catalogue with the query, where
+ * results, filters and the spelling fix live.
+ */
+function SearchBox({ placeholder }: { placeholder: string }) {
+  const router = useRouter();
+  const [q, setQ] = useState("");
+
+  return (
+    <form
+      role="search"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const term = q.trim();
+        router.push(term ? `/idejos/visos?q=${encodeURIComponent(term)}` : "/idejos/visos");
+      }}
+      className="flex items-center gap-2 rounded-full border border-(--nr-border) bg-(--nr-surface) px-4 py-2.5 transition-colors focus-within:border-(--nr-ink)"
+    >
+      <LuSearch className="w-4 shrink-0 text-(--nr-faint)" aria-hidden />
+      <input
+        type="search"
+        enterKeyHint="search"
+        aria-label={placeholder}
+        placeholder={placeholder}
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        // 16px on phones, or iOS zooms the page on focus.
+        className="min-w-0 grow bg-transparent text-base outline-none placeholder:text-(--nr-faint) sm:text-sm"
+      />
+    </form>
   );
 }
