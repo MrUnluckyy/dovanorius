@@ -940,8 +940,12 @@
       "pickCount": "{count, plural, one {# hand-picked gift} other {# hand-picked gifts}}",
       "metaRecipientTitle": "Gifts for {recipient} - ideas and collections | Noriuto.lt",
       "metaRecipientDescription": "Hand-picked gift ideas for {recipient}: collections, guides and thousands of products from trusted shops.",
-      "metaCategoryTitle": "{category} - gifts for {recipient} | Noriuto.lt",
-      "searchPlaceholder": "Search gifts, e.g. drone, perfume"
+      "metaCategoryTitle": "{title} – ideas and offers | Noriuto.lt",
+      "searchPlaceholder": "Search gifts, e.g. drone, perfume",
+      "categoryTitle": "{category} gifts for {recipient}",
+      "metaPageDescriptionBrands": "{title}: {brands} and more – gift ideas from €{from} from trusted shops, picked by Noriuto.lt.",
+      "metaPageDescription": "{title}: hand-picked gift ideas from trusted shops. Pick one or save it to a wish list.",
+      "breadcrumbRoot": "Gift ideas"
     },
     "event": {
       "back": "Back to “{event}”",
@@ -970,6 +974,21 @@
       "searchFor": "Search {q}",
       "nothing": "Nothing matches these filters.",
       "more": "Show more"
+    },
+    "categoryGen": {
+      "beauty": "Beauty",
+      "home": "Home",
+      "kitchen": "Kitchen",
+      "tech": "Tech",
+      "toys": "Toy",
+      "tools": "Tool",
+      "sport": "Sport",
+      "garden": "Garden",
+      "pets": "Pet",
+      "clothing": "Clothing",
+      "shoes": "Shoe",
+      "bag": "Bag",
+      "accessory": "Accessory"
     }
   },
   "Inspo": {

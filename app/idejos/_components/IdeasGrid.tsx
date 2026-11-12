@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useInspoProducts } from "@/hooks/useInspoProducts";
+import { ideasGridFilters, type InitialGrid } from "@/lib/discover/gridQuery";
 import type { Audience } from "@/types/inspo";
 import { toCardProduct } from "./CollectionRow";
 import { ProductCard, type CardProduct } from "./ProductCard";
@@ -19,6 +20,7 @@ export function IdeasGrid({
   productTypes,
   ageGroup,
   priceMax,
+  initial,
   onOpen,
 }: {
   title: string;
@@ -30,24 +32,18 @@ export function IdeasGrid({
   ageGroup?: "kid" | "teen" | "adult" | null;
   /** Upper price bound, e.g. a Secret Santa budget. */
   priceMax?: number | null;
+  /** First page rendered on the server, used when it matches these filters. */
+  initial?: InitialGrid | null;
   onOpen: (p: CardProduct) => void;
 }) {
   const t = useTranslations("Discover");
+  const filters = ideasGridFilters({ audience, productType, productTypes, ageGroup, priceMax });
+  // Only for the exact query the server ran: on "Sau" the visitor can change
+  // gender, and a stale first page must not stand in for the new one.
+  const initialPage =
+    initial && initial.key === JSON.stringify(filters) ? initial.products : undefined;
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInspoProducts({
-      merchant: null,
-      productType,
-      productTypes: productType ? null : productTypes ?? null,
-      ageGroup: ageGroup ?? null,
-      brand: null,
-      priceMin: null,
-      priceMax: priceMax ?? null,
-      search: "",
-      audience,
-      inSeason: true,
-      onSaleOnly: false,
-      sort: "recommended",
-    });
+    useInspoProducts(filters, { initialPage });
 
   const products = (data?.pages.flat() ?? []).map(toCardProduct);
 

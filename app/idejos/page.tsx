@@ -6,6 +6,7 @@ import { discoverHref } from "@/lib/discover/routes";
 import { storyArticleFor } from "@/lib/discover/articles";
 import { placementFor } from "@/lib/discover/placements";
 import { loadEventEntry } from "@/lib/discover/eventEntry.server";
+import { initialGridFor } from "@/lib/discover/ssrGrid.server";
 import { DiscoverHub } from "./_components/hub/DiscoverHub";
 import { EventHub } from "./_components/hub/EventHub";
 
@@ -14,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
+    alternates: { canonical: "/idejos" },
   };
 }
 
@@ -40,11 +42,20 @@ export default async function DiscoverPage({
 
   if (visitor.recipient) redirect(discoverHref(visitor.recipient));
 
-  const [article, ad] = await Promise.all([
+  const [article, ad, initialGrid] = await Promise.all([
     storyArticleFor(null, await getLocale()),
     placementFor(null, null),
+    initialGridFor(null, null, visitor.gender),
   ]);
   return (
-    <DiscoverHub visitor={visitor} userId={userId} recipient={null} category={null} article={article} ad={ad} />
+    <DiscoverHub
+      visitor={visitor}
+      userId={userId}
+      recipient={null}
+      category={null}
+      article={article}
+      ad={ad}
+      initialGrid={initialGrid}
+    />
   );
 }

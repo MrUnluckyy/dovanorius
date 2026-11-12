@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 import { getVisitor } from "@/lib/discover/visitor.server";
 import { CATEGORY_SLUGS, RECIPIENT_SLUGS, categoryFromSlug, recipientFromSlug } from "@/lib/discover/routes";
 import { storyArticleFor } from "@/lib/discover/articles";
 import { placementFor } from "@/lib/discover/placements";
+import { initialGridFor } from "@/lib/discover/ssrGrid.server";
+import { discoverBreadcrumb, discoverPageMetadata } from "@/lib/discover/pageSeo.server";
 import { DiscoverHub } from "../../_components/hub/DiscoverHub";
+import { JsonLd } from "../../_components/JsonLd";
 
 // Every recipient × category pair is known up front; anything else is a 404.
 export const dynamicParams = false;
@@ -25,14 +28,7 @@ async function resolve(params: Params["params"]) {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { recipient, category } = await resolve(params);
   if (!recipient || !category) return {};
-  const t = await getTranslations("Discover");
-  return {
-    title: t("hub.metaCategoryTitle", {
-      category: t(`category.${category}`),
-      recipient: t(`recipient.${recipient}`).toLocaleLowerCase("lt"),
-    }),
-    robots: recipient === "self" ? { index: false } : undefined,
-  };
+  return discoverPageMetadata(recipient, category);
 }
 
 /** A category inside a recipient: its collections first, then its grid. */
@@ -41,11 +37,24 @@ export default async function RecipientCategoryPage({ params }: Params) {
   if (!recipient || !category) notFound();
 
   const [{ visitor, userId }, locale] = await Promise.all([getVisitor(), getLocale()]);
-  const [article, ad] = await Promise.all([
+  const [article, ad, initialGrid, breadcrumb] = await Promise.all([
     storyArticleFor(recipient, locale),
     placementFor(recipient, category),
+    initialGridFor(recipient, category, visitor.gender),
+    discoverBreadcrumb(recipient, category),
   ]);
   return (
-    <DiscoverHub visitor={visitor} userId={userId} recipient={recipient} category={category} article={article} ad={ad} />
+    <>
+      <JsonLd data={breadcrumb} />
+      <DiscoverHub
+        visitor={visitor}
+        userId={userId}
+        recipient={recipient}
+        category={category}
+        article={article}
+        ad={ad}
+        initialGrid={initialGrid}
+      />
+    </>
   );
 }

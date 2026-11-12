@@ -28,6 +28,7 @@ import {
 import type { Visitor } from "@/lib/discover/visitorState";
 import type { StoryArticle } from "@/lib/discover/articles";
 import type { Placement } from "@/lib/discover/placements";
+import { ideasGridScope, type InitialGrid } from "@/lib/discover/gridQuery";
 import { useMyCategories } from "@/hooks/useMyCategories";
 import { trackDiscover, trackInspo, type TrackContext } from "@/utils/trackInspo";
 import { toCardProduct } from "../CollectionRow";
@@ -37,8 +38,6 @@ import { IdeasGrid } from "../IdeasGrid";
 import { Rail } from "./Rail";
 import { StillLife } from "./StillLife";
 import { StoryBlock, type Story } from "./StoryBlock";
-
-const APPAREL = new Set(["clothing", "shoes", "bag"]);
 
 /** How many ranked collections lead a page before "Visos kolekcijos". */
 const TOP = 4;
@@ -63,6 +62,7 @@ export function DiscoverHub({
   category,
   article,
   ad,
+  initialGrid = null,
 }: {
   visitor: Visitor;
   userId: string | null;
@@ -71,6 +71,8 @@ export function DiscoverHub({
   article: StoryArticle | null;
   /** The one sponsored placement for this page, if any. */
   ad: Placement | null;
+  /** The grid's first page, rendered on the server (for search engines). */
+  initialGrid?: InitialGrid | null;
 }) {
   const t = useTranslations("Discover");
   const supabase = createClient();
@@ -224,7 +226,12 @@ export function DiscoverHub({
   const title = !recipient
     ? t("hub.homeTitle")
     : category
-      ? t(`category.${category}`)
+      ? // "Grožio dovanos moteriai", not "Grožis": the H1 is what the page
+        // ranks for, and it is what people search.
+        t("hub.categoryTitle", {
+          category: t(`categoryGen.${category}`),
+          recipient: recipientLabel!.toLocaleLowerCase("lt"),
+        })
       : t("hub.recipientTitle", { recipient: recipientLabel!.toLocaleLowerCase("lt") });
 
   const profileText = [
@@ -431,13 +438,8 @@ export function DiscoverHub({
         {/* ---------- The grid ---------- */}
         <IdeasGrid
           title={category ? t("hub.allInCategory") : recipient ? t("hub.allIdeas") : t("firstView.moreIdeas")}
-          audience={lens.audience}
-          productType={category ?? lens.gridType}
-          // A recipient page's grid stays inside that recipient's gift
-          // categories, minus apparel: default browse is mostly fashion, and
-          // a page called "Dovanos moteriai" should not open on cycling shorts.
-          productTypes={recipient ? categoriesFor(recipient, gender).filter((c) => !APPAREL.has(c)) : undefined}
-          ageGroup={lens.ageGroup}
+          {...ideasGridScope(recipient, category, gender)}
+          initial={initialGrid}
           onOpen={open({ surface: "grid" })}
         />
 

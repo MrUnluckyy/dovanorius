@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 import { getVisitor } from "@/lib/discover/visitor.server";
 import { RECIPIENT_SLUGS, recipientFromSlug } from "@/lib/discover/routes";
 import { storyArticleFor } from "@/lib/discover/articles";
 import { placementFor } from "@/lib/discover/placements";
+import { initialGridFor } from "@/lib/discover/ssrGrid.server";
+import { discoverBreadcrumb, discoverPageMetadata } from "@/lib/discover/pageSeo.server";
 import { DiscoverHub } from "../_components/hub/DiscoverHub";
+import { JsonLd } from "../_components/JsonLd";
 
 // Only real recipients exist; anything else is a hard 404, not a streamed
 // "not found" page with a 200 status.
@@ -19,14 +22,7 @@ type Params = { params: Promise<{ recipient: string }> };
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const recipient = recipientFromSlug((await params).recipient);
   if (!recipient) return {};
-  const t = await getTranslations("Discover");
-  const label = t(`recipient.${recipient}`).toLocaleLowerCase("lt");
-  return {
-    title: t("hub.metaRecipientTitle", { recipient: label }),
-    description: t("hub.metaRecipientDescription", { recipient: label }),
-    // "Sau" is personal; the gift pages are what should rank.
-    robots: recipient === "self" ? { index: false } : undefined,
-  };
+  return discoverPageMetadata(recipient, null);
 }
 
 /** "Dovanos moteriai": one recipient's hub. */
@@ -35,11 +31,25 @@ export default async function RecipientPage({ params }: Params) {
   if (!recipient) notFound();
 
   const [{ visitor, userId }, locale] = await Promise.all([getVisitor(), getLocale()]);
-  const [article, ad] = await Promise.all([
+  const [article, ad, initialGrid, breadcrumb] = await Promise.all([
     storyArticleFor(recipient, locale),
     placementFor(recipient, null),
+    // The grid's first page, in the HTML (search engines saw an empty grid).
+    initialGridFor(recipient, null, visitor.gender),
+    discoverBreadcrumb(recipient, null),
   ]);
   return (
-    <DiscoverHub visitor={visitor} userId={userId} recipient={recipient} category={null} article={article} ad={ad} />
+    <>
+      <JsonLd data={breadcrumb} />
+      <DiscoverHub
+        visitor={visitor}
+        userId={userId}
+        recipient={recipient}
+        category={null}
+        article={article}
+        ad={ad}
+        initialGrid={initialGrid}
+      />
+    </>
   );
 }
