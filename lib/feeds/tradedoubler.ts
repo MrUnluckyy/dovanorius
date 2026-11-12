@@ -121,6 +121,13 @@ type FeedProfile = {
    * alongside the cameras people actually give).
    */
   keep?: (p: NormalizedProduct) => boolean;
+  /**
+   * Category to prepend to the feed's own, for feeds whose names and
+   * categories never say what the product IS in Lithuanian. Search matches
+   * name + brand + category, so "dronas" only finds a DJI drone if something
+   * on the row says "dronai" (DJI calls it "DJI Flip Fly More Combo").
+   */
+  categoryPrefix?: (p: NormalizedProduct) => string | null;
 };
 
 /**
@@ -128,6 +135,20 @@ type FeedProfile = {
  * something you'd put on a wish list for someone. The camera, mic, drone and
  * gimbal combos (and the nicer accessories, bags, cases) stay.
  */
+/** DJI product lines → the Lithuanian word a shopper searches for. First match wins. */
+const DJI_LINES: [RegExp, string][] = [
+  [/\bosmo (action|360)\b/i, "Veiksmo kameros"],
+  [/\bosmo mobile\b/i, "Telefono stabilizatoriai"],
+  [/\b(osmo )?pocket\b|\bosmo nano\b/i, "Vaizdo kameros"],
+  [/\brs ?\d|\bronin\b/i, "Kameros stabilizatoriai"],
+  [/\bmic\b/i, "Mikrofonai"],
+  [/\bpower\b/i, "Įkrovimo stotys"],
+  [/\bromo\b/i, "Robotai dulkių siurbliai"],
+  // Last: "Mini" is also in "Mic Mini" and "RS 4 Mini".
+  [/\b(mini|air|mavic|avata|flip|neo|fpv|inspire|spark|tello)\b/i, "Dronai"],
+  [/\b(goggles|rc|rc-n\d|motion controller|fly more)\b/i, "Dronų priedai"],
+];
+
 const DJI_NOT_GIFTS =
   /\b(transmission|transceiver|cable|connector|breakout|adapter|cage|replacement|deodorizer|cleaning solution|detergent|filter|mop|dust bag|roller brush|side brush|propellers?|care refresh|ronin|zenmuse|matrice|agras|avia|dock|enterprise|screw|bracket|refurbished)\b/i;
 
@@ -238,6 +259,7 @@ export const TD_FEED_PROFILES: Record<string, FeedProfile> = {
     // are not gifts.
     curate: { requireInStock: false, maxPrice: 1500 },
     keep: (p) => !DJI_NOT_GIFTS.test(p.productName),
+    categoryPrefix: (p) => DJI_LINES.find(([re]) => re.test(p.productName))?.[1] ?? null,
   },
 };
 
@@ -530,8 +552,18 @@ export async function* parseFeed(
     } catch {
       continue; // a single malformed row must not abort a 674k-row feed
     }
-    const product = mapProduct(raw, profile);
-    if (product && (!profile.keep || profile.keep(product))) yield product;
+    let product = mapProduct(raw, profile);
+    if (!product || (profile.keep && !profile.keep(product))) continue;
+    const prefix = profile.categoryPrefix?.(product);
+    if (prefix) {
+      const categoryName = product.categoryName ? `${prefix} > ${product.categoryName}` : prefix;
+      product = {
+        ...product,
+        categoryName,
+        productType: classifyProductType(categoryName, profile.merchantName, product.productName),
+      };
+    }
+    yield product;
   }
 
   if (failure) throw failure;
