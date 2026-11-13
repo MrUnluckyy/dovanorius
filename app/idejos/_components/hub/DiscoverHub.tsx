@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/utils/supabase/client";
 import {
@@ -35,6 +36,9 @@ import { toCardProduct } from "../CollectionRow";
 import type { CardProduct } from "../ProductCard";
 import { ProductModal } from "../ProductModal";
 import { IdeasGrid } from "../IdeasGrid";
+import { BudgetChips } from "../BudgetChips";
+import { priceBand } from "../filters";
+import { withBudget } from "@/lib/discover/routes";
 import { Rail } from "./Rail";
 import { StillLife } from "./StillLife";
 import { StoryBlock, type Story } from "./StoryBlock";
@@ -83,6 +87,29 @@ export function DiscoverHub({
   const [selected, setSelected] = useState<CardProduct | null>(null);
   const [showAll, setShowAll] = useState(false);
 
+  // Budget lives in the URL (?price=under20), so it survives Back, sharing
+  // and moving between recipients; changing it replaces history rather than
+  // pushing an entry per tap (see BrowseClient).
+  const searchParams = useSearchParams();
+  const [budgetKey, setBudgetKey] = useState(searchParams.get("price") ?? "all");
+  const budget = priceBand(budgetKey);
+  const changeBudget = useCallback((key: string) => {
+    setBudgetKey(key);
+    const sp = new URLSearchParams(window.location.search);
+    if (key === "all") sp.delete("price");
+    else sp.set("price", key);
+    window.history.replaceState(null, "", sp.toString() ? `?${sp}` : window.location.pathname);
+    // Logged as an answer to the "budget" question: the event types are a
+    // DB-checked list, and this is exactly that, a visitor telling us something.
+    trackDiscover("nudge_answered", { page: "inspire", state: visitor.state, question: "budget", answer: key });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const inBudget = (price: number | null | undefined) =>
+    price != null &&
+    (budget.min == null || price >= budget.min) &&
+    (budget.max == null || price <= budget.max);
+  const href = (path: string) => withBudget(path, budgetKey);
+
   const lens = recipientLens(recipient, gender);
   const { data: personas } = usePersonas();
   const { data: picksById, isLoading: picksLoading } = useAllPersonaPicks();
@@ -99,8 +126,22 @@ export function DiscoverHub({
     picks.filter(
       (p) =>
         (!category || p.product_type === category) &&
+        (budget.key === "all" || inBudget(p.price)) &&
         !(lens.audience === "her" && p.gender === "male") &&
         !(lens.audience === "him" && p.gender === "female")
+    );
+
+  // A collection on a recipient's page may only show what that recipient's
+  // page offers: no pliers on "Moteriai", no creatine or streetwear on
+  // "Vaikui". "other" (unclassified) is fine for adults, not for children.
+  const allowedTypes = recipient ? new Set(categoriesFor(recipient, gender)) : null;
+  const young = recipient === "kid" || recipient === "baby" || recipient === "teen";
+  const forThisPage = (picks: PersonaPick[]) =>
+    inCategory(picks).filter(
+      (p) =>
+        !allowedTypes ||
+        allowedTypes.has(p.product_type ?? "") ||
+        (p.product_type === "other" && !young)
     );
 
   // ---- lead row: the recipient's own curated picks -------------------------
@@ -124,12 +165,21 @@ export function DiscoverHub({
           return persona ? [{ persona, rank: r }] : [];
         })
       : [...themes.values()].map((persona) => ({ persona, rank: null }));
-    return order
-      .map((s) => ({ ...s, items: toCards(inCategory(picksById?.[s.persona.id] ?? [])) }))
+    const conflicts = (g: GiftPersona["gender"]) =>
+      (g === "male" && lens.audience === "her") || (g === "female" && lens.audience === "him");
+    const rails = order
+      // "Dovanos JAM" has no place on "Moteriai", nor on a child's page.
+      .filter((s) => !conflicts(s.persona.gender) && !(young && s.persona.gender))
+      .map((s) => ({ ...s, items: toCards(forThisPage(picksById?.[s.persona.id] ?? [])) }))
       // A rail narrowed to a category must still look like a row.
       .filter((s) => s.items.length >= 4);
+    // Pages for everyone don't open on a collection for one gender: those
+    // follow the ones that suit anybody.
+    return lens.audience === "everyone"
+      ? [...rails.filter((s) => !s.persona.gender), ...rails.filter((s) => s.persona.gender)]
+      : rails;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ranked, personas, picksById, category, lens.audience]);
+  }, [ranked, personas, picksById, category, lens.audience, recipient, gender, budgetKey]);
 
   // On a category page the order is already narrowed, so show what qualifies;
   // elsewhere the ranking's own top slots lead.
@@ -160,14 +210,27 @@ export function DiscoverHub({
   const imagesFrom = (picks: PersonaPick[]) =>
     picks.map((p) => p.image_url).filter((u): u is string => !!u).slice(0, 3);
 
-  const recipientImages = (key: RecipientKey) => {
-    const slugs = recipientLens(key, gender).personas;
-    const picks = slugs.flatMap((s) => picksOf(bySlug.get(s)));
-    // Couple and neutral "Sau" have no persona: borrow from broad collections.
-    return imagesFrom(
-      picks.length ? picks : ["small-things", "cosy-home", "tech-lover"].flatMap((s) => picksOf(bySlug.get(s)).slice(0, 1))
-    );
-  };
+  // Each recipient tile gets its own three images: "Sau" and "Porai" used to
+  // borrow the same ones, and the same bracelet sat on three tiles.
+  const recipientTileImages = useMemo(() => {
+    const used = new Set<string>();
+    const out = {} as Record<RecipientKey, string[]>;
+    const broad = ["small-things", "kitchen-joy", "tech-lover", "cosy-home", "sport-outdoors"];
+    for (const key of NAV_RECIPIENTS) {
+      const own = recipientLens(key, gender).personas.flatMap((sl) => picksOf(bySlug.get(sl)));
+      // Couple and neutral "Sau" have no persona: borrow from broad collections.
+      const pool = own.length ? own : broad.flatMap((sl) => picksOf(bySlug.get(sl)));
+      const imgs = pool
+        .map((p) => p.image_url)
+        .filter((u): u is string => !!u && !used.has(u))
+        .filter((u, i, a) => a.indexOf(u) === i)
+        .slice(0, 3);
+      imgs.forEach((u) => used.add(u));
+      out[key] = imgs;
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [picksById, bySlug, gender]);
 
   const categoryImages = (cat: string) => {
     const own = lens.personas.flatMap((s) => picksOf(bySlug.get(s)));
@@ -249,8 +312,20 @@ export function DiscoverHub({
 
   // Six products under the guide: deeper picks for this recipient when there
   // are enough, otherwise the second half of a collection already on the page.
-  const storyProducts =
-    leadPicks.length >= 18
+  //
+  // A guide that names a budget ("Secret Santa dovanos iki 20 €") gets only
+  // products inside it, or none: €70 items under that headline read as its
+  // picks and contradict it.
+  const guideBudget = Number(/iki\s*(\d+)\s*(?:€|eur)/i.exec(article?.title ?? "")?.[1]) || null;
+  const storyProducts = guideBudget
+    ? (() => {
+        const seen = new Set<string>();
+        const fits = [...toCards(leadPicks), ...shelves.flatMap((sh) => sh.items)].filter(
+          (p) => p.price != null && p.price <= guideBudget && !seen.has(p.id) && seen.add(p.id)
+        );
+        return fits.length >= 3 ? fits.slice(0, 6) : [];
+      })()
+    : leadPicks.length >= 18
       ? toCards(leadPicks.slice(12, 18))
       : (top[1]?.items ?? top[0]?.items ?? []).slice(6, 12);
 
@@ -306,6 +381,7 @@ export function DiscoverHub({
             : title}
         </h1>
         {!recipient && <p className="mt-3 max-w-[46ch] text-[16px] text-(--nr-muted)">{t("hub.homeLead")}</p>}
+        <BudgetChips value={budgetKey} onChange={changeBudget} className="mt-5" />
         {isSelf && !category && visitor.greetingName && (
           <p className="mt-3 text-[16px] text-(--nr-muted)">{t("firstView.todayPrompt")}</p>
         )}
@@ -319,9 +395,9 @@ export function DiscoverHub({
               {NAV_RECIPIENTS.map((key) => (
                 <StillLife
                   key={key}
-                  href={discoverHref(key)}
+                  href={href(discoverHref(key))}
                   label={t(`recipient.${key}`)}
-                  images={picksLoading ? [] : recipientImages(key)}
+                  images={picksLoading ? [] : recipientTileImages[key]}
                   loading={picksLoading}
                 />
               ))}
@@ -373,7 +449,7 @@ export function DiscoverHub({
                   <StillLife
                     key={c}
                     size="sm"
-                    href={discoverHref(recipient, c)}
+                    href={href(discoverHref(recipient, c))}
                     label={t(`category.${c}`)}
                     images={picksLoading ? [] : categoryImages(c)}
                     loading={picksLoading}
@@ -439,6 +515,8 @@ export function DiscoverHub({
         <IdeasGrid
           title={category ? t("hub.allInCategory") : recipient ? t("hub.allIdeas") : t("firstView.moreIdeas")}
           {...ideasGridScope(recipient, category, gender)}
+          priceMin={budget.min}
+          priceMax={budget.max}
           initial={initialGrid}
           onOpen={open({ surface: "grid" })}
         />

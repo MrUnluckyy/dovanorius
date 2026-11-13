@@ -764,12 +764,13 @@
       "pets": "Augintiniai"
     },
     "price": {
-      "all": "Bet kokia kaina",
-      "under25": "Iki 25 €",
-      "b25to50": "25–50 €",
+      "all": "Bet koks biudžetas",
       "b50to100": "50–100 €",
       "over100": "100 €+",
-      "label": "Kaina"
+      "label": "Biudžetas",
+      "under20": "Iki 20 €",
+      "b20to50": "20–50 €",
+      "upTo": "Iki {max} €"
     },
     "searchPlaceholder": "Ieškoti prekių…",
     "onSale": "Su nuolaida",
@@ -989,7 +990,8 @@
       "shoes": "Avalynės",
       "bag": "Rankinių ir kuprinių",
       "accessory": "Aksesuarų"
-    }
+    },
+    "recipientHint": "Ieškai dovanos? Atrinktos idėjos: {title}"
   },
   "Inspo": {
     "metaTitle": "Dovanų idėjos tau",
@@ -1004,7 +1006,7 @@
       "anniversary": "Jubiliejus"
     },
     "thinking": "Renkame dovanas tau…",
-    "addToBoard": "Pridėti į lentą",
+    "addToBoard": "Į norų sąrašą",
     "added": "Pridėta",
     "addedToBoard": "Pridėta į „{board}“",
     "addError": "Nepavyko pridėti į lentą.",
@@ -1024,7 +1026,8 @@
     "loadingStep1": "Analizuojame tavo skonį",
     "loadingStep2": "Peržiūrime tūkstančius prekių",
     "loadingStep3": "Renkame geriausiai tinkančias",
-    "loadingHint": "Dirbtinis intelektas parenka dovanas pagal tavo norus — tai gali užtrukti kelias sekundes."
+    "loadingHint": "Dirbtinis intelektas parenka dovanas pagal tavo norus — tai gali užtrukti kelias sekundes.",
+    "viewInShop": "Žiūrėti {shop} svetainėje"
   },
   "BoardPicker": {
     "title": "Į kurią lentą?",

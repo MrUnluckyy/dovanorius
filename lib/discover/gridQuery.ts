@@ -71,6 +71,7 @@ export function ideasGridFilters(scope: {
   productType: string | null;
   productTypes?: string[];
   ageGroup?: InspoFilters["ageGroup"];
+  priceMin?: number | null;
   priceMax?: number | null;
 }): InspoFilters {
   return {
@@ -79,7 +80,7 @@ export function ideasGridFilters(scope: {
     productTypes: scope.productType ? null : scope.productTypes ?? null,
     ageGroup: scope.ageGroup ?? null,
     brand: null,
-    priceMin: null,
+    priceMin: scope.priceMin ?? null,
     priceMax: scope.priceMax ?? null,
     search: "",
     audience: scope.audience,

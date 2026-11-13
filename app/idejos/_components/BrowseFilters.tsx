@@ -101,7 +101,7 @@ export function BrowseFilters({
     >
       {/* One line: search grows, controls sit right. Fixed height regardless of
           how many filters are active. */}
-      <div className="flex items-center gap-2">
+      <div className="relative flex items-center gap-2">
         <label
           className="flex min-w-0 grow items-center gap-2 px-3.5 py-2 transition sm:max-w-lg"
           style={{
@@ -120,7 +120,10 @@ export function BrowseFilters({
           />
         </label>
 
-        <div className="relative shrink-0" ref={popover}>
+        {/* On phones the popover anchors to the whole row (full width): anchored
+            to this button, which is not the rightmost control, it ran off the
+            left edge and cut off the price options. */}
+        <div className="shrink-0 sm:relative" ref={popover}>
           <button
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
@@ -150,7 +153,7 @@ export function BrowseFilters({
 
           {open && (
             <div
-              className="absolute right-0 z-40 mt-2 w-[min(22rem,calc(100vw-2rem))] p-4"
+              className="absolute inset-x-0 top-full z-40 mt-2 p-4 sm:left-auto sm:right-0 sm:w-[22rem]"
               style={{
                 background: "var(--nr-surface)",
                 border: "1px solid var(--nr-border)",

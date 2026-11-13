@@ -41,9 +41,16 @@ const firstPage = unstable_cache(
 export async function initialGridFor(
   recipient: RecipientKey | null,
   category: string | null,
-  gender: VisitorGender
+  gender: VisitorGender,
+  budget: { min: number | null; max: number | null } = { min: null, max: null }
 ): Promise<InitialGrid | null> {
-  const key = JSON.stringify(ideasGridFilters(ideasGridScope(recipient, category, gender)));
+  const key = JSON.stringify(
+    ideasGridFilters({
+      ...ideasGridScope(recipient, category, gender),
+      priceMin: budget.min,
+      priceMax: budget.max,
+    })
+  );
   try {
     return { key, products: await firstPage(key) };
   } catch (err) {

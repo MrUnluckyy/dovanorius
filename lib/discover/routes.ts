@@ -66,6 +66,11 @@ export function discoverHref(recipient?: RecipientKey | null, category?: string 
   return category && CATEGORY_SLUGS[category] ? `${base}/${CATEGORY_SLUGS[category]}` : base;
 }
 
+/** Carry the chosen budget (?price=…) onto another discover link. */
+export function withBudget(path: string, priceKey: string | null | undefined): string {
+  return priceKey && priceKey !== "all" ? `${path}?price=${encodeURIComponent(priceKey)}` : path;
+}
+
 export function collectionHref(slug: string): string {
   return `/idejos/kolekcija/${slug}`;
 }

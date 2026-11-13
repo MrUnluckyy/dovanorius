@@ -28,3 +28,8 @@ export function cleanName(name: string, brand?: string | null): string {
   n = n.replace(TAIL_NOISE, "");
   return n.charAt(0).toUpperCase() + n.slice(1);
 }
+
+/** "Modivo LT" -> "Modivo": feeds name programmes, people know shops. */
+export function shopDisplayName(merchant: string): string {
+  return merchant.replace(/\s+LT$/i, "").trim();
+}

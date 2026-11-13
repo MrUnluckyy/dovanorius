@@ -6,6 +6,7 @@ import { RECIPIENT_SLUGS, recipientFromSlug } from "@/lib/discover/routes";
 import { storyArticleFor } from "@/lib/discover/articles";
 import { placementFor } from "@/lib/discover/placements";
 import { initialGridFor } from "@/lib/discover/ssrGrid.server";
+import { priceBand } from "../_components/filters";
 import { discoverBreadcrumb, discoverPageMetadata } from "@/lib/discover/pageSeo.server";
 import { DiscoverHub } from "../_components/hub/DiscoverHub";
 import { JsonLd } from "../_components/JsonLd";
@@ -18,6 +19,7 @@ export function generateStaticParams() {
 }
 
 type Params = { params: Promise<{ recipient: string }> };
+type PageProps = Params & { searchParams: Promise<{ price?: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const recipient = recipientFromSlug((await params).recipient);
@@ -26,7 +28,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 
 /** "Dovanos moteriai": one recipient's hub. */
-export default async function RecipientPage({ params }: Params) {
+export default async function RecipientPage({ params, searchParams }: PageProps) {
   const recipient = recipientFromSlug((await params).recipient);
   if (!recipient) notFound();
 
@@ -35,7 +37,7 @@ export default async function RecipientPage({ params }: Params) {
     storyArticleFor(recipient, locale),
     placementFor(recipient, null),
     // The grid's first page, in the HTML (search engines saw an empty grid).
-    initialGridFor(recipient, null, visitor.gender),
+    initialGridFor(recipient, null, visitor.gender, priceBand((await searchParams).price)),
     discoverBreadcrumb(recipient, null),
   ]);
   return (

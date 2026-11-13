@@ -41,17 +41,38 @@ export const SORTS: InspoSort[] = [
 
 export const AUDIENCES: Audience[] = ["everyone", "her", "him"];
 
-export const PRICE_BANDS: {
-  key: string;
-  min: number | null;
-  max: number | null;
-}[] = [
+export type PriceBand = { key: string; min: number | null; max: number | null };
+
+/**
+ * Gift budgets cluster at 20, 50 and 100 € (people say "iki 20 €", and so
+ * does our own Secret Santa guide). Any "iki<N>" key also works, for a
+ * Secret Santa budget or a search like "kvepalai iki 30 eur".
+ */
+export const PRICE_BANDS: PriceBand[] = [
   { key: "all", min: null, max: null },
-  { key: "under25", min: null, max: 25 },
-  { key: "b25to50", min: 25, max: 50 },
+  { key: "under20", min: null, max: 20 },
+  { key: "b20to50", min: 20, max: 50 },
   { key: "b50to100", min: 50, max: 100 },
   { key: "over100", min: 100, max: null },
 ];
+
+/** The band for a URL key, including "iki<N>" and the old "under25". */
+export function priceBand(key: string | null | undefined): PriceBand {
+  const fixed = PRICE_BANDS.find((b) => b.key === key);
+  if (fixed) return fixed;
+  const upTo = /^iki(\d{1,4})$/.exec(key ?? "")?.[1] ?? (key === "under25" ? "25" : null);
+  return upTo ? { key: key!, min: null, max: Number(upTo) } : PRICE_BANDS[0];
+}
+
+/** "Iki 20 €", "20–50 €", "Iki 35 €". */
+export function priceBandLabel(
+  t: (key: string, values?: Record<string, string | number>) => string,
+  band: PriceBand
+): string {
+  return PRICE_BANDS.some((b) => b.key === band.key)
+    ? t(`price.${band.key}`)
+    : t("price.upTo", { max: band.max ?? 0 });
+}
 
 /** Build a browse URL. The single place query-param spelling is decided. */
 export function browseHref(params: {
@@ -80,8 +101,6 @@ export function browseHref(params: {
  */
 export function bandForBudget(budget: number | null | undefined): string | null {
   if (budget == null || !Number.isFinite(budget) || budget <= 0) return null;
-  if (budget <= 25) return "under25";
-  if (budget <= 50) return "b25to50";
-  if (budget <= 100) return "b50to100";
-  return "over100";
+  // The exact budget: a 20 € Secret Santa should not be shown 25 € gifts.
+  return `iki${Math.round(budget)}`;
 }

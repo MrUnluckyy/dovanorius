@@ -19,6 +19,7 @@ export function IdeasGrid({
   productType,
   productTypes,
   ageGroup,
+  priceMin,
   priceMax,
   initial,
   onOpen,
@@ -30,14 +31,15 @@ export function IdeasGrid({
   productTypes?: string[];
   /** kid | teen | adult, from the recipient; null = every age. */
   ageGroup?: "kid" | "teen" | "adult" | null;
-  /** Upper price bound, e.g. a Secret Santa budget. */
+  /** Budget, e.g. "iki 20 €" or a Secret Santa limit. */
+  priceMin?: number | null;
   priceMax?: number | null;
   /** First page rendered on the server, used when it matches these filters. */
   initial?: InitialGrid | null;
   onOpen: (p: CardProduct) => void;
 }) {
   const t = useTranslations("Discover");
-  const filters = ideasGridFilters({ audience, productType, productTypes, ageGroup, priceMax });
+  const filters = ideasGridFilters({ audience, productType, productTypes, ageGroup, priceMin, priceMax });
   // Only for the exact query the server ran: on "Sau" the visitor can change
   // gender, and a stale first page must not stand in for the new one.
   const initialPage =
