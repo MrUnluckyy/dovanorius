@@ -3,6 +3,9 @@ import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/lib/siteUrl";
 import { freshClient } from "@/sanity/client";
 import { SITEMAP_FACETS_QUERY, SITEMAP_POSTS_QUERY } from "@/sanity/queries";
+import { discoverHref } from "@/lib/discover/routes";
+import { MIN_INDEXABLE_PRODUCTS, indexablePaths } from "@/lib/discover/seo";
+import { initialGridFor } from "@/lib/discover/ssrGrid.server";
 
 type SitemapPost = {
   slug: string;
@@ -77,5 +80,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
-  return [...staticRoutes, ...postRoutes, ...facetRoutes];
+  return [...staticRoutes, ...(await giftPageRoutes(now)), ...postRoutes, ...facetRoutes];
+}
+
+/**
+ * "Dovanos mamai", "Technikos dovanos vyrui"…: every recipient and category
+ * page with enough products to be worth a search visit. Same rule and the
+ * same (cached) first grid page as the page's own robots tag, so the sitemap
+ * never lists a page that says noindex.
+ */
+async function giftPageRoutes(now: Date): Promise<MetadataRoute.Sitemap> {
+  const paths = indexablePaths();
+  const routes: MetadataRoute.Sitemap = [];
+  // A few at a time: ~90 pages, and the database is a small instance.
+  for (let i = 0; i < paths.length; i += 6) {
+    const batch = await Promise.all(
+      paths.slice(i, i + 6).map(async ({ recipient, category }) => {
+        const grid = await initialGridFor(recipient, category, null);
+        if (!grid || grid.products.length < MIN_INDEXABLE_PRODUCTS) return null;
+        return {
+          url: absoluteUrl(discoverHref(recipient, category)),
+          lastModified: now,
+          changeFrequency: "daily" as const,
+          priority: category ? 0.6 : 0.7,
+        };
+      })
+    );
+    routes.push(...batch.filter((r) => r !== null));
+  }
+  return routes;
 }

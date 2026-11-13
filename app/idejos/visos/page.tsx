@@ -3,11 +3,20 @@ import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { BrowseClient } from "./BrowseClient";
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
   const t = await getTranslations("Discover");
+  // Every search and filter combination is its own URL. Only the bare page
+  // belongs in the index; the variants point back to it.
+  const filtered = Object.keys(await searchParams).length > 0;
   return {
     title: t("browseMetaTitle"),
     description: t("browseMetaDescription"),
+    alternates: { canonical: "/idejos/visos" },
+    robots: filtered ? { index: false, follow: true } : undefined,
   };
 }
 

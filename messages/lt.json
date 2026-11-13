@@ -940,8 +940,12 @@
       "pickCount": "{count, plural, one {# atrinkta dovana} few {# atrinktos dovanos} other {# atrinktų dovanų}}",
       "metaRecipientTitle": "Dovanos {recipient} - idėjos ir kolekcijos | Noriuto.lt",
       "metaRecipientDescription": "Atrinktos dovanų idėjos {recipient}: kolekcijos, gidai ir tūkstančiai prekių iš patikimų parduotuvių.",
-      "metaCategoryTitle": "{category} - dovanos {recipient} | Noriuto.lt",
-      "searchPlaceholder": "Ieškok dovanos, pvz. dronas, kvepalai"
+      "metaCategoryTitle": "{title} – idėjos ir pasiūlymai | Noriuto.lt",
+      "searchPlaceholder": "Ieškok dovanos, pvz. dronas, kvepalai",
+      "categoryTitle": "{category} dovanos {recipient}",
+      "metaPageDescriptionBrands": "{title}: {brands} ir daugiau – dovanų idėjos nuo {from} € iš patikimų parduotuvių, atrinktos Noriuto.lt.",
+      "metaPageDescription": "{title}: atrinktos dovanų idėjos iš patikimų parduotuvių. Išsirink arba įsidėk į norų sąrašą.",
+      "breadcrumbRoot": "Dovanų idėjos"
     },
     "event": {
       "back": "Atgal į „{event}“",
@@ -970,6 +974,21 @@
       "searchFor": "Ieškoti {q}",
       "nothing": "Su šiais filtrais nieko neradome.",
       "more": "Rodyti daugiau"
+    },
+    "categoryGen": {
+      "beauty": "Grožio",
+      "home": "Namų",
+      "kitchen": "Virtuvės",
+      "tech": "Technikos",
+      "toys": "Žaislų",
+      "tools": "Įrankių",
+      "sport": "Sporto",
+      "garden": "Sodo",
+      "pets": "Augintinių",
+      "clothing": "Drabužių",
+      "shoes": "Avalynės",
+      "bag": "Rankinių ir kuprinių",
+      "accessory": "Aksesuarų"
     }
   },
   "Inspo": {
