@@ -6,6 +6,7 @@ import { CATEGORY_SLUGS, RECIPIENT_SLUGS, categoryFromSlug, recipientFromSlug } 
 import { storyArticleFor } from "@/lib/discover/articles";
 import { placementFor } from "@/lib/discover/placements";
 import { initialGridFor } from "@/lib/discover/ssrGrid.server";
+import { priceBand } from "../../_components/filters";
 import { discoverBreadcrumb, discoverPageMetadata } from "@/lib/discover/pageSeo.server";
 import { DiscoverHub } from "../../_components/hub/DiscoverHub";
 import { JsonLd } from "../../_components/JsonLd";
@@ -19,6 +20,7 @@ export function generateStaticParams() {
 }
 
 type Params = { params: Promise<{ recipient: string; category: string }> };
+type PageProps = Params & { searchParams: Promise<{ price?: string }> };
 
 async function resolve(params: Params["params"]) {
   const p = await params;
@@ -32,7 +34,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 
 /** A category inside a recipient: its collections first, then its grid. */
-export default async function RecipientCategoryPage({ params }: Params) {
+export default async function RecipientCategoryPage({ params, searchParams }: PageProps) {
   const { recipient, category } = await resolve(params);
   if (!recipient || !category) notFound();
 
@@ -40,7 +42,7 @@ export default async function RecipientCategoryPage({ params }: Params) {
   const [article, ad, initialGrid, breadcrumb] = await Promise.all([
     storyArticleFor(recipient, locale),
     placementFor(recipient, category),
-    initialGridFor(recipient, category, visitor.gender),
+    initialGridFor(recipient, category, visitor.gender, priceBand((await searchParams).price)),
     discoverBreadcrumb(recipient, category),
   ]);
   return (

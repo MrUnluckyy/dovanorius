@@ -22,6 +22,7 @@ import {
 } from "@/components/boards/BoardPickerSheet";
 import { trackInspo } from "@/utils/trackInspo";
 import { shopHref } from "@/utils/affiliate/outHref";
+import { formatPrice, shopDisplayName } from "@/lib/discover/format";
 import type { CardProduct } from "./ProductCard";
 
 const ISSUES = ["wrong_category", "wrong_gender", "not_a_gift"] as const;
@@ -217,12 +218,12 @@ export function ProductModal({
                   moment, not urgency. */}
               <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 <span className="text-2xl font-bold tracking-tight">
-                  {product.price != null ? `${product.price} €` : "—"}
+                  {product.price != null ? formatPrice(product.price) : "—"}
                 </span>
                 {showRrp && (
                   <>
                     <span className="text-sm line-through opacity-75">
-                      {product.rrp} €
+                      {formatPrice(product.rrp)}
                     </span>
                     <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-semibold text-success">
                       {t("priceDropped", { percent: discount ?? 0 })}
@@ -284,10 +285,14 @@ export function ProductModal({
                     target="_blank"
                     rel="noopener noreferrer sponsored"
                     onClick={() => trackInspo("click_out", product.id)}
-                    className="btn btn-neutral w-full gap-2 rounded-full"
+                    // The button that earns: brand yellow, and it names the shop,
+                    // because where it ships from is part of the decision.
+                    className="nr-btn nr-btn-primary w-full"
                   >
                     <LuExternalLink className="w-4" />
-                    {tInspo("viewInStore")}
+                    {product.merchant
+                      ? tInspo("viewInShop", { shop: shopDisplayName(product.merchant) })
+                      : tInspo("viewInStore")}
                   </a>
                 )}
 

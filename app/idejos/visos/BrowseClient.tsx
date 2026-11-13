@@ -15,7 +15,10 @@ import { BrowseFilters } from "../_components/BrowseFilters";
 import { toCardProduct } from "../_components/CollectionRow";
 import { ProductModal } from "../_components/ProductModal";
 import { SearchFallbackView, type SearchFallback } from "../_components/SearchFallback";
-import { CATEGORIES, PRICE_BANDS, SORTS, AUDIENCES } from "../_components/filters";
+import { CATEGORIES, PRICE_BANDS, SORTS, AUDIENCES, priceBand, priceBandLabel } from "../_components/filters";
+import { BudgetChips } from "../_components/BudgetChips";
+import { parseGiftQuery, stripPrice } from "@/lib/discover/queryIntent";
+import { discoverHref } from "@/lib/discover/routes";
 import { trackInspo, trackDiscover } from "@/utils/trackInspo";
 import { isAccountUser } from "@/utils/auth/account";
 
@@ -61,12 +64,27 @@ export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
   const sort = (params.get("sort") as InspoSort) ?? "recommended";
   const onSaleOnly = params.get("sale") === "1";
   const search = params.get("q") ?? "";
+  // "kvepalai iki 30 eur" is kvepalai on a 30 € budget; "dovana mamai" is a
+  // recipient, not a product. The URL keeps what was typed; this reads it.
+  const intent = useMemo(() => parseGiftQuery(search), [search]);
+  const searchTerm = intent.priceMax || intent.recipient ? intent.q : search;
 
   // The one exception: typing should not push a history entry per keystroke.
   const [searchInput, setSearchInput] = useState(search);
 
   const { audience, setAudience } = useDiscoverAudience(userId);
-  const band = PRICE_BANDS.find((b) => b.key === bandKey) ?? PRICE_BANDS[0];
+  const effectiveBandKey = intent.priceMax ? `iki${intent.priceMax}` : bandKey;
+  const band = priceBand(effectiveBandKey);
+  const changeBudget = (key: string) => {
+    // A chip replaces a budget typed into the search.
+    if (intent.priceMax) {
+      const q = stripPrice(searchInput);
+      setSearchInput(q);
+      setParams({ q: q || null, price: key });
+    } else {
+      setParams({ price: key });
+    }
+  };
 
   const setParams = useCallback(
     (next: Record<string, string | null>) => {
@@ -114,13 +132,13 @@ export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
       brand,
       priceMin: band.min,
       priceMax: band.max,
-      search,
+      search: searchTerm,
       audience,
       inSeason: true,
       onSaleOnly,
       sort,
     }),
-    [shop?.name, productType, brand, band.min, band.max, search, audience, onSaleOnly, sort]
+    [shop?.name, productType, brand, band.min, band.max, searchTerm, audience, onSaleOnly, sort]
   );
 
   const {
@@ -135,14 +153,14 @@ export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
   // spelling fix (begymo -> begimo), else the query minus the words nothing
   // matched (kayali kvepalai -> kvepalai), else popular gifts. Same filters.
   const noResults =
-    !!search.trim() && !isLoading && !isError && !updating && (data?.pages[0]?.length ?? 0) === 0;
+    !!searchTerm.trim() && !isLoading && !isError && !updating && (data?.pages[0]?.length ?? 0) === 0;
   const { data: fallback } = useQuery({
-    queryKey: ["search-fallback", search, filters],
+    queryKey: ["search-fallback", searchTerm, filters],
     enabled: noResults,
     staleTime: Infinity,
     queryFn: async () => {
       const { data: fb, error } = await supabase.rpc("search_fallback", {
-        p_q: search,
+        p_q: searchTerm,
         ...searchFilterArgs(filters),
       });
       if (error) throw error;
@@ -184,7 +202,7 @@ export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const hasFilters = !!productType || !!brand || bandKey !== "all" || onSaleOnly || !!search;
+  const hasFilters = !!productType || !!brand || effectiveBandKey !== "all" || onSaleOnly || !!search;
 
   return (
     <div className="mx-auto max-w-[1440px] px-4 pt-8 sm:px-6">
@@ -230,8 +248,8 @@ export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
         productType={productType}
         onProductType={(v) => setParams({ type: v })}
         bands={PRICE_BANDS}
-        bandKey={bandKey}
-        onBandKey={(v) => setParams({ price: v })}
+        bandKey={effectiveBandKey}
+        onBandKey={changeBudget}
         brand={brand}
         onBrand={(v) => setParams({ brand: v })}
         onSaleOnly={onSaleOnly}
@@ -246,6 +264,24 @@ export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
         hideBrand={!!shop}
       />
 
+      <BudgetChips value={effectiveBandKey} onChange={changeBudget} className="mb-4" />
+
+      {intent.recipient && (
+        <Link
+          href={discoverHref(intent.recipient) + (effectiveBandKey !== "all" ? `?price=${effectiveBandKey}` : "")}
+          className="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-(--nr-border) bg-(--nr-tile) px-4 py-3.5 text-[15px] text-(--nr-ink) transition-colors hover:border-(--nr-ink)/40 sm:px-5"
+        >
+          <span>
+            {t("recipientHint", {
+              title: t("hub.recipientTitle", {
+                recipient: t(`recipient.${intent.recipient}`).toLocaleLowerCase("lt"),
+              }),
+            })}
+          </span>
+          <span aria-hidden className="font-semibold">→</span>
+        </Link>
+      )}
+
       {hasFilters && (
         <div className="mb-5 flex flex-wrap items-center gap-1.5">
           {productType && (
@@ -255,8 +291,8 @@ export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
             />
           )}
           {brand && <FilterChip label={brand} onClear={() => setParams({ brand: null })} />}
-          {bandKey !== "all" && (
-            <FilterChip label={t(`price.${bandKey}`)} onClear={() => setParams({ price: null })} />
+          {effectiveBandKey !== "all" && (
+            <FilterChip label={priceBandLabel(t, band)} onClear={() => changeBudget("all")} />
           )}
           {onSaleOnly && (
             <FilterChip label={t("onSale")} onClear={() => setParams({ sale: null })} />
@@ -293,7 +329,7 @@ export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
             </div>
           ) : (
             <SearchFallbackView
-              search={search}
+              search={searchTerm}
               fallback={fallback ?? null}
               loading={!fallback || fallbackQuery.isLoading}
               products={fallbackProducts}

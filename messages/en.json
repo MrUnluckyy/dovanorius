@@ -764,12 +764,13 @@
       "pets": "Pets"
     },
     "price": {
-      "all": "Any price",
-      "under25": "Under €25",
-      "b25to50": "€25–50",
+      "all": "Any budget",
       "b50to100": "€50–100",
       "over100": "€100+",
-      "label": "Price"
+      "label": "Budget",
+      "under20": "Under €20",
+      "b20to50": "€20–50",
+      "upTo": "Under €{max}"
     },
     "searchPlaceholder": "Search products…",
     "onSale": "On sale",
@@ -989,7 +990,8 @@
       "shoes": "Shoe",
       "bag": "Bag",
       "accessory": "Accessory"
-    }
+    },
+    "recipientHint": "Looking for a gift? Our picks: {title}"
   },
   "Inspo": {
     "metaTitle": "Gift Ideas For You",
@@ -1004,7 +1006,7 @@
       "anniversary": "Anniversary"
     },
     "thinking": "Picking gifts for you…",
-    "addToBoard": "Add to board",
+    "addToBoard": "Add to wish list",
     "added": "Added",
     "addedToBoard": "Added to {board}",
     "addError": "Couldn't add to board.",
@@ -1024,7 +1026,8 @@
     "loadingStep1": "Analyzing your taste",
     "loadingStep2": "Scanning thousands of products",
     "loadingStep3": "Picking the best matches",
-    "loadingHint": "AI is choosing gifts based on your wishes — this can take a few seconds."
+    "loadingHint": "AI is choosing gifts based on your wishes — this can take a few seconds.",
+    "viewInShop": "View on {shop}"
   },
   "BoardPicker": {
     "title": "Save to board",

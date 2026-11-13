@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LuSearch } from "react-icons/lu";
 import type { VisitorGender } from "@/lib/discover/recipients";
@@ -12,7 +12,9 @@ import {
   categoryFromSlug,
   discoverHref,
   recipientFromSlug,
+  withBudget,
 } from "@/lib/discover/routes";
+import { parseGiftQuery } from "@/lib/discover/queryIntent";
 
 /**
  * The sticky discover bar: recipient tabs, and under them the categories of
@@ -25,6 +27,8 @@ export function DiscoverNav({ gender }: { gender: VisitorGender }) {
   const t = useTranslations("Discover");
   const pathname = usePathname() ?? "";
   const [, root, seg1, seg2] = pathname.split("/");
+  // The budget chosen on the page travels with every tab and category.
+  const budgetKey = useSearchParams().get("price");
 
   // Browse (/idejos/visos) and shop pages carry their own search + filter bar.
   // NB these are the Lithuanian routes: this check still said "discover" after
@@ -50,7 +54,7 @@ export function DiscoverNav({ gender }: { gender: VisitorGender }) {
 
   if (hidden) return null;
 
-  const search = <SearchBox placeholder={t("hub.searchPlaceholder")} />;
+  const search = <SearchBox placeholder={t("hub.searchPlaceholder")} budgetKey={budgetKey} />;
   const cats = recipient ? categoriesFor(recipient, gender) : [];
 
   return (
@@ -70,7 +74,7 @@ export function DiscoverNav({ gender }: { gender: VisitorGender }) {
               return (
                 <Link
                   key={key}
-                  href={discoverHref(key)}
+                  href={withBudget(discoverHref(key), budgetKey)}
                   aria-current={on ? "page" : undefined}
                   className={`whitespace-nowrap pb-1.5 pt-4 text-[15px] font-semibold transition-colors ${
                     on ? "text-(--nr-ink)" : "text-(--nr-muted) hover:text-(--nr-ink)"
@@ -99,7 +103,7 @@ export function DiscoverNav({ gender }: { gender: VisitorGender }) {
             className="-mx-4 flex gap-5 overflow-x-auto px-4 pb-3 pt-3 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden"
           >
             <Link
-              href={discoverHref(recipient)}
+              href={withBudget(discoverHref(recipient), budgetKey)}
               aria-current={!category ? "page" : undefined}
               className={`whitespace-nowrap text-[14px] transition-colors ${
                 !category ? "font-semibold text-(--nr-ink)" : "text-(--nr-muted) hover:text-(--nr-ink)"
@@ -112,7 +116,7 @@ export function DiscoverNav({ gender }: { gender: VisitorGender }) {
               return (
                 <Link
                   key={c}
-                  href={discoverHref(recipient, c)}
+                  href={withBudget(discoverHref(recipient, c), budgetKey)}
                   aria-current={on ? "page" : undefined}
                   className={`whitespace-nowrap text-[14px] transition-colors ${
                     on ? "font-semibold text-(--nr-ink)" : "text-(--nr-muted) hover:text-(--nr-ink)"
@@ -133,17 +137,32 @@ export function DiscoverNav({ gender }: { gender: VisitorGender }) {
  * Always-visible search. Enter goes to the full catalogue with the query, where
  * results, filters and the spelling fix live.
  */
-function SearchBox({ placeholder }: { placeholder: string }) {
+function SearchBox({ placeholder, budgetKey }: { placeholder: string; budgetKey: string | null }) {
   const router = useRouter();
   const [q, setQ] = useState("");
+
+  const submit = () => {
+    const term = q.trim();
+    const intent = parseGiftQuery(term);
+    const budget = intent.priceMax ? `iki${intent.priceMax}` : budgetKey;
+    // "dovana mamai", "dovanos vyrui iki 50 €": no product words, just who it
+    // is for. That is a page we have, not a search.
+    if (intent.recipient && !intent.q) {
+      router.push(withBudget(discoverHref(intent.recipient), budget));
+      return;
+    }
+    const sp = new URLSearchParams();
+    if (term) sp.set("q", term);
+    if (budget && budget !== "all") sp.set("price", budget);
+    router.push(sp.toString() ? `/idejos/visos?${sp}` : "/idejos/visos");
+  };
 
   return (
     <form
       role="search"
       onSubmit={(e) => {
         e.preventDefault();
-        const term = q.trim();
-        router.push(term ? `/idejos/visos?q=${encodeURIComponent(term)}` : "/idejos/visos");
+        submit();
       }}
       className="flex items-center gap-2 rounded-full border border-(--nr-border) bg-(--nr-surface) px-4 py-2.5 transition-colors focus-within:border-(--nr-ink)"
     >

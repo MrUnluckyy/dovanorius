@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getVisitor } from "@/lib/discover/visitor.server";
-import { discoverHref } from "@/lib/discover/routes";
+import { discoverHref, withBudget } from "@/lib/discover/routes";
 import { storyArticleFor } from "@/lib/discover/articles";
 import { placementFor } from "@/lib/discover/placements";
 import { loadEventEntry } from "@/lib/discover/eventEntry.server";
 import { initialGridFor } from "@/lib/discover/ssrGrid.server";
+import { priceBand } from "./_components/filters";
 import { DiscoverHub } from "./_components/hub/DiscoverHub";
 import { EventHub } from "./_components/hub/EventHub";
 
@@ -28,24 +29,24 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function DiscoverPage({
   searchParams,
 }: {
-  searchParams: Promise<{ event?: string }>;
+  searchParams: Promise<{ event?: string; price?: string }>;
 }) {
   const { visitor, userId } = await getVisitor();
 
   // From a Secret Santa reveal: the giver gets their recipient's page (4.6).
   // Anyone else carrying the parameter falls through to normal discover.
-  const { event } = await searchParams;
+  const { event, price } = await searchParams;
   if (event) {
     const entry = await loadEventEntry(event);
     if (entry) return <EventHub entry={entry} accountId={visitor.isAccount ? userId : null} />;
   }
 
-  if (visitor.recipient) redirect(discoverHref(visitor.recipient));
+  if (visitor.recipient) redirect(withBudget(discoverHref(visitor.recipient), price));
 
   const [article, ad, initialGrid] = await Promise.all([
     storyArticleFor(null, await getLocale()),
     placementFor(null, null),
-    initialGridFor(null, null, visitor.gender),
+    initialGridFor(null, null, visitor.gender, priceBand(price)),
   ]);
   return (
     <DiscoverHub
