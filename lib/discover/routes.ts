@@ -103,6 +103,11 @@ export const NAV_RECIPIENTS: RecipientKey[] = [
 // Packshot-friendly, most giftable categories first; apparel last, because
 // model photos neither compose into still lifes nor read as gifts.
 const HER = ["beauty", "home", "accessory", "kitchen", "tech", "sport", "bag", "clothing", "shoes"];
+// Mom and a friend are women too, but not the same page as "Moteriai": mom
+// leans to home, kitchen and garden; a friend to beauty and small things (no
+// tech). Distinct mixes keep the three pages from being duplicates.
+const MOM = ["home", "kitchen", "beauty", "garden", "accessory", "tech", "bag", "clothing", "shoes"];
+const FRIEND = ["beauty", "accessory", "home", "kitchen", "sport", "bag", "clothing", "shoes"];
 const HIM = ["tech", "tools", "sport", "kitchen", "accessory", "home", "bag", "clothing", "shoes"];
 const ALL = ["home", "beauty", "tech", "kitchen", "toys", "sport", "tools", "accessory", "garden", "pets", "clothing", "shoes", "bag"];
 
@@ -114,9 +119,11 @@ export function categoriesFor(
 ): string[] {
   switch (recipient) {
     case "woman":
-    case "mom":
-    case "friend":
       return HER;
+    case "mom":
+      return MOM;
+    case "friend":
+      return FRIEND;
     case "man":
       return HIM;
     case "self":
