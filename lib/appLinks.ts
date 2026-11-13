@@ -1,19 +1,15 @@
 /**
  * Paths for links that leave the site — copied, shared, emailed — and that
  * the mobile app claims as universal/app links
- * (public/.well-known/apple-app-site-association: /b/*, /users/*,
- * /events/join/*).
+ * (public/.well-known/apple-app-site-association).
  *
- * The web's own routes are Lithuanian (/zmones, /renginiai/prisijungti), and
- * the old English paths 308 to them (next.config.ts). Shared links still use
- * the English form on purpose: on a phone with Noriuto installed the OS opens
- * them in the app — which knows only those paths — and everywhere else the
- * redirect lands on the Lithuanian page. Switch these over once the app maps
- * the Lithuanian paths (app/+native-intent.ts) and the AASA lists them.
+ * Lithuanian, like the web's own routes. The app maps them to its own screens
+ * (noriuto-app lib/webLinks.ts, since its PR #11); the AASA lists both these
+ * and the old English paths, which links already sent still use.
  */
 export const shareLinks = {
-  profile: (userId: string) => `/users/${userId}`,
-  eventJoin: (token: string) => `/events/join/${token}`,
+  profile: (userId: string) => `/zmones/${userId}`,
+  eventJoin: (token: string) => `/renginiai/prisijungti/${token}`,
 };
 
 /**
