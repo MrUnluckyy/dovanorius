@@ -6,6 +6,7 @@ import { SITEMAP_FACETS_QUERY, SITEMAP_POSTS_QUERY } from "@/sanity/queries";
 import { discoverHref } from "@/lib/discover/routes";
 import { MIN_INDEXABLE_PRODUCTS, indexablePaths } from "@/lib/discover/seo";
 import { initialGridFor } from "@/lib/discover/ssrGrid.server";
+import { OCCASIONS } from "@/lib/discover/occasions";
 
 type SitemapPost = {
   slug: string;
@@ -80,7 +81,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
-  return [...staticRoutes, ...(await giftPageRoutes(now)), ...postRoutes, ...facetRoutes];
+  // Occasion pages: "Kalėdinės dovanos", "Secret Santa dovanos"…
+  const occasionRoutes: MetadataRoute.Sitemap = OCCASIONS.map((o) => ({
+    url: absoluteUrl(`/idejos/proga/${o.slug}`),
+    lastModified: now,
+    changeFrequency: "daily",
+    priority: 0.8,
+  }));
+
+  return [...staticRoutes, ...occasionRoutes, ...(await giftPageRoutes(now)), ...postRoutes, ...facetRoutes];
 }
 
 /**

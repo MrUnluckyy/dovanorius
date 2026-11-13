@@ -12,8 +12,10 @@ import {
   categoryFromSlug,
   discoverHref,
   recipientFromSlug,
+  occasionHref,
   withBudget,
 } from "@/lib/discover/routes";
+import { occasionByKey } from "@/lib/discover/occasions";
 import { parseGiftQuery } from "@/lib/discover/queryIntent";
 
 /**
@@ -145,9 +147,15 @@ function SearchBox({ placeholder, budgetKey }: { placeholder: string; budgetKey:
     const term = q.trim();
     const intent = parseGiftQuery(term);
     const budget = intent.priceMax ? `iki${intent.priceMax}` : budgetKey;
-    // "dovana mamai", "dovanos vyrui iki 50 €": no product words, just who it
-    // is for. That is a page we have, not a search.
-    if (intent.recipient && !intent.q) {
+    // "dovana mamai", "kalėdinės dovanos vyrui iki 50 €": no product words,
+    // just who it is for or the occasion. That is a page we have, not a search.
+    if (!intent.q && intent.occasion) {
+      const o = occasionByKey(intent.occasion);
+      const kam = intent.recipient && o.recipients.includes(intent.recipient) ? intent.recipient : null;
+      router.push(occasionHref(o.slug, kam, budget));
+      return;
+    }
+    if (!intent.q && intent.recipient) {
       router.push(withBudget(discoverHref(intent.recipient), budget));
       return;
     }

@@ -71,6 +71,19 @@ export function withBudget(path: string, priceKey: string | null | undefined): s
   return priceKey && priceKey !== "all" ? `${path}?price=${encodeURIComponent(priceKey)}` : path;
 }
 
+/** /idejos/proga/kaledos?kam=moteriai&price=under20 */
+export function occasionHref(
+  slug: string,
+  recipient?: RecipientKey | null,
+  priceKey?: string | null
+): string {
+  const sp = new URLSearchParams();
+  if (recipient) sp.set("kam", RECIPIENT_SLUGS[recipient]);
+  if (priceKey && priceKey !== "all") sp.set("price", priceKey);
+  const qs = sp.toString();
+  return `/idejos/proga/${slug}${qs ? `?${qs}` : ""}`;
+}
+
 export function collectionHref(slug: string): string {
   return `/idejos/kolekcija/${slug}`;
 }

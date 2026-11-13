@@ -5,6 +5,7 @@
  * They become a price filter and a link to the recipient's page instead.
  */
 import type { RecipientKey } from "./recipients";
+import type { OccasionKey } from "./occasions";
 
 export type GiftQuery = {
   /** What is left to search for: the product words. */
@@ -12,6 +13,8 @@ export type GiftQuery = {
   /** "iki 30 eur" -> 30. */
   priceMax: number | null;
   recipient: RecipientKey | null;
+  /** "kalėdinės dovanos" -> christmas. Set even when product words remain. */
+  occasion: OccasionKey | null;
 };
 
 const fold = (s: string) =>
@@ -31,6 +34,17 @@ const RECIPIENT_WORDS: Record<string, RecipientKey> = {
   porai: "couple", poroms: "couple",
   namams: "home",
 };
+
+/** Folded word prefix -> occasion. */
+const OCCASION_WORDS: [RegExp, OccasionKey][] = [
+  [/^(kaled|christmas|xmas)/, "christmas"],
+  [/^(santa|secretsanta)$/, "secretSanta"],
+  [/^gimtadien/, "birthday"],
+  [/^vardadien/, "nameDay"],
+  [/^jubiliej/, "anniversary"],
+  [/^ikurtuv/, "housewarming"],
+];
+const occasionOf = (folded: string) => OCCASION_WORDS.find(([re]) => re.test(folded))?.[1] ?? null;
 
 /** Words that only say "a gift" and narrow nothing. */
 const FILLER = /^(dovan\w*|ideja|idejos|idej\w*|ka|kokia|kokios|padovanoti|kaledin\w*|kaledom|kaledu|proga|progai)$/;
@@ -61,8 +75,17 @@ export function parseGiftQuery(input: string): GiftQuery {
     kept.push(word);
   }
   // "dovanu idejos mamai": filler before the recipient word was kept above.
-  const q = (recipient || priceMax ? kept.filter((w) => !FILLER.test(fold(w))) : kept).join(" ");
-  return { q, priceMax, recipient };
+  let words = recipient || priceMax ? kept.filter((w) => !FILLER.test(fold(w))) : kept;
+
+  // An occasion counts only as the whole query's subject: "kalėdinės dovanos"
+  // is the Christmas page, "kalėdinis žaislas" is still a search (ornaments).
+  const key = (w: string) => fold(w).replace(/[^a-z0-9]/g, "");
+  const occasion = rest.split(/\s+/).map((w) => occasionOf(key(w))).find(Boolean) ?? null;
+  if (occasion) {
+    const rest = words.filter((w) => !occasionOf(key(w)) && !FILLER.test(key(w)) && !/^secret$/i.test(w));
+    if (!rest.length) words = [];
+  }
+  return { q: words.join(" "), priceMax, recipient, occasion };
 }
 
 /** The query without its "iki N €" part, for when a budget chip replaces it. */
