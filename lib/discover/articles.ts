@@ -35,6 +35,7 @@ const L = (f: string) =>
   `coalesce(${f}[language == $locale || _key == $locale][0].value, ${f}[language == "lt" || _key == "lt"][0].value)`;
 
 const QUERY = /* groq */ `{
+  "named": *[_type == "post" && slug.current == $slug && publishedAt <= now()][0]{ "slug": slug.current, "title": ${L("title")}, "excerpt": ${L("excerpt")}, coverImage },
   "tagged": *[_type == "post" && defined(slug.current) && publishedAt <= now()
     && count((facets[]->slug.current)[@ in $facets]) > 0]
     | order(publishedAt desc)[0]{ "slug": slug.current, "title": ${L("title")}, "excerpt": ${L("excerpt")}, coverImage },
@@ -51,15 +52,17 @@ type Row = {
 
 export async function storyArticleFor(
   recipient: RecipientKey | null,
-  locale: string
+  locale: string,
+  /** A specific guide (an occasion page names its own); falls back as usual. */
+  slug: string | null = null
 ): Promise<StoryArticle | null> {
   try {
-    const res = await client.fetch<{ tagged: Row; latest: Row }>(
+    const res = await client.fetch<{ named: Row; tagged: Row; latest: Row }>(
       QUERY,
-      { facets: (recipient && FACETS[recipient]) || [], locale },
+      { facets: (recipient && FACETS[recipient]) || [], locale, slug: slug ?? "" },
       { next: { revalidate: 3600, tags: ["post"] } }
     );
-    const row = res.tagged ?? res.latest;
+    const row = res.named ?? res.tagged ?? res.latest;
     if (!row?.title) return null;
     return {
       slug: row.slug,

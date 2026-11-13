@@ -15,6 +15,7 @@ import { unstable_cache } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
 import type { InspoFilters, InspoProduct } from "@/types/inspo";
 import type { RecipientKey, VisitorGender } from "./recipients";
+import type { Occasion } from "./occasions";
 import {
   discoverPageArgs,
   ideasGridFilters,
@@ -42,11 +43,12 @@ export async function initialGridFor(
   recipient: RecipientKey | null,
   category: string | null,
   gender: VisitorGender,
-  budget: { min: number | null; max: number | null } = { min: null, max: null }
+  budget: { min: number | null; max: number | null } = { min: null, max: null },
+  occasion: Occasion | null = null
 ): Promise<InitialGrid | null> {
   const key = JSON.stringify(
     ideasGridFilters({
-      ...ideasGridScope(recipient, category, gender),
+      ...ideasGridScope(recipient, category, gender, occasion),
       priceMin: budget.min,
       priceMax: budget.max,
     })

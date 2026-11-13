@@ -8,6 +8,7 @@
 import type { InspoFilters, InspoProduct } from "@/types/inspo";
 import { recipientLens, type RecipientKey, type VisitorGender } from "./recipients";
 import { categoriesFor } from "./routes";
+import { GIFT_TYPES, type Occasion } from "./occasions";
 
 export const INSPO_PAGE_SIZE = 24;
 
@@ -49,9 +50,23 @@ const APPAREL = new Set(["clothing", "shoes", "bag"]);
 export function ideasGridScope(
   recipient: RecipientKey | null,
   category: string | null,
-  gender: VisitorGender
+  gender: VisitorGender,
+  occasion: Occasion | null = null
 ) {
   const lens = recipientLens(recipient, gender);
+  if (occasion) {
+    // An occasion draws from its own categories (all gift ones by default),
+    // narrowed to what the chosen recipient's page offers.
+    const types = occasion.gridTypes ?? GIFT_TYPES;
+    const forRecipient = recipient ? categoriesFor(recipient, gender).filter((c) => types.includes(c)) : types;
+    const productType = lens.gridType && types.includes(lens.gridType) ? lens.gridType : null;
+    return {
+      audience: lens.audience,
+      productType,
+      productTypes: forRecipient.length ? forRecipient : types,
+      ageGroup: lens.ageGroup,
+    };
+  }
   return {
     audience: lens.audience,
     productType: category ?? lens.gridType,

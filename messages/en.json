@@ -991,7 +991,53 @@
       "bag": "Bag",
       "accessory": "Accessory"
     },
-    "recipientHint": "Looking for a gift? Our picks: {title}"
+    "recipientHint": "Looking for a gift? Our picks: {title}",
+    "occasion": {
+      "label": "Occasions",
+      "kam": "For whom?",
+      "everyone": "Everyone",
+      "countdown": "{days} days left",
+      "metaTitle": "{title} – ideas and offers | Noriuto.lt",
+      "santaCtaTitle": "Organising a Secret Santa?",
+      "santaCtaBody": "Set up the draw in a minute – everyone gets their match and their wish list.",
+      "santaCtaButton": "Create a draw",
+      "christmas": {
+        "label": "Christmas",
+        "title": "Christmas gifts",
+        "intro": "Gifts for under the tree – from cosy little things to the ones they dream about all year. Pick who it's for and a budget.",
+        "description": "Christmas gift ideas for her, him, kids and teens from trusted shops, with a budget filter from €10."
+      },
+      "secretSanta": {
+        "label": "Secret Santa",
+        "title": "Secret Santa gifts",
+        "intro": "Drew a name and have a budget? Gifts that fit the sum and don't look last-minute.",
+        "description": "Secret Santa gift ideas under €20, €30 or €50 for colleagues and friends."
+      },
+      "birthday": {
+        "label": "Birthday",
+        "title": "Birthday gifts",
+        "intro": "Birthday gift ideas for her, him and kids – from tech to beauty and hobbies.",
+        "description": "Birthday gift ideas for her, him and kids: tech, beauty, hobbies."
+      },
+      "nameDay": {
+        "label": "Name day",
+        "title": "Name day gifts",
+        "intro": "A name day calls for a small but thoughtful gift.",
+        "description": "Name day gift ideas: small, thoughtful gifts from €10."
+      },
+      "anniversary": {
+        "label": "Anniversary",
+        "title": "Anniversary gifts",
+        "intro": "A round date deserves a special gift.",
+        "description": "Anniversary gift ideas for her, him and couples."
+      },
+      "housewarming": {
+        "label": "Housewarming",
+        "title": "Housewarming gifts",
+        "intro": "For a new home – cosiness, kitchen and garden.",
+        "description": "Housewarming gift ideas: home, kitchen, garden and tools."
+      }
+    }
   },
   "Inspo": {
     "metaTitle": "Gift Ideas For You",

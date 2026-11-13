@@ -75,7 +75,7 @@ export async function middleware(request: NextRequest) {
 }
 
 /** Discover's own static segments; everything else must be a known slug. */
-const DISCOVER_STATIC = new Set(["visos", "parduotuve", "kolekcija"]);
+const DISCOVER_STATIC = new Set(["visos", "parduotuve", "kolekcija", "proga"]);
 
 function isUnknownDiscoverPath(pathname: string): boolean {
   const [, root, recipient, category, ...rest] = pathname.split("/");

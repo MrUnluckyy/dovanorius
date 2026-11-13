@@ -38,7 +38,9 @@ import { ProductModal } from "../ProductModal";
 import { IdeasGrid } from "../IdeasGrid";
 import { BudgetChips } from "../BudgetChips";
 import { priceBand } from "../filters";
-import { withBudget } from "@/lib/discover/routes";
+import { occasionHref, withBudget } from "@/lib/discover/routes";
+import type { Occasion } from "@/lib/discover/occasions";
+import { OccasionStrip } from "./OccasionStrip";
 import { Rail } from "./Rail";
 import { StillLife } from "./StillLife";
 import { StoryBlock, type Story } from "./StoryBlock";
@@ -67,6 +69,7 @@ export function DiscoverHub({
   article,
   ad,
   initialGrid = null,
+  occasion = null,
 }: {
   visitor: Visitor;
   userId: string | null;
@@ -77,6 +80,9 @@ export function DiscoverHub({
   ad: Placement | null;
   /** The grid's first page, rendered on the server (for search engines). */
   initialGrid?: InitialGrid | null;
+  /** An occasion page (/idejos/proga/…): its own title, collections and grid;
+   *  `recipient` is then the "Kam?" choice, not the page. */
+  occasion?: Occasion | null;
 }) {
   const t = useTranslations("Discover");
   const supabase = createClient();
@@ -91,7 +97,9 @@ export function DiscoverHub({
   // and moving between recipients; changing it replaces history rather than
   // pushing an entry per tap (see BrowseClient).
   const searchParams = useSearchParams();
-  const [budgetKey, setBudgetKey] = useState(searchParams.get("price") ?? "all");
+  const [budgetKey, setBudgetKey] = useState(
+    searchParams.get("price") ?? occasion?.defaultPrice ?? "all"
+  );
   const budget = priceBand(budgetKey);
   const changeBudget = useCallback((key: string) => {
     setBudgetKey(key);
@@ -159,7 +167,13 @@ export function DiscoverHub({
         .filter((p) => p.kind === "theme" || p.kind === "editorial")
         .map((p) => [p.id, p])
     );
-    const order: { persona: GiftPersona; rank: RankedCollection | null }[] = ranked
+    // An occasion names its collections; the ranking doesn't know occasions.
+    const order: { persona: GiftPersona; rank: RankedCollection | null }[] = occasion
+      ? occasion.collections.flatMap((slug) => {
+          const persona = bySlug.get(slug);
+          return persona ? [{ persona, rank: null }] : [];
+        })
+      : ranked
       ? ranked.flatMap((r) => {
           const persona = themes.get(r.persona_id);
           return persona ? [{ persona, rank: r }] : [];
@@ -179,11 +193,14 @@ export function DiscoverHub({
       ? [...rails.filter((s) => !s.persona.gender), ...rails.filter((s) => s.persona.gender)]
       : rails;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ranked, personas, picksById, category, lens.audience, recipient, gender, budgetKey]);
+  }, [ranked, personas, picksById, category, lens.audience, recipient, gender, budgetKey, occasion]);
 
   // On a category page the order is already narrowed, so show what qualifies;
   // elsewhere the ranking's own top slots lead.
-  const top = category ? shelves.slice(0, TOP) : shelves.filter((s) => s.rank?.is_top ?? true).slice(0, TOP);
+  const top =
+    category || occasion
+      ? shelves.slice(0, TOP)
+      : shelves.filter((s) => s.rank?.is_top ?? true).slice(0, TOP);
   const rest = shelves.filter((s) => !top.includes(s));
 
   const reasonText = (r: RankedCollection | null): string | null => {
@@ -257,15 +274,17 @@ export function DiscoverHub({
       state: visitor.state,
       ...(recipient ? { recipient } : {}),
       ...(category ? { shelf: `category:${category}` } : {}),
+      ...(occasion ? { shelf: `occasion:${occasion.slug}` } : {}),
     });
-    // Remembered for next time: /discover reopens on this recipient.
-    if (recipient && userId && recipient !== visitor.recipient) {
+    // Remembered for next time: /discover reopens on this recipient. Not on
+    // an occasion page, where "Kam?" is a filter, not a choice of page.
+    if (!occasion && recipient && userId && recipient !== visitor.recipient) {
       // .then() is what sends it: supabase-js builders are lazy, and a bare
       // `void builder` never leaves the browser.
       supabase.from("profiles").update({ last_recipient: recipient }).eq("id", userId).then(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipient, category]);
+  }, [recipient, category, occasion?.slug]);
 
   const answerGender = (g: "female" | "male" | null) => {
     trackDiscover("nudge_answered", {
@@ -286,7 +305,9 @@ export function DiscoverHub({
 
   // ---- copy ----------------------------------------------------------------
   const recipientLabel = recipient ? t(`recipient.${recipient}`) : null;
-  const title = !recipient
+  const title = occasion
+    ? t(`occasion.${occasion.key}.title`)
+    : !recipient
     ? t("hub.homeTitle")
     : category
       ? // "Grožio dovanos moteriai", not "Grožis": the H1 is what the page
@@ -375,13 +396,36 @@ export function DiscoverHub({
             {t("hub.recipientTitle", { recipient: recipientLabel!.toLocaleLowerCase("lt") })}
           </Link>
         )}
+        {occasion && (
+          <Link href="/idejos" className="mb-2 inline-block text-[14px] text-(--nr-muted) hover:text-(--nr-ink)">
+            {t("hub.breadcrumbRoot")}
+          </Link>
+        )}
         <h1 className="font-heading text-[34px] font-extrabold leading-[1.02] tracking-[-0.035em] text-(--nr-ink) sm:text-[52px]">
-          {visitor.greetingName && isSelf && !category
+          {visitor.greetingName && isSelf && !category && !occasion
             ? t("firstView.greeting", { name: visitor.greetingName })
             : title}
         </h1>
-        {!recipient && <p className="mt-3 max-w-[46ch] text-[16px] text-(--nr-muted)">{t("hub.homeLead")}</p>}
-        <BudgetChips value={budgetKey} onChange={changeBudget} className="mt-5" />
+        {occasion ? (
+          <p className="mt-3 max-w-[60ch] text-[16px] text-(--nr-muted)">{t(`occasion.${occasion.key}.intro`)}</p>
+        ) : (
+          !recipient && <p className="mt-3 max-w-[46ch] text-[16px] text-(--nr-muted)">{t("hub.homeLead")}</p>
+        )}
+        {occasion && (
+          <ChipRow label={t("occasion.kam")} className="mt-5">
+            {[null, ...occasion.recipients].map((key) => (
+              <ChipLink
+                key={key ?? "all"}
+                href={occasionHref(occasion.slug, key, budgetKey)}
+                active={recipient === key}
+              >
+                {key ? t(`recipient.${key}`) : t("occasion.everyone")}
+              </ChipLink>
+            ))}
+          </ChipRow>
+        )}
+        <BudgetChips value={budgetKey} onChange={changeBudget} className={occasion ? "mt-2.5" : "mt-5"} />
+        {!occasion && !category && <OccasionStrip recipient={recipient} budgetKey={budgetKey} />}
         {isSelf && !category && visitor.greetingName && (
           <p className="mt-3 text-[16px] text-(--nr-muted)">{t("firstView.todayPrompt")}</p>
         )}
@@ -389,7 +433,7 @@ export function DiscoverHub({
 
       <div className="space-y-14 sm:space-y-20">
         {/* ---------- Home: who is it for ---------- */}
-        {!recipient && (
+        {!recipient && !occasion && (
           <section aria-label={t("hub.recipientsNav")}>
             <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-4 sm:gap-x-4">
               {NAV_RECIPIENTS.map((key) => (
@@ -428,7 +472,7 @@ export function DiscoverHub({
         )}
 
         {/* ---------- Lead row ---------- */}
-        {recipient && (picksLoading || leadPicks.length >= 4) && (
+        {recipient && !occasion && (picksLoading || leadPicks.length >= 4) && (
           <Rail
             title={leadTitle}
             reason={leadReason}
@@ -439,7 +483,7 @@ export function DiscoverHub({
         )}
 
         {/* ---------- Category tiles (recipient root only) ---------- */}
-        {recipient && !category && tileCategories.length > 0 && (
+        {recipient && !category && !occasion && tileCategories.length > 0 && (
           <section>
             <h2 className="mb-4 font-heading text-[22px] font-bold tracking-[-0.02em] text-(--nr-ink) sm:text-[26px]">
               {t("hub.categories")}
@@ -472,6 +516,7 @@ export function DiscoverHub({
                 items={s.items.slice(0, 12)}
                 onOpen={open({ surface: "shelf", shelf: s.persona.slug })}
               />
+              {i === 0 && occasion?.key === "secretSanta" && <SantaCta />}
               {i === 1 && slotA}
               {i === 3 && slotB}
             </div>
@@ -514,7 +559,7 @@ export function DiscoverHub({
         {/* ---------- The grid ---------- */}
         <IdeasGrid
           title={category ? t("hub.allInCategory") : recipient ? t("hub.allIdeas") : t("firstView.moreIdeas")}
-          {...ideasGridScope(recipient, category, gender)}
+          {...ideasGridScope(recipient, category, gender, occasion)}
           priceMin={budget.min}
           priceMax={budget.max}
           initial={initialGrid}
@@ -535,5 +580,54 @@ export function DiscoverHub({
 
       <ProductModal product={selected} userId={accountId} onClose={() => setSelected(null)} />
     </div>
+  );
+}
+
+/** A labelled row of pill links (the "Kam?" choice on occasion pages). */
+function ChipRow({ label, className = "", children }: { label: string; className?: string; children: React.ReactNode }) {
+  return (
+    <div
+      role="group"
+      aria-label={label}
+      className={`-mx-4 flex items-center gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden ${className}`}
+    >
+      <span className="mr-1 w-[76px] shrink-0 text-[11px] font-semibold uppercase tracking-[0.12em] text-(--nr-gold-text)">
+        {label}
+      </span>
+      {children}
+    </div>
+  );
+}
+
+function ChipLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      scroll={false}
+      aria-current={active ? "page" : undefined}
+      className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium text-(--nr-ink) transition-transform active:scale-[0.97] ${
+        active
+          ? "border-(--nr-yellow-deep) bg-(--nr-yellow) shadow-(--nr-shadow-btn)"
+          : "border-(--nr-border) bg-(--nr-surface) hover:border-(--nr-ink)/40"
+      }`}
+    >
+      {children}
+    </Link>
+  );
+}
+
+/** Secret Santa page: the gift is half of it; the draw is the other half. */
+function SantaCta() {
+  const t = useTranslations("Discover.occasion");
+  return (
+    <section className="flex flex-col items-start gap-4 rounded-[24px] bg-(--nr-yellow) px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+      <div>
+        <h2 className="font-heading text-[22px] font-bold tracking-[-0.02em] text-(--nr-ink)">{t("santaCtaTitle")}</h2>
+        <p className="mt-1 max-w-[52ch] text-[15px] text-(--nr-ink)/80">{t("santaCtaBody")}</p>
+      </div>
+      <Link href="/renginiai/naujas" className="nr-btn nr-btn-dark shrink-0">
+        {t("santaCtaButton")}
+      </Link>
+    </section>
   );
 }

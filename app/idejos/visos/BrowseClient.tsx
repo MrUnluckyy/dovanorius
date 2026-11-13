@@ -18,7 +18,8 @@ import { SearchFallbackView, type SearchFallback } from "../_components/SearchFa
 import { CATEGORIES, PRICE_BANDS, SORTS, AUDIENCES, priceBand, priceBandLabel } from "../_components/filters";
 import { BudgetChips } from "../_components/BudgetChips";
 import { parseGiftQuery, stripPrice } from "@/lib/discover/queryIntent";
-import { discoverHref } from "@/lib/discover/routes";
+import { discoverHref, occasionHref } from "@/lib/discover/routes";
+import { occasionByKey } from "@/lib/discover/occasions";
 import { trackInspo, trackDiscover } from "@/utils/trackInspo";
 import { isAccountUser } from "@/utils/auth/account";
 
@@ -67,7 +68,10 @@ export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
   // "kvepalai iki 30 eur" is kvepalai on a 30 € budget; "dovana mamai" is a
   // recipient, not a product. The URL keeps what was typed; this reads it.
   const intent = useMemo(() => parseGiftQuery(search), [search]);
-  const searchTerm = intent.priceMax || intent.recipient ? intent.q : search;
+  const searchTerm =
+    intent.priceMax || intent.recipient || (intent.occasion && !intent.q) ? intent.q : search;
+  // "kalėdinis žaislas" stays a search, with a way to the Christmas page.
+  const hintOccasion = intent.occasion ? occasionByKey(intent.occasion) : null;
 
   // The one exception: typing should not push a history entry per keystroke.
   const [searchInput, setSearchInput] = useState(search);
@@ -266,16 +270,26 @@ export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
 
       <BudgetChips value={effectiveBandKey} onChange={changeBudget} className="mb-4" />
 
-      {intent.recipient && (
+      {(intent.recipient || hintOccasion) && (
         <Link
-          href={discoverHref(intent.recipient) + (effectiveBandKey !== "all" ? `?price=${effectiveBandKey}` : "")}
+          href={
+            hintOccasion
+              ? occasionHref(
+                  hintOccasion.slug,
+                  intent.recipient && hintOccasion.recipients.includes(intent.recipient) ? intent.recipient : null,
+                  effectiveBandKey
+                )
+              : discoverHref(intent.recipient) + (effectiveBandKey !== "all" ? `?price=${effectiveBandKey}` : "")
+          }
           className="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-(--nr-border) bg-(--nr-tile) px-4 py-3.5 text-[15px] text-(--nr-ink) transition-colors hover:border-(--nr-ink)/40 sm:px-5"
         >
           <span>
             {t("recipientHint", {
-              title: t("hub.recipientTitle", {
-                recipient: t(`recipient.${intent.recipient}`).toLocaleLowerCase("lt"),
-              }),
+              title: hintOccasion
+                ? t(`occasion.${hintOccasion.key}.title`)
+                : t("hub.recipientTitle", {
+                    recipient: t(`recipient.${intent.recipient}`).toLocaleLowerCase("lt"),
+                  }),
             })}
           </span>
           <span aria-hidden className="font-semibold">→</span>

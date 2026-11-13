@@ -991,7 +991,53 @@
       "bag": "Rankinių ir kuprinių",
       "accessory": "Aksesuarų"
     },
-    "recipientHint": "Ieškai dovanos? Atrinktos idėjos: {title}"
+    "recipientHint": "Ieškai dovanos? Atrinktos idėjos: {title}",
+    "occasion": {
+      "label": "Progos",
+      "kam": "Kam?",
+      "everyone": "Visiems",
+      "countdown": "liko {days} d.",
+      "metaTitle": "{title} – idėjos ir pasiūlymai | Noriuto.lt",
+      "santaCtaTitle": "Organizuoji Secret Santa?",
+      "santaCtaBody": "Sukurk traukimą per minutę – kiekvienas gaus savo porą ir jos norų sąrašą.",
+      "santaCtaButton": "Sukurti traukimą",
+      "christmas": {
+        "label": "Kalėdos",
+        "title": "Kalėdinės dovanos",
+        "intro": "Dovanos po eglute visiems – nuo jaukių smulkmenų iki tų, apie kurias svajojama visus metus. Pasirink, kam ieškai, ir biudžetą.",
+        "description": "Kalėdinių dovanų idėjos moteriai, vyrui, vaikams ir paaugliams: atrinktos prekės iš patikimų parduotuvių, su biudžetu nuo 10 €."
+      },
+      "secretSanta": {
+        "label": "Secret Santa",
+        "title": "Secret Santa dovanos",
+        "intro": "Ištraukei vardą ir turi biudžetą? Čia dovanos, kurios tilps į sumą ir neatrodys pirktos paskutinę minutę.",
+        "description": "Secret Santa dovanų idėjos iki 20 €, 30 € ar 50 €: smulkmenos su charakteriu, jaukumas ir skanėstai kolegoms ir draugams."
+      },
+      "birthday": {
+        "label": "Gimtadienis",
+        "title": "Dovanos gimtadienio proga",
+        "intro": "Gimtadienio dovanų idėjos jai, jam ir vaikams – nuo technikos iki grožio ir pomėgių.",
+        "description": "Gimtadienio dovanų idėjos moteriai, vyrui ir vaikams: technika, grožis, pomėgiai. Atrinktos prekės su biudžeto filtru."
+      },
+      "nameDay": {
+        "label": "Vardadienis",
+        "title": "Dovanos vardadienio proga",
+        "intro": "Vardadieniui tinka maža, bet apgalvota dovana: kvepianti žvakė, skanėstas ar smulkmena su charakteriu.",
+        "description": "Vardadienio dovanų idėjos: mažos, bet apgalvotos dovanos jai, jam ir vaikams – nuo 10 €."
+      },
+      "anniversary": {
+        "label": "Jubiliejus",
+        "title": "Jubiliejinės dovanos",
+        "intro": "Apvali data verta ypatingos dovanos – atrinkome tokias, kurios bus prisimenamos.",
+        "description": "Jubiliejinių dovanų idėjos moteriai, vyrui ir porai: ypatingos dovanos apvaliai datai."
+      },
+      "housewarming": {
+        "label": "Įkurtuvės",
+        "title": "Dovanos įkurtuvėms",
+        "intro": "Naujiems namams – jaukumas, virtuvė ir sodas. Dovanos, kurios iškart ras savo vietą.",
+        "description": "Dovanų idėjos įkurtuvėms: namų jaukumas, virtuvė, sodas ir įrankiai naujiems namams."
+      }
+    }
   },
   "Inspo": {
     "metaTitle": "Dovanų idėjos tau",
