@@ -2,6 +2,7 @@
 "use client";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import { redactSecrets } from "@/lib/analyticsRedact";
 
 export function GtmPageView() {
   const pathname = usePathname();
@@ -11,8 +12,9 @@ export function GtmPageView() {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: "page_view",
-      page_path:
-        pathname + (searchParams?.toString() ? `?${searchParams}` : ""),
+      page_path: redactSecrets(
+        pathname + (searchParams?.toString() ? `?${searchParams}` : "")
+      ),
     });
   }, [pathname, searchParams]);
 
