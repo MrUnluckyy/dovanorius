@@ -73,9 +73,13 @@ export function ideasGridScope(
     // A recipient page's grid stays inside that recipient's gift categories,
     // minus apparel: default browse is mostly fashion, and a page called
     // "Dovanos moteriai" should not open on cycling shorts.
+    // The discover home (no recipient) draws from the gift categories only:
+    // unfiltered, the feed is mostly clothes and unclassified rows.
     productTypes: recipient
       ? categoriesFor(recipient, gender).filter((c) => !APPAREL.has(c))
-      : undefined,
+      : category
+        ? undefined
+        : GIFT_TYPES,
     ageGroup: lens.ageGroup,
   };
 }
