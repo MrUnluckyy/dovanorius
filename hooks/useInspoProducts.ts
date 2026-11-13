@@ -32,6 +32,23 @@ function nextCursor(sort: InspoFilters["sort"], last: InspoProduct & { pos?: num
 type PageParam = { cursor: string | null; page: number };
 
 /**
+ * The filter arguments search_products and search_fallback share, so the
+ * fallback relaxes the words but never the visitor's filters.
+ */
+export function searchFilterArgs(filters: InspoFilters) {
+  return {
+    p_product_type: filters.productType,
+    p_brand: filters.brand,
+    p_merchant: filters.merchant,
+    p_price_min: Math.max(PRICE_FLOOR, filters.priceMin ?? 0),
+    p_price_max: filters.priceMax,
+    p_gender: filters.audience === "him" ? "male" : filters.audience === "her" ? "female" : null,
+    p_hide_season: filters.inSeason ? offSeasonToHide(new Date().getMonth()) : null,
+    p_on_sale: filters.onSaleOnly,
+  };
+}
+
+/**
  * Paginated, quality-gated read of the product feed for discover.
  *
  * Browsing reads discover_page() (T9): a slim, pre-filtered copy of the feed
@@ -39,11 +56,12 @@ type PageParam = { cursor: string | null; page: number };
  * import no longer evicts it from cache. Search keeps search_products(), which
  * ranks by relevance and pages by offset.
  */
-export function useInspoProducts(filters: InspoFilters) {
+export function useInspoProducts(filters: InspoFilters, options: { enabled?: boolean } = {}) {
   const supabase = createClient();
 
   return useInfiniteQuery({
     queryKey: ["inspo", filters],
+    enabled: options.enabled ?? true,
     initialPageParam: { cursor: null, page: 0 } as PageParam,
     // Keep the current grid on screen while the next query runs. Without this
     // every keystroke that settled blanked the results into skeletons, which
@@ -60,19 +78,11 @@ export function useInspoProducts(filters: InspoFilters) {
         const { data, error } = await supabase
           .rpc("search_products", {
             p_q: term,
-            p_product_type: filters.productType,
-            p_brand: filters.brand,
-            p_merchant: filters.merchant,
-            p_price_min: priceMin,
-            p_price_max: filters.priceMax,
-            p_gender:
-              filters.audience === "him" ? "male" : filters.audience === "her" ? "female" : null,
-            p_hide_season: hideSeason,
-            p_on_sale: filters.onSaleOnly,
+            ...searchFilterArgs(filters),
             p_sort: filters.sort,
             p_limit: INSPO_PAGE_SIZE,
             p_offset: pageParam.page * INSPO_PAGE_SIZE,
-            p_source: "web",
+            p_source: filters.searchSource ?? "web",
           })
           .select("*, display_name");
         if (error) throw error;

@@ -7,13 +7,14 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { LuX, LuExternalLink } from "react-icons/lu";
 import { createClient } from "@/utils/supabase/client";
-import { useInspoProducts } from "@/hooks/useInspoProducts";
+import { searchFilterArgs, useInspoProducts } from "@/hooks/useInspoProducts";
 import { useDiscoverAudience } from "@/hooks/useDiscoverAudience";
 import type { InspoFilters, InspoSort } from "@/types/inspo";
 import { ProductCard, type CardProduct } from "../_components/ProductCard";
 import { BrowseFilters } from "../_components/BrowseFilters";
 import { toCardProduct } from "../_components/CollectionRow";
 import { ProductModal } from "../_components/ProductModal";
+import { SearchFallbackView, type SearchFallback } from "../_components/SearchFallback";
 import { CATEGORIES, PRICE_BANDS, SORTS, AUDIENCES } from "../_components/filters";
 import { trackInspo, trackDiscover } from "@/utils/trackInspo";
 import { isAccountUser } from "@/utils/auth/account";
@@ -129,21 +130,42 @@ export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
   // shows the previous results, so say that it is updating.
   const updating = isPlaceholderData || searchInput.trim() !== search.trim();
 
-  // Only once a search has settled on nothing: ask for a spelling fix
-  // (begymo -> begimo, samsng -> samsung). search_correct returns null when
-  // every word already exists in the catalogue, so no suggestion is shown then.
+  // Once a search has settled on nothing, don't leave an empty page: ask the
+  // database for the nearest thing that does exist (search_fallback): the
+  // spelling fix (begymo -> begimo), else the query minus the words nothing
+  // matched (kayali kvepalai -> kvepalai), else popular gifts. Same filters.
   const noResults =
     !!search.trim() && !isLoading && !isError && !updating && (data?.pages[0]?.length ?? 0) === 0;
-  const { data: suggestion } = useQuery({
-    queryKey: ["search-correct", search],
+  const { data: fallback } = useQuery({
+    queryKey: ["search-fallback", search, filters],
     enabled: noResults,
     staleTime: Infinity,
     queryFn: async () => {
-      const { data: fixed } = await supabase.rpc("search_correct", { p_q: search });
-      return (fixed as string | null) ?? null;
+      const { data: fb, error } = await supabase.rpc("search_fallback", {
+        p_q: search,
+        ...searchFilterArgs(filters),
+      });
+      if (error) throw error;
+      return fb as SearchFallback;
     },
   });
-  const applySuggestion = (term: string) => {
+  const fallbackFilters: InspoFilters = useMemo(
+    () => ({
+      ...filters,
+      search: fallback?.mode === "popular" ? "" : (fallback?.q ?? ""),
+      searchSource: "fallback",
+      // Popular means "nothing like it": show the best gifts, not the
+      // cheapest or the most discounted.
+      sort: fallback?.mode === "popular" ? "recommended" : filters.sort,
+    }),
+    [filters, fallback]
+  );
+  const fallbackQuery = useInspoProducts(fallbackFilters, { enabled: noResults && !!fallback });
+  const fallbackProducts = useMemo(
+    () => fallbackQuery.data?.pages.flat() ?? [],
+    [fallbackQuery.data]
+  );
+  const applyTerm = (term: string) => {
     setSearchInput(term);
     setParams({ q: term });
   };
@@ -270,18 +292,17 @@ export function BrowseClient({ shop }: { shop?: ShopInfo } = {}) {
               <span className="loading loading-spinner loading-md opacity-60" />
             </div>
           ) : (
-            <div className="py-20 text-center">
-              <p className="opacity-75">{t("empty")}</p>
-              {suggestion && (
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm mt-3 cursor-pointer rounded-full underline underline-offset-4"
-                  onClick={() => applySuggestion(suggestion)}
-                >
-                  {t("didYouMean", { term: `„${suggestion}“` })}
-                </button>
-              )}
-            </div>
+            <SearchFallbackView
+              search={search}
+              fallback={fallback ?? null}
+              loading={!fallback || fallbackQuery.isLoading}
+              products={fallbackProducts}
+              hasMore={!!fallbackQuery.hasNextPage}
+              loadingMore={fallbackQuery.isFetchingNextPage}
+              onMore={() => fallbackQuery.fetchNextPage()}
+              onOpen={openProduct}
+              onApply={applyTerm}
+            />
           )
         ) : (
           <>
