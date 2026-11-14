@@ -25,7 +25,12 @@ test("keeps URLs without secrets as they are", () => {
     "/auth/confirm?type=email&next=%2F",
     "/idejos/visos?q=kodas&price=10&sort=new",
     "/renginiai/kaledos?invite=1",
-    "/b/s/abc?tokenx=1&mytoken=2",
+    "/b/kaledos?tokenx=1&mytoken=2",
+    "/prisijungti?next=%2Fmano",
+    "/lentos/abc-123",
+    "/renginiai/kaledos/mano",
+    "/idejos/join/x",
+    "/blog/r/keep/x",
   ]) {
     assert.equal(redactSecrets(url), url);
   }
@@ -57,4 +62,61 @@ test("removes tokens from every part of an event", () => {
   assert.equal(out.properties.none, null);
   assert.ok(out.timestamp instanceof Date);
   assert.ok(JSON.stringify(event).includes(SECRET), "the input is not changed");
+});
+
+const TOKEN = "3f2c9a1e-7b4d-4c8e-9a6f-0123456789ab";
+
+test("replaces the token in every capability link with a placeholder", () => {
+  const cases: [string, string][] = [
+    [`/b/s/${TOKEN}`, "/b/s/[token]"],
+    [`/r/keep/${TOKEN}.c2ln`, "/r/keep/[token]"],
+    [`/r/release/${TOKEN}`, "/r/release/[token]"],
+    [`/renginiai/prieiga/${TOKEN}`, "/renginiai/prieiga/[token]"],
+    [`/renginiai/prisijungti/${TOKEN}?invite=1`, "/renginiai/prisijungti/[token]?invite=1"],
+    [`/events/join/${TOKEN}`, "/events/join/[token]"],
+    [`/lentos/prisijungti/${TOKEN}/`, "/lentos/prisijungti/[token]/"],
+    [`/boards/join/${TOKEN}`, "/boards/join/[token]"],
+    [`/partner/join/${TOKEN}`, "/partner/join/[token]"],
+    [`/join/${TOKEN}#top`, "/join/[token]#top"],
+    [`https://noriuto.lt/b/s/${TOKEN}`, "https://noriuto.lt/b/s/[token]"],
+    [`http://localhost:3000/b/s/${TOKEN}`, "http://localhost:3000/b/s/[token]"],
+    [`https://partner.noriuto.lt/join/${TOKEN}`, "https://partner.noriuto.lt/join/[token]"],
+  ];
+  for (const [url, expected] of cases) {
+    assert.equal(redactSecrets(url), expected);
+    assert.equal(redactSecrets(redactSecrets(url)), expected);
+  }
+});
+
+test("replaces the token in an encoded link, such as the login page's next parameter", () => {
+  assert.equal(
+    redactSecrets(`/prisijungti?next=%2Flentos%2Fprisijungti%2F${TOKEN}`),
+    "/prisijungti?next=%2Flentos%2Fprisijungti%2F[token]"
+  );
+  assert.equal(
+    redactSecrets(`/x?u=https%3A%2F%2Fnoriuto.lt%2Fb%2Fs%2F${TOKEN}&y=1`),
+    "/x?u=https%3A%2F%2Fnoriuto.lt%2Fb%2Fs%2F[token]&y=1"
+  );
+});
+
+test("removes capability tokens from every part of an event", () => {
+  const shareUrl = `https://noriuto.lt/b/s/${TOKEN}`;
+  const event = {
+    event: "$pageleave",
+    properties: {
+      $current_url: shareUrl,
+      $pathname: `/b/s/${TOKEN}`,
+      $referrer: `https://noriuto.lt/renginiai/prieiga/${TOKEN}`,
+      $prev_pageview_pathname: `/r/release/${TOKEN}`,
+      $elements_chain: `a:attr__href="/renginiai/prisijungti/${TOKEN}"nth-child="1";div:text="https://noriuto.lt/b/s/${TOKEN}"`,
+    },
+    $set_once: { $initial_current_url: shareUrl, $initial_pathname: `/b/s/${TOKEN}` },
+  };
+  const out = redactPayload(event);
+  assert.ok(!JSON.stringify(out).includes(TOKEN));
+  assert.equal(out.properties.$pathname, "/b/s/[token]");
+  assert.equal(
+    out.properties.$elements_chain,
+    'a:attr__href="/renginiai/prisijungti/[token]"nth-child="1";div:text="https://noriuto.lt/b/s/[token]"'
+  );
 });
