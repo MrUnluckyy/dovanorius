@@ -19,9 +19,46 @@ const SECRET_PARAM_VALUE = new RegExp(
   "gi"
 );
 
-/** The text with the value of every secret URL parameter replaced. */
+/**
+ * Routes where the path itself is the key: whoever has the link can see a
+ * shared board, join an event or board, open a guest's event seat, change a
+ * reservation, or join a partner team. The legacy English paths still
+ * redirect, and the partner host serves its invite at /join.
+ */
+const CAPABILITY_ROUTES = [
+  "b/s",
+  "r/keep",
+  "r/release",
+  "renginiai/prieiga",
+  "renginiai/prisijungti",
+  "events/join",
+  "lentos/prisijungti",
+  "boards/join",
+  "partner/join",
+  "join",
+];
+
+// A slash, or its encoded form: the login page carries the invite path in ?next=.
+const SLASH = "(?:/|%2F)";
+
+const CAPABILITY_PATH = new RegExp(
+  // Only at the start of a path: the start of the text, after a host, or
+  // after a quote, a space or "=" (attribute values, query parameters).
+  `(^|[\\s"'=(]|${SLASH}{2}[^/\\s"'?#%]+)` +
+    `(${SLASH}(?:${CAPABILITY_ROUTES.map((r) => r.replace("/", SLASH)).join("|")})${SLASH})` +
+    `[^/?#&\\s"'%]+`,
+  "gi"
+);
+
+/**
+ * The text with the value of every secret URL parameter replaced, and the
+ * token in every capability link replaced with "[token]", so pages still
+ * group by route.
+ */
 export function redactSecrets(text: string): string {
-  return text.replace(SECRET_PARAM_VALUE, "$1redacted");
+  return text
+    .replace(SECRET_PARAM_VALUE, "$1redacted")
+    .replace(CAPABILITY_PATH, "$1$2[token]");
 }
 
 /**
