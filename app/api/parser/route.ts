@@ -738,11 +738,17 @@ async function respondFromPage(page: FetchResult): Promise<NextResponse> {
   // velonova and most OpenCart/WooCommerce themes emit these even when their
   // JSON-LD is broken.
   if (!price) {
+    // twitter:data1 is whatever twitter:label1 says it is. On WordPress shops
+    // Yoast fills it with "Est. reading time" = "1 minutė", which parsed as a
+    // price of 1 €. Only trust it when the label is a price.
+    const twitterPrice = /price|kaina|cena|hinta|preis|prix/i.test(prop("twitter:label1") ?? "")
+      ? prop("twitter:data1")
+      : undefined;
     price = normalizePrice(
       prop("product:price:amount") ??
         prop("og:price:amount") ??
         prop("product:sale_price:amount") ??
-        prop("twitter:data1")
+        twitterPrice
     );
     if (price) console.log(`[parser] price from meta tags → ${price}`);
   }
@@ -782,6 +788,22 @@ async function respondFromPage(page: FetchResult): Promise<NextResponse> {
   if (!productImages.length) {
     const mi = abs(itemprop("image"), finalUrl);
     if (mi) productImages = [mi];
+  }
+
+  // ── Fallback 3: WooCommerce's visible price ───────────────────────────────
+  // Many small LT shops run WooCommerce without a price in JSON-LD or meta
+  // (miniai.lt). The product summary's price block is standard markup; a sale
+  // shows the new price inside <ins>. Only the main summary, never related
+  // products further down.
+  if (!price) {
+    const summary = $(".product .summary .price, .product .entry-summary .price, .single-product .price").first();
+    const amount = summary.find("ins .woocommerce-Price-amount").first().text() ||
+      summary.find(".woocommerce-Price-amount").first().text();
+    price = normalizePrice(amount.replace(/\u00a0/g, " ").trim() || undefined);
+    if (price) {
+      console.log(`[parser] price from WooCommerce summary → ${price}`);
+      if (!priceCurrency && /€|&euro;/.test(summary.html() ?? "")) priceCurrency = "EUR";
+    }
   }
 
   // Currency of last resort: infer from the symbol next to the price, else the
