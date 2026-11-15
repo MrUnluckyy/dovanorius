@@ -11,7 +11,10 @@ import {
 export { INSPO_PAGE_SIZE };
 
 /** The keyset cursor for the row after `last`, per sort (see discover_page). */
-function nextCursor(sort: InspoFilters["sort"], last: InspoProduct & { pos?: number }): string {
+function nextCursor(
+  sort: InspoFilters["sort"],
+  last: InspoProduct & { pos?: number; sort_k?: number | null }
+): string {
   switch (sort) {
     case "price_asc":
     case "price_desc":
@@ -19,7 +22,8 @@ function nextCursor(sort: InspoFilters["sort"], last: InspoProduct & { pos?: num
     case "discount":
       return `${last.discount_pct}|${last.id}`;
     default:
-      return String(last.pos);
+      // A recipient's boosted order pages by (sort_k, pos); plain by pos.
+      return last.sort_k != null ? `${last.sort_k}|${last.pos}` : String(last.pos);
   }
 }
 
@@ -109,7 +113,10 @@ export function useInspoProducts(
     getNextPageParam: (lastPage, allPages): PageParam | undefined => {
       if (lastPage.length < INSPO_PAGE_SIZE) return undefined;
       return {
-        cursor: nextCursor(filters.sort, lastPage[lastPage.length - 1] as InspoProduct & { pos?: number }),
+        cursor: nextCursor(
+          filters.sort,
+          lastPage[lastPage.length - 1] as InspoProduct & { pos?: number; sort_k?: number | null }
+        ),
         page: allPages.length,
       };
     },

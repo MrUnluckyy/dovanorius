@@ -40,8 +40,22 @@ export function discoverPageArgs(filters: InspoFilters, cursor: string | null) {
     p_cursor: cursor,
     p_limit: INSPO_PAGE_SIZE,
     p_age_group: filters.ageGroup ?? null,
+    // Only sent when set, so a database without the parameter still answers.
+    ...(filters.boostTypes?.length && !filters.productType ? { p_boost_types: filters.boostTypes } : {}),
   };
 }
+
+/**
+ * Types a recipient's grid pulls forward (two rounds early in the mix), so
+ * pages for related people don't open on the same products: "Dovanos mamai"
+ * leads with home, kitchen and garden, "Dovanos draugei" with beauty and
+ * accessories, while "Dovanos moteriai" stays the plain mix.
+ */
+const BOOST: Partial<Record<RecipientKey, string[]>> = {
+  mom: ["home", "kitchen", "garden"],
+  friend: ["beauty", "accessory"],
+  couple: ["home", "kitchen"],
+};
 
 const APPAREL = new Set(["clothing", "shoes", "bag"]);
 
@@ -81,6 +95,7 @@ export function ideasGridScope(
         ? undefined
         : GIFT_TYPES,
     ageGroup: lens.ageGroup,
+    boostTypes: recipient && !category ? (BOOST[recipient] ?? null) : null,
   };
 }
 
@@ -92,6 +107,7 @@ export function ideasGridFilters(scope: {
   ageGroup?: InspoFilters["ageGroup"];
   priceMin?: number | null;
   priceMax?: number | null;
+  boostTypes?: string[] | null;
 }): InspoFilters {
   return {
     merchant: null,
@@ -106,6 +122,7 @@ export function ideasGridFilters(scope: {
     inSeason: true,
     onSaleOnly: false,
     sort: "recommended",
+    boostTypes: scope.boostTypes ?? null,
   };
 }
 

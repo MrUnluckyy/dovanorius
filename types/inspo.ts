@@ -62,4 +62,7 @@ export type InspoFilters = {
   /** When true, only show discounted products. */
   onSaleOnly: boolean;
   sort: InspoSort;
+  /** Types this page pulls forward in the recommended order (a recipient's
+   *  priority: mom → home, kitchen, garden). Browse only, not search. */
+  boostTypes?: string[] | null;
 };
