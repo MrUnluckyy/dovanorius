@@ -1347,7 +1347,8 @@
     "save": "Išsaugoti norą",
     "saving": "Saugoma…",
     "noBoards": "Dar neturi lentų — sukurk pirmą, ir noras atsidurs joje.",
-    "saveFailed": "Noro išsaugoti nepavyko. Pabandyk dar kartą."
+    "saveFailed": "Noro išsaugoti nepavyko. Pabandyk dar kartą.",
+    "fetchPartial": "Ši parduotuvė neleidžia nuskaityti prekės automatiškai. Pavadinimą paėmėme iš nuorodos – patikrink jį ir pridėk nuotrauką bei kainą."
   },
   "Create": {
     "title": "Ką norėtum sukurti?",

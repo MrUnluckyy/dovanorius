@@ -1347,7 +1347,8 @@
     "save": "Save wish",
     "saving": "Saving…",
     "noBoards": "You don't have a board yet — create your first one and the wish will go there.",
-    "saveFailed": "We couldn't save the wish. Please try again."
+    "saveFailed": "We couldn't save the wish. Please try again.",
+    "fetchPartial": "This shop doesn't let us read the product automatically. We took the title from the link – check it and add a photo and price."
   },
   "Create": {
     "title": "What would you like to create?",
