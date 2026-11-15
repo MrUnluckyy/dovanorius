@@ -521,6 +521,15 @@ export async function GET(req: Request) {
     }
   }
 
+  return respondFromPage(page);
+}
+
+/**
+ * Everything after the fetch: bot-wall and status checks, then extraction.
+ * Shared by GET (the server fetched the page) and POST (the app fetched it on
+ * the phone, where shops that block datacenters let it through).
+ */
+async function respondFromPage(page: FetchResult): Promise<NextResponse> {
   const { html, status: httpStatus } = page;
   const finalUrl = cleanUrl(page.finalUrl);
 
@@ -819,4 +828,43 @@ export async function GET(req: Request) {
   });
 
   return NextResponse.json(result);
+}
+
+/** Phone-fetched pages: the app trims to the head and a slice of the body. */
+const DEVICE_HTML_MAX = 1_500_000;
+
+/**
+ * POST {url, html}: the app fetched the page itself (residential or mobile
+ * network, which shops behind datacenter blocks let through) and asks us only
+ * to read it. Nothing is fetched here, so this adds no new way to reach other
+ * hosts; the html is parsed exactly like a page the server fetched.
+ */
+export async function POST(req: Request) {
+  let body: { url?: unknown; html?: unknown };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+  }
+  const url = typeof body.url === "string" ? body.url.trim() : "";
+  const html = typeof body.html === "string" ? body.html : "";
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return NextResponse.json({ error: "Invalid url" }, { status: 400 });
+  }
+  if (!/^https?:$/.test(parsed.protocol) || !isPublicHost(parsed.hostname)) {
+    return NextResponse.json({ error: "Invalid url" }, { status: 400 });
+  }
+  if (!html || html.length > DEVICE_HTML_MAX) {
+    return NextResponse.json({ error: "Invalid html" }, { status: 400 });
+  }
+  console.log(`[parser] ── DEVICE HTML ── ${parsed.hostname} htmlLength=${html.length}`);
+  return respondFromPage({
+    html,
+    finalUrl: cleanUrl(url),
+    status: 200,
+    headers: new Headers(),
+  });
 }
