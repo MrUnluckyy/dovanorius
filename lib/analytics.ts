@@ -1,5 +1,6 @@
 import posthog from "posthog-js";
 import { readSignupContext } from "@/lib/signupContext";
+import { redactPayload } from "@/lib/analyticsRedact";
 
 export { rememberSignupContext } from "@/lib/signupContext";
 
@@ -27,6 +28,8 @@ export function initAnalytics() {
     person_profiles: "identified_only",
     capture_pageview: false, // handled manually via PostHogPageView
     capture_pageleave: true,
+    // Every event, automatic ones included: auth links carry tokens in the URL.
+    before_send: (event) => event && redactPayload(event),
   });
 }
 
