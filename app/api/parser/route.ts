@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import * as cheerio from "cheerio";
+import { cleanUrl, isPublicHost, shopHost, titleFromUrl } from "@/lib/parser/url";
+import { matchFeed } from "@/lib/parser/feedMatch";
 
 /** Schema.org (partial) types */
 type Brand = string | { name?: string };
@@ -345,26 +347,94 @@ type FetchResult = {
   html: string;
   finalUrl: string;
   status: number;
+  headers: Headers;
 };
 
+/**
+ * Follows redirects by hand so every hop is checked: a public shop link that
+ * redirects to localhost or a private address must not be fetched (the parser
+ * is an open endpoint). share.google and other short links resolve here.
+ */
 async function fetchPage(url: string, timeoutMs: number): Promise<FetchResult> {
   const ctrl = new AbortController();
   const timeout = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const res = await fetch(url, {
-      redirect: "follow",
-      signal: ctrl.signal,
-      headers: BROWSER_HEADERS,
-    });
-    const buf = await res.arrayBuffer();
-    return {
-      html: decodeBody(buf, res.headers.get("content-type")),
-      finalUrl: res.url || url,
-      status: res.status,
-    };
+    let current = url;
+    for (let hop = 0; hop < 8; hop++) {
+      const res = await fetch(current, {
+        redirect: "manual",
+        signal: ctrl.signal,
+        headers: BROWSER_HEADERS,
+      });
+      const location = res.headers.get("location");
+      if (res.status >= 300 && res.status < 400 && location) {
+        const next = new URL(location, current);
+        if (!/^https?:$/.test(next.protocol) || !isPublicHost(next.hostname)) {
+          throw new Error(`redirect to a non-public address: ${next.hostname}`);
+        }
+        await res.body?.cancel();
+        current = next.toString();
+        continue;
+      }
+      const buf = await res.arrayBuffer();
+      return {
+        html: decodeBody(buf, res.headers.get("content-type")),
+        finalUrl: current,
+        status: res.status,
+        headers: res.headers,
+      };
+    }
+    throw new Error("too many redirects");
   } finally {
     clearTimeout(timeout);
   }
+}
+
+/** Bot walls answer with these, whatever the page says. */
+function blockedByHeaders(status: number, headers: Headers): boolean {
+  if ([401, 403, 429, 503].includes(status)) return true;
+  return (
+    headers.get("cf-mitigated") === "challenge" ||
+    headers.has("x-dd-b") || // DataDome
+    (status >= 400 && /akamai/i.test(headers.get("server") ?? ""))
+  );
+}
+
+/**
+ * When the page can't be read, never leave the person with nothing: first our
+ * own feeds (pigu, notino…), then the link itself — shop name, icon and a
+ * title made from the URL, marked partial so the form asks them to check it.
+ * 200, not an error: released app builds only look at res.ok and data.title,
+ * so they prefill this without an update.
+ */
+async function fallbackResult(url: string, reason: "blocked" | "unreachable") {
+  const host = shopHost(url);
+  const feed = await matchFeed(url).catch(() => null);
+  if (feed) {
+    console.log(`[parser] FEED HIT ${host} → "${feed.title}"`);
+    return NextResponse.json({
+      url,
+      siteName: host,
+      title: feed.title,
+      images: feed.image ? [feed.image] : [],
+      favicon: `https://${new URL(url).hostname}/favicon.ico`,
+      price: feed.price ?? undefined,
+      currency: feed.price ? "EUR" : undefined,
+      brand: feed.brand ?? undefined,
+      source: "feed",
+    });
+  }
+  const title = titleFromUrl(url);
+  console.warn(`[parser] PARTIAL ${host} (${reason}) → title from url: ${title ?? "none"}`);
+  return NextResponse.json({
+    url,
+    siteName: host,
+    title: title ?? undefined,
+    images: [],
+    favicon: `https://${new URL(url).hostname}/favicon.ico`,
+    partial: true,
+    reason,
+  });
 }
 
 /** Swap www. on/off — some shops 403 the bare host but serve the www one. */
@@ -380,6 +450,10 @@ function altHostUrl(url: string): string | undefined {
   }
 }
 
+// A blocked shop can take the whole direct-fetch timeout before the feed
+// lookup and the fallback run; leave room for both.
+export const maxDuration = 30;
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const target = searchParams.get("url");
@@ -391,27 +465,48 @@ export async function GET(req: Request) {
     normalizedTarget = `https://${normalizedTarget}`;
   }
   try {
-    new URL(normalizedTarget);
+    const parsed = new URL(normalizedTarget);
+    if (!/^https?:$/.test(parsed.protocol) || !isPublicHost(parsed.hostname)) {
+      return NextResponse.json({ error: "Invalid url" }, { status: 400 });
+    }
   } catch {
     return NextResponse.json({ error: "Invalid url" }, { status: 400 });
   }
+  // gclid, fbclid, utm_*… never identify a product; drop them before anything.
+  normalizedTarget = cleanUrl(normalizedTarget);
 
   console.log(`[parser] ── START ── ${normalizedTarget}`);
 
   let page: FetchResult;
   try {
-    page = await fetchPage(normalizedTarget, 12_000);
+    page = await fetchPage(normalizedTarget, 10_000);
     console.log(
       `[parser] fetch ok — status=${page.status} finalUrl=${page.finalUrl} htmlLength=${page.html.length}`
     );
   } catch (e) {
     console.error(`[parser] fetch failed — ${normalizedTarget}`, e);
-    return NextResponse.json({ error: "Fetch failed" }, { status: 500 });
+    return fallbackResult(normalizedTarget, "unreachable");
   }
 
   // A 403/404 on the bare host is often just a misconfigured redirect; try the
   // other side of the www split once before giving up.
-  if (page.status >= 400) {
+  // 429 is often a short throttle (Shopify does this under load): wait what
+  // the shop asks, up to 2 s, and try once more before calling it blocked.
+  if (page.status === 429) {
+    const wait = Math.min(Number(page.headers.get("retry-after")) || 1, 2) * 1000;
+    await new Promise((r) => setTimeout(r, wait));
+    try {
+      const again = await fetchPage(page.finalUrl, 8_000);
+      console.log(`[parser] retry after 429 — status=${again.status}`);
+      page = again;
+    } catch (e) {
+      console.warn(`[parser] retry after 429 failed`, e);
+    }
+  }
+
+  // Not for a bot wall: the other host is behind the same wall, and the wait
+  // only delays the fallback.
+  if (page.status >= 400 && !blockedByHeaders(page.status, page.headers)) {
     const alt = altHostUrl(normalizedTarget);
     if (alt) {
       try {
@@ -426,12 +521,25 @@ export async function GET(req: Request) {
     }
   }
 
-  const { html, finalUrl, status: httpStatus } = page;
+  const { html, status: httpStatus } = page;
+  const finalUrl = cleanUrl(page.finalUrl);
+
+  // A bot wall is not a missing page: say so, and fall back instead of
+  // telling the person their link is broken.
+  if (blockedByHeaders(httpStatus, page.headers)) {
+    console.warn(`[parser] BLOCKED by status/headers — ${httpStatus}`);
+    return fallbackResult(finalUrl, "blocked");
+  }
 
   // A dead product page still returns a full themed body (Shopify 404s run to
   // hundreds of KB), and its og: tags describe the STORE, not the product — so
   // parsing on regardless yields an item titled after the shop with the shop
-  // logo as its image. Trust the status code instead.
+  // logo as its image. Trust the status code instead. Only 404/410 mean gone;
+  // any other error status is the shop refusing us.
+  if (httpStatus >= 400 && ![404, 410].includes(httpStatus)) {
+    console.warn(`[parser] UPSTREAM ${httpStatus} — treating as blocked`);
+    return fallbackResult(finalUrl, "blocked");
+  }
   if (httpStatus >= 400) {
     console.warn(`[parser] UPSTREAM ${httpStatus} — refusing to parse error page`);
     return NextResponse.json(
@@ -462,14 +570,7 @@ export async function GET(req: Request) {
 
   if (blockedBy) {
     console.warn(`[parser] BLOCKED — matched marker: "${blockedBy}" (titleMatch=${titleLower.includes(blockedBy)}, smallPage=${isSmallPage})`);
-    return NextResponse.json(
-      {
-        error: "SCRAPER_BLOCKED",
-        message:
-          "Website blocked automated access. Please enter the product details manually.",
-      },
-      { status: 422 }
-    );
+    return fallbackResult(finalUrl, "blocked");
   }
 
   const og = (p: string): string | undefined =>

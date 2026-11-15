@@ -68,7 +68,7 @@ export function WishForm({
   const { data: boards = [], isLoading: boardsLoading } = useBoards();
 
   const [step, setStep] = useState<Step>(startManual ? "details" : "start");
-  const [fetchFailed, setFetchFailed] = useState(false);
+  const [fetchFailed, setFetchFailed] = useState<boolean | "partial">(false);
   const [showMore, setShowMore] = useState(false);
   const [creatingBoard, setCreatingBoard] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
@@ -178,7 +178,10 @@ export function WishForm({
       if (Number.isFinite(parsedPrice) && parsedPrice > 0) {
         setValue("price", parsedPrice);
       }
-      if (!data?.title) setFetchFailed(true);
+      // partial: the shop blocks automated reading, so the title came from the
+      // link itself. Say so, so the person checks it and adds a photo/price.
+      if (data?.partial) setFetchFailed("partial");
+      else if (!data?.title) setFetchFailed(true);
     } catch {
       // Not an error worth a toast: many shops block bots. The link is kept
       // and the person finishes by hand.
@@ -435,7 +438,7 @@ export function WishForm({
 
       {fetchFailed && (
         <div role="status" className="alert alert-warning py-2.5 text-sm">
-          {t("fetchFailed")}
+          {fetchFailed === "partial" ? t("fetchPartial") : t("fetchFailed")}
         </div>
       )}
 
