@@ -12,7 +12,7 @@ import { Toaster } from "react-hot-toast";
 import { ClaimedReservationsNotice } from "@/components/reservations/ClaimedReservationsNotice";
 import { ReportProblemDialog } from "@/components/feedback/ReportProblemDialog";
 import { ContactChat } from "@/components/feedback/ContactChat";
-import { Analytics } from "@vercel/analytics/next";
+import { VercelAnalytics } from "@/components/VercelAnalytics";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { GtmPageView } from "@/components/GtmPageView";
 import { PostHogProvider } from "@/components/providers/PostHogProvider";
@@ -155,7 +155,7 @@ export default async function RootLayout({
             <div className="bg-(--nr-cream) text-(--nr-ink) font-body min-h-screen">
               {children}
             </div>
-            <Analytics mode="production" />
+            <VercelAnalytics />
             {/* <ClarityProvider /> — if it comes back, render it only with consent?.analytics. */}
             <ConsentBanner initial={consent} />
           </Providers>
