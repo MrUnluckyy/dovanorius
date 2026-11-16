@@ -7,7 +7,9 @@
         "paths": [
           "/b/*",
           "/users/*",
-          "/events/join/*"
+          "/events/join/*",
+          "/zmones/*",
+          "/renginiai/prisijungti/*"
         ]
       }
     ]
