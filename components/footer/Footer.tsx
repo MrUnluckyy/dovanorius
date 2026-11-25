@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { LocaleToggle } from "@/components/LocaleToggle";
 import { ConsentSettingsLink } from "@/components/consent/ConsentSettingsLink";
+import { logoSrc } from "@/lib/season";
 
 export default function Footer() {
   const t = useTranslations("Landing.footer");
@@ -12,7 +13,7 @@ export default function Footer() {
     <footer className="border-t border-(--nr-border)">
       <div className="nr-container flex flex-col items-center gap-5 py-7 text-[13px] text-(--nr-faint) md:flex-row md:justify-between">
         <div className="flex items-center gap-2">
-          <Image src="/assets/logo.png" alt="Noriuto" width={22} height={22} />
+          <Image src={logoSrc()} alt="Noriuto" width={22} height={22} />
           <span>{t("copyright", { year: new Date().getFullYear() })}</span>
         </div>
         <nav className="flex flex-wrap justify-center gap-x-5 gap-y-2">

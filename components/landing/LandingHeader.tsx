@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { LandingSearch } from "@/components/landing/LandingSearch";
+import { logoSrc } from "@/lib/season";
 
 /**
  * Marketing header for the logged-out landing page.
@@ -68,7 +69,7 @@ export function LandingHeader() {
               className="flex items-center gap-2.5"
             >
               <Image
-                src="/assets/logo.png"
+                src={logoSrc()}
                 alt="Noriuto"
                 width={32}
                 height={32}

@@ -25,6 +25,7 @@ import { CreateTriggerButton } from "../create/CreateTriggerButton";
 import useProfile from "@/hooks/useProfile";
 import { AvatarImg } from "@/components/AvatarImg";
 import { Hero3D } from "@/components/ui/Hero3D";
+import { logoSrc } from "@/lib/season";
 
 /** Phone top-bar buttons: one size and one radius, so the row reads as a set. */
 const ICON_BTN =
@@ -85,7 +86,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
                 className="flex shrink-0 items-center gap-2 text-xl font-bold"
               >
                 <Image
-                  src="/assets/logo.png"
+                  src={logoSrc()}
                   alt="Noriuto"
                   width={40}
                   height={40}
@@ -239,7 +240,7 @@ export function NavigationV2({ user }: { user?: User | null }) {
         <aside className="flex min-h-full w-[min(88vw,22rem)] flex-col bg-(--nr-cream) px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 font-body">
           <div className="mb-4 flex items-center justify-between">
             <Link href={signedIn ? "/mano" : "/"} onClick={closeDrawer} className="flex items-center gap-2">
-              <Image src="/assets/logo.png" alt="" width={36} height={36} />
+              <Image src={logoSrc()} alt="" width={36} height={36} />
               <span className="font-heading text-lg font-bold">Noriuto.lt</span>
             </Link>
             <label

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { logoSrc } from "@/lib/season";
 
 const CONTACT = "mailto:partneriai@noriuto.lt";
 
@@ -34,7 +35,7 @@ export function PartnerHeader() {
           <div className="flex items-center gap-2.5">
             <Link href="/" className="flex items-center gap-2.5">
               <Image
-                src="/assets/logo.png"
+                src={logoSrc()}
                 alt="Noriuto"
                 width={32}
                 height={32}

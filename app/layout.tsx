@@ -20,6 +20,7 @@ import { ConsentBanner } from "@/components/consent/ConsentBanner";
 import { CONSENT_COOKIE, consentDefaultsScript, parseConsent } from "@/lib/consent";
 import { createClient } from "@/utils/supabase/server";
 import { SITE_URL } from "@/lib/siteUrl";
+import { Snowflakes } from "@/components/Snowflakes";
 
 /* Display face — headlines, buttons, numbers (Noriuto design system) */
 const headings = Bricolage_Grotesque({
@@ -133,6 +134,7 @@ export default async function RootLayout({
       <body
         className={`${headings.variable} ${body.variable} ${special.variable} antialiased relative`}
       >
+        <Snowflakes />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}

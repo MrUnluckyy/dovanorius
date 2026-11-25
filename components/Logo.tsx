@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { logoSrc } from "@/lib/season";
 
 type Props = {
   size?: "sm" | "md" | "lg";
@@ -24,7 +25,7 @@ export function Logo({ size = "md" }: Props) {
         className={`btn btn-ghost ${getFontSize()} mx-0 px-0 font-heading`}
       >
         <Image
-          src="/assets/logo.png"
+          src={logoSrc()}
           alt="Noriuto.lt"
           width={getLogoSize()}
           height={getLogoSize()}
