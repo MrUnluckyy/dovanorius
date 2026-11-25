@@ -6,6 +6,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { fetchAwinSales } from "./awin";
 import { fetchCjSales } from "./cj";
+import { fetchTradedoublerSales } from "./tradedoubler";
 import type { AffiliateSale } from "./types";
 
 export type SyncResult = { network: string; fetched: number; error?: string };
@@ -34,6 +35,7 @@ export async function syncAffiliateSales(
   const jobs: [string, () => Promise<AffiliateSale[]>][] = [
     ["awin", () => fetchAwinSales(from, to, awinNames)],
     ["cj", () => fetchCjSales(from, to)],
+    ["tradedoubler", () => fetchTradedoublerSales(from, to)],
   ];
 
   const results: SyncResult[] = [];

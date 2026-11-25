@@ -1,10 +1,11 @@
 /**
- * Nightly: pull affiliate sales (Awin, CJ) into affiliate_transactions.
+ * Nightly: pull affiliate sales (Awin, CJ, TradeDoubler) into affiliate_transactions.
  *
  *   node --env-file=.env.local --import tsx scripts/sync-affiliate-sales.ts [days]
  *
  * Env: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SECRET_KEY, AWIN_API_KEY,
- * AWIN_PUBLISHER_ID, CJ_ACCESS_TOKEN, CJ_COMPANY_ID. Exits non-zero when any
+ * AWIN_PUBLISHER_ID, CJ_ACCESS_TOKEN, CJ_COMPANY_ID, TRADEDOUBLER_CLIENT_ID,
+ * TRADEDOUBLER_CLIENT_SECRET, TRADEDOUBLER_USERNAME, TRADEDOUBLER_PASSWORD. Exits non-zero when any
  * network failed, so the GitHub Action shows red instead of silently skipping.
  */
 import { createClient } from "@supabase/supabase-js";

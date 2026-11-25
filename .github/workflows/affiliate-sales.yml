@@ -1,9 +1,10 @@
-# Nightly: affiliate network sales (Awin, CJ) → affiliate_transactions, for the
+# Nightly: affiliate network sales (Awin, CJ, TradeDoubler) → affiliate_transactions, for the
 # admin "Pajamos" page. Re-pulls 90 days so status changes (pending → approved
 # → paid) land on the same rows.
 #
 # Secrets: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SECRET_KEY, AWIN_API_KEY,
-# AWIN_PUBLISHER_ID, CJ_ACCESS_TOKEN, CJ_COMPANY_ID
+# AWIN_PUBLISHER_ID, CJ_ACCESS_TOKEN, CJ_COMPANY_ID, TRADEDOUBLER_CLIENT_ID,
+# TRADEDOUBLER_CLIENT_SECRET, TRADEDOUBLER_USERNAME, TRADEDOUBLER_PASSWORD
 name: Affiliate sales sync
 
 on:
@@ -31,3 +32,7 @@ jobs:
           AWIN_PUBLISHER_ID: ${{ secrets.AWIN_PUBLISHER_ID }}
           CJ_ACCESS_TOKEN: ${{ secrets.CJ_ACCESS_TOKEN }}
           CJ_COMPANY_ID: ${{ secrets.CJ_COMPANY_ID }}
+          TRADEDOUBLER_CLIENT_ID: ${{ secrets.TRADEDOUBLER_CLIENT_ID }}
+          TRADEDOUBLER_CLIENT_SECRET: ${{ secrets.TRADEDOUBLER_CLIENT_SECRET }}
+          TRADEDOUBLER_USERNAME: ${{ secrets.TRADEDOUBLER_USERNAME }}
+          TRADEDOUBLER_PASSWORD: ${{ secrets.TRADEDOUBLER_PASSWORD }}
