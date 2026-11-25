@@ -6,7 +6,7 @@ import { buildDeeplink } from "@/utils/affiliate/buildDeeplink";
 import { resolvePartner, tagPartnerUrl } from "@/utils/affiliate/partnerLink";
 import type { AffiliateCredentials } from "@/types/affiliate";
 import { normalizeShopUrl, unwrapOwnOut } from "@/utils/affiliate/outHref";
-import { advertiserOf, tagNetworkLink } from "@/utils/affiliate/networkLink";
+import { advertiserOf, networkOf, tagNetworkLink } from "@/utils/affiliate/networkLink";
 
 export const dynamic = "force-dynamic";
 
@@ -81,7 +81,7 @@ async function currentUserId(): Promise<string | null> {
  * networks' own tracking hosts are accepted (tagNetworkLink returns null for
  * anything else), so this is not an open redirect.
  */
-async function networkLinkRedirect(link: string, rawProduct: string | null) {
+async function networkLinkRedirect(link: string, rawProduct: string | null, itemId: string | null = null) {
   const subId = crypto.randomUUID();
   const tagged = tagNetworkLink(link, subId);
   if (!tagged) {
@@ -107,15 +107,24 @@ async function networkLinkRedirect(link: string, rawProduct: string | null) {
     } else if (info?.targetUrl) {
       merchantId = (await resolveMerchant(info.targetUrl))?.id ?? null;
     }
-    await supabaseAdmin.from("affiliate_clicks").insert({
-      item_id: null,
+    const click = {
+      // A wish saved from Discover keeps its tracked link; the wish id says
+      // which board it was opened from.
+      item_id: itemId && /^[0-9a-f-]{36}$/i.test(itemId) ? itemId : null,
       user_id: await currentUserId(),
       merchant_id: merchantId,
       partner_id: null,
       product_id: productId,
       target_url: info?.targetUrl ?? link,
       sub_id: subId,
-    });
+    };
+    const { error } = await supabaseAdmin.from("affiliate_clicks").insert(click);
+    // A deleted wish (foreign key) must not cost us the click itself.
+    if (error?.code === "23503" && click.item_id) {
+      await supabaseAdmin.from("affiliate_clicks").insert({ ...click, item_id: null });
+    } else if (error) {
+      console.error("[out] discover click log failed", error.message);
+    }
   } catch (e) {
     console.error("[out] discover click log failed", e);
   }
@@ -138,6 +147,13 @@ export async function GET(req: Request) {
 
   if (!raw) {
     return NextResponse.json({ error: "Missing url" }, { status: 400 });
+  }
+
+  // A network's tracked link in u= (the app's Discover opens /out?u=<feed
+  // link>, and wishes saved from it store that): tag it like ?d= instead of
+  // passing it through without our sub id.
+  if (networkOf(raw)) {
+    return networkLinkRedirect(raw, searchParams.get("p") ?? unwrapped?.productId ?? null, searchParams.get("item"));
   }
 
   // Only ever redirect to absolute http(s) URLs (block javascript:, data:, …).
