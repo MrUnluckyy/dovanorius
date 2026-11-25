@@ -847,3 +847,35 @@
     );
   }
 }
+
+/* seasonal snow (components/Snowflakes.tsx) ------------------------- */
+.nr-flake {
+  position: absolute;
+  top: -24px;
+  line-height: 1;
+  color: #9fb6cc;
+  opacity: 0.45;
+  will-change: transform;
+  animation-name: nrSnowFall, nrSnowSway;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  animation-direction: normal, alternate;
+}
+@keyframes nrSnowFall {
+  to {
+    translate: 0 calc(100vh + 48px);
+  }
+}
+@keyframes nrSnowSway {
+  from {
+    transform: translateX(-14px) rotate(-20deg);
+  }
+  to {
+    transform: translateX(14px) rotate(20deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nr-snow {
+    display: none;
+  }
+}
