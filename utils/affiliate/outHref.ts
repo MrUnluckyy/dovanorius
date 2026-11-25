@@ -1,14 +1,25 @@
 // Client-safe: no Supabase import, so product cards can use it.
 
 /**
- * Discover links partner products through /out, so the click is logged and the
- * shop's URL gets tagged (see utils/affiliate/partnerLink.ts). Affiliate rows
- * already carry a tracked network deeplink and keep linking straight to it.
+ * Every Discover product goes through /out, so the click is logged and tagged:
+ * - partner products: the shop URL gets utm_* + nr_click (partnerLink.ts);
+ * - affiliate products: the feed's tracked network link gets our sub id as
+ *   Awin clickref / TradeDoubler epi / CJ sid (networkLink.ts), so the sale
+ *   the network reports can be traced to this product.
+ * A link /out can't tag (not a known network host) still opens directly.
  */
 export function shopHref(product: { id: string; deepLink: string }): string {
-  if (!product.id.startsWith("partner:")) return product.deepLink;
-  return `/out?u=${encodeURIComponent(product.deepLink)}&p=${encodeURIComponent(product.id)}`;
+  if (product.id.startsWith("partner:")) {
+    return `/out?u=${encodeURIComponent(product.deepLink)}&p=${encodeURIComponent(product.id)}`;
+  }
+  return NETWORK_HOST.test(product.deepLink)
+    ? `/out?d=${encodeURIComponent(product.deepLink)}&p=${encodeURIComponent(product.id)}`
+    : product.deepLink;
 }
+
+/** Client-side mirror of networkLink.ts's host allowlist (kept import-free). */
+const NETWORK_HOST =
+  /^https?:\/\/(?:www\.)?(?:awin1\.com|pdt\.tradedoubler\.com|clk\.tradedoubler\.com|anrdoezrs\.net|tkqlhce\.com|dpbolvw\.net|jdoqocy\.com|kqzyfj\.com)\//i;
 
 const OWN_OUT = /^https?:\/\/(?:www\.)?noriuto\.lt\/out\?/i;
 

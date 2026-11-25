@@ -6,6 +6,7 @@ import { buildDeeplink } from "@/utils/affiliate/buildDeeplink";
 import { resolvePartner, tagPartnerUrl } from "@/utils/affiliate/partnerLink";
 import type { AffiliateCredentials } from "@/types/affiliate";
 import { normalizeShopUrl, unwrapOwnOut } from "@/utils/affiliate/outHref";
+import { advertiserOf, tagNetworkLink } from "@/utils/affiliate/networkLink";
 
 export const dynamic = "force-dynamic";
 
@@ -52,12 +53,79 @@ function credentials(): AffiliateCredentials {
  *
  *   /out?u=<encoded product url>&item=<item id?>   (board items)
  *   /out?u=<encoded product url>&p=<partner:uuid>   (Discover partner products)
+ *   /out?d=<encoded network link>&p=<product id>    (Discover affiliate products)
  *
  * Direct partners have no network, so their links are tagged here instead:
  * utm_* plus nr_click=<sub_id>, the key a later order is matched on.
  */
+/** Discover feed product ids (awc-/tdc-/cjc- concepts, legacy numeric Awin ids). */
+const FEED_PRODUCT = /^(awc|tdc|cjc)-[0-9a-f]{16}$|^\d{6,20}$/i;
+
+/** The signed-in user's id, if any; never blocks the redirect. */
+async function currentUserId(): Promise<string | null> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A Discover affiliate product: the feed already gave us the network's tracked
+ * link. Add our sub id to it (Awin clickref, TradeDoubler epi, CJ sid) so the
+ * network reports it back with the sale, log the click, and redirect. Only the
+ * networks' own tracking hosts are accepted (tagNetworkLink returns null for
+ * anything else), so this is not an open redirect.
+ */
+async function networkLinkRedirect(link: string, rawProduct: string | null) {
+  const subId = crypto.randomUUID();
+  const tagged = tagNetworkLink(link, subId);
+  if (!tagged) {
+    return new NextResponse(invalidLinkPage(), {
+      status: 400,
+      headers: { "content-type": "text/html; charset=utf-8" },
+    });
+  }
+  const productId = rawProduct && FEED_PRODUCT.test(rawProduct) ? rawProduct : null;
+
+  try {
+    const info = advertiserOf(link);
+    let merchantId: string | null = null;
+    if (info?.advertiserId) {
+      const { data } = await supabaseAdmin
+        .from("affiliate_merchants")
+        .select("id")
+        .eq("network", info.network)
+        .eq("network_advertiser_id", info.advertiserId)
+        .limit(1)
+        .maybeSingle();
+      merchantId = data?.id ?? null;
+    } else if (info?.targetUrl) {
+      merchantId = (await resolveMerchant(info.targetUrl))?.id ?? null;
+    }
+    await supabaseAdmin.from("affiliate_clicks").insert({
+      item_id: null,
+      user_id: await currentUserId(),
+      merchant_id: merchantId,
+      partner_id: null,
+      product_id: productId,
+      target_url: info?.targetUrl ?? link,
+      sub_id: subId,
+    });
+  } catch (e) {
+    console.error("[out] discover click log failed", e);
+  }
+  return NextResponse.redirect(tagged, 302);
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
+  const networkLink = searchParams.get("d");
+  if (networkLink) return networkLinkRedirect(networkLink, searchParams.get("p"));
   // A wish can store one of our own /out links (the app saves Discover ideas
   // that way); follow it to the shop here instead of redirecting to ourselves.
   const unwrapped = searchParams.get("u") ? unwrapOwnOut(searchParams.get("u")!) : null;
