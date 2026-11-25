@@ -148,7 +148,12 @@ export default async function IncomePage({
   const productById = new Map((products ?? []).map((p) => [p.id, p]));
   const sourceOf = (t: Tx): { label: string; detail: string | null } => {
     const c = t.click_ref ? clickByRef.get(t.click_ref) : null;
-    if (!c) return { label: t.click_ref ? "Nerastas paspaudimas" : "Be žymos", detail: null };
+    if (!c) {
+      if (!t.click_ref) return { label: "Be žymos", detail: null };
+      // Not one of our /out ids: a link tagged by hand (e.g. epi(janome-sale)).
+      if (!/^[0-9a-f-]{36}$/i.test(t.click_ref)) return { label: "Rankinė žyma", detail: t.click_ref };
+      return { label: "Nerastas paspaudimas", detail: null };
+    }
     if (c.item_id) return { label: "Noras", detail: itemById.get(c.item_id)?.title ?? null };
     if (c.product_id) return { label: "Idėjos", detail: productById.get(c.product_id)?.product_name ?? null };
     if (c.partner_id) return { label: "Partneris", detail: null };
@@ -175,7 +180,7 @@ export default async function IncomePage({
         <div>
           <h1 className="font-heading text-2xl font-bold">Pajamos</h1>
           <p className="text-sm text-base-content/70">
-            Paspaudimai iš Noriuto ir pardavimai, kuriuos pranešė Awin ir CJ. Atnaujinama kas
+            Paspaudimai iš Noriuto ir pardavimai, kuriuos pranešė Awin, CJ ir TradeDoubler. Atnaujinama kas
             naktį; būsenos (laukiama → patvirtinta → išmokėta) keičiasi kelias savaites.
           </p>
         </div>
@@ -306,7 +311,7 @@ export default async function IncomePage({
         Naujausias pardavimų įrašas:{" "}
         {["awin", "cj", "tradedoubler"]
           .map((n) =>
-            `${NETWORK_LT[n]} ${synced.get(n) ? new Date(synced.get(n)!).toLocaleString("lt-LT") : n === "tradedoubler" ? "neprijungta" : "pardavimų dar nėra"}`
+            `${NETWORK_LT[n]} ${synced.get(n) ? new Date(synced.get(n)!).toLocaleString("lt-LT") : "pardavimų dar nėra"}`
           )
           .join(" · ")}
       </p>
