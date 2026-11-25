@@ -30,6 +30,7 @@ const sections: Section[] = [
     icon: LuChartNoAxesColumn,
     pages: [
       { href: "/admin", label: "Apžvalga", exact: true },
+      { href: "/admin/pajamos", label: "Pajamos" },
       { href: "/admin/searches", label: "Paieškos" },
       { href: "/admin/partners/orders", label: "Partnerių užsakymai" },
     ],

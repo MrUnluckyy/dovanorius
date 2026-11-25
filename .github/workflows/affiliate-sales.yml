@@ -1,0 +1,33 @@
+# Nightly: affiliate network sales (Awin, CJ) → affiliate_transactions, for the
+# admin "Pajamos" page. Re-pulls 90 days so status changes (pending → approved
+# → paid) land on the same rows.
+#
+# Secrets: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SECRET_KEY, AWIN_API_KEY,
+# AWIN_PUBLISHER_ID, CJ_ACCESS_TOKEN, CJ_COMPANY_ID
+name: Affiliate sales sync
+
+on:
+  schedule:
+    - cron: "40 5 * * *" # 05:40 UTC, after the feed import
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: node --import tsx scripts/sync-affiliate-sales.ts
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          AWIN_API_KEY: ${{ secrets.AWIN_API_KEY }}
+          AWIN_PUBLISHER_ID: ${{ secrets.AWIN_PUBLISHER_ID }}
+          CJ_ACCESS_TOKEN: ${{ secrets.CJ_ACCESS_TOKEN }}
+          CJ_COMPANY_ID: ${{ secrets.CJ_COMPANY_ID }}
