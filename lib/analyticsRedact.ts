@@ -76,3 +76,11 @@ export function redactPayload<T>(value: T): T {
   }
   return value;
 }
+
+/**
+ * Vercel Web Analytics' beforeSend: the same redaction for the page URL it
+ * reports, so a capability link or auth token never reaches Vercel either.
+ */
+export function redactUrlEvent<T extends { url: string }>(event: T): T {
+  return { ...event, url: redactSecrets(event.url) };
+}

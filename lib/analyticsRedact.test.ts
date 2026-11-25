@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { redactPayload, redactSecrets } from "./analyticsRedact";
+import { redactPayload, redactSecrets, redactUrlEvent } from "./analyticsRedact";
 
 const SECRET = "pkce_0123456789abcdef";
 
@@ -119,4 +119,17 @@ test("removes capability tokens from every part of an event", () => {
     out.properties.$elements_chain,
     'a:attr__href="/renginiai/prisijungti/[token]"nth-child="1";div:text="https://noriuto.lt/b/s/[token]"'
   );
+});
+
+test("Vercel Analytics events get the same redaction, other fields untouched", () => {
+  const token = "fakeVercelToken123";
+  const page = redactUrlEvent({ type: "pageview" as const, url: `https://www.noriuto.lt/b/s/${token}` });
+  assert.equal(page.url, "https://www.noriuto.lt/b/s/[token]");
+  assert.equal(page.type, "pageview");
+
+  const auth = redactUrlEvent({ type: "pageview" as const, url: `https://www.noriuto.lt/auth/confirm?token_hash=${token}&type=email` });
+  assert.ok(!auth.url.includes(token));
+
+  const plain = { type: "pageview" as const, url: "https://www.noriuto.lt/idejos/proga/kaledos?kam=moteriai" };
+  assert.deepEqual(redactUrlEvent(plain), plain);
 });
